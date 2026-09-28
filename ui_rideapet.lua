@@ -1,6 +1,6 @@
 -- ============================================================
--- VRILZHUB UI — RIDE A PET v5.4 (_G FIX)
--- Pakai _G buat dropdown state (bukan property di Frame)
+-- VRILZHUB UI — RIDE A PET v5.5 (AUTO-DETECT PC & MOBILE)
+-- PC: 800x580 | Mobile: 88% x 78% viewport
 -- ============================================================
 
 local UI = {}
@@ -13,13 +13,76 @@ local TweenService = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 
--- ============================================================
--- GLOBAL STATE (PAKAI _G — SELALU SUPPORT)
--- ============================================================
-_G.VRILZ_DropdownLayer = nil
-_G.VRILZ_DropdownCloseOverlay = nil
-_G.VRILZ_DropdownActive = nil
+-- ====== AUTO-DETECT MOBILE ======
+local IS_MOBILE = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 
+-- ====== UI CONFIG (PC & MOBILE BEDA) ======
+local UI_CONFIG = {
+    MOBILE = {
+        WIN_W_PCT = 0.88,
+        WIN_H_PCT = 0.78,
+        SIDEBAR_W = 70,
+        TAB_H = 40,
+        TAB_ICON = 18,
+        TAB_SHOW_LABEL = false,
+        CARD_HEADER = 28,
+        CARD_PAD_TOP = 8,
+        CARD_PAD_BOT = 8,
+        CARD_PAD_SIDE = 10,
+        CARD_GAP = 6,
+        TOGGLE_H = 36,
+        TOGGLE_W = 48,
+        TOGGLE_KNOB = 20,
+        DROPDOWN_H = 40,
+        DROPDOWN_ITEM = 36,
+        ACTION_H = 36,
+        FONT_TITLE = 13,
+        FONT_LABEL = 11,
+        FONT_MUTED = 9,
+        FONT_SMALL = 10,
+        FONT_MED = 11,
+        FONT_LARGE = 14,
+        HEADER_H = 40,
+        SEARCH_H = 30,
+        NOTIF_W = 300,
+        NOTIF_H = 52,
+        OPEN_BTN = 52,
+    },
+    PC = {
+        WIN_W = 800,
+        WIN_H = 580,
+        SIDEBAR_W = 140,
+        TAB_H = 44,
+        TAB_ICON = 16,
+        TAB_SHOW_LABEL = true,
+        CARD_HEADER = 30,
+        CARD_PAD_TOP = 10,
+        CARD_PAD_BOT = 12,
+        CARD_PAD_SIDE = 14,
+        CARD_GAP = 8,
+        TOGGLE_H = 30,
+        TOGGLE_W = 46,
+        TOGGLE_KNOB = 18,
+        DROPDOWN_H = 34,
+        DROPDOWN_ITEM = 28,
+        ACTION_H = 34,
+        FONT_TITLE = 12,
+        FONT_LABEL = 12,
+        FONT_MUTED = 10,
+        FONT_SMALL = 10,
+        FONT_MED = 12,
+        FONT_LARGE = 15,
+        HEADER_H = 52,
+        SEARCH_H = 34,
+        NOTIF_W = 380,
+        NOTIF_H = 52,
+        OPEN_BTN = 56,
+    },
+}
+
+local CFG = IS_MOBILE and UI_CONFIG.MOBILE or UI_CONFIG.PC
+
+-- ====== EGG NAMES ======
 local EggNames = {
     "Cherub", "Volcanic", "Blackhole", "Solaris", "Galaxy",
     "Crystal", "Golden", "Glass", "Skull", "Sinister",
@@ -28,6 +91,7 @@ local EggNames = {
     "Bloom", "Aurora", "White", "Brown"
 }
 
+-- ====== THEME ======
 local Themes = {
     Brutal = {
         BG = Color3.fromRGB(15, 5, 10),
@@ -91,6 +155,7 @@ local function applyTheme(themeName)
     end
 end
 
+-- ====== NOTIFICATION ======
 local NotifHolder = nil
 
 local function setupNotifHolder(parent)
@@ -121,7 +186,7 @@ local function notify(text, type)
     else color = C.Accent; icon = "i" end
 
     local notif = Instance.new("Frame")
-    notif.Size = UDim2.fromOffset(380, 52)
+    notif.Size = UDim2.fromOffset(CFG.NOTIF_W, CFG.NOTIF_H)
     notif.BackgroundColor3 = C.Surface
     notif.BorderSizePixel = 0
     notif.ZIndex = 501
@@ -167,7 +232,7 @@ local function notify(text, type)
     label.Text = text
     label.TextColor3 = C.Text
     label.Font = Enum.Font.GothamBold
-    label.TextSize = 13
+    label.TextSize = CFG.FONT_LABEL
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.ZIndex = 502
     label.Parent = notif
@@ -192,6 +257,7 @@ local function notify(text, type)
     end)
 end
 
+-- ====== CARD ======
 local function makeCard(parent, title, layoutOrder)
     local card = Instance.new("Frame")
     card.Size = UDim2.new(1, 0, 0, 0)
@@ -216,7 +282,7 @@ local function makeCard(parent, title, layoutOrder)
     registerTheme(stroke, "Accent", "Color")
 
     local headerFrame = Instance.new("Frame")
-    headerFrame.Size = UDim2.new(1, 0, 0, 30)
+    headerFrame.Size = UDim2.new(1, 0, 0, CFG.CARD_HEADER)
     headerFrame.BackgroundColor3 = C.Surface2
     headerFrame.BorderSizePixel = 0
     headerFrame.ZIndex = 2
@@ -247,7 +313,7 @@ local function makeCard(parent, title, layoutOrder)
     titleLabel.Text = title
     titleLabel.TextColor3 = C.Text
     titleLabel.Font = Enum.Font.GothamBold
-    titleLabel.TextSize = 12
+    titleLabel.TextSize = CFG.FONT_TITLE
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     titleLabel.ZIndex = 3
     titleLabel.Parent = headerFrame
@@ -255,49 +321,50 @@ local function makeCard(parent, title, layoutOrder)
 
     local content = Instance.new("Frame")
     content.Size = UDim2.new(1, 0, 0, 0)
-    content.Position = UDim2.new(0, 0, 0, 30)
+    content.Position = UDim2.new(0, 0, 0, CFG.CARD_HEADER)
     content.AutomaticSize = Enum.AutomaticSize.Y
     content.BackgroundTransparency = 1
     content.ZIndex = 2
     content.Parent = card
 
     local contentPad = Instance.new("UIPadding")
-    contentPad.PaddingTop = UDim.new(0, 10)
-    contentPad.PaddingBottom = UDim.new(0, 12)
-    contentPad.PaddingLeft = UDim.new(0, 14)
-    contentPad.PaddingRight = UDim.new(0, 14)
+    contentPad.PaddingTop = UDim.new(0, CFG.CARD_PAD_TOP)
+    contentPad.PaddingBottom = UDim.new(0, CFG.CARD_PAD_BOT)
+    contentPad.PaddingLeft = UDim.new(0, CFG.CARD_PAD_SIDE)
+    contentPad.PaddingRight = UDim.new(0, CFG.CARD_PAD_SIDE)
     contentPad.Parent = content
 
     local layout = Instance.new("UIListLayout")
-    layout.Padding = UDim.new(0, 8)
+    layout.Padding = UDim.new(0, CFG.CARD_GAP)
     layout.SortOrder = Enum.SortOrder.LayoutOrder
     layout.Parent = content
 
     return card, content
 end
 
+-- ====== TOGGLE ======
 local function makeToggle(parent, text, default, callback)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 30)
+    frame.Size = UDim2.new(1, 0, 0, CFG.TOGGLE_H)
     frame.BackgroundTransparency = 1
     frame.ZIndex = 3
     frame.Parent = parent
 
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -56, 1, 0)
+    label.Size = UDim2.new(1, -(CFG.TOGGLE_W + 12), 1, 0)
     label.BackgroundTransparency = 1
     label.Text = text
     label.TextColor3 = C.Text
     label.Font = Enum.Font.GothamSemibold
-    label.TextSize = 12
+    label.TextSize = CFG.FONT_LABEL
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.ZIndex = 4
     label.Parent = frame
     registerTheme(label, "Text", "TextColor3")
 
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.fromOffset(46, 24)
-    btn.Position = UDim2.new(1, -46, 0.5, -12)
+    btn.Size = UDim2.fromOffset(CFG.TOGGLE_W, IS_MOBILE and 26 or 24)
+    btn.Position = UDim2.new(1, -CFG.TOGGLE_W, 0.5, -(IS_MOBILE and 13 or 12))
     btn.BackgroundColor3 = default and C.Accent or C.Surface3
     btn.Text = ""
     btn.BorderSizePixel = 0
@@ -310,8 +377,8 @@ local function makeToggle(parent, text, default, callback)
     corner.Parent = btn
 
     local knob = Instance.new("Frame")
-    knob.Size = UDim2.fromOffset(18, 18)
-    knob.Position = default and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
+    knob.Size = UDim2.fromOffset(CFG.TOGGLE_KNOB, CFG.TOGGLE_KNOB)
+    knob.Position = default and UDim2.new(1, -(CFG.TOGGLE_KNOB + 3), 0.5, -CFG.TOGGLE_KNOB/2) or UDim2.new(0, 3, 0.5, -CFG.TOGGLE_KNOB/2)
     knob.BackgroundColor3 = Color3.new(1, 1, 1)
     knob.BorderSizePixel = 0
     knob.ZIndex = 5
@@ -328,15 +395,17 @@ local function makeToggle(parent, text, default, callback)
             BackgroundColor3 = state and C.Accent or C.Surface3
         }):Play()
         TweenService:Create(knob, TweenInfo.new(0.2), {
-            Position = state and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
+            Position = state and UDim2.new(1, -(CFG.TOGGLE_KNOB + 3), 0.5, -CFG.TOGGLE_KNOB/2) or UDim2.new(0, 3, 0.5, -CFG.TOGGLE_KNOB/2)
         }):Play()
         if callback then callback(state) end
     end)
 end
 
--- ============================================================
--- DROPDOWN GLOBAL (PAKAI _G — FIX BENAR)
--- ============================================================
+-- ====== DROPDOWN GLOBAL (PAKAI _G) ======
+_G.VRILZ_DropdownLayer = nil
+_G.VRILZ_DropdownCloseOverlay = nil
+_G.VRILZ_DropdownActive = nil
+
 local function setupDropdownLayer(parent)
     _G.VRILZ_DropdownLayer = Instance.new("Frame")
     _G.VRILZ_DropdownLayer.Name = "DropdownLayer"
@@ -367,7 +436,7 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     local selectedValue = default or items[1] or "Pilih..."
 
     local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, 0, 0, 34)
+    container.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
     container.BackgroundColor3 = C.Surface3
     container.BorderSizePixel = 0
     container.ZIndex = 3
@@ -386,21 +455,21 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     registerTheme(stroke, "Accent", "Color")
 
     local selectedLbl = Instance.new("TextLabel")
-    selectedLbl.Size = UDim2.new(1, -40, 1, 0)
+    selectedLbl.Size = UDim2.new(1, -44, 1, 0)
     selectedLbl.Position = UDim2.fromOffset(12, 0)
     selectedLbl.BackgroundTransparency = 1
     selectedLbl.Text = selectedValue
     selectedLbl.TextColor3 = C.Text
     selectedLbl.Font = Enum.Font.GothamSemibold
-    selectedLbl.TextSize = 12
+    selectedLbl.TextSize = CFG.FONT_LABEL
     selectedLbl.TextXAlignment = Enum.TextXAlignment.Left
     selectedLbl.ZIndex = 4
     selectedLbl.Parent = container
     registerTheme(selectedLbl, "Text", "TextColor3")
 
     local arrow = Instance.new("TextLabel")
-    arrow.Size = UDim2.fromOffset(24, 34)
-    arrow.Position = UDim2.new(1, -30, 0, 0)
+    arrow.Size = UDim2.fromOffset(30, CFG.DROPDOWN_H)
+    arrow.Position = UDim2.new(1, -34, 0, 0)
     arrow.BackgroundTransparency = 1
     arrow.Text = "▼"
     arrow.TextColor3 = C.Accent
@@ -445,8 +514,8 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     listPad.PaddingRight = UDim.new(0, 4)
     listPad.Parent = listFrame
 
-    local itemHeight = 28
-    local maxH = math.min(#items * (itemHeight + 2) + 10, 220)
+    local itemHeight = CFG.DROPDOWN_ITEM
+    local maxH = math.min(#items * (itemHeight + 2) + 10, IS_MOBILE and 220 or 180)
 
     local function closeList()
         isOpen = false
@@ -514,7 +583,7 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
         opt.Text = item
         opt.TextColor3 = C.Text
         opt.Font = Enum.Font.GothamSemibold
-        opt.TextSize = 12
+        opt.TextSize = CFG.FONT_LABEL
         opt.AutoButtonColor = false
         opt.ZIndex = 2002
         opt.LayoutOrder = i
@@ -541,13 +610,11 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     return container
 end
 
--- ============================================================
--- FPS WINDOW
--- ============================================================
+-- ====== FPS WINDOW ======
 local function buildFPSWindow(parent)
     local fpsWin = Instance.new("Frame")
     fpsWin.Name = "FPSWindow"
-    fpsWin.Size = UDim2.fromOffset(180, 70)
+    fpsWin.Size = UDim2.fromOffset(IS_MOBILE and 160 or 180, IS_MOBILE and 64 or 70)
     fpsWin.Position = UDim2.fromOffset(20, 90)
     fpsWin.BackgroundColor3 = C.Surface
     fpsWin.BackgroundTransparency = 0.1
@@ -575,7 +642,7 @@ local function buildFPSWindow(parent)
     fpsLbl.Text = "FPS: --"
     fpsLbl.TextColor3 = C.Text
     fpsLbl.Font = Enum.Font.GothamBold
-    fpsLbl.TextSize = 14
+    fpsLbl.TextSize = IS_MOBILE and 12 or 14
     fpsLbl.TextXAlignment = Enum.TextXAlignment.Left
     fpsLbl.ZIndex = 61
     fpsLbl.Parent = fpsWin
@@ -583,12 +650,12 @@ local function buildFPSWindow(parent)
 
     local pingLbl = Instance.new("TextLabel")
     pingLbl.Size = UDim2.new(1, -20, 0, 20)
-    pingLbl.Position = UDim2.fromOffset(10, 34)
+    pingLbl.Position = UDim2.fromOffset(10, IS_MOBILE and 30 or 34)
     pingLbl.BackgroundTransparency = 1
     pingLbl.Text = "PING: --"
     pingLbl.TextColor3 = C.Accent2
     pingLbl.Font = Enum.Font.GothamBold
-    pingLbl.TextSize = 12
+    pingLbl.TextSize = IS_MOBILE and 11 or 12
     pingLbl.TextXAlignment = Enum.TextXAlignment.Left
     pingLbl.ZIndex = 61
     pingLbl.Parent = fpsWin
@@ -615,14 +682,27 @@ local function buildFPSWindow(parent)
 end
 
 -- ============================================================
--- BUILD MAIN WINDOW
+-- BUILD MAIN WINDOW (AUTO-DETECT PC & MOBILE)
 -- ============================================================
 local function buildMainWindow(parent)
     local screenGui = parent
+    local viewport = (workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize) or Vector2.new(1280, 720)
+
+    -- Hitung ukuran window
+    local winW, winH
+    if IS_MOBILE then
+        winW = math.floor(viewport.X * CFG.WIN_W_PCT)
+        winH = math.floor(viewport.Y * CFG.WIN_H_PCT)
+    else
+        winW = math.min(CFG.WIN_W, math.floor(viewport.X * 0.7))
+        winH = math.min(CFG.WIN_H, math.floor(viewport.Y * 0.78))
+    end
 
     local main = Instance.new("Frame")
-    main.Size = UDim2.fromOffset(800, 580)
-    main.Position = UDim2.new(0.5, -400, 0.5, -290)
+    main.Name = "MainWindow"
+    main.AnchorPoint = Vector2.new(0.5, 0.5)
+    main.Position = UDim2.fromScale(0.5, 0.5)
+    main.Size = UDim2.fromOffset(winW, winH)
     main.BackgroundColor3 = C.BG
     main.BorderSizePixel = 0
     main.ZIndex = 1
@@ -640,8 +720,11 @@ local function buildMainWindow(parent)
     stroke.Parent = main
     registerTheme(stroke, "Accent", "Color")
 
+    -- ========================================================
+    -- HEADER
+    -- ========================================================
     local header = Instance.new("Frame")
-    header.Size = UDim2.new(1, 0, 0, 52)
+    header.Size = UDim2.new(1, 0, 0, CFG.HEADER_H)
     header.BackgroundColor3 = C.Surface
     header.BorderSizePixel = 0
     header.ZIndex = 10
@@ -661,13 +744,13 @@ local function buildMainWindow(parent)
     headerFix.Parent = header
 
     local logo = Instance.new("TextLabel")
-    logo.Size = UDim2.fromOffset(36, 36)
-    logo.Position = UDim2.fromOffset(12, 8)
+    logo.Size = UDim2.fromOffset(IS_MOBILE and 30 or 36, IS_MOBILE and 30 or 36)
+    logo.Position = UDim2.fromOffset(IS_MOBILE and 10 or 12, (CFG.HEADER_H - (IS_MOBILE and 30 or 36)) / 2)
     logo.BackgroundColor3 = C.Accent
     logo.Text = "⚡"
     logo.TextColor3 = Color3.new(1, 1, 1)
     logo.Font = Enum.Font.GothamBold
-    logo.TextSize = 20
+    logo.TextSize = IS_MOBILE and 16 or 20
     logo.ZIndex = 11
     logo.Parent = header
     registerTheme(logo, "Accent", "BackgroundColor3")
@@ -678,12 +761,12 @@ local function buildMainWindow(parent)
 
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(0, 300, 0, 20)
-    title.Position = UDim2.fromOffset(58, 10)
+    title.Position = UDim2.fromOffset(IS_MOBILE and 48 or 58, IS_MOBILE and 8 or 10)
     title.BackgroundTransparency = 1
     title.Text = "VRILZHUB"
     title.TextColor3 = C.Text
     title.Font = Enum.Font.GothamBold
-    title.TextSize = 15
+    title.TextSize = IS_MOBILE and 13 or 15
     title.TextXAlignment = Enum.TextXAlignment.Left
     title.ZIndex = 11
     title.Parent = header
@@ -691,25 +774,26 @@ local function buildMainWindow(parent)
 
     local subtitle = Instance.new("TextLabel")
     subtitle.Size = UDim2.new(0, 300, 0, 14)
-    subtitle.Position = UDim2.fromOffset(58, 28)
+    subtitle.Position = UDim2.fromOffset(IS_MOBILE and 48 or 58, IS_MOBILE and 26 or 28)
     subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Ride a Pet · v5.4"
+    subtitle.Text = "Ride a Pet · v5.5"
     subtitle.TextColor3 = C.Muted
     subtitle.Font = Enum.Font.GothamSemibold
-    subtitle.TextSize = 10
+    subtitle.TextSize = IS_MOBILE and 9 or 10
     subtitle.TextXAlignment = Enum.TextXAlignment.Left
     subtitle.ZIndex = 11
     subtitle.Parent = header
     registerTheme(subtitle, "Muted", "TextColor3")
 
+    -- Minimize
     local minBtn = Instance.new("TextButton")
-    minBtn.Size = UDim2.fromOffset(32, 32)
-    minBtn.Position = UDim2.new(1, -78, 0.5, -16)
+    minBtn.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
+    minBtn.Position = UDim2.new(1, -(IS_MOBILE and 66 or 78), 0.5, -(IS_MOBILE and 14 or 16))
     minBtn.BackgroundColor3 = C.Surface3
     minBtn.Text = "−"
     minBtn.TextColor3 = C.Text
     minBtn.Font = Enum.Font.GothamBold
-    minBtn.TextSize = 20
+    minBtn.TextSize = IS_MOBILE and 18 or 20
     minBtn.BorderSizePixel = 0
     minBtn.ZIndex = 11
     minBtn.Parent = header
@@ -720,14 +804,15 @@ local function buildMainWindow(parent)
     minCorner.CornerRadius = UDim.new(0, 8)
     minCorner.Parent = minBtn
 
+    -- Close
     local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.fromOffset(32, 32)
-    closeBtn.Position = UDim2.new(1, -40, 0.5, -16)
+    closeBtn.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
+    closeBtn.Position = UDim2.new(1, -(IS_MOBILE and 34 or 40), 0.5, -(IS_MOBILE and 14 or 16))
     closeBtn.BackgroundColor3 = C.Surface3
     closeBtn.Text = "×"
     closeBtn.TextColor3 = C.Text
     closeBtn.Font = Enum.Font.GothamBold
-    closeBtn.TextSize = 22
+    closeBtn.TextSize = IS_MOBILE and 20 or 22
     closeBtn.BorderSizePixel = 0
     closeBtn.ZIndex = 11
     closeBtn.Parent = header
@@ -738,15 +823,20 @@ local function buildMainWindow(parent)
     closeCorner.CornerRadius = UDim.new(0, 8)
     closeCorner.Parent = closeBtn
 
+    -- ========================================================
+    -- BODY
+    -- ========================================================
     local body = Instance.new("Frame")
-    body.Size = UDim2.new(1, -20, 1, -72)
-    body.Position = UDim2.new(0, 10, 0, 62)
+    body.Size = UDim2.new(1, -20, 1, -(CFG.HEADER_H + 20))
+    body.Position = UDim2.new(0, 10, 0, CFG.HEADER_H + 10)
     body.BackgroundTransparency = 1
     body.ZIndex = 2
     body.Parent = main
 
+    -- Sidebar
+    local sidebarW = CFG.SIDEBAR_W
     local sidebar = Instance.new("Frame")
-    sidebar.Size = UDim2.new(0, 140, 1, 0)
+    sidebar.Size = UDim2.new(0, sidebarW, 1, 0)
     sidebar.BackgroundColor3 = C.Surface
     sidebar.BorderSizePixel = 0
     sidebar.ZIndex = 3
@@ -771,15 +861,16 @@ local function buildMainWindow(parent)
     sidebarLayout.Parent = sidebar
 
     local sidebarPad = Instance.new("UIPadding")
-    sidebarPad.PaddingTop = UDim.new(0, 10)
-    sidebarPad.PaddingBottom = UDim.new(0, 10)
-    sidebarPad.PaddingLeft = UDim.new(0, 8)
-    sidebarPad.PaddingRight = UDim.new(0, 8)
+    sidebarPad.PaddingTop = UDim.new(0, IS_MOBILE and 6 or 10)
+    sidebarPad.PaddingBottom = UDim.new(0, IS_MOBILE and 6 or 10)
+    sidebarPad.PaddingLeft = UDim.new(0, 6)
+    sidebarPad.PaddingRight = UDim.new(0, 6)
     sidebarPad.Parent = sidebar
 
+    -- Page Holder
     local pageHolder = Instance.new("ScrollingFrame")
-    pageHolder.Size = UDim2.new(1, -150, 1, 0)
-    pageHolder.Position = UDim2.new(0, 150, 0, 0)
+    pageHolder.Size = UDim2.new(1, -(sidebarW + 10), 1, 0)
+    pageHolder.Position = UDim2.new(0, sidebarW + 10, 0, 0)
     pageHolder.BackgroundTransparency = 1
     pageHolder.BorderSizePixel = 0
     pageHolder.ScrollBarThickness = 4
@@ -793,54 +884,62 @@ local function buildMainWindow(parent)
     local pageHolderPad = Instance.new("UIPadding")
     pageHolderPad.PaddingTop = UDim.new(0, 4)
     pageHolderPad.PaddingBottom = UDim.new(0, 40)
-    pageHolderPad.PaddingLeft = UDim.new(0, 10)
-    pageHolderPad.PaddingRight = UDim.new(0, 10)
+    pageHolderPad.PaddingLeft = UDim.new(0, IS_MOBILE and 6 or 10)
+    pageHolderPad.PaddingRight = UDim.new(0, IS_MOBILE and 6 or 10)
     pageHolderPad.Parent = pageHolder
 
-    local resizeHandle = Instance.new("TextButton")
-    resizeHandle.Size = UDim2.fromOffset(22, 22)
-    resizeHandle.Position = UDim2.new(1, -24, 1, -24)
-    resizeHandle.BackgroundTransparency = 1
-    resizeHandle.Text = "◢"
-    resizeHandle.TextColor3 = C.Accent
-    resizeHandle.TextSize = 14
-    resizeHandle.Font = Enum.Font.GothamBold
-    resizeHandle.AutoButtonColor = false
-    resizeHandle.ZIndex = 100
-    resizeHandle.Parent = main
-    registerTheme(resizeHandle, "Accent", "TextColor3")
+    -- ========================================================
+    -- RESIZE HANDLE (PC only)
+    -- ========================================================
+    if not IS_MOBILE then
+        local resizeHandle = Instance.new("TextButton")
+        resizeHandle.Size = UDim2.fromOffset(22, 22)
+        resizeHandle.Position = UDim2.new(1, -24, 1, -24)
+        resizeHandle.BackgroundTransparency = 1
+        resizeHandle.Text = "◢"
+        resizeHandle.TextColor3 = C.Accent
+        resizeHandle.TextSize = 14
+        resizeHandle.Font = Enum.Font.GothamBold
+        resizeHandle.AutoButtonColor = false
+        resizeHandle.ZIndex = 100
+        resizeHandle.Parent = main
+        registerTheme(resizeHandle, "Accent", "TextColor3")
 
-    local resizing = false
-    local resizeStart, startSize
-    resizeHandle.InputBegan:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-            resizing = true
-            resizeStart = i.Position
-            startSize = main.Size
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(i)
-        if resizing and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-            local delta = i.Position - resizeStart
-            local newX = math.clamp(startSize.X.Offset + delta.X, 600, 1200)
-            local newY = math.clamp(startSize.Y.Offset + delta.Y, 400, 800)
-            main.Size = UDim2.fromOffset(newX, newY)
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-            resizing = false
-        end
-    end)
+        local resizing = false
+        local resizeStart, startSize
+        resizeHandle.InputBegan:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                resizing = true
+                resizeStart = i.Position
+                startSize = main.Size
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(i)
+            if resizing and i.UserInputType == Enum.UserInputType.MouseMovement then
+                local delta = i.Position - resizeStart
+                local newX = math.clamp(startSize.X.Offset + delta.X, 600, 1200)
+                local newY = math.clamp(startSize.Y.Offset + delta.Y, 400, 800)
+                main.Size = UDim2.fromOffset(newX, newY)
+            end
+        end)
+        UserInputService.InputEnded:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                resizing = false
+            end
+        end)
+    end
 
+    -- ========================================================
+    -- OPEN BUTTON
+    -- ========================================================
     local openBtn = Instance.new("TextButton")
-    openBtn.Size = UDim2.fromOffset(56, 56)
+    openBtn.Size = UDim2.fromOffset(CFG.OPEN_BTN, CFG.OPEN_BTN)
     openBtn.Position = UDim2.fromOffset(20, 20)
     openBtn.BackgroundColor3 = C.Surface
     openBtn.Text = "⚡"
     openBtn.TextColor3 = C.Accent
     openBtn.Font = Enum.Font.GothamBold
-    openBtn.TextSize = 28
+    openBtn.TextSize = IS_MOBILE and 24 or 28
     openBtn.BorderSizePixel = 0
     openBtn.Visible = false
     openBtn.ZIndex = 400
@@ -883,7 +982,7 @@ local function buildMainWindow(parent)
         main.Visible = true
         main.Size = UDim2.fromOffset(0, 0)
         TweenService:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Size = UDim2.fromOffset(800, 580)
+            Size = UDim2.fromOffset(winW, winH)
         }):Play()
     end)
 
@@ -906,11 +1005,14 @@ local function buildMainWindow(parent)
         end)
     end)
 
+    -- ========================================================
+    -- TAB SYSTEM
+    -- ========================================================
     local pages = {}
     local navs = {}
 
     local function registerTab(id, icon, label)
-        local tabH = 44
+        local tabH = CFG.TAB_H
         local btn = Instance.new("TextButton")
         btn.Size = UDim2.new(1, 0, 0, tabH)
         btn.BackgroundColor3 = C.Surface3
@@ -926,31 +1028,39 @@ local function buildMainWindow(parent)
         corner.Parent = btn
 
         local ic = Instance.new("TextLabel")
-        ic.Size = UDim2.fromOffset(28, tabH)
-        ic.Position = UDim2.fromOffset(10, 0)
+        if CFG.TAB_SHOW_LABEL then
+            ic.Size = UDim2.fromOffset(28, tabH)
+            ic.Position = UDim2.fromOffset(10, 0)
+        else
+            ic.Size = UDim2.fromScale(1, 1)
+            ic.Position = UDim2.fromOffset(0, 0)
+        end
         ic.BackgroundTransparency = 1
         ic.Text = icon
-        ic.TextSize = 16
+        ic.TextSize = CFG.TAB_ICON
         ic.Font = Enum.Font.GothamBold
         ic.TextColor3 = C.Accent
         ic.ZIndex = 5
         ic.Parent = btn
         registerTheme(ic, "Accent", "TextColor3")
 
-        local lbl = Instance.new("TextLabel")
-        lbl.Size = UDim2.new(1, -44, 1, 0)
-        lbl.Position = UDim2.fromOffset(42, 0)
-        lbl.BackgroundTransparency = 1
-        lbl.Text = label
-        lbl.TextColor3 = C.Muted
-        lbl.TextSize = 12
-        lbl.Font = Enum.Font.GothamSemibold
-        lbl.TextXAlignment = Enum.TextXAlignment.Left
-        lbl.ZIndex = 5
-        lbl.Parent = btn
-        registerTheme(lbl, "Muted", "TextColor3")
-
-        navs[id] = {btn = btn, ic = ic, lbl = lbl}
+        if CFG.TAB_SHOW_LABEL then
+            local lbl = Instance.new("TextLabel")
+            lbl.Size = UDim2.new(1, -44, 1, 0)
+            lbl.Position = UDim2.fromOffset(42, 0)
+            lbl.BackgroundTransparency = 1
+            lbl.Text = label
+            lbl.TextColor3 = C.Muted
+            lbl.TextSize = CFG.FONT_LABEL
+            lbl.Font = Enum.Font.GothamSemibold
+            lbl.TextXAlignment = Enum.TextXAlignment.Left
+            lbl.ZIndex = 5
+            lbl.Parent = btn
+            registerTheme(lbl, "Muted", "TextColor3")
+            navs[id] = {btn = btn, ic = ic, lbl = lbl}
+        else
+            navs[id] = {btn = btn, ic = ic, lbl = nil}
+        end
 
         local function switchTo()
             for n, p in pairs(pages) do
@@ -960,13 +1070,13 @@ local function buildMainWindow(parent)
                 if n == id then
                     x.btn.BackgroundColor3 = C.Accent
                     x.btn.BackgroundTransparency = 0
-                    x.lbl.TextColor3 = Color3.new(1, 1, 1)
                     x.ic.TextColor3 = Color3.new(1, 1, 1)
+                    if x.lbl then x.lbl.TextColor3 = Color3.new(1, 1, 1) end
                 else
                     x.btn.BackgroundColor3 = C.Surface3
                     x.btn.BackgroundTransparency = 0.5
-                    x.lbl.TextColor3 = C.Muted
                     x.ic.TextColor3 = C.Accent
+                    if x.lbl then x.lbl.TextColor3 = C.Muted end
                 end
             end
         end
@@ -989,25 +1099,29 @@ local function buildMainWindow(parent)
         page.ZIndex = 6
         page.Parent = pageHolder
         local layout = Instance.new("UIListLayout")
-        layout.Padding = UDim.new(0, 12)
+        layout.Padding = UDim.new(0, IS_MOBILE and 8 or 12)
         layout.SortOrder = Enum.SortOrder.LayoutOrder
         layout.Parent = page
         return page
     end
 
+    -- ========================================================
+    -- TAB INFO
+    -- ========================================================
     local infoPage = createPage("Info")
     pages.Info = infoPage
 
     local infoCard, infoContent = makeCard(infoPage, "INFORMASI CLIENT", 1)
 
     local avRow = Instance.new("Frame")
-    avRow.Size = UDim2.new(1, 0, 0, 70)
+    avRow.Size = UDim2.new(1, 0, 0, IS_MOBILE and 60 or 70)
     avRow.BackgroundTransparency = 1
     avRow.LayoutOrder = 1
     avRow.Parent = infoContent
 
+    local avSz = IS_MOBILE and 50 or 60
     local avatar = Instance.new("ImageLabel")
-    avatar.Size = UDim2.fromOffset(60, 60)
+    avatar.Size = UDim2.fromOffset(avSz, avSz)
     avatar.Position = UDim2.fromOffset(0, 5)
     avatar.BackgroundColor3 = C.Surface3
     avatar.BorderSizePixel = 0
@@ -1026,26 +1140,26 @@ local function buildMainWindow(parent)
     registerTheme(avStroke, "Accent", "Color")
 
     local nameLbl = Instance.new("TextLabel")
-    nameLbl.Size = UDim2.new(1, -75, 0, 22)
-    nameLbl.Position = UDim2.fromOffset(75, 12)
+    nameLbl.Size = UDim2.new(1, -(avSz + 15), 0, 22)
+    nameLbl.Position = UDim2.fromOffset(avSz + 15, IS_MOBILE and 10 or 12)
     nameLbl.BackgroundTransparency = 1
     nameLbl.Text = LocalPlayer.DisplayName
     nameLbl.TextColor3 = C.Text
     nameLbl.Font = Enum.Font.GothamBold
-    nameLbl.TextSize = 15
+    nameLbl.TextSize = IS_MOBILE and 13 or 15
     nameLbl.TextXAlignment = Enum.TextXAlignment.Left
     nameLbl.ZIndex = 3
     nameLbl.Parent = avRow
     registerTheme(nameLbl, "Text", "TextColor3")
 
     local userLbl = Instance.new("TextLabel")
-    userLbl.Size = UDim2.new(1, -75, 0, 16)
-    userLbl.Position = UDim2.fromOffset(75, 34)
+    userLbl.Size = UDim2.new(1, -(avSz + 15), 0, 16)
+    userLbl.Position = UDim2.fromOffset(avSz + 15, IS_MOBILE and 30 or 34)
     userLbl.BackgroundTransparency = 1
     userLbl.Text = "@" .. LocalPlayer.Name
     userLbl.TextColor3 = C.Muted
     userLbl.Font = Enum.Font.GothamSemibold
-    userLbl.TextSize = 11
+    userLbl.TextSize = IS_MOBILE and 10 or 11
     userLbl.TextXAlignment = Enum.TextXAlignment.Left
     userLbl.ZIndex = 3
     userLbl.Parent = avRow
@@ -1057,7 +1171,7 @@ local function buildMainWindow(parent)
     sessionLbl.Text = "Sesi: 00:00"
     sessionLbl.TextColor3 = C.Accent2
     sessionLbl.Font = Enum.Font.GothamBold
-    sessionLbl.TextSize = 12
+    sessionLbl.TextSize = CFG.FONT_LABEL
     sessionLbl.TextXAlignment = Enum.TextXAlignment.Left
     sessionLbl.LayoutOrder = 2
     sessionLbl.ZIndex = 3
@@ -1077,13 +1191,16 @@ local function buildMainWindow(parent)
 
     registerTab("Info", "ℹ", "Info")
 
+    -- ========================================================
+    -- TAB PREDIKSI
+    -- ========================================================
     local predPage = createPage("Prediksi")
     pages.Prediksi = predPage
 
     local eggInMapCard, eggInMapContent = makeCard(predPage, "EGG SPAWN DI MAP", 1)
 
     local eggInMapList = Instance.new("ScrollingFrame")
-    eggInMapList.Size = UDim2.new(1, 0, 0, 160)
+    eggInMapList.Size = UDim2.new(1, 0, 0, IS_MOBILE and 140 or 160)
     eggInMapList.BackgroundTransparency = 1
     eggInMapList.BorderSizePixel = 0
     eggInMapList.ScrollBarThickness = 3
@@ -1102,7 +1219,7 @@ local function buildMainWindow(parent)
     local eggPredCard, eggPredContent = makeCard(predPage, "PREDIKSI EGG BERIKUTNYA", 2)
 
     local eggPredList = Instance.new("ScrollingFrame")
-    eggPredList.Size = UDim2.new(1, 0, 0, 160)
+    eggPredList.Size = UDim2.new(1, 0, 0, IS_MOBILE and 140 or 160)
     eggPredList.BackgroundTransparency = 1
     eggPredList.BorderSizePixel = 0
     eggPredList.ScrollBarThickness = 3
@@ -1134,13 +1251,13 @@ local function buildMainWindow(parent)
                 end
                 if #eggsInMap == 0 then
                     local lbl = Instance.new("TextLabel")
-                    lbl.Size = UDim2.new(1, 0, 0, 28)
+                    lbl.Size = UDim2.new(1, 0, 0, IS_MOBILE and 26 or 28)
                     lbl.BackgroundColor3 = C.Surface3
                     lbl.BackgroundTransparency = 0.5
                     lbl.Text = "   Nggak ada egg di map"
                     lbl.TextColor3 = C.Muted
                     lbl.Font = Enum.Font.GothamSemibold
-                    lbl.TextSize = 11
+                    lbl.TextSize = CFG.FONT_LABEL
                     lbl.TextXAlignment = Enum.TextXAlignment.Left
                     lbl.LayoutOrder = 1
                     lbl.ZIndex = 4
@@ -1151,13 +1268,13 @@ local function buildMainWindow(parent)
                 else
                     for i, eggName in ipairs(eggsInMap) do
                         local lbl = Instance.new("TextLabel")
-                        lbl.Size = UDim2.new(1, 0, 0, 28)
+                        lbl.Size = UDim2.new(1, 0, 0, IS_MOBILE and 26 or 28)
                         lbl.BackgroundColor3 = C.Surface3
                         lbl.BackgroundTransparency = 0.3
                         lbl.Text = "   🥚  " .. eggName
                         lbl.TextColor3 = C.Text
                         lbl.Font = Enum.Font.GothamSemibold
-                        lbl.TextSize = 12
+                        lbl.TextSize = CFG.FONT_LABEL
                         lbl.TextXAlignment = Enum.TextXAlignment.Left
                         lbl.LayoutOrder = i
                         lbl.ZIndex = 4
@@ -1184,13 +1301,13 @@ local function buildMainWindow(parent)
                 end
                 if #preds == 0 then
                     local lbl = Instance.new("TextLabel")
-                    lbl.Size = UDim2.new(1, 0, 0, 28)
+                    lbl.Size = UDim2.new(1, 0, 0, IS_MOBILE and 26 or 28)
                     lbl.BackgroundColor3 = C.Surface3
                     lbl.BackgroundTransparency = 0.5
                     lbl.Text = "   Menunggu data..."
                     lbl.TextColor3 = C.Muted
                     lbl.Font = Enum.Font.GothamSemibold
-                    lbl.TextSize = 11
+                    lbl.TextSize = CFG.FONT_LABEL
                     lbl.TextXAlignment = Enum.TextXAlignment.Left
                     lbl.LayoutOrder = 1
                     lbl.ZIndex = 4
@@ -1201,13 +1318,13 @@ local function buildMainWindow(parent)
                 else
                     for i, eggName in ipairs(preds) do
                         local lbl = Instance.new("TextLabel")
-                        lbl.Size = UDim2.new(1, 0, 0, 28)
+                        lbl.Size = UDim2.new(1, 0, 0, IS_MOBILE and 26 or 28)
                         lbl.BackgroundColor3 = C.Surface3
                         lbl.BackgroundTransparency = 0.3
                         lbl.Text = "   🎯  " .. eggName
                         lbl.TextColor3 = C.Text
                         lbl.Font = Enum.Font.GothamSemibold
-                        lbl.TextSize = 12
+                        lbl.TextSize = CFG.FONT_LABEL
                         lbl.TextXAlignment = Enum.TextXAlignment.Left
                         lbl.LayoutOrder = i
                         lbl.ZIndex = 4
@@ -1229,6 +1346,9 @@ local function buildMainWindow(parent)
 
     registerTab("Prediksi", "◎", "Prediksi")
 
+    -- ========================================================
+    -- TAB EGG
+    -- ========================================================
     local eggPage = createPage("Egg")
     pages.Egg = eggPage
 
@@ -1248,7 +1368,7 @@ local function buildMainWindow(parent)
     eggNameLbl.Text = "Pilih Egg:"
     eggNameLbl.TextColor3 = C.Muted
     eggNameLbl.Font = Enum.Font.GothamSemibold
-    eggNameLbl.TextSize = 11
+    eggNameLbl.TextSize = CFG.FONT_MUTED
     eggNameLbl.TextXAlignment = Enum.TextXAlignment.Left
     eggNameLbl.ZIndex = 3
     eggNameLbl.Parent = autoStealContent
@@ -1260,6 +1380,9 @@ local function buildMainWindow(parent)
 
     registerTab("Egg", "◯", "Egg")
 
+    -- ========================================================
+    -- TAB VISUAL
+    -- ========================================================
     local visualPage = createPage("Visual")
     pages.Visual = visualPage
 
@@ -1276,6 +1399,9 @@ local function buildMainWindow(parent)
 
     registerTab("Visual", "◆", "Visual")
 
+    -- ========================================================
+    -- TAB AUTO
+    -- ========================================================
     local autoPage = createPage("Auto")
     pages.Auto = autoPage
 
@@ -1285,6 +1411,9 @@ local function buildMainWindow(parent)
 
     registerTab("Auto", "▶", "Auto")
 
+    -- ========================================================
+    -- TAB SETTINGS
+    -- ========================================================
     local setPage = createPage("Settings")
     pages.Settings = setPage
 
@@ -1296,7 +1425,7 @@ local function buildMainWindow(parent)
     themeLbl.Text = "Pilih Tema:"
     themeLbl.TextColor3 = C.Muted
     themeLbl.Font = Enum.Font.GothamSemibold
-    themeLbl.TextSize = 11
+    themeLbl.TextSize = CFG.FONT_MUTED
     themeLbl.TextXAlignment = Enum.TextXAlignment.Left
     themeLbl.ZIndex = 3
     themeLbl.Parent = themeContent
@@ -1369,9 +1498,10 @@ local function buildMainWindow(parent)
     pages.Info.Visible = true
     navs.Info.btn.BackgroundColor3 = C.Accent
     navs.Info.btn.BackgroundTransparency = 0
-    navs.Info.lbl.TextColor3 = Color3.new(1, 1, 1)
     navs.Info.ic.TextColor3 = Color3.new(1, 1, 1)
+    if navs.Info.lbl then navs.Info.lbl.TextColor3 = Color3.new(1, 1, 1) end
 
+    -- Drag header
     local dragging, dragInput, dragStart, startPos
     header.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -1405,8 +1535,12 @@ local function buildMainWindow(parent)
     return main
 end
 
+-- ============================================================
+-- UI.INIT
+-- ============================================================
 function UI.Init(sharedState)
     Shared = sharedState
+
     Shared.Notify = notify
 
     Shared.ESP_Eggs_Enabled = false
@@ -1437,8 +1571,9 @@ function UI.Init(sharedState)
     setupDropdownLayer(ScreenGui)
 
     local loading = Instance.new("Frame")
-    loading.Size = UDim2.fromOffset(400, 240)
-    loading.Position = UDim2.new(0.5, -200, 0.5, -120)
+    loading.Size = UDim2.fromOffset(IS_MOBILE and 340 or 400, IS_MOBILE and 220 or 240)
+    loading.AnchorPoint = Vector2.new(0.5, 0.5)
+    loading.Position = UDim2.fromScale(0.5, 0.5)
     loading.BackgroundColor3 = C.Surface
     loading.BorderSizePixel = 0
     loading.ZIndex = 200
@@ -1455,7 +1590,7 @@ function UI.Init(sharedState)
     title.Text = "⚡ VRILZHUB"
     title.TextColor3 = C.Accent
     title.Font = Enum.Font.GothamBold
-    title.TextSize = 20
+    title.TextSize = IS_MOBILE and 18 or 20
     title.ZIndex = 201
     title.Parent = loading
     registerTheme(title, "Accent", "TextColor3")
@@ -1467,14 +1602,14 @@ function UI.Init(sharedState)
     subtitle.Text = "Ride a Pet · Loading..."
     subtitle.TextColor3 = C.Muted
     subtitle.Font = Enum.Font.GothamSemibold
-    subtitle.TextSize = 11
+    subtitle.TextSize = IS_MOBILE and 10 or 11
     subtitle.ZIndex = 201
     subtitle.Parent = loading
     registerTheme(subtitle, "Muted", "TextColor3")
 
     local barBg = Instance.new("Frame")
     barBg.Size = UDim2.new(1, -40, 0, 6)
-    barBg.Position = UDim2.new(0, 20, 0, 80)
+    barBg.Position = UDim2.new(0, 20, 0, IS_MOBILE and 72 or 80)
     barBg.BackgroundColor3 = C.Surface3
     barBg.BorderSizePixel = 0
     barBg.ZIndex = 201
@@ -1492,12 +1627,12 @@ function UI.Init(sharedState)
 
     local statusLbl = Instance.new("TextLabel")
     statusLbl.Size = UDim2.new(1, -40, 0, 16)
-    statusLbl.Position = UDim2.new(0, 20, 0, 100)
+    statusLbl.Position = UDim2.new(0, 20, 0, IS_MOBILE and 92 or 100)
     statusLbl.BackgroundTransparency = 1
     statusLbl.Text = "0%"
     statusLbl.TextColor3 = C.Accent
     statusLbl.Font = Enum.Font.GothamBold
-    statusLbl.TextSize = 12
+    statusLbl.TextSize = IS_MOBILE and 11 or 12
     statusLbl.TextXAlignment = Enum.TextXAlignment.Right
     statusLbl.ZIndex = 201
     statusLbl.Parent = loading
