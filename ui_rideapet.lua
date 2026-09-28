@@ -1,6 +1,6 @@
 -- ============================================================
--- VRILZHUB UI — RIDE A PET v3.2 (TANPA KEY + PREDIKSI EGG)
--- Brutal UI + Minimize + Close + FPS Boost + Prediksi
+-- VRILZHUB UI — RIDE A PET v3.3 (FIX LAYOUT + DROPDOWN)
+-- Dropdown masuk card, theme dropdown, tab prediksi sendiri
 -- ============================================================
 
 local UI = {}
@@ -94,7 +94,7 @@ local function applyTheme(themeName)
 end
 
 -- ============================================================
--- NOTIFICATION (ATAS TENGAH)
+-- NOTIFICATION
 -- ============================================================
 local NotifHolder = nil
 
@@ -325,13 +325,16 @@ local function makeToggle(parent, text, default, callback)
     end)
 end
 
+-- ============================================================
+-- DROPDOWN (NAIK KE ATAS KALAU RUANG BAWAH KURANG)
+-- ============================================================
 local function makeDropdown(parent, items, default, onSelect)
     local container = Instance.new("Frame")
     container.Size = UDim2.new(1, 0, 0, 34)
     container.BackgroundColor3 = C.Surface3
     container.BorderSizePixel = 0
     container.ClipsDescendants = false
-    container.ZIndex = 100
+    container.ZIndex = 999
     container.Parent = parent
     registerTheme(container, "Surface3", "BackgroundColor3")
 
@@ -354,7 +357,7 @@ local function makeDropdown(parent, items, default, onSelect)
     selectedLbl.Font = Enum.Font.GothamSemibold
     selectedLbl.TextSize = 12
     selectedLbl.TextXAlignment = Enum.TextXAlignment.Left
-    selectedLbl.ZIndex = 101
+    selectedLbl.ZIndex = 1000
     selectedLbl.Parent = container
     registerTheme(selectedLbl, "Text", "TextColor3")
 
@@ -365,13 +368,12 @@ local function makeDropdown(parent, items, default, onSelect)
     arrow.Text = "▼"
     arrow.TextColor3 = C.Accent
     arrow.TextSize = 10
-    arrow.ZIndex = 101
+    arrow.ZIndex = 1000
     arrow.Parent = container
     registerTheme(arrow, "Accent", "TextColor3")
 
     local listFrame = Instance.new("ScrollingFrame")
     listFrame.Size = UDim2.new(1, 0, 0, 0)
-    listFrame.Position = UDim2.fromOffset(0, 37)
     listFrame.BackgroundColor3 = C.Surface2
     listFrame.BorderSizePixel = 0
     listFrame.ScrollBarThickness = 4
@@ -379,7 +381,7 @@ local function makeDropdown(parent, items, default, onSelect)
     listFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
     listFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
     listFrame.Visible = false
-    listFrame.ZIndex = 200
+    listFrame.ZIndex = 1001
     listFrame.Parent = container
     registerTheme(listFrame, "Surface2", "BackgroundColor3")
 
@@ -421,6 +423,24 @@ local function makeDropdown(parent, items, default, onSelect)
     local function openList()
         isOpen = true
         listFrame.Visible = true
+
+        -- Cek apakah ruang bawah cukup
+        local containerAbsY = container.AbsolutePosition.Y
+        local containerAbsH = container.AbsoluteSize.Y
+        local screenH = workspace.CurrentCamera.ViewportSize.Y
+        local spaceBelow = screenH - (containerAbsY + containerAbsH)
+        local spaceAbove = containerAbsY
+
+        if spaceBelow >= maxH or spaceBelow >= spaceAbove then
+            -- Buka ke bawah
+            listFrame.Position = UDim2.fromOffset(0, 37)
+            listFrame.AnchorPoint = Vector2.new(0, 0)
+        else
+            -- Buka ke atas
+            listFrame.Position = UDim2.fromOffset(0, -3)
+            listFrame.AnchorPoint = Vector2.new(0, 1)
+        end
+
         TweenService:Create(listFrame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, maxH)}):Play()
         arrow.Text = "▲"
     end
@@ -440,7 +460,7 @@ local function makeDropdown(parent, items, default, onSelect)
         opt.Font = Enum.Font.GothamSemibold
         opt.TextSize = 11
         opt.AutoButtonColor = false
-        opt.ZIndex = 201
+        opt.ZIndex = 1002
         opt.LayoutOrder = i
         opt.Parent = listFrame
         registerTheme(opt, "Surface3", "BackgroundColor3")
@@ -532,7 +552,6 @@ local function buildMainWindow(parent)
     title.Parent = header
     registerTheme(title, "Text", "TextColor3")
 
-    -- Minimize
     local minBtn = Instance.new("TextButton")
     minBtn.Size = UDim2.fromOffset(28, 28)
     minBtn.Position = UDim2.new(1, -70, 0.5, -14)
@@ -551,7 +570,6 @@ local function buildMainWindow(parent)
     minCorner.CornerRadius = UDim.new(0, 6)
     minCorner.Parent = minBtn
 
-    -- Close
     local closeBtn = Instance.new("TextButton")
     closeBtn.Size = UDim2.fromOffset(28, 28)
     closeBtn.Position = UDim2.new(1, -38, 0.5, -14)
@@ -865,13 +883,13 @@ local function buildMainWindow(parent)
     registerTab("Info", "ℹ️", "Info")
 
     -- ========================================================
-    -- TAB EGG (DENGAN PREDIKSI)
+    -- TAB PREDIKSI (TAB SENDIRI)
     -- ========================================================
-    local eggPage = createPage("Egg")
-    pages.Egg = eggPage
+    local predPage = createPage("Prediksi")
+    pages.Prediksi = predPage
 
-    -- Card 1: Egg yang SPAWN di map
-    local eggInMapCard, eggInMapContent = makeCard(eggPage, "🥚 EGG SPAWN DI MAP", 120)
+    -- Card 1: Egg SPAWN di map
+    local eggInMapCard, eggInMapContent = makeCard(predPage, "🥚 EGG SPAWN DI MAP", 130)
     eggInMapCard.LayoutOrder = 1
 
     local eggInMapList = Instance.new("ScrollingFrame")
@@ -891,7 +909,7 @@ local function buildMainWindow(parent)
     eggInMapLayout.Parent = eggInMapList
 
     -- Card 2: Prediksi egg berikutnya
-    local eggPredCard, eggPredContent = makeCard(eggPage, "🎯 PREDIKSI EGG BERIKUTNYA", 120)
+    local eggPredCard, eggPredContent = makeCard(predPage, "🎯 PREDIKSI EGG BERIKUTNYA", 130)
     eggPredCard.LayoutOrder = 2
 
     local eggPredList = Instance.new("ScrollingFrame")
@@ -1002,16 +1020,22 @@ local function buildMainWindow(parent)
         end
     end)
 
-    -- Card 3: Egg ESP
+    registerTab("Prediksi", "🎯", "Prediksi")
+
+    -- ========================================================
+    -- TAB EGG
+    -- ========================================================
+    local eggPage = createPage("Egg")
+    pages.Egg = eggPage
+
     local eggEspCard, eggEspContent = makeCard(eggPage, "🥚 EGG ESP", 140)
-    eggEspCard.LayoutOrder = 3
+    eggEspCard.LayoutOrder = 1
     makeToggle(eggEspContent, "Aktifkan Egg ESP", false, function(v) Shared.ESP_Eggs_Enabled = v end)
     makeToggle(eggEspContent, "Tampilkan Nama", true, function(v) Shared.ESP_EggName_Enabled = v end)
     makeToggle(eggEspContent, "Tampilkan Luck", true, function(v) Shared.ESP_EggLuck_Enabled = v end)
 
-    -- Card 4: Auto Steal
     local autoStealCard, autoStealContent = makeCard(eggPage, "🥚 AUTO STEAL", 260)
-    autoStealCard.LayoutOrder = 4
+    autoStealCard.LayoutOrder = 2
     makeToggle(autoStealContent, "Aktifkan Auto Steal", false, function(v) Shared.AutoSteal_Enabled = v end)
     makeToggle(autoStealContent, "Auto Return ke Plot", true, function(v) Shared.AutoReturn_Enabled = v end)
     makeToggle(autoStealContent, "Auto Hatch", false, function(v) Shared.AutoHatch_Enabled = v end)
@@ -1074,46 +1098,25 @@ local function buildMainWindow(parent)
     local setPage = createPage("Settings")
     pages.Settings = setPage
 
-    local themeCard, themeContent = makeCard(setPage, "🎨 TEMA", 90)
+    local themeCard, themeContent = makeCard(setPage, "🎨 TEMA", 100)
     themeCard.LayoutOrder = 1
 
-    local themeFrame = Instance.new("Frame")
-    themeFrame.Size = UDim2.new(1, 0, 0, 30)
-    themeFrame.BackgroundTransparency = 1
-    themeFrame.ZIndex = 3
-    themeFrame.Parent = themeContent
+    local themeLbl = Instance.new("TextLabel")
+    themeLbl.Size = UDim2.new(1, 0, 0, 16)
+    themeLbl.BackgroundTransparency = 1
+    themeLbl.Text = "Pilih Tema:"
+    themeLbl.TextColor3 = C.Muted
+    themeLbl.Font = Enum.Font.GothamSemibold
+    themeLbl.TextSize = 11
+    themeLbl.TextXAlignment = Enum.TextXAlignment.Left
+    themeLbl.ZIndex = 3
+    themeLbl.Parent = themeContent
 
-    local themeLayout = Instance.new("UIListLayout")
-    themeLayout.FillDirection = Enum.FillDirection.Horizontal
-    themeLayout.Padding = UDim.new(0, 8)
-    themeLayout.Parent = themeFrame
-
-    local function makeThemeBtn(name, themeKey)
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.fromOffset(90, 28)
-        btn.BackgroundColor3 = C.Surface2
-        btn.Text = name
-        btn.TextColor3 = C.Text
-        btn.Font = Enum.Font.GothamBold
-        btn.TextSize = 12
-        btn.BorderSizePixel = 0
-        btn.ZIndex = 4
-        btn.Parent = themeFrame
-        registerTheme(btn, "Surface2", "BackgroundColor3")
-        registerTheme(btn, "Text", "TextColor3")
-
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 6)
-        corner.Parent = btn
-
-        btn.MouseButton1Click:Connect(function()
-            applyTheme(themeKey)
-        end)
-    end
-
-    makeThemeBtn("Brutal", "Brutal")
-    makeThemeBtn("Ice", "Ice")
-    makeThemeBtn("Fire", "Fire")
+    local themeList = {"Brutal", "Ice", "Fire"}
+    makeDropdown(themeContent, themeList, CurrentTheme, function(v)
+        applyTheme(v)
+        notify("Tema: " .. v, "success")
+    end)
 
     local fpsCard, fpsContent = makeCard(setPage, "⚡ FPS BOOST", 120)
     fpsCard.LayoutOrder = 2
@@ -1205,7 +1208,7 @@ local function buildMainWindow(parent)
 end
 
 -- ============================================================
--- UI.INIT (TANPA KEY)
+-- UI.INIT
 -- ============================================================
 function UI.Init(sharedState)
     Shared = sharedState
