@@ -1,734 +1,5 @@
 -- ============================================================
--- VRILZHUB UI — RIDE A PET v5.0 (PROFESSIONAL)
--- Dropdown popup global, layout rapi, window resizeable
--- ============================================================
-
-local UI = {}
-local Shared = nil
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
-local LocalPlayer = Players.LocalPlayer
-
--- ============================================================
--- EGG NAMES
--- ============================================================
-local EggNames = {
-    "Cherub", "Volcanic", "Blackhole", "Solaris", "Galaxy",
-    "Crystal", "Golden", "Glass", "Skull", "Sinister",
-    "Soul", "Dominus", "Slime", "Flower", "Leaf",
-    "Stone", "Easter", "Cracked", "Ice", "Tidal",
-    "Bloom", "Aurora", "White", "Brown"
-}
-
--- ============================================================
--- BRUTAL THEME
--- ============================================================
-local Themes = {
-    Brutal = {
-        BG = Color3.fromRGB(15, 5, 10),
-        Surface = Color3.fromRGB(25, 10, 20),
-        Surface2 = Color3.fromRGB(35, 15, 25),
-        Surface3 = Color3.fromRGB(45, 20, 35),
-        Stroke = Color3.fromRGB(255, 50, 80),
-        Text = Color3.fromRGB(255, 240, 245),
-        Muted = Color3.fromRGB(200, 150, 180),
-        Accent = Color3.fromRGB(255, 50, 80),
-        Accent2 = Color3.fromRGB(50, 150, 255),
-        Accent3 = Color3.fromRGB(150, 220, 255),
-        Success = Color3.fromRGB(50, 255, 150),
-        Error = Color3.fromRGB(255, 50, 80),
-    },
-    Ice = {
-        BG = Color3.fromRGB(5, 10, 20),
-        Surface = Color3.fromRGB(10, 20, 35),
-        Surface2 = Color3.fromRGB(15, 30, 50),
-        Surface3 = Color3.fromRGB(20, 40, 65),
-        Stroke = Color3.fromRGB(150, 220, 255),
-        Text = Color3.fromRGB(240, 250, 255),
-        Muted = Color3.fromRGB(150, 200, 240),
-        Accent = Color3.fromRGB(50, 150, 255),
-        Accent2 = Color3.fromRGB(150, 220, 255),
-        Accent3 = Color3.fromRGB(255, 50, 80),
-        Success = Color3.fromRGB(50, 255, 150),
-        Error = Color3.fromRGB(255, 50, 80),
-    },
-    Fire = {
-        BG = Color3.fromRGB(20, 5, 0),
-        Surface = Color3.fromRGB(35, 10, 5),
-        Surface2 = Color3.fromRGB(50, 15, 5),
-        Surface3 = Color3.fromRGB(65, 20, 10),
-        Stroke = Color3.fromRGB(255, 100, 50),
-        Text = Color3.fromRGB(255, 240, 230),
-        Muted = Color3.fromRGB(220, 170, 150),
-        Accent = Color3.fromRGB(255, 100, 50),
-        Accent2 = Color3.fromRGB(255, 200, 50),
-        Accent3 = Color3.fromRGB(255, 50, 80),
-        Success = Color3.fromRGB(50, 255, 150),
-        Error = Color3.fromRGB(255, 50, 80),
-    },
-}
-
-local CurrentTheme = "Brutal"
-local C = Themes[CurrentTheme]
-
-local ThemeWidgets = {}
-local function registerTheme(widget, key, property)
-    table.insert(ThemeWidgets, {widget = widget, key = key, property = property})
-end
-
-local function applyTheme(themeName)
-    CurrentTheme = themeName
-    C = Themes[themeName]
-    for _, item in ipairs(ThemeWidgets) do
-        pcall(function()
-            item.widget[item.property] = C[item.key]
-        end)
-    end
-end
-
--- ============================================================
--- NOTIFICATION
--- ============================================================
-local NotifHolder = nil
-
-local function setupNotifHolder(parent)
-    NotifHolder = Instance.new("Frame")
-    NotifHolder.Name = "NotifHolder"
-    NotifHolder.AnchorPoint = Vector2.new(0.5, 0)
-    NotifHolder.Position = UDim2.new(0.5, 0, 0, 20)
-    NotifHolder.Size = UDim2.fromOffset(420, 320)
-    NotifHolder.BackgroundTransparency = 1
-    NotifHolder.ZIndex = 500
-    NotifHolder.Parent = parent
-    local layout = Instance.new("UIListLayout")
-    layout.Padding = UDim.new(0, 8)
-    layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    layout.VerticalAlignment = Enum.VerticalAlignment.Top
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Parent = NotifHolder
-end
-
-local function notify(text, type)
-    if not NotifHolder then return end
-    type = type or "info"
-
-    local color, icon
-    if type == "success" then color = C.Success; icon = "✓"
-    elseif type == "error" then color = C.Error; icon = "✕"
-    elseif type == "warning" then color = Color3.fromRGB(255, 200, 50); icon = "!"
-    else color = C.Accent; icon = "i" end
-
-    local notif = Instance.new("Frame")
-    notif.Size = UDim2.fromOffset(380, 52)
-    notif.BackgroundColor3 = C.Surface
-    notif.BorderSizePixel = 0
-    notif.ZIndex = 501
-    notif.Parent = NotifHolder
-    registerTheme(notif, "Surface", "BackgroundColor3")
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 10)
-    corner.Parent = notif
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = color
-    stroke.Thickness = 2
-    stroke.Transparency = 0.3
-    stroke.Parent = notif
-
-    -- Icon circle
-    local iconBg = Instance.new("Frame")
-    iconBg.Size = UDim2.fromOffset(32, 32)
-    iconBg.Position = UDim2.new(0, 12, 0.5, -16)
-    iconBg.BackgroundColor3 = color
-    iconBg.BorderSizePixel = 0
-    iconBg.ZIndex = 502
-    iconBg.Parent = notif
-
-    local iconCorner = Instance.new("UICorner")
-    iconCorner.CornerRadius = UDim.new(1, 0)
-    iconCorner.Parent = iconBg
-
-    local iconLbl = Instance.new("TextLabel")
-    iconLbl.Size = UDim2.fromScale(1, 1)
-    iconLbl.BackgroundTransparency = 1
-    iconLbl.Text = icon
-    iconLbl.TextColor3 = Color3.new(1, 1, 1)
-    iconLbl.Font = Enum.Font.GothamBold
-    iconLbl.TextSize = 16
-    iconLbl.ZIndex = 503
-    iconLbl.Parent = iconBg
-
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -60, 1, 0)
-    label.Position = UDim2.fromOffset(54, 0)
-    label.BackgroundTransparency = 1
-    label.Text = text
-    label.TextColor3 = C.Text
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 13
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.ZIndex = 502
-    label.Parent = notif
-    registerTheme(label, "Text", "TextColor3")
-
-    notif.Position = UDim2.fromOffset(0, -80)
-    TweenService:Create(notif, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Position = UDim2.fromOffset(0, 0)
-    }):Play()
-
-    task.delay(3, function()
-        if notif and notif.Parent then
-            TweenService:Create(notif, TweenInfo.new(0.3), {
-                Position = UDim2.fromOffset(0, -80),
-                BackgroundTransparency = 1
-            }):Play()
-            TweenService:Create(label, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
-            TweenService:Create(iconLbl, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
-            task.wait(0.35)
-            if notif then notif:Destroy() end
-        end
-    end)
-end
-
--- ============================================================
--- CARD FACTORY (AUTO-SIZE, RAPI)
--- ============================================================
-local function makeCard(parent, title, layoutOrder)
-    local card = Instance.new("Frame")
-    card.Size = UDim2.new(1, 0, 0, 0)
-    card.AutomaticSize = Enum.AutomaticSize.Y
-    card.BackgroundColor3 = C.Surface
-    card.BorderSizePixel = 0
-    card.ClipsDescendants = false
-    card.LayoutOrder = layoutOrder or 1
-    card.ZIndex = 1
-    card.Parent = parent
-    registerTheme(card, "Surface", "BackgroundColor3")
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 10)
-    corner.Parent = card
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = C.Accent
-    stroke.Thickness = 1
-    stroke.Transparency = 0.5
-    stroke.Parent = card
-    registerTheme(stroke, "Accent", "Color")
-
-    -- Header card
-    local headerFrame = Instance.new("Frame")
-    headerFrame.Size = UDim2.new(1, 0, 0, 30)
-    headerFrame.BackgroundColor3 = C.Surface2
-    headerFrame.BorderSizePixel = 0
-    headerFrame.ZIndex = 2
-    headerFrame.Parent = card
-    registerTheme(headerFrame, "Surface2", "BackgroundColor3")
-
-    local headerCorner = Instance.new("UICorner")
-    headerCorner.CornerRadius = UDim.new(0, 10)
-    headerCorner.Parent = headerFrame
-
-    -- Dot accent
-    local dot = Instance.new("Frame")
-    dot.Size = UDim2.fromOffset(6, 6)
-    dot.Position = UDim2.new(0, 12, 0.5, -3)
-    dot.BackgroundColor3 = C.Accent
-    dot.BorderSizePixel = 0
-    dot.ZIndex = 3
-    dot.Parent = headerFrame
-
-    local dotCorner = Instance.new("UICorner")
-    dotCorner.CornerRadius = UDim.new(1, 0)
-    dotCorner.Parent = dot
-    registerTheme(dot, "Accent", "BackgroundColor3")
-
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, -30, 1, 0)
-    titleLabel.Position = UDim2.fromOffset(26, 0)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = title
-    titleLabel.TextColor3 = C.Text
-    titleLabel.Font = Enum.Font.GothamBold
-    titleLabel.TextSize = 12
-    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    titleLabel.ZIndex = 3
-    titleLabel.Parent = headerFrame
-    registerTheme(titleLabel, "Text", "TextColor3")
-
-    -- Content
-    local content = Instance.new("Frame")
-    content.Size = UDim2.new(1, 0, 0, 0)
-    content.Position = UDim2.new(0, 0, 0, 30)
-    content.AutomaticSize = Enum.AutomaticSize.Y
-    content.BackgroundTransparency = 1
-    content.ZIndex = 2
-    content.Parent = card
-
-    local contentPad = Instance.new("UIPadding")
-    contentPad.PaddingTop = UDim.new(0, 10)
-    contentPad.PaddingBottom = UDim.new(0, 12)
-    contentPad.PaddingLeft = UDim.new(0, 14)
-    contentPad.PaddingRight = UDim.new(0, 14)
-    contentPad.Parent = content
-
-    local layout = Instance.new("UIListLayout")
-    layout.Padding = UDim.new(0, 8)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Parent = content
-
-    return card, content
-end
-
--- ============================================================
--- TOGGLE (RAPI)
--- ============================================================
-local function makeToggle(parent, text, default, callback)
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 30)
-    frame.BackgroundTransparency = 1
-    frame.ZIndex = 3
-    frame.Parent = parent
-
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -56, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Text = text
-    label.TextColor3 = C.Text
-    label.Font = Enum.Font.GothamSemibold
-    label.TextSize = 12
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.ZIndex = 4
-    label.Parent = frame
-    registerTheme(label, "Text", "TextColor3")
-
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.fromOffset(46, 24)
-    btn.Position = UDim2.new(1, -46, 0.5, -12)
-    btn.BackgroundColor3 = default and C.Accent or C.Surface3
-    btn.Text = ""
-    btn.BorderSizePixel = 0
-    btn.ZIndex = 4
-    btn.Parent = frame
-    registerTheme(btn, default and "Accent" or "Surface3", "BackgroundColor3")
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(1, 0)
-    corner.Parent = btn
-
-    local knob = Instance.new("Frame")
-    knob.Size = UDim2.fromOffset(18, 18)
-    knob.Position = default and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
-    knob.BackgroundColor3 = Color3.new(1, 1, 1)
-    knob.BorderSizePixel = 0
-    knob.ZIndex = 5
-    knob.Parent = btn
-
-    local knobCorner = Instance.new("UICorner")
-    knobCorner.CornerRadius = UDim.new(1, 0)
-    knobCorner.Parent = knob
-
-    local state = default
-    btn.MouseButton1Click:Connect(function()
-        state = not state
-        TweenService:Create(btn, TweenInfo.new(0.2), {
-            BackgroundColor3 = state and C.Accent or C.Surface3
-        }):Play()
-        TweenService:Create(knob, TweenInfo.new(0.2), {
-            Position = state and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
-        }):Play()
-        if callback then callback(state) end
-    end)
-end
-
--- ============================================================
--- TEXTBOX
--- ============================================================
-local function makeTextBox(parent, label, placeholder, callback)
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 48)
-    frame.BackgroundTransparency = 1
-    frame.ZIndex = 3
-    frame.Parent = parent
-
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1, 0, 0, 16)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = label
-    lbl.TextColor3 = C.Muted
-    lbl.Font = Enum.Font.GothamSemibold
-    lbl.TextSize = 11
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.ZIndex = 4
-    lbl.Parent = frame
-    registerTheme(lbl, "Muted", "TextColor3")
-
-    local box = Instance.new("TextBox")
-    box.Size = UDim2.new(1, 0, 0, 26)
-    box.Position = UDim2.new(0, 0, 0, 20)
-    box.BackgroundColor3 = C.Surface2
-    box.TextColor3 = C.Text
-    box.PlaceholderText = placeholder or ""
-    box.PlaceholderColor3 = C.Muted
-    box.Font = Enum.Font.GothamSemibold
-    box.TextSize = 12
-    box.Text = ""
-    box.BorderSizePixel = 0
-    box.ZIndex = 4
-    box.Parent = frame
-    registerTheme(box, "Surface2", "BackgroundColor3")
-    registerTheme(box, "Text", "TextColor3")
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
-    corner.Parent = box
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = C.Accent
-    stroke.Thickness = 1
-    stroke.Transparency = 0.6
-    stroke.Parent = box
-
-    box.FocusLost:Connect(function()
-        if callback then callback(box.Text) end
-    end)
-end
--- ============================================================
--- DROPDOWN GLOBAL (POPUP DI LAYER TERPISAH)
--- Muncul di atas semua UI, nggak ketutupan card
--- ============================================================
-local DropdownLayer = nil
-local ActiveDropdown = nil
-
-local function setupDropdownLayer(parent)
-    DropdownLayer = Instance.new("Frame")
-    DropdownLayer.Name = "DropdownLayer"
-    DropdownLayer.Size = UDim2.fromScale(1, 1)
-    DropdownLayer.BackgroundTransparency = 1
-    DropdownLayer.ZIndex = 2000
-    DropdownLayer.Parent = parent
-
-    -- Klik di luar dropdown → tutup dropdown
-    local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.fromScale(1, 1)
-    closeBtn.BackgroundTransparency = 1
-    closeBtn.Text = ""
-    closeBtn.ZIndex = 1999
-    closeBtn.Visible = false
-    closeBtn.Parent = DropdownLayer
-
-    closeBtn.MouseButton1Click:Connect(function()
-        if ActiveDropdown then
-            ActiveDropdown.close()
-            ActiveDropdown = nil
-            closeBtn.Visible = false
-        end
-    end)
-
-    DropdownLayer.closeOverlay = closeBtn
-end
-
-local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
-    local isOpen = false
-    local selectedValue = default or items[1] or "Pilih..."
-
-    -- Container di card
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, 0, 0, 34)
-    container.BackgroundColor3 = C.Surface3
-    container.BorderSizePixel = 0
-    container.ZIndex = 3
-    container.Parent = anchorFrame
-    registerTheme(container, "Surface3", "BackgroundColor3")
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
-    corner.Parent = container
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = C.Accent
-    stroke.Thickness = 1
-    stroke.Transparency = 0.6
-    stroke.Parent = container
-    registerTheme(stroke, "Accent", "Color")
-
-    local selectedLbl = Instance.new("TextLabel")
-    selectedLbl.Size = UDim2.new(1, -40, 1, 0)
-    selectedLbl.Position = UDim2.fromOffset(12, 0)
-    selectedLbl.BackgroundTransparency = 1
-    selectedLbl.Text = selectedValue
-    selectedLbl.TextColor3 = C.Text
-    selectedLbl.Font = Enum.Font.GothamSemibold
-    selectedLbl.TextSize = 12
-    selectedLbl.TextXAlignment = Enum.TextXAlignment.Left
-    selectedLbl.ZIndex = 4
-    selectedLbl.Parent = container
-    registerTheme(selectedLbl, "Text", "TextColor3")
-
-    local arrow = Instance.new("TextLabel")
-    arrow.Size = UDim2.fromOffset(24, 34)
-    arrow.Position = UDim2.new(1, -30, 0, 0)
-    arrow.BackgroundTransparency = 1
-    arrow.Text = "▼"
-    arrow.TextColor3 = C.Accent
-    arrow.TextSize = 10
-    arrow.ZIndex = 4
-    arrow.Parent = container
-    registerTheme(arrow, "Accent", "TextColor3")
-
-    -- List popup (di layer global)
-    local listFrame = Instance.new("ScrollingFrame")
-    listFrame.Size = UDim2.new(0, container.AbsoluteSize.X, 0, 0)
-    listFrame.BackgroundColor3 = C.Surface2
-    listFrame.BorderSizePixel = 0
-    listFrame.ScrollBarThickness = 4
-    listFrame.ScrollBarImageColor3 = C.Accent
-    listFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-    listFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    listFrame.Visible = false
-    listFrame.ZIndex = 2001
-    listFrame.Parent = DropdownLayer
-    registerTheme(listFrame, "Surface2", "BackgroundColor3")
-
-    local listCorner = Instance.new("UICorner")
-    listCorner.CornerRadius = UDim.new(0, 8)
-    listCorner.Parent = listFrame
-
-    local listStroke = Instance.new("UIStroke")
-    listStroke.Color = C.Accent
-    listStroke.Transparency = 0.2
-    listStroke.Thickness = 2
-    listStroke.Parent = listFrame
-    registerTheme(listStroke, "Accent", "Color")
-
-    local listLayout = Instance.new("UIListLayout")
-    listLayout.Padding = UDim.new(0, 2)
-    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    listLayout.Parent = listFrame
-
-    local listPad = Instance.new("UIPadding")
-    listPad.PaddingTop = UDim.new(0, 4)
-    listPad.PaddingBottom = UDim.new(0, 4)
-    listPad.PaddingLeft = UDim.new(0, 4)
-    listPad.PaddingRight = UDim.new(0, 4)
-    listPad.Parent = listFrame
-
-    local itemHeight = 28
-    local maxH = math.min(#items * (itemHeight + 2) + 10, 220)
-
-    local function closeList()
-        isOpen = false
-        arrow.Text = "▼"
-        TweenService:Create(listFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, listFrame.Size.X.Offset, 0, 0)}):Play()
-        task.delay(0.2, function()
-            if not isOpen then listFrame.Visible = false end
-        end)
-        DropdownLayer.closeOverlay.Visible = false
-        ActiveDropdown = nil
-    end
-
-    local function openList()
-        -- Tutup dropdown lain kalau ada
-        if ActiveDropdown and ActiveDropdown.close then
-            ActiveDropdown.close()
-        end
-
-        isOpen = true
-        listFrame.Visible = true
-        arrow.Text = "▲"
-
-        -- Set ukuran list sama dengan container
-        local width = container.AbsoluteSize.X
-        listFrame.Size = UDim2.fromOffset(width, 0)
-
-        -- Cek ruang bawah vs atas
-        local containerAbsY = container.AbsolutePosition.Y
-        local containerAbsH = container.AbsoluteSize.Y
-        local screenH = workspace.CurrentCamera.ViewportSize.Y
-        local spaceBelow = screenH - (containerAbsY + containerAbsH + 10)
-        local spaceAbove = containerAbsY
-
-        if spaceBelow >= maxH or spaceBelow >= spaceAbove then
-            -- Buka ke bawah
-            listFrame.Position = UDim2.fromOffset(container.AbsolutePosition.X, containerAbsY + containerAbsH + 4)
-            TweenService:Create(listFrame, TweenInfo.new(0.2), {
-                Size = UDim2.fromOffset(width, maxH)
-            }):Play()
-        else
-            -- Buka ke atas
-            listFrame.Position = UDim2.fromOffset(container.AbsolutePosition.X, containerAbsY - maxH - 4)
-            TweenService:Create(listFrame, TweenInfo.new(0.2), {
-                Size = UDim2.fromOffset(width, maxH)
-            }):Play()
-        end
-
-        DropdownLayer.closeOverlay.Visible = true
-        ActiveDropdown = {
-            close = closeList,
-            listFrame = listFrame,
-            container = container
-        }
-    end
-
-    container.InputBegan:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-            if isOpen then closeList() else openList() end
-        end
-    end)
-
-    for i, item in ipairs(items) do
-        local opt = Instance.new("TextButton")
-        opt.Size = UDim2.new(1, 0, 0, itemHeight)
-        opt.BackgroundColor3 = C.Surface3
-        opt.Text = item
-        opt.TextColor3 = C.Text
-        opt.Font = Enum.Font.GothamSemibold
-        opt.TextSize = 12
-        opt.AutoButtonColor = false
-        opt.ZIndex = 2002
-        opt.LayoutOrder = i
-        opt.Parent = listFrame
-        registerTheme(opt, "Surface3", "BackgroundColor3")
-        registerTheme(opt, "Text", "TextColor3")
-
-        local optCorner = Instance.new("UICorner")
-        optCorner.CornerRadius = UDim.new(0, 5)
-        optCorner.Parent = opt
-
-        -- Highlight selected
-        if item == selectedValue then
-            opt.BackgroundColor3 = C.Accent
-        end
-
-        opt.MouseEnter:Connect(function()
-            if item ~= selectedValue then
-                TweenService:Create(opt, TweenInfo.new(0.15), {
-                    BackgroundColor3 = C.Surface2
-                }):Play()
-            end
-        end)
-
-        opt.MouseLeave:Connect(function()
-            if item ~= selectedValue then
-                TweenService:Create(opt, TweenInfo.new(0.15), {
-                    BackgroundColor3 = C.Surface3
-                }):Play()
-            end
-        end)
-
-        opt.MouseButton1Click:Connect(function()
-            selectedValue = item
-            selectedLbl.Text = item
-            closeList()
-            if onSelect then onSelect(item) end
-        end)
-    end
-
-    return container
-end
-
--- ============================================================
--- FPS WINDOW
--- ============================================================
-local function buildFPSWindow(parent)
-    local fpsWin = Instance.new("Frame")
-    fpsWin.Name = "FPSWindow"
-    fpsWin.Size = UDim2.fromOffset(180, 70)
-    fpsWin.Position = UDim2.fromOffset(20, 90)
-    fpsWin.BackgroundColor3 = C.Surface
-    fpsWin.BackgroundTransparency = 0.1
-    fpsWin.BorderSizePixel = 0
-    fpsWin.Visible = false
-    fpsWin.ZIndex = 60
-    fpsWin.Parent = parent
-    registerTheme(fpsWin, "Surface", "BackgroundColor3")
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 12)
-    corner.Parent = fpsWin
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = C.Accent
-    stroke.Thickness = 1.5
-    stroke.Transparency = 0.3
-    stroke.Parent = fpsWin
-    registerTheme(stroke, "Accent", "Color")
-
-    -- Drag
-    local drag, ds, sp = false, nil, nil
-    fpsWin.InputBegan:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-            drag = true
-            ds = i.Position
-            sp = fpsWin.Position
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(i)
-        if drag and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-            local d = i.Position - ds
-            fpsWin.Position = UDim2.new(sp.X.Scale, sp.X.Offset + d.X, sp.Y.Scale, sp.Y.Offset + d.Y)
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-            drag = false
-        end
-    end)
-
-    local fpsLbl = Instance.new("TextLabel")
-    fpsLbl.Size = UDim2.new(1, -20, 0, 24)
-    fpsLbl.Position = UDim2.fromOffset(10, 8)
-    fpsLbl.BackgroundTransparency = 1
-    fpsLbl.Text = "FPS: --"
-    fpsLbl.TextColor3 = C.Text
-    fpsLbl.Font = Enum.Font.GothamBold
-    fpsLbl.TextSize = 14
-    fpsLbl.TextXAlignment = Enum.TextXAlignment.Left
-    fpsLbl.ZIndex = 61
-    fpsLbl.Parent = fpsWin
-    registerTheme(fpsLbl, "Text", "TextColor3")
-
-    local pingLbl = Instance.new("TextLabel")
-    pingLbl.Size = UDim2.new(1, -20, 0, 20)
-    pingLbl.Position = UDim2.fromOffset(10, 34)
-    pingLbl.BackgroundTransparency = 1
-    pingLbl.Text = "PING: --"
-    pingLbl.TextColor3 = C.Accent2
-    pingLbl.Font = Enum.Font.GothamBold
-    pingLbl.TextSize = 12
-    pingLbl.TextXAlignment = Enum.TextXAlignment.Left
-    pingLbl.ZIndex = 61
-    pingLbl.Parent = fpsWin
-    registerTheme(pingLbl, "Accent2", "TextColor3")
-
-    local frames, last = 0, os.clock()
-    RunService.RenderStepped:Connect(function()
-        frames = frames + 1
-        local elapsed = os.clock() - last
-        if elapsed >= 0.5 then
-            local fps = math.floor(frames / elapsed)
-            local ping = 0
-            pcall(function()
-                ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
-            end)
-            fpsLbl.Text = "FPS: " .. fps
-            pingLbl.Text = "PING: " .. ping .. "ms"
-            local fpsColor = fps >= 50 and C.Success or (fps >= 30 and Color3.fromRGB(255, 200, 50) or C.Error)
-            fpsLbl.TextColor3 = fpsColor
-            frames = 0
-            last = os.clock()
-        end
-    end)
-
-    return fpsWin
-end
--- ============================================================
--- BUILD MAIN WINDOW (PROFESIONAL, RESIZEABLE)
+-- BUILD MAIN WINDOW
 -- ============================================================
 local function buildMainWindow(parent)
     local screenGui = parent
@@ -774,7 +45,6 @@ local function buildMainWindow(parent)
     headerFix.ZIndex = 10
     headerFix.Parent = header
 
-    -- Logo
     local logo = Instance.new("TextLabel")
     logo.Size = UDim2.fromOffset(36, 36)
     logo.Position = UDim2.fromOffset(12, 8)
@@ -808,7 +78,7 @@ local function buildMainWindow(parent)
     subtitle.Size = UDim2.new(0, 300, 0, 14)
     subtitle.Position = UDim2.fromOffset(58, 28)
     subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Ride a Pet · v5.0"
+    subtitle.Text = "Ride a Pet · v5.1"
     subtitle.TextColor3 = C.Muted
     subtitle.Font = Enum.Font.GothamSemibold
     subtitle.TextSize = 10
@@ -817,7 +87,6 @@ local function buildMainWindow(parent)
     subtitle.Parent = header
     registerTheme(subtitle, "Muted", "TextColor3")
 
-    -- Minimize
     local minBtn = Instance.new("TextButton")
     minBtn.Size = UDim2.fromOffset(32, 32)
     minBtn.Position = UDim2.new(1, -78, 0.5, -16)
@@ -836,14 +105,6 @@ local function buildMainWindow(parent)
     minCorner.CornerRadius = UDim.new(0, 8)
     minCorner.Parent = minBtn
 
-    minBtn.MouseEnter:Connect(function()
-        TweenService:Create(minBtn, TweenInfo.new(0.15), {BackgroundColor3 = C.Accent2}):Play()
-    end)
-    minBtn.MouseLeave:Connect(function()
-        TweenService:Create(minBtn, TweenInfo.new(0.15), {BackgroundColor3 = C.Surface3}):Play()
-    end)
-
-    -- Close
     local closeBtn = Instance.new("TextButton")
     closeBtn.Size = UDim2.fromOffset(32, 32)
     closeBtn.Position = UDim2.new(1, -40, 0.5, -16)
@@ -861,13 +122,6 @@ local function buildMainWindow(parent)
     local closeCorner = Instance.new("UICorner")
     closeCorner.CornerRadius = UDim.new(0, 8)
     closeCorner.Parent = closeBtn
-
-    closeBtn.MouseEnter:Connect(function()
-        TweenService:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = C.Error}):Play()
-    end)
-    closeBtn.MouseLeave:Connect(function()
-        TweenService:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = C.Surface3}):Play()
-    end)
 
     -- Body
     local body = Instance.new("Frame")
@@ -931,7 +185,7 @@ local function buildMainWindow(parent)
     pageHolderPad.PaddingRight = UDim.new(0, 10)
     pageHolderPad.Parent = pageHolder
 
-    -- Resize handle (pojok kanan bawah)
+    -- Resize
     local resizeHandle = Instance.new("TextButton")
     resizeHandle.Size = UDim2.fromOffset(22, 22)
     resizeHandle.Position = UDim2.new(1, -24, 1, -24)
@@ -994,15 +248,6 @@ local function buildMainWindow(parent)
     openStroke.Transparency = 0.3
     openStroke.Parent = openBtn
 
-    task.spawn(function()
-        while openBtn.Parent do
-            TweenService:Create(openStroke, TweenInfo.new(1.5), {Transparency = 0.7}):Play()
-            task.wait(1.5)
-            TweenService:Create(openStroke, TweenInfo.new(1.5), {Transparency = 0.3}):Play()
-            task.wait(1.5)
-        end
-    end)
-
     local openDrag, openDS, openSP = false, nil, nil
     openBtn.InputBegan:Connect(function(i)
         if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
@@ -1040,7 +285,6 @@ local function buildMainWindow(parent)
             main.Visible = false
             openBtn.Visible = true
         end)
-        notify("Di-minimize", "info")
     end)
 
     closeBtn.MouseButton1Click:Connect(function()
@@ -1144,15 +388,12 @@ local function buildMainWindow(parent)
         return page
     end
 
-    -- ========================================================
-    -- TAB INFO
-    -- ========================================================
+    -- INFO
     local infoPage = createPage("Info")
     pages.Info = infoPage
 
     local infoCard, infoContent = makeCard(infoPage, "INFORMASI CLIENT", 1)
 
-    -- Avatar + Name container
     local avRow = Instance.new("Frame")
     avRow.Size = UDim2.new(1, 0, 0, 70)
     avRow.BackgroundTransparency = 1
@@ -1230,13 +471,10 @@ local function buildMainWindow(parent)
 
     registerTab("Info", "ℹ", "Info")
 
-    -- ========================================================
-    -- TAB PREDIKSI
-    -- ========================================================
+    -- PREDIKSI
     local predPage = createPage("Prediksi")
     pages.Prediksi = predPage
 
-    -- Egg Spawn
     local eggInMapCard, eggInMapContent = makeCard(predPage, "EGG SPAWN DI MAP", 1)
 
     local eggInMapList = Instance.new("ScrollingFrame")
@@ -1256,8 +494,7 @@ local function buildMainWindow(parent)
     eggInMapLayout.SortOrder = Enum.SortOrder.LayoutOrder
     eggInMapLayout.Parent = eggInMapList
 
-    -- Prediksi
-    local eggPredCard, eggPredContent = makeCard(predPage, "PREDIKSI EGG BERIKUTNYA", 1)
+    local eggPredCard, eggPredContent = makeCard(predPage, "PREDIKSI EGG BERIKUTNYA", 2)
 
     local eggPredList = Instance.new("ScrollingFrame")
     eggPredList.Size = UDim2.new(1, 0, 0, 160)
@@ -1276,7 +513,6 @@ local function buildMainWindow(parent)
     eggPredLayout.SortOrder = Enum.SortOrder.LayoutOrder
     eggPredLayout.Parent = eggPredList
 
-    -- Update berkala
     local lastEggInMapStr = ""
     local lastEggPredStr = ""
 
@@ -1388,9 +624,7 @@ local function buildMainWindow(parent)
 
     registerTab("Prediksi", "◎", "Prediksi")
 
-    -- ========================================================
-    -- TAB EGG
-    -- ========================================================
+    -- EGG
     local eggPage = createPage("Egg")
     pages.Egg = eggPage
 
@@ -1422,9 +656,7 @@ local function buildMainWindow(parent)
 
     registerTab("Egg", "◯", "Egg")
 
-    -- ========================================================
-    -- TAB VISUAL
-    -- ========================================================
+    -- VISUAL
     local visualPage = createPage("Visual")
     pages.Visual = visualPage
 
@@ -1441,9 +673,7 @@ local function buildMainWindow(parent)
 
     registerTab("Visual", "◆", "Visual")
 
-    -- ========================================================
-    -- TAB AUTO
-    -- ========================================================
+    -- AUTO
     local autoPage = createPage("Auto")
     pages.Auto = autoPage
 
@@ -1453,9 +683,7 @@ local function buildMainWindow(parent)
 
     registerTab("Auto", "▶", "Auto")
 
-    -- ========================================================
-    -- TAB SETTINGS
-    -- ========================================================
+    -- SETTINGS
     local setPage = createPage("Settings")
     pages.Settings = setPage
 
@@ -1498,14 +726,12 @@ local function buildMainWindow(parent)
                         if name:find("egg") or name:find("nest") then skip = true end
                         if parentName:find("plot") or parentName:find("char") then skip = true end
                         if obj:FindFirstChildWhichIsA("ProximityPrompt") then skip = true end
-
                         if not skip then
-                            local isDecorative = false
-                            if obj.Transparency >= 0.5 then isDecorative = true end
-                            if name:find("tree") or name:find("rock") or name:find("bush") then isDecorative = true end
-                            if name:find("grass") or name:find("flower") or name:find("cloud") then isDecorative = true end
-
-                            if isDecorative and obj.Size.Magnitude < 50 then
+                            local isDeco = false
+                            if obj.Transparency >= 0.5 then isDeco = true end
+                            if name:find("tree") or name:find("rock") or name:find("bush") then isDeco = true end
+                            if name:find("grass") or name:find("flower") or name:find("cloud") then isDeco = true end
+                            if isDeco and obj.Size.Magnitude < 50 then
                                 obj.LocalTransparencyModifier = 1
                                 obj.CanCollide = false
                                 table.insert(hidden, obj)
@@ -1549,7 +775,6 @@ local function buildMainWindow(parent)
     local dragging, dragInput, dragStart, startPos
     header.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            -- Cek klik bukan di tombol
             local mouseX = UserInputService:GetMouseLocation().X
             if mouseX > (header.AbsolutePosition.X + header.AbsoluteSize.X - 90) then return end
             dragging = true
@@ -1615,7 +840,6 @@ function UI.Init(sharedState)
     setupNotifHolder(ScreenGui)
     setupDropdownLayer(ScreenGui)
 
-    -- Loading 3 detik
     local loading = Instance.new("Frame")
     loading.Size = UDim2.fromOffset(400, 240)
     loading.Position = UDim2.new(0.5, -200, 0.5, -120)
