@@ -1,6 +1,6 @@
 -- ============================================================
--- VRILZHUB UI — RIDE A PET v3.1 (TANPA KEY)
--- Brutal UI + Minimize + Close + FPS Boost
+-- VRILZHUB UI — RIDE A PET v3.2 (TANPA KEY + PREDIKSI EGG)
+-- Brutal UI + Minimize + Close + FPS Boost + Prediksi
 -- ============================================================
 
 local UI = {}
@@ -322,56 +322,6 @@ local function makeToggle(parent, text, default, callback)
             Position = state and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
         }):Play()
         if callback then callback(state) end
-    end)
-end
-
-local function makeTextBox(parent, label, placeholder, callback)
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 44)
-    frame.BackgroundTransparency = 1
-    frame.ZIndex = 3
-    frame.Parent = parent
-
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1, 0, 0, 16)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = label
-    lbl.TextColor3 = C.Muted
-    lbl.Font = Enum.Font.Gotham
-    lbl.TextSize = 11
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.ZIndex = 4
-    lbl.Parent = frame
-    registerTheme(lbl, "Muted", "TextColor3")
-
-    local box = Instance.new("TextBox")
-    box.Size = UDim2.new(1, 0, 0, 24)
-    box.Position = UDim2.new(0, 0, 0, 18)
-    box.BackgroundColor3 = C.Surface2
-    box.TextColor3 = C.Text
-    box.PlaceholderText = placeholder or ""
-    box.PlaceholderColor3 = C.Muted
-    box.Font = Enum.Font.Gotham
-    box.TextSize = 12
-    box.Text = ""
-    box.BorderSizePixel = 0
-    box.ZIndex = 4
-    box.Parent = frame
-    registerTheme(box, "Surface2", "BackgroundColor3")
-    registerTheme(box, "Text", "TextColor3")
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
-    corner.Parent = box
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = C.Accent
-    stroke.Thickness = 1
-    stroke.Transparency = 0.5
-    stroke.Parent = box
-
-    box.FocusLost:Connect(function()
-        if callback then callback(box.Text) end
     end)
 end
 
@@ -915,19 +865,153 @@ local function buildMainWindow(parent)
     registerTab("Info", "ℹ️", "Info")
 
     -- ========================================================
-    -- TAB EGG
+    -- TAB EGG (DENGAN PREDIKSI)
     -- ========================================================
     local eggPage = createPage("Egg")
     pages.Egg = eggPage
 
+    -- Card 1: Egg yang SPAWN di map
+    local eggInMapCard, eggInMapContent = makeCard(eggPage, "🥚 EGG SPAWN DI MAP", 120)
+    eggInMapCard.LayoutOrder = 1
+
+    local eggInMapList = Instance.new("ScrollingFrame")
+    eggInMapList.Size = UDim2.new(1, 0, 1, 0)
+    eggInMapList.BackgroundTransparency = 1
+    eggInMapList.BorderSizePixel = 0
+    eggInMapList.ScrollBarThickness = 3
+    eggInMapList.ScrollBarImageColor3 = C.Success
+    eggInMapList.CanvasSize = UDim2.new(0, 0, 0, 0)
+    eggInMapList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    eggInMapList.ZIndex = 3
+    eggInMapList.Parent = eggInMapContent
+
+    local eggInMapLayout = Instance.new("UIListLayout")
+    eggInMapLayout.Padding = UDim.new(0, 2)
+    eggInMapLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    eggInMapLayout.Parent = eggInMapList
+
+    -- Card 2: Prediksi egg berikutnya
+    local eggPredCard, eggPredContent = makeCard(eggPage, "🎯 PREDIKSI EGG BERIKUTNYA", 120)
+    eggPredCard.LayoutOrder = 2
+
+    local eggPredList = Instance.new("ScrollingFrame")
+    eggPredList.Size = UDim2.new(1, 0, 1, 0)
+    eggPredList.BackgroundTransparency = 1
+    eggPredList.BorderSizePixel = 0
+    eggPredList.ScrollBarThickness = 3
+    eggPredList.ScrollBarImageColor3 = C.Accent3
+    eggPredList.CanvasSize = UDim2.new(0, 0, 0, 0)
+    eggPredList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    eggPredList.ZIndex = 3
+    eggPredList.Parent = eggPredContent
+
+    local eggPredLayout = Instance.new("UIListLayout")
+    eggPredLayout.Padding = UDim.new(0, 2)
+    eggPredLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    eggPredLayout.Parent = eggPredList
+
+    -- Update list berkala
+    local lastEggInMapStr = ""
+    local lastEggPredStr = ""
+
+    task.spawn(function()
+        while eggInMapList.Parent do
+            task.wait(1)
+
+            -- Update egg in map
+            local eggsInMap = Shared.EggsInMap or {}
+            local inMapStr = table.concat(eggsInMap, ",")
+            if inMapStr ~= lastEggInMapStr then
+                lastEggInMapStr = inMapStr
+                for _, child in ipairs(eggInMapList:GetChildren()) do
+                    if child:IsA("TextLabel") then child:Destroy() end
+                end
+                if #eggsInMap == 0 then
+                    local lbl = Instance.new("TextLabel")
+                    lbl.Size = UDim2.new(1, 0, 0, 20)
+                    lbl.BackgroundTransparency = 1
+                    lbl.Text = "  Nggak ada egg di map"
+                    lbl.TextColor3 = C.Muted
+                    lbl.Font = Enum.Font.GothamSemibold
+                    lbl.TextSize = 11
+                    lbl.TextXAlignment = Enum.TextXAlignment.Left
+                    lbl.LayoutOrder = 1
+                    lbl.ZIndex = 4
+                    lbl.Parent = eggInMapList
+                else
+                    for i, eggName in ipairs(eggsInMap) do
+                        local lbl = Instance.new("TextLabel")
+                        lbl.Size = UDim2.new(1, 0, 0, 22)
+                        lbl.BackgroundColor3 = C.Success
+                        lbl.BackgroundTransparency = 0.85
+                        lbl.Text = "  🥚 " .. eggName
+                        lbl.TextColor3 = C.Text
+                        lbl.Font = Enum.Font.GothamSemibold
+                        lbl.TextSize = 11
+                        lbl.TextXAlignment = Enum.TextXAlignment.Left
+                        lbl.LayoutOrder = i
+                        lbl.ZIndex = 4
+                        lbl.Parent = eggInMapList
+                        local c = Instance.new("UICorner")
+                        c.CornerRadius = UDim.new(0, 4)
+                        c.Parent = lbl
+                    end
+                end
+            end
+
+            -- Update prediksi
+            local preds = Shared.EggPredictions or {}
+            local predStr = table.concat(preds, ",")
+            if predStr ~= lastEggPredStr then
+                lastEggPredStr = predStr
+                for _, child in ipairs(eggPredList:GetChildren()) do
+                    if child:IsA("TextLabel") then child:Destroy() end
+                end
+                if #preds == 0 then
+                    local lbl = Instance.new("TextLabel")
+                    lbl.Size = UDim2.new(1, 0, 0, 20)
+                    lbl.BackgroundTransparency = 1
+                    lbl.Text = "  Menunggu data..."
+                    lbl.TextColor3 = C.Muted
+                    lbl.Font = Enum.Font.GothamSemibold
+                    lbl.TextSize = 11
+                    lbl.TextXAlignment = Enum.TextXAlignment.Left
+                    lbl.LayoutOrder = 1
+                    lbl.ZIndex = 4
+                    lbl.Parent = eggPredList
+                else
+                    for i, eggName in ipairs(preds) do
+                        local lbl = Instance.new("TextLabel")
+                        lbl.Size = UDim2.new(1, 0, 0, 22)
+                        lbl.BackgroundColor3 = C.Accent3
+                        lbl.BackgroundTransparency = 0.85
+                        lbl.Text = "  🎯 " .. eggName
+                        lbl.TextColor3 = C.Text
+                        lbl.Font = Enum.Font.GothamSemibold
+                        lbl.TextSize = 11
+                        lbl.TextXAlignment = Enum.TextXAlignment.Left
+                        lbl.LayoutOrder = i
+                        lbl.ZIndex = 4
+                        lbl.Parent = eggPredList
+                        local c = Instance.new("UICorner")
+                        c.CornerRadius = UDim.new(0, 4)
+                        c.Parent = lbl
+                    end
+                end
+            end
+        end
+    end)
+
+    -- Card 3: Egg ESP
     local eggEspCard, eggEspContent = makeCard(eggPage, "🥚 EGG ESP", 140)
-    eggEspCard.LayoutOrder = 1
+    eggEspCard.LayoutOrder = 3
     makeToggle(eggEspContent, "Aktifkan Egg ESP", false, function(v) Shared.ESP_Eggs_Enabled = v end)
     makeToggle(eggEspContent, "Tampilkan Nama", true, function(v) Shared.ESP_EggName_Enabled = v end)
     makeToggle(eggEspContent, "Tampilkan Luck", true, function(v) Shared.ESP_EggLuck_Enabled = v end)
 
+    -- Card 4: Auto Steal
     local autoStealCard, autoStealContent = makeCard(eggPage, "🥚 AUTO STEAL", 260)
-    autoStealCard.LayoutOrder = 2
+    autoStealCard.LayoutOrder = 4
     makeToggle(autoStealContent, "Aktifkan Auto Steal", false, function(v) Shared.AutoSteal_Enabled = v end)
     makeToggle(autoStealContent, "Auto Return ke Plot", true, function(v) Shared.AutoReturn_Enabled = v end)
     makeToggle(autoStealContent, "Auto Hatch", false, function(v) Shared.AutoHatch_Enabled = v end)
@@ -1141,6 +1225,9 @@ function UI.Init(sharedState)
     Shared.AutoRidePet_Enabled = false
     Shared.AutoEquipBest_Enabled = false
     Shared.SelectedEgg = "Cherub"
+    Shared.EggPrediction_Enabled = true
+    Shared.EggsInMap = {}
+    Shared.EggPredictions = {}
 
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "VRILZHUB_RideAPet"
@@ -1151,7 +1238,7 @@ function UI.Init(sharedState)
 
     setupNotifHolder(ScreenGui)
 
-    -- Loading 3 detik (simpel)
+    -- Loading 3 detik
     local loading = Instance.new("Frame")
     loading.Size = UDim2.fromOffset(400, 240)
     loading.Position = UDim2.new(0.5, -200, 0.5, -120)
