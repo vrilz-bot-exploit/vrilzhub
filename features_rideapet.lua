@@ -1,6 +1,6 @@
 -- ============================================================
--- VRILZHUB FEATURES — RIDE A PET v3.1
--- Auto Steal by Egg Name + Notif "Egg No Spawn" + Prediction
+-- VRILZHUB FEATURES — RIDE A PET v3.2
+-- + Egg Prediction System + Notif Egg No Spawn
 -- ============================================================
 
 local Features = {}
@@ -395,6 +395,106 @@ function Features.startAutoRidePet()
 end
 
 -- ============================================================
+-- EGG PREDICTION SYSTEM
+-- ============================================================
+local EggHistory = {}
+local LastEggList = {}
+local MAX_HISTORY = 50
+
+function Features.startEggPrediction()
+    task.spawn(function()
+        while task.wait(1) do
+            if not Shared.EggPrediction_Enabled then continue end
+
+            local rendered = Workspace:FindFirstChild("RenderedEggs")
+            if not rendered then continue end
+
+            -- Kumpulin egg yang ada saat ini
+            local currentEggs = {}
+            for _, egg in ipairs(rendered:GetChildren()) do
+                if egg:IsA("Model") then
+                    table.insert(currentEggs, egg.Name)
+                end
+            end
+
+            -- Deteksi egg baru
+            for _, eggName in ipairs(currentEggs) do
+                local found = false
+                for _, lastEgg in ipairs(LastEggList) do
+                    if lastEgg == eggName then
+                        found = true
+                        break
+                    end
+                end
+                if not found then
+                    table.insert(EggHistory, {
+                        name = eggName,
+                        time = os.time(),
+                    })
+                    if #EggHistory > MAX_HISTORY then
+                        table.remove(EggHistory, 1)
+                    end
+                    if Shared.Notify then
+                        Shared.Notify("🎯 Egg spawn: " .. eggName, "success")
+                    end
+                end
+            end
+
+            -- Deteksi egg hilang
+            for _, lastEgg in ipairs(LastEggList) do
+                local found = false
+                for _, eggName in ipairs(currentEggs) do
+                    if eggName == lastEgg then
+                        found = true
+                        break
+                    end
+                end
+                if not found then
+                    if Shared.Notify then
+                        Shared.Notify("❌ Egg hilang: " .. lastEgg, "warning")
+                    end
+                end
+            end
+
+            -- Update
+            LastEggList = currentEggs
+            Shared.EggsInMap = currentEggs
+            Shared.EggHistory = EggHistory
+
+            -- Prediksi egg berikutnya
+            local eggCount = {}
+            for _, entry in ipairs(EggHistory) do
+                eggCount[entry.name] = (eggCount[entry.name] or 0) + 1
+            end
+
+            local sorted = {}
+            for name, count in pairs(eggCount) do
+                table.insert(sorted, {name = name, count = count})
+            end
+            table.sort(sorted, function(a, b) return a.count > b.count end)
+
+            -- Ambil egg yang belum ada di map
+            local predictions = {}
+            for _, entry in ipairs(sorted) do
+                local alreadyInMap = false
+                for _, eggName in ipairs(currentEggs) do
+                    if eggName == entry.name then
+                        alreadyInMap = true
+                        break
+                    end
+                end
+                if not alreadyInMap then
+                    table.insert(predictions, entry.name)
+                end
+                if #predictions >= 5 then break end
+            end
+
+            Shared.EggPredictions = predictions
+        end
+    end)
+end
+
+-- ============================================================
 -- REMOTE ACTIONS
 -- ============================================================
 local function getRemote(name)
@@ -452,6 +552,7 @@ function Features.Init(sharedState)
     Features.startAutoSteal()
     Features.startAutoHatch()
     Features.startAutoRidePet()
+    Features.startEggPrediction()
 
     print("[VRILZHUB] Ride a Pet Features loaded")
 end
