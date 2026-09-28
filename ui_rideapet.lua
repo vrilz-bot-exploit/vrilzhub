@@ -1,6 +1,6 @@
 -- ============================================================
--- VRILZHUB UI — RIDE A PET v3.3 (FIX LAYOUT + DROPDOWN)
--- Dropdown masuk card, theme dropdown, tab prediksi sendiri
+-- VRILZHUB UI — RIDE A PET v4.0
+-- Fix: Layout presisi, window resizeable, card auto-size
 -- ============================================================
 
 local UI = {}
@@ -145,19 +145,6 @@ local function notify(text, type)
     stroke.Transparency = 0.2
     stroke.Parent = notif
 
-    local glow = Instance.new("Frame")
-    glow.Size = UDim2.new(1, 6, 1, 6)
-    glow.Position = UDim2.new(0, -3, 0, -3)
-    glow.BackgroundColor3 = color
-    glow.BackgroundTransparency = 0.9
-    glow.BorderSizePixel = 0
-    glow.ZIndex = 500
-    glow.Parent = notif
-
-    local glowCorner = Instance.new("UICorner")
-    glowCorner.CornerRadius = UDim.new(0, 12)
-    glowCorner.Parent = glow
-
     local iconLbl = Instance.new("TextLabel")
     iconLbl.Size = UDim2.fromOffset(40, 56)
     iconLbl.Position = UDim2.fromOffset(6, 0)
@@ -202,11 +189,12 @@ local function notify(text, type)
 end
 
 -- ============================================================
--- WIDGET FACTORY
+-- WIDGET FACTORY (CARD AUTO-SIZE)
 -- ============================================================
-local function makeCard(parent, title, height)
+local function makeCard(parent, title)
     local card = Instance.new("Frame")
-    card.Size = UDim2.new(1, 0, 0, height or 100)
+    card.Size = UDim2.new(1, 0, 0, 0)
+    card.AutomaticSize = Enum.AutomaticSize.Y
     card.BackgroundColor3 = C.Surface
     card.BorderSizePixel = 0
     card.ClipsDescendants = false
@@ -253,8 +241,9 @@ local function makeCard(parent, title, height)
     registerTheme(titleLabel, "Accent", "TextColor3")
 
     local content = Instance.new("Frame")
-    content.Size = UDim2.new(1, 0, 1, -28)
+    content.Size = UDim2.new(1, 0, 0, 0)
     content.Position = UDim2.new(0, 0, 0, 28)
+    content.AutomaticSize = Enum.AutomaticSize.Y
     content.BackgroundTransparency = 1
     content.ZIndex = 2
     content.Parent = card
@@ -325,8 +314,58 @@ local function makeToggle(parent, text, default, callback)
     end)
 end
 
+local function makeTextBox(parent, label, placeholder, callback)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 0, 44)
+    frame.BackgroundTransparency = 1
+    frame.ZIndex = 3
+    frame.Parent = parent
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, 0, 0, 16)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = label
+    lbl.TextColor3 = C.Muted
+    lbl.Font = Enum.Font.Gotham
+    lbl.TextSize = 11
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.ZIndex = 4
+    lbl.Parent = frame
+    registerTheme(lbl, "Muted", "TextColor3")
+
+    local box = Instance.new("TextBox")
+    box.Size = UDim2.new(1, 0, 0, 24)
+    box.Position = UDim2.new(0, 0, 0, 18)
+    box.BackgroundColor3 = C.Surface2
+    box.TextColor3 = C.Text
+    box.PlaceholderText = placeholder or ""
+    box.PlaceholderColor3 = C.Muted
+    box.Font = Enum.Font.Gotham
+    box.TextSize = 12
+    box.Text = ""
+    box.BorderSizePixel = 0
+    box.ZIndex = 4
+    box.Parent = frame
+    registerTheme(box, "Surface2", "BackgroundColor3")
+    registerTheme(box, "Text", "TextColor3")
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = box
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = C.Accent
+    stroke.Thickness = 1
+    stroke.Transparency = 0.5
+    stroke.Parent = box
+
+    box.FocusLost:Connect(function()
+        if callback then callback(box.Text) end
+    end)
+end
+
 -- ============================================================
--- DROPDOWN (NAIK KE ATAS KALAU RUANG BAWAH KURANG)
+-- DROPDOWN (AUTO DETECT SPACE)
 -- ============================================================
 local function makeDropdown(parent, items, default, onSelect)
     local container = Instance.new("Frame")
@@ -424,7 +463,6 @@ local function makeDropdown(parent, items, default, onSelect)
         isOpen = true
         listFrame.Visible = true
 
-        -- Cek apakah ruang bawah cukup
         local containerAbsY = container.AbsolutePosition.Y
         local containerAbsH = container.AbsoluteSize.Y
         local screenH = workspace.CurrentCamera.ViewportSize.Y
@@ -432,11 +470,9 @@ local function makeDropdown(parent, items, default, onSelect)
         local spaceAbove = containerAbsY
 
         if spaceBelow >= maxH or spaceBelow >= spaceAbove then
-            -- Buka ke bawah
             listFrame.Position = UDim2.fromOffset(0, 37)
             listFrame.AnchorPoint = Vector2.new(0, 0)
         else
-            -- Buka ke atas
             listFrame.Position = UDim2.fromOffset(0, -3)
             listFrame.AnchorPoint = Vector2.new(0, 1)
         end
@@ -481,7 +517,7 @@ local function makeDropdown(parent, items, default, onSelect)
 end
 
 -- ============================================================
--- BUILD MAIN WINDOW
+-- BUILD MAIN WINDOW (RESIZEABLE)
 -- ============================================================
 local function buildMainWindow(parent)
     local screenGui = parent
@@ -552,6 +588,7 @@ local function buildMainWindow(parent)
     title.Parent = header
     registerTheme(title, "Text", "TextColor3")
 
+    -- Minimize
     local minBtn = Instance.new("TextButton")
     minBtn.Size = UDim2.fromOffset(28, 28)
     minBtn.Position = UDim2.new(1, -70, 0.5, -14)
@@ -570,6 +607,7 @@ local function buildMainWindow(parent)
     minCorner.CornerRadius = UDim.new(0, 6)
     minCorner.Parent = minBtn
 
+    -- Close
     local closeBtn = Instance.new("TextButton")
     closeBtn.Size = UDim2.fromOffset(28, 28)
     closeBtn.Position = UDim2.new(1, -38, 0.5, -14)
@@ -720,12 +758,62 @@ local function buildMainWindow(parent)
 
     local pageHolderPad = Instance.new("UIPadding")
     pageHolderPad.PaddingTop = UDim.new(0, 4)
-    pageHolderPad.PaddingBottom = UDim.new(0, 40)
+    pageHolderPad.PaddingBottom = UDim.new(0, 60)
     pageHolderPad.PaddingLeft = UDim.new(0, 8)
     pageHolderPad.PaddingRight = UDim.new(0, 8)
     pageHolderPad.Parent = pageHolder
 
-    -- Pages
+    -- ========================================================
+    -- RESIZE HANDLE
+    -- ========================================================
+    local resizeHandle = Instance.new("TextButton")
+    resizeHandle.Size = UDim2.fromOffset(20, 20)
+    resizeHandle.Position = UDim2.new(1, -22, 1, -22)
+    resizeHandle.BackgroundTransparency = 1
+    resizeHandle.Text = ""
+    resizeHandle.AutoButtonColor = false
+    resizeHandle.ZIndex = 100
+    resizeHandle.Parent = main
+
+    local resizeIcon = Instance.new("TextLabel")
+    resizeIcon.Size = UDim2.fromScale(1, 1)
+    resizeIcon.BackgroundTransparency = 1
+    resizeIcon.Text = "◢"
+    resizeIcon.TextColor3 = C.Accent
+    resizeIcon.TextSize = 14
+    resizeIcon.Font = Enum.Font.GothamBold
+    resizeIcon.ZIndex = 101
+    resizeIcon.Parent = resizeHandle
+
+    local resizing = false
+    local resizeStart, startSize
+
+    resizeHandle.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+            resizing = true
+            resizeStart = i.Position
+            startSize = main.Size
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(i)
+        if resizing and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+            local delta = i.Position - resizeStart
+            local newX = math.clamp(startSize.X.Offset + delta.X, 400, 1100)
+            local newY = math.clamp(startSize.Y.Offset + delta.Y, 350, 800)
+            main.Size = UDim2.fromOffset(newX, newY)
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+            resizing = false
+        end
+    end)
+
+    -- ========================================================
+    -- PAGES
+    -- ========================================================
     local pages = {}
     local navs = {}
 
@@ -810,7 +898,7 @@ local function buildMainWindow(parent)
     local infoPage = createPage("Info")
     pages.Info = infoPage
 
-    local infoCard, infoContent = makeCard(infoPage, "👤 INFORMASI CLIENT", 180)
+    local infoCard, infoContent = makeCard(infoPage, "👤 INFORMASI CLIENT")
     infoCard.LayoutOrder = 1
 
     local avSz = 60
@@ -883,17 +971,17 @@ local function buildMainWindow(parent)
     registerTab("Info", "ℹ️", "Info")
 
     -- ========================================================
-    -- TAB PREDIKSI (TAB SENDIRI)
+    -- TAB PREDIKSI
     -- ========================================================
     local predPage = createPage("Prediksi")
     pages.Prediksi = predPage
 
-    -- Card 1: Egg SPAWN di map
-    local eggInMapCard, eggInMapContent = makeCard(predPage, "🥚 EGG SPAWN DI MAP", 130)
+    -- Card Egg Spawn
+    local eggInMapCard, eggInMapContent = makeCard(predPage, "🥚 EGG SPAWN DI MAP")
     eggInMapCard.LayoutOrder = 1
 
     local eggInMapList = Instance.new("ScrollingFrame")
-    eggInMapList.Size = UDim2.new(1, 0, 1, 0)
+    eggInMapList.Size = UDim2.new(1, 0, 0, 130)
     eggInMapList.BackgroundTransparency = 1
     eggInMapList.BorderSizePixel = 0
     eggInMapList.ScrollBarThickness = 3
@@ -908,12 +996,12 @@ local function buildMainWindow(parent)
     eggInMapLayout.SortOrder = Enum.SortOrder.LayoutOrder
     eggInMapLayout.Parent = eggInMapList
 
-    -- Card 2: Prediksi egg berikutnya
-    local eggPredCard, eggPredContent = makeCard(predPage, "🎯 PREDIKSI EGG BERIKUTNYA", 130)
+    -- Card Prediksi
+    local eggPredCard, eggPredContent = makeCard(predPage, "🎯 PREDIKSI EGG BERIKUTNYA")
     eggPredCard.LayoutOrder = 2
 
     local eggPredList = Instance.new("ScrollingFrame")
-    eggPredList.Size = UDim2.new(1, 0, 1, 0)
+    eggPredList.Size = UDim2.new(1, 0, 0, 130)
     eggPredList.BackgroundTransparency = 1
     eggPredList.BorderSizePixel = 0
     eggPredList.ScrollBarThickness = 3
@@ -928,7 +1016,7 @@ local function buildMainWindow(parent)
     eggPredLayout.SortOrder = Enum.SortOrder.LayoutOrder
     eggPredLayout.Parent = eggPredList
 
-    -- Update list berkala
+    -- Update list
     local lastEggInMapStr = ""
     local lastEggPredStr = ""
 
@@ -936,7 +1024,6 @@ local function buildMainWindow(parent)
         while eggInMapList.Parent do
             task.wait(1)
 
-            -- Update egg in map
             local eggsInMap = Shared.EggsInMap or {}
             local inMapStr = table.concat(eggsInMap, ",")
             if inMapStr ~= lastEggInMapStr then
@@ -977,7 +1064,6 @@ local function buildMainWindow(parent)
                 end
             end
 
-            -- Update prediksi
             local preds = Shared.EggPredictions or {}
             local predStr = table.concat(preds, ",")
             if predStr ~= lastEggPredStr then
@@ -1028,13 +1114,13 @@ local function buildMainWindow(parent)
     local eggPage = createPage("Egg")
     pages.Egg = eggPage
 
-    local eggEspCard, eggEspContent = makeCard(eggPage, "🥚 EGG ESP", 140)
+    local eggEspCard, eggEspContent = makeCard(eggPage, "🥚 EGG ESP")
     eggEspCard.LayoutOrder = 1
     makeToggle(eggEspContent, "Aktifkan Egg ESP", false, function(v) Shared.ESP_Eggs_Enabled = v end)
     makeToggle(eggEspContent, "Tampilkan Nama", true, function(v) Shared.ESP_EggName_Enabled = v end)
     makeToggle(eggEspContent, "Tampilkan Luck", true, function(v) Shared.ESP_EggLuck_Enabled = v end)
 
-    local autoStealCard, autoStealContent = makeCard(eggPage, "🥚 AUTO STEAL", 260)
+    local autoStealCard, autoStealContent = makeCard(eggPage, "🥚 AUTO STEAL")
     autoStealCard.LayoutOrder = 2
     makeToggle(autoStealContent, "Aktifkan Auto Steal", false, function(v) Shared.AutoSteal_Enabled = v end)
     makeToggle(autoStealContent, "Auto Return ke Plot", true, function(v) Shared.AutoReturn_Enabled = v end)
@@ -1064,13 +1150,13 @@ local function buildMainWindow(parent)
     local visualPage = createPage("Visual")
     pages.Visual = visualPage
 
-    local pEspCard, pEspContent = makeCard(visualPage, "👤 PLAYER ESP", 140)
+    local pEspCard, pEspContent = makeCard(visualPage, "👤 PLAYER ESP")
     pEspCard.LayoutOrder = 1
     makeToggle(pEspContent, "Player ESP", false, function(v) Shared.ESP_Players_Enabled = v end)
     makeToggle(pEspContent, "Player Chams", true, function(v) Shared.ESP_PlayerChams_Enabled = v end)
     makeToggle(pEspContent, "Player Studs", true, function(v) Shared.ESP_PlayerStuds_Enabled = v end)
 
-    local petEspCard, petEspContent = makeCard(visualPage, "🐾 PET ESP", 160)
+    local petEspCard, petEspContent = makeCard(visualPage, "🐾 PET ESP")
     petEspCard.LayoutOrder = 2
     makeToggle(petEspContent, "Pet ESP", false, function(v) Shared.ESP_Pets_Enabled = v end)
     makeToggle(petEspContent, "Tampilkan Nama", true, function(v) Shared.ESP_PetName_Enabled = v end)
@@ -1085,7 +1171,7 @@ local function buildMainWindow(parent)
     local autoPage = createPage("Auto")
     pages.Auto = autoPage
 
-    local autoCard, autoContent = makeCard(autoPage, "⚙️ AUTO LAINNYA", 140)
+    local autoCard, autoContent = makeCard(autoPage, "⚙️ AUTO LAINNYA")
     autoCard.LayoutOrder = 1
     makeToggle(autoContent, "Auto Ride Pet", false, function(v) Shared.AutoRidePet_Enabled = v end)
     makeToggle(autoContent, "Auto Equip Best", false, function(v) Shared.AutoEquipBest_Enabled = v end)
@@ -1098,7 +1184,7 @@ local function buildMainWindow(parent)
     local setPage = createPage("Settings")
     pages.Settings = setPage
 
-    local themeCard, themeContent = makeCard(setPage, "🎨 TEMA", 100)
+    local themeCard, themeContent = makeCard(setPage, "🎨 TEMA")
     themeCard.LayoutOrder = 1
 
     local themeLbl = Instance.new("TextLabel")
@@ -1118,7 +1204,7 @@ local function buildMainWindow(parent)
         notify("Tema: " .. v, "success")
     end)
 
-    local fpsCard, fpsContent = makeCard(setPage, "⚡ FPS BOOST", 120)
+    local fpsCard, fpsContent = makeCard(setPage, "⚡ FPS BOOST")
     fpsCard.LayoutOrder = 2
     makeToggle(fpsContent, "FPS Boost", false, function(v)
         if v then
