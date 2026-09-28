@@ -1,6 +1,6 @@
 -- ============================================================
--- VRILZHUB UI — RIDE A PET v5.2 (FULL FIX)
--- Dropdown popup global, layout presisi, profesional
+-- VRILZHUB UI — RIDE A PET v5.3 (BENAR-BENAR FIX)
+-- Dropdown pakai DropdownState table (nggak error closeOverlay)
 -- ============================================================
 
 local UI = {}
@@ -343,37 +343,37 @@ local function makeToggle(parent, text, default, callback)
 end
 
 -- ============================================================
--- DROPDOWN GLOBAL (FIX BENAR-BENAR)
+-- DROPDOWN GLOBAL (PAKAI DropdownState TABLE — FIX BENAR)
 -- ============================================================
-local DropdownLayer = nil
-local ActiveDropdown = nil
+local DropdownState = {
+    Layer = nil,
+    CloseOverlay = nil,
+    Active = nil
+}
 
 local function setupDropdownLayer(parent)
-    DropdownLayer = Instance.new("Frame")
-    DropdownLayer.Name = "DropdownLayer"
-    DropdownLayer.Size = UDim2.fromScale(1, 1)
-    DropdownLayer.BackgroundTransparency = 1
-    DropdownLayer.ZIndex = 2000
-    DropdownLayer.Parent = parent
+    DropdownState.Layer = Instance.new("Frame")
+    DropdownState.Layer.Name = "DropdownLayer"
+    DropdownState.Layer.Size = UDim2.fromScale(1, 1)
+    DropdownState.Layer.BackgroundTransparency = 1
+    DropdownState.Layer.ZIndex = 2000
+    DropdownState.Layer.Parent = parent
 
-    local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.fromScale(1, 1)
-    closeBtn.BackgroundTransparency = 1
-    closeBtn.Text = ""
-    closeBtn.ZIndex = 1999
-    closeBtn.Visible = false
-    closeBtn.Parent = DropdownLayer
+    DropdownState.CloseOverlay = Instance.new("TextButton")
+    DropdownState.CloseOverlay.Size = UDim2.fromScale(1, 1)
+    DropdownState.CloseOverlay.BackgroundTransparency = 1
+    DropdownState.CloseOverlay.Text = ""
+    DropdownState.CloseOverlay.ZIndex = 1999
+    DropdownState.CloseOverlay.Visible = false
+    DropdownState.CloseOverlay.Parent = DropdownState.Layer
 
-    closeBtn.MouseButton1Click:Connect(function()
-        if ActiveDropdown then
-            ActiveDropdown.close()
-            ActiveDropdown = nil
+    DropdownState.CloseOverlay.MouseButton1Click:Connect(function()
+        if DropdownState.Active and DropdownState.Active.close then
+            DropdownState.Active.close()
         end
-        closeBtn.Visible = false
+        DropdownState.Active = nil
+        DropdownState.CloseOverlay.Visible = false
     end)
-
-    -- ⬇️ INI YANG WAJIB ⬇️
-    DropdownLayer.closeOverlay = closeBtn
 end
 
 local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
@@ -433,7 +433,7 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     listFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
     listFrame.Visible = false
     listFrame.ZIndex = 2001
-    listFrame.Parent = DropdownLayer
+    listFrame.Parent = DropdownState.Layer
     registerTheme(listFrame, "Surface2", "BackgroundColor3")
 
     local listCorner = Instance.new("UICorner")
@@ -470,15 +470,15 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
         task.delay(0.2, function()
             if not isOpen then listFrame.Visible = false end
         end)
-        if DropdownLayer and DropdownLayer.closeOverlay then
-            DropdownLayer.closeOverlay.Visible = false
+        if DropdownState.CloseOverlay then
+            DropdownState.CloseOverlay.Visible = false
         end
-        ActiveDropdown = nil
+        DropdownState.Active = nil
     end
 
     local function openList()
-        if ActiveDropdown and ActiveDropdown.close then
-            ActiveDropdown.close()
+        if DropdownState.Active and DropdownState.Active.close then
+            DropdownState.Active.close()
         end
 
         isOpen = true
@@ -504,11 +504,11 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
             Size = UDim2.fromOffset(width, maxH)
         }):Play()
 
-        if DropdownLayer and DropdownLayer.closeOverlay then
-            DropdownLayer.closeOverlay.Visible = true
+        if DropdownState.CloseOverlay then
+            DropdownState.CloseOverlay.Visible = true
         end
 
-        ActiveDropdown = {
+        DropdownState.Active = {
             close = closeList,
             listFrame = listFrame,
             container = container
@@ -708,7 +708,7 @@ local function buildMainWindow(parent)
     subtitle.Size = UDim2.new(0, 300, 0, 14)
     subtitle.Position = UDim2.fromOffset(58, 28)
     subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Ride a Pet · v5.2"
+    subtitle.Text = "Ride a Pet · v5.3"
     subtitle.TextColor3 = C.Muted
     subtitle.Font = Enum.Font.GothamSemibold
     subtitle.TextSize = 10
