@@ -5,8 +5,8 @@
 
 local CONFIG = {
     GameId = 124216119978534, -- Ride a Pet
-    FeaturesURL = "https://raw.githubusercontent.com/vrilz-bot-exploit/ride-a-pet/main/features_rideapet.lua",
-    UIURL = "https://raw.githubusercontent.com/vrilz-bot-exploit/ride-a-pet/main/ui_rideapet.lua",
+    FeaturesURL = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/features_rideapet.lua",
+UIURL = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/ui_rideapet.lua",
 }
 
 -- ============================================================
