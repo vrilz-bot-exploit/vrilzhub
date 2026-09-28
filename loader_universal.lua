@@ -1,12 +1,12 @@
 -- ============================================================
 -- VRILZHUB LOADER — RIDE A PET
--- Repo: vrilz-bot-exploit/ride-a-pet
+-- Repo: vrilz-bot-exploit/vrilzhub
 -- ============================================================
 
 local CONFIG = {
     GameId = 124216119978534, -- Ride a Pet
     FeaturesURL = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/features_rideapet.lua",
-UIURL = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/ui_rideapet.lua",
+    UIURL = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/ui_rideapet.lua",
 }
 
 -- ============================================================
@@ -66,4 +66,4 @@ local Shared = {}
 Features.Init(Shared)
 UI.Init(Shared)
 
-print("[VRILZHUB] SUCCESS! Ride a Pet loaded.")b
+print("[VRILZHUB] SUCCESS! Ride a Pet loaded.")
