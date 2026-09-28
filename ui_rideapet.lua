@@ -1,6 +1,6 @@
 -- ============================================================
--- VRILZHUB UI — RIDE A PET v5.3 (BENAR-BENAR FIX)
--- Dropdown pakai DropdownState table (nggak error closeOverlay)
+-- VRILZHUB UI — RIDE A PET v5.4 (_G FIX)
+-- Pakai _G buat dropdown state (bukan property di Frame)
 -- ============================================================
 
 local UI = {}
@@ -14,8 +14,12 @@ local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 
 -- ============================================================
--- EGG NAMES
+-- GLOBAL STATE (PAKAI _G — SELALU SUPPORT)
 -- ============================================================
+_G.VRILZ_DropdownLayer = nil
+_G.VRILZ_DropdownCloseOverlay = nil
+_G.VRILZ_DropdownActive = nil
+
 local EggNames = {
     "Cherub", "Volcanic", "Blackhole", "Solaris", "Galaxy",
     "Crystal", "Golden", "Glass", "Skull", "Sinister",
@@ -24,9 +28,6 @@ local EggNames = {
     "Bloom", "Aurora", "White", "Brown"
 }
 
--- ============================================================
--- THEME
--- ============================================================
 local Themes = {
     Brutal = {
         BG = Color3.fromRGB(15, 5, 10),
@@ -90,9 +91,6 @@ local function applyTheme(themeName)
     end
 end
 
--- ============================================================
--- NOTIFICATION
--- ============================================================
 local NotifHolder = nil
 
 local function setupNotifHolder(parent)
@@ -194,9 +192,6 @@ local function notify(text, type)
     end)
 end
 
--- ============================================================
--- CARD
--- ============================================================
 local function makeCard(parent, title, layoutOrder)
     local card = Instance.new("Frame")
     card.Size = UDim2.new(1, 0, 0, 0)
@@ -281,9 +276,6 @@ local function makeCard(parent, title, layoutOrder)
     return card, content
 end
 
--- ============================================================
--- TOGGLE
--- ============================================================
 local function makeToggle(parent, text, default, callback)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 30)
@@ -343,36 +335,30 @@ local function makeToggle(parent, text, default, callback)
 end
 
 -- ============================================================
--- DROPDOWN GLOBAL (PAKAI DropdownState TABLE — FIX BENAR)
+-- DROPDOWN GLOBAL (PAKAI _G — FIX BENAR)
 -- ============================================================
-local DropdownState = {
-    Layer = nil,
-    CloseOverlay = nil,
-    Active = nil
-}
-
 local function setupDropdownLayer(parent)
-    DropdownState.Layer = Instance.new("Frame")
-    DropdownState.Layer.Name = "DropdownLayer"
-    DropdownState.Layer.Size = UDim2.fromScale(1, 1)
-    DropdownState.Layer.BackgroundTransparency = 1
-    DropdownState.Layer.ZIndex = 2000
-    DropdownState.Layer.Parent = parent
+    _G.VRILZ_DropdownLayer = Instance.new("Frame")
+    _G.VRILZ_DropdownLayer.Name = "DropdownLayer"
+    _G.VRILZ_DropdownLayer.Size = UDim2.fromScale(1, 1)
+    _G.VRILZ_DropdownLayer.BackgroundTransparency = 1
+    _G.VRILZ_DropdownLayer.ZIndex = 2000
+    _G.VRILZ_DropdownLayer.Parent = parent
 
-    DropdownState.CloseOverlay = Instance.new("TextButton")
-    DropdownState.CloseOverlay.Size = UDim2.fromScale(1, 1)
-    DropdownState.CloseOverlay.BackgroundTransparency = 1
-    DropdownState.CloseOverlay.Text = ""
-    DropdownState.CloseOverlay.ZIndex = 1999
-    DropdownState.CloseOverlay.Visible = false
-    DropdownState.CloseOverlay.Parent = DropdownState.Layer
+    _G.VRILZ_DropdownCloseOverlay = Instance.new("TextButton")
+    _G.VRILZ_DropdownCloseOverlay.Size = UDim2.fromScale(1, 1)
+    _G.VRILZ_DropdownCloseOverlay.BackgroundTransparency = 1
+    _G.VRILZ_DropdownCloseOverlay.Text = ""
+    _G.VRILZ_DropdownCloseOverlay.ZIndex = 1999
+    _G.VRILZ_DropdownCloseOverlay.Visible = false
+    _G.VRILZ_DropdownCloseOverlay.Parent = _G.VRILZ_DropdownLayer
 
-    DropdownState.CloseOverlay.MouseButton1Click:Connect(function()
-        if DropdownState.Active and DropdownState.Active.close then
-            DropdownState.Active.close()
+    _G.VRILZ_DropdownCloseOverlay.MouseButton1Click:Connect(function()
+        if _G.VRILZ_DropdownActive and _G.VRILZ_DropdownActive.close then
+            _G.VRILZ_DropdownActive.close()
         end
-        DropdownState.Active = nil
-        DropdownState.CloseOverlay.Visible = false
+        _G.VRILZ_DropdownActive = nil
+        _G.VRILZ_DropdownCloseOverlay.Visible = false
     end)
 end
 
@@ -433,7 +419,7 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     listFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
     listFrame.Visible = false
     listFrame.ZIndex = 2001
-    listFrame.Parent = DropdownState.Layer
+    listFrame.Parent = _G.VRILZ_DropdownLayer
     registerTheme(listFrame, "Surface2", "BackgroundColor3")
 
     local listCorner = Instance.new("UICorner")
@@ -470,15 +456,15 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
         task.delay(0.2, function()
             if not isOpen then listFrame.Visible = false end
         end)
-        if DropdownState.CloseOverlay then
-            DropdownState.CloseOverlay.Visible = false
+        if _G.VRILZ_DropdownCloseOverlay then
+            _G.VRILZ_DropdownCloseOverlay.Visible = false
         end
-        DropdownState.Active = nil
+        _G.VRILZ_DropdownActive = nil
     end
 
     local function openList()
-        if DropdownState.Active and DropdownState.Active.close then
-            DropdownState.Active.close()
+        if _G.VRILZ_DropdownActive and _G.VRILZ_DropdownActive.close then
+            _G.VRILZ_DropdownActive.close()
         end
 
         isOpen = true
@@ -504,11 +490,11 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
             Size = UDim2.fromOffset(width, maxH)
         }):Play()
 
-        if DropdownState.CloseOverlay then
-            DropdownState.CloseOverlay.Visible = true
+        if _G.VRILZ_DropdownCloseOverlay then
+            _G.VRILZ_DropdownCloseOverlay.Visible = true
         end
 
-        DropdownState.Active = {
+        _G.VRILZ_DropdownActive = {
             close = closeList,
             listFrame = listFrame,
             container = container
@@ -654,7 +640,6 @@ local function buildMainWindow(parent)
     stroke.Parent = main
     registerTheme(stroke, "Accent", "Color")
 
-    -- Header
     local header = Instance.new("Frame")
     header.Size = UDim2.new(1, 0, 0, 52)
     header.BackgroundColor3 = C.Surface
@@ -708,7 +693,7 @@ local function buildMainWindow(parent)
     subtitle.Size = UDim2.new(0, 300, 0, 14)
     subtitle.Position = UDim2.fromOffset(58, 28)
     subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Ride a Pet · v5.3"
+    subtitle.Text = "Ride a Pet · v5.4"
     subtitle.TextColor3 = C.Muted
     subtitle.Font = Enum.Font.GothamSemibold
     subtitle.TextSize = 10
@@ -753,7 +738,6 @@ local function buildMainWindow(parent)
     closeCorner.CornerRadius = UDim.new(0, 8)
     closeCorner.Parent = closeBtn
 
-    -- Body
     local body = Instance.new("Frame")
     body.Size = UDim2.new(1, -20, 1, -72)
     body.Position = UDim2.new(0, 10, 0, 62)
@@ -761,7 +745,6 @@ local function buildMainWindow(parent)
     body.ZIndex = 2
     body.Parent = main
 
-    -- Sidebar
     local sidebar = Instance.new("Frame")
     sidebar.Size = UDim2.new(0, 140, 1, 0)
     sidebar.BackgroundColor3 = C.Surface
@@ -794,7 +777,6 @@ local function buildMainWindow(parent)
     sidebarPad.PaddingRight = UDim.new(0, 8)
     sidebarPad.Parent = sidebar
 
-    -- Page Holder
     local pageHolder = Instance.new("ScrollingFrame")
     pageHolder.Size = UDim2.new(1, -150, 1, 0)
     pageHolder.Position = UDim2.new(0, 150, 0, 0)
@@ -815,7 +797,6 @@ local function buildMainWindow(parent)
     pageHolderPad.PaddingRight = UDim.new(0, 10)
     pageHolderPad.Parent = pageHolder
 
-    -- Resize
     local resizeHandle = Instance.new("TextButton")
     resizeHandle.Size = UDim2.fromOffset(22, 22)
     resizeHandle.Position = UDim2.new(1, -24, 1, -24)
@@ -852,7 +833,6 @@ local function buildMainWindow(parent)
         end
     end)
 
-    -- Open Button
     local openBtn = Instance.new("TextButton")
     openBtn.Size = UDim2.fromOffset(56, 56)
     openBtn.Position = UDim2.fromOffset(20, 20)
@@ -926,9 +906,6 @@ local function buildMainWindow(parent)
         end)
     end)
 
-    -- ========================================================
-    -- TAB SYSTEM
-    -- ========================================================
     local pages = {}
     local navs = {}
 
@@ -1018,7 +995,6 @@ local function buildMainWindow(parent)
         return page
     end
 
-    -- INFO
     local infoPage = createPage("Info")
     pages.Info = infoPage
 
@@ -1101,7 +1077,6 @@ local function buildMainWindow(parent)
 
     registerTab("Info", "ℹ", "Info")
 
-    -- PREDIKSI
     local predPage = createPage("Prediksi")
     pages.Prediksi = predPage
 
@@ -1254,7 +1229,6 @@ local function buildMainWindow(parent)
 
     registerTab("Prediksi", "◎", "Prediksi")
 
-    -- EGG
     local eggPage = createPage("Egg")
     pages.Egg = eggPage
 
@@ -1286,7 +1260,6 @@ local function buildMainWindow(parent)
 
     registerTab("Egg", "◯", "Egg")
 
-    -- VISUAL
     local visualPage = createPage("Visual")
     pages.Visual = visualPage
 
@@ -1303,7 +1276,6 @@ local function buildMainWindow(parent)
 
     registerTab("Visual", "◆", "Visual")
 
-    -- AUTO
     local autoPage = createPage("Auto")
     pages.Auto = autoPage
 
@@ -1313,7 +1285,6 @@ local function buildMainWindow(parent)
 
     registerTab("Auto", "▶", "Auto")
 
-    -- SETTINGS
     local setPage = createPage("Settings")
     pages.Settings = setPage
 
@@ -1401,7 +1372,6 @@ local function buildMainWindow(parent)
     navs.Info.lbl.TextColor3 = Color3.new(1, 1, 1)
     navs.Info.ic.TextColor3 = Color3.new(1, 1, 1)
 
-    -- Drag header
     local dragging, dragInput, dragStart, startPos
     header.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -1435,12 +1405,8 @@ local function buildMainWindow(parent)
     return main
 end
 
--- ============================================================
--- UI.INIT
--- ============================================================
 function UI.Init(sharedState)
     Shared = sharedState
-
     Shared.Notify = notify
 
     Shared.ESP_Eggs_Enabled = false
