@@ -276,7 +276,7 @@ local function notify(text, type)
     end)
 end
 
--- ====== CARD (DENGAN EFFECT HOVER + PRESS + RIPPLE) ======
+-- ====== CARD (HOVER + RIPPLE, TANPA MEMBESAR) ======
 local function makeCard(parent, title, layoutOrder)
     local card = Instance.new("Frame")
     card.Size = UDim2.new(1, 0, 0, 0)
@@ -309,7 +309,7 @@ local function makeCard(parent, title, layoutOrder)
     rippleLayer.ZIndex = 99
     rippleLayer.Parent = card
 
-    -- ===== HOVER EFFECT =====
+    -- ===== HOVER EFFECT (NAIK + GLOW) =====
     local hoverOffset = IS_MOBILE and 1 or 2
     local originalStrokeTrans = 0.5
 
@@ -337,15 +337,9 @@ local function makeCard(parent, title, layoutOrder)
         end
     end)
 
-    -- ===== PRESS + RIPPLE EFFECT =====
+    -- ===== RIPPLE EFFECT SAJA (TANPA MEMBESAR/MENGECIL) =====
     card.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            -- Scale down
-            TweenService:Create(card, TweenInfo.new(0.08), {
-                Size = UDim2.new(0.98, 0, 0, card.AbsoluteSize.Y * 0.98)
-            }):Play()
-
-            -- Ripple
             local ripple = Instance.new("Frame")
             ripple.Size = UDim2.fromOffset(0, 0)
             ripple.Position = UDim2.fromOffset(input.Position.X - card.AbsolutePosition.X, input.Position.Y - card.AbsolutePosition.Y)
@@ -368,14 +362,6 @@ local function makeCard(parent, title, layoutOrder)
             task.delay(0.7, function()
                 if ripple then ripple:Destroy() end
             end)
-        end
-    end)
-
-    card.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            TweenService:Create(card, TweenInfo.new(0.1, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                Size = UDim2.new(1, 0, 0, card.AbsoluteSize.Y / 0.98)
-            }):Play()
         end
     end)
 
@@ -795,7 +781,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     local itemHeight = CFG.DROPDOWN_ITEM
     local maxH = math.min(#items * (itemHeight + 2) + 10, IS_MOBILE and 220 or 180)
 
-    local optionButtons = {} -- Simpan reference
+    local optionButtons = {}
 
     local function updateLabel()
         local selected = {}
@@ -930,22 +916,17 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
             local isNone = (item == "None")
 
             if isNone then
-                -- Klik None: kalau ON, uncheck semua rarity lain + keep None
-                -- kalau OFF, jangan biarin (harus ada yg kepilih)
                 if sharedTable["None"] then
-                    -- Coba uncheck None → cek apakah masih ada rarity lain
                     local anyOther = false
                     for _, r in ipairs(items) do
                         if r ~= "None" and sharedTable[r] then anyOther = true break end
                     end
                     if not anyOther then
-                        -- Gak boleh uncheck None kalau gak ada yg lain
                         return
                     end
                     sharedTable["None"] = false
                     updateButtonVisual("None")
                 else
-                    -- Check None: uncheck semua rarity lain
                     for _, r in ipairs(items) do
                         if r ~= "None" then sharedTable[r] = false end
                     end
@@ -953,22 +934,18 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
                     for _, r in ipairs(items) do updateButtonVisual(r) end
                 end
             else
-                -- Klik rarity biasa
                 sharedTable[item] = not sharedTable[item]
                 if sharedTable[item] then
-                    -- Kalau baru check rarity, uncheck None
                     if sharedTable["None"] then
                         sharedTable["None"] = false
                         updateButtonVisual("None")
                     end
                 else
-                    -- Kalau uncheck rarity, cek apakah semua rarity off
                     local anyOn = false
                     for _, r in ipairs(items) do
                         if r ~= "None" and sharedTable[r] then anyOn = true break end
                     end
                     if not anyOn then
-                        -- Semua rarity off → check None
                         sharedTable["None"] = true
                         updateButtonVisual("None")
                     end
@@ -1465,13 +1442,10 @@ local function buildMainWindow(parent)
         return page
     end
 
-    -- ========================================================
-    -- TAB INFO (DENGAN DISCORD + INFORMASI)
-    -- ========================================================
+    -- TAB INFO
     local infoPage = createPage("Info")
     pages.Info = infoPage
 
-    -- Card profile
     local infoCard, infoContent = makeCard(infoPage, "INFORMASI CLIENT", 1)
 
     local avRow = Instance.new("Frame")
@@ -1598,7 +1572,7 @@ local function buildMainWindow(parent)
         registerTheme(lbl, "Muted", "TextColor3")
     end
 
-    -- Card Discord (KLIK → COPY LINK)
+    -- Card Discord
     local discordCard, discordContent = makeCard(infoPage, "💬 JOIN DISCORD", 4)
     local DISCORD_LINK = "https://discord.gg/psWhrYWbq"
 
@@ -1639,9 +1613,7 @@ local function buildMainWindow(parent)
 
     registerTab("Info", "ℹ", "Info")
 
-    -- ========================================================
     -- TAB PREDIKSI
-    -- ========================================================
     local predPage = createPage("Prediksi")
     pages.Prediksi = predPage
 
@@ -1794,9 +1766,7 @@ local function buildMainWindow(parent)
 
     registerTab("Prediksi", "◎", "Prediksi")
 
-    -- ========================================================
     -- TAB EGG
-    -- ========================================================
     local eggPage = createPage("Egg")
     pages.Egg = eggPage
 
@@ -1828,9 +1798,7 @@ local function buildMainWindow(parent)
 
     registerTab("Egg", "◯", "Egg")
 
-    -- ========================================================
     -- TAB VISUAL
-    -- ========================================================
     local visualPage = createPage("Visual")
     pages.Visual = visualPage
 
@@ -1847,13 +1815,10 @@ local function buildMainWindow(parent)
 
     registerTab("Visual", "◆", "Visual")
 
-    -- ========================================================
     -- TAB AUTO
-    -- ========================================================
     local autoPage = createPage("Auto")
     pages.Auto = autoPage
 
-    -- SPEED
     local speedCard, speedContent = makeCard(autoPage, "SPEED", 1)
     makeToggle(speedContent, "Aktifkan Speed", false, function(v) Shared.Speed_Enabled = v end)
 
@@ -1914,7 +1879,6 @@ local function buildMainWindow(parent)
         end
     end)
 
-    -- INSTANT PICKUP
     local ipCard, ipContent = makeCard(autoPage, "INSTANT PICKUP", 2)
     makeToggle(ipContent, "Aktifkan Instant Pickup", false, function(v) Shared.InstantPickup_Enabled = v end)
 
@@ -1929,7 +1893,6 @@ local function buildMainWindow(parent)
     ipNote.LayoutOrder = 2
     ipNote.Parent = ipContent
 
-    -- AUTO FARM
     local farmCard, farmContent = makeCard(autoPage, "AUTO FARM", 3)
     makeToggle(farmContent, "Aktifkan Auto Farm", false, function(v) Shared.AutoFarm_Enabled = v end)
     makeToggle(farmContent, "Auto Return ke Plot", false, function(v) Shared.AutoReturn_Enabled = v end)
@@ -1962,16 +1925,13 @@ local function buildMainWindow(parent)
         Shared.RarityNotifThreshold = v
     end)
 
-    -- AUTO LAINNYA
     local autoCard, autoContent = makeCard(autoPage, "AUTO LAINNYA", 4)
     makeToggle(autoContent, "Auto Ride Pet", false, function(v) Shared.AutoRidePet_Enabled = v end)
     makeToggle(autoContent, "Auto Equip Best", false, function(v) Shared.AutoEquipBest_Enabled = v end)
 
     registerTab("Auto", "▶", "Auto")
 
-    -- ========================================================
     -- TAB SETTINGS
-    -- ========================================================
     local setPage = createPage("Settings")
     pages.Settings = setPage
 
@@ -2059,7 +2019,6 @@ local function buildMainWindow(parent)
     navs.Info.ic.TextColor3 = Color3.new(1, 1, 1)
     if navs.Info.lbl then navs.Info.lbl.TextColor3 = Color3.new(1, 1, 1) end
 
-    -- Drag header
     local dragging, dragInput, dragStart, startPos
     header.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -2094,7 +2053,7 @@ local function buildMainWindow(parent)
 end
 
 -- ============================================================
--- LOADING SCREEN BRUTAL — KOTAK TEGAS + PETIR + V MEMBESAR
+-- LOADING SCREEN BRUTAL
 -- ============================================================
 local function buildLoadingScreen(parent)
     local viewport = (workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize) or Vector2.new(1280, 720)
@@ -2512,7 +2471,6 @@ function UI.Init(sharedState)
     Shared = sharedState
     Shared.Notify = notify
 
-    -- Defaults SEMUA OFF
     Shared.ESP_Eggs_Enabled = false
     Shared.ESP_EggName_Enabled = false
     Shared.ESP_EggLuck_Enabled = false
@@ -2530,14 +2488,9 @@ function UI.Init(sharedState)
     Shared.EggsInMap = {}
     Shared.EggPredictions = {}
 
-    -- SPEED
     Shared.Speed_Enabled = false
     Shared.Speed_Value = 100
-
-    -- INSTANT PICKUP
     Shared.InstantPickup_Enabled = false
-
-    -- AUTO FARM - default None
     Shared.AutoFarm_Enabled = false
     Shared.SelectedRarities = {
         ["None"] = true,
@@ -2558,7 +2511,7 @@ function UI.Init(sharedState)
     ScreenGui.ResetOnSpawn = false
     ScreenGui.IgnoreGuiInset = true
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    ScreenGui.Parent = game:GetService("CoreGui")
+    ScreenGui.Parent = game:GetService("CoreGUI")
 
     setupNotifHolder(ScreenGui)
     setupDropdownLayer(ScreenGui)
