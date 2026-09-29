@@ -546,16 +546,13 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
         local containerAbsH = container.AbsoluteSize.Y
         local screenH = workspace.CurrentCamera.ViewportSize.Y
         local spaceBelow = screenH - (containerAbsY + containerAbsH + 10)
-        local spaceAbove = containerAbsY
+        local realMaxH = math.min(maxH, math.max(spaceBelow, 100))
 
-        if spaceBelow >= maxH or spaceBelow >= spaceAbove then
-            listFrame.Position = UDim2.fromOffset(container.AbsolutePosition.X, containerAbsY + containerAbsH + 4)
-        else
-            listFrame.Position = UDim2.fromOffset(container.AbsolutePosition.X, containerAbsY - maxH - 4)
-        end
+        -- SELALU DI BAWAH
+        listFrame.Position = UDim2.fromOffset(container.AbsolutePosition.X, containerAbsY + containerAbsH + 4)
 
         TweenService:Create(listFrame, TweenInfo.new(0.2), {
-            Size = UDim2.fromOffset(width, maxH)
+            Size = UDim2.fromOffset(width, realMaxH)
         }):Play()
 
         if _G.VRILZ_DropdownCloseOverlay then
@@ -752,16 +749,13 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         local containerAbsH = container.AbsoluteSize.Y
         local screenH = workspace.CurrentCamera.ViewportSize.Y
         local spaceBelow = screenH - (containerAbsY + containerAbsH + 10)
-        local spaceAbove = containerAbsY
+        local realMaxH = math.min(maxH, math.max(spaceBelow, 100))
 
-        if spaceBelow >= maxH or spaceBelow >= spaceAbove then
-            listFrame.Position = UDim2.fromOffset(container.AbsolutePosition.X, containerAbsY + containerAbsH + 4)
-        else
-            listFrame.Position = UDim2.fromOffset(container.AbsolutePosition.X, containerAbsY - maxH - 4)
-        end
+        -- SELALU DI BAWAH
+        listFrame.Position = UDim2.fromOffset(container.AbsolutePosition.X, containerAbsY + containerAbsH + 4)
 
         TweenService:Create(listFrame, TweenInfo.new(0.2), {
-            Size = UDim2.fromOffset(width, maxH)
+            Size = UDim2.fromOffset(width, realMaxH)
         }):Play()
 
         if _G.VRILZ_DropdownCloseOverlay then
