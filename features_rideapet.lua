@@ -1,6 +1,6 @@
 -- ============================================================
--- VRILZHUB FEATURES — RIDE A PET v3.2
--- + Egg Prediction System + Notif Egg No Spawn
+-- VRILZHUB FEATURES — RIDE A PET v4.0
+-- + Speed + Auto Farm by Rarity + Instant Pickup + Notif Once
 -- ============================================================
 
 local Features = {}
@@ -9,7 +9,42 @@ local Shared = nil
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
+
+-- ============================================================
+-- LOAD GAMEDATA (EGGS + PETS + RARITY)
+-- ============================================================
+local GameData = ReplicatedStorage:FindFirstChild("GameData")
+local EggData, PetData = {}, {}
+
+if GameData then
+    local eggsMod = GameData:FindFirstChild("Eggs")
+    if eggsMod then
+        local ok, data = pcall(require, eggsMod)
+        if ok and type(data) == "table" then EggData = data end
+    end
+    local petsMod = GameData:FindFirstChild("Pets")
+    if petsMod then
+        local ok, data = pcall(require, petsMod)
+        if ok and type(data) == "table" then PetData = data end
+    end
+end
+
+local RARITY_ORDER = {
+    Common = 1, Uncommon = 2, Rare = 3, Epic = 4,
+    Legendary = 5, Mythic = 6, Divine = 7, Ethereal = 8, Secret = 9,
+}
+
+local function getEggRarity(eggName)
+    local info = EggData[eggName]
+    return info and info.Rarity or "Common"
+end
+
+local function getPetRarity(petName)
+    local info = PetData[petName]
+    return info and info.Rarity or "Common"
+end
 
 -- ============================================================
 -- GET EGG LUCK
@@ -238,14 +273,13 @@ function Features.startPetESP()
 end
 
 -- ============================================================
--- GET MY PLOT
+-- GET MY PLOT (FIX: pakai NestsOwnerLoaded)
 -- ============================================================
 local function getMyPlot()
     local plots = Workspace:FindFirstChild("Plots")
     if not plots then return nil end
     for _, plot in ipairs(plots:GetChildren()) do
-        local owner = plot:GetAttribute("OwnerUserId") or plot:GetAttribute("Owner")
-        if owner == LocalPlayer.UserId or owner == LocalPlayer.Name then
+        if plot:GetAttribute("NestsOwnerLoaded") == LocalPlayer.UserId then
             return plot
         end
     end
@@ -259,6 +293,36 @@ local function getMyPlotSpawn()
         or plot:FindFirstChildWhichIsA("SpawnLocation", true)
         or plot:FindFirstChildWhichIsA("BasePart", true)
     return spawnPart
+end
+
+-- ============================================================
+-- GAME REMOTE HELPER
+-- ============================================================
+local function getGameRemote(name)
+    local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+    if not remotes then return nil end
+    local gameRemotes = remotes:FindFirstChild("Game")
+    if not gameRemotes then return nil end
+    return gameRemotes:FindFirstChild(name)
+end
+
+-- ============================================================
+-- SPEED
+-- ============================================================
+function Features.setSpeed(v)
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if hum then hum.WalkSpeed = v end
+end
+
+function Features.startSpeed()
+    task.spawn(function()
+        while task.wait(0.3) do
+            if Shared.Speed_Enabled then
+                Features.setSpeed(Shared.Speed_Value or 50)
+            end
+        end
+    end)
 end
 
 -- ============================================================
@@ -291,7 +355,31 @@ local function findEggByName(eggName)
 end
 
 -- ============================================================
--- AUTO STEAL + NOTIF "EGG NO SPAWN"
+-- INSTANT PICKUP (SKIP PROMPT)
+-- ============================================================
+function Features.instantPickup(egg)
+    local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+    local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not eggPart or not root then return false end
+
+    root.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+
+    local remote = getGameRemote("EggPickup")
+    if remote then
+        pcall(function() remote:FireServer(egg) end)
+        return true
+    end
+
+    local prompt = egg:FindFirstChild("Pickup", true)
+    if prompt and typeof(fireproximityprompt) == "function" then
+        pcall(fireproximityprompt, prompt)
+        return true
+    end
+    return false
+end
+
+-- ============================================================
+-- AUTO STEAL (LEGACY - masih dipakai kalau toggle lama)
 -- ============================================================
 local lastNoEggNotif = 0
 
@@ -300,19 +388,10 @@ function Features.startAutoSteal()
         while task.wait(0.5) do
             if not Shared.AutoSteal_Enabled then continue end
 
-            local eggName = Shared.SelectedEgg or "Cherub"
+            local eggName = Shared.SelectedEgg or "Cherub Egg"
             local egg = findEggByName(eggName)
 
-            if not egg then
-                local now = os.clock()
-                if now - lastNoEggNotif > 5 then
-                    lastNoEggNotif = now
-                    if Shared.Notify then
-                        Shared.Notify("Egg no spawn: " .. eggName, "warning")
-                    end
-                end
-                continue
-            end
+            if not egg then continue end
 
             local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
             local prompt = egg:FindFirstChild("Pickup", true)
@@ -333,16 +412,135 @@ function Features.startAutoSteal()
                 local spawnPart = getMyPlotSpawn()
                 if spawnPart then
                     myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
-                else
-                    local spawn = Workspace:FindFirstChild("Spawn")
-                    if spawn then
-                        local spawnLoc = spawn:FindFirstChildWhichIsA("SpawnLocation", true)
-                        if spawnLoc then
-                            myRoot.CFrame = spawnLoc.CFrame + Vector3.new(0, 5, 0)
-                        end
+                end
+            end
+        end
+    end)
+end
+
+-- ============================================================
+-- AUTO FARM v3 — BY RARITY, RETURN FIRST, NOTIF SEKALI
+-- ============================================================
+local NotifiedEggs = {}
+
+local function getEggKey(egg)
+    local part = egg:FindFirstChildWhichIsA("BasePart", true)
+    if not part then return egg.Name end
+    local p = part.Position
+    return string.format("%s_%.0f_%.0f_%.0f", egg.Name, p.X, p.Y, p.Z)
+end
+
+local function getNotifThreshold()
+    local thresholds = {
+        Common = 1, Uncommon = 2, Rare = 3, Epic = 4,
+        Legendary = 5, Mythic = 6, Divine = 7, Ethereal = 8, Secret = 9,
+    }
+    return thresholds[Shared.RarityNotifThreshold or "Legendary"] or 5
+end
+
+local function isRaritySelected(eggName)
+    local rarity = getEggRarity(eggName)
+    if not Shared.SelectedRarities then return false end
+    return Shared.SelectedRarities[rarity] == true
+end
+
+local function getBestEggInMap()
+    local rendered = Workspace:FindFirstChild("RenderedEggs")
+    if not rendered then return nil end
+
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return nil end
+
+    local best, bestRank = nil, 0
+    for _, egg in ipairs(rendered:GetChildren()) do
+        if egg:IsA("Model") and isRaritySelected(egg.Name) then
+            local rarity = getEggRarity(egg.Name)
+            local rank = RARITY_ORDER[rarity] or 1
+            local part = egg:FindFirstChildWhichIsA("BasePart", true)
+            if part then
+                local d = (part.Position - myRoot.Position).Magnitude
+                if rank > bestRank or (rank == bestRank and (not best or d < best.dist)) then
+                    best = {egg = egg, dist = d, rarity = rarity, rank = rank}
+                    bestRank = rank
+                end
+            end
+        end
+    end
+    return best
+end
+
+local function returnToMyPlot()
+    if not Shared.AutoReturn_Enabled then return end
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return end
+
+    local plot = getMyPlot()
+    local spawnPart = plot and (
+        plot:FindFirstChild("Spawn", true)
+        or plot:FindFirstChildWhichIsA("SpawnLocation", true)
+        or plot:FindFirstChildWhichIsA("BasePart", true)
+    )
+    if spawnPart then
+        myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
+    end
+end
+
+function Features.startAutoFarm()
+    task.spawn(function()
+        while task.wait(0.4) do
+            if not Shared.AutoFarm_Enabled then continue end
+
+            -- Cleanup NotifiedEggs: hapus key yang egg-nya udah gak ada
+            local rendered = Workspace:FindFirstChild("RenderedEggs")
+            if rendered then
+                local validKeys = {}
+                for _, egg in ipairs(rendered:GetChildren()) do
+                    if egg:IsA("Model") then
+                        validKeys[getEggKey(egg)] = true
+                    end
+                end
+                for key in pairs(NotifiedEggs) do
+                    if not validKeys[key] then
+                        NotifiedEggs[key] = nil
                     end
                 end
             end
+
+            local best = getBestEggInMap()
+
+            -- Kalau gak ada egg target → DIAM
+            if not best then continue end
+
+            local egg = best.egg
+            local eggName = egg.Name
+            local eggRarity = best.rarity
+            local eggKey = getEggKey(egg)
+
+            -- Notif SEKALI AJA per egg (khusus rarity ≥ threshold)
+            if (RARITY_ORDER[eggRarity] or 1) >= getNotifThreshold() then
+                if not NotifiedEggs[eggKey] then
+                    NotifiedEggs[eggKey] = true
+                    if Shared.Notify then
+                        Shared.Notify("🎯 " .. eggName .. " (" .. eggRarity .. ")", "success")
+                    end
+                end
+            end
+
+            -- Teleport ke egg
+            local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+            if not myRoot or not eggPart then continue end
+
+            myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+            task.wait(0.1)
+
+            -- Instant pickup
+            Features.instantPickup(egg)
+            task.wait(0.15)
+
+            -- Return ke plot dulu
+            returnToMyPlot()
+            task.wait(0.3)
         end
     end)
 end
@@ -371,7 +569,7 @@ function Features.startAutoHatch()
 end
 
 -- ============================================================
--- AUTO RIDE PET
+-- AUTO RIDE PET (LEGACY)
 -- ============================================================
 function Features.startAutoRidePet()
     task.spawn(function()
@@ -395,6 +593,42 @@ function Features.startAutoRidePet()
 end
 
 -- ============================================================
+-- AUTO RIDE BY RARITY
+-- ============================================================
+function Features.startAutoRideByRarity()
+    task.spawn(function()
+        while task.wait(1.5) do
+            if not Shared.AutoRideRarity_Enabled then continue end
+
+            local plot = getMyPlot()
+            if not plot then continue end
+            local pets = plot:FindFirstChild("Pets")
+            if not pets then continue end
+
+            local minRank = RARITY_ORDER[Shared.RideMinRarity or "Mythic"] or 6
+            local bestPet, bestRank = nil, 0
+
+            for _, pet in ipairs(pets:GetChildren()) do
+                if pet:IsA("Model") then
+                    local rar = getPetRarity(pet.Name)
+                    local rank = RARITY_ORDER[rar] or 1
+                    if rank >= minRank and rank > bestRank then
+                        bestPet, bestRank = pet, rank
+                    end
+                end
+            end
+
+            if bestPet then
+                local prompt = bestPet:FindFirstChild("RidePrompt", true)
+                if prompt and prompt.Enabled and typeof(fireproximityprompt) == "function" then
+                    pcall(fireproximityprompt, prompt)
+                end
+            end
+        end
+    end)
+end
+
+-- ============================================================
 -- EGG PREDICTION SYSTEM
 -- ============================================================
 local EggHistory = {}
@@ -409,7 +643,6 @@ function Features.startEggPrediction()
             local rendered = Workspace:FindFirstChild("RenderedEggs")
             if not rendered then continue end
 
-            -- Kumpulin egg yang ada saat ini
             local currentEggs = {}
             for _, egg in ipairs(rendered:GetChildren()) do
                 if egg:IsA("Model") then
@@ -417,7 +650,6 @@ function Features.startEggPrediction()
                 end
             end
 
-            -- Deteksi egg baru
             for _, eggName in ipairs(currentEggs) do
                 local found = false
                 for _, lastEgg in ipairs(LastEggList) do
@@ -434,34 +666,13 @@ function Features.startEggPrediction()
                     if #EggHistory > MAX_HISTORY then
                         table.remove(EggHistory, 1)
                     end
-                    if Shared.Notify then
-                        Shared.Notify("🎯 Egg spawn: " .. eggName, "success")
-                    end
                 end
             end
 
-            -- Deteksi egg hilang
-            for _, lastEgg in ipairs(LastEggList) do
-                local found = false
-                for _, eggName in ipairs(currentEggs) do
-                    if eggName == lastEgg then
-                        found = true
-                        break
-                    end
-                end
-                if not found then
-                    if Shared.Notify then
-                        Shared.Notify("❌ Egg hilang: " .. lastEgg, "warning")
-                    end
-                end
-            end
-
-            -- Update
             LastEggList = currentEggs
             Shared.EggsInMap = currentEggs
             Shared.EggHistory = EggHistory
 
-            -- Prediksi egg berikutnya
             local eggCount = {}
             for _, entry in ipairs(EggHistory) do
                 eggCount[entry.name] = (eggCount[entry.name] or 0) + 1
@@ -473,7 +684,6 @@ function Features.startEggPrediction()
             end
             table.sort(sorted, function(a, b) return a.count > b.count end)
 
-            -- Ambil egg yang belum ada di map
             local predictions = {}
             for _, entry in ipairs(sorted) do
                 local alreadyInMap = false
@@ -497,16 +707,8 @@ end
 -- ============================================================
 -- REMOTE ACTIONS
 -- ============================================================
-local function getRemote(name)
-    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
-    if not remotes then return nil end
-    local gameRemotes = remotes:FindFirstChild("Game")
-    if not gameRemotes then return nil end
-    return gameRemotes:FindFirstChild(name)
-end
-
 function Features.rideAlong()
-    local remote = getRemote("RideAlong")
+    local remote = getGameRemote("RideAlong")
     if remote then
         remote:FireServer()
         return true
@@ -515,7 +717,7 @@ function Features.rideAlong()
 end
 
 function Features.petDismount()
-    local remote = getRemote("PetDismount")
+    local remote = getGameRemote("PetDismount")
     if remote then
         remote:FireServer()
         return true
@@ -524,7 +726,7 @@ function Features.petDismount()
 end
 
 function Features.pickupPet()
-    local remote = getRemote("PickupPet")
+    local remote = getGameRemote("PickupPet")
     if remote then
         remote:FireServer()
         return true
@@ -533,7 +735,7 @@ function Features.pickupPet()
 end
 
 function Features.hatchEgg()
-    local remote = getRemote("Hatch")
+    local remote = getGameRemote("Hatch")
     if remote then
         remote:FireServer()
         return true
@@ -553,8 +755,11 @@ function Features.Init(sharedState)
     Features.startAutoHatch()
     Features.startAutoRidePet()
     Features.startEggPrediction()
+    Features.startSpeed()
+    Features.startAutoFarm()
+    Features.startAutoRideByRarity()
 
-    print("[VRILZHUB] Ride a Pet Features loaded")
+    print("[VRILZHUB] Ride a Pet Features v4.0 loaded")
 end
 
 return Features
