@@ -16,7 +16,7 @@ local LocalPlayer = Players.LocalPlayer
 -- ====== AUTO-DETECT MOBILE ======
 local IS_MOBILE = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 
--- ====== UI CONFIG ======
+-- ====== UI CONFIG (PC & MOBILE BEDA) ======
 local UI_CONFIG = {
     MOBILE = {
         WIN_W_PCT = 0.88,
@@ -91,21 +91,10 @@ local EggNames = {
     "Bloom", "Aurora", "White", "Brown"
 }
 
--- ====== RARITY ======
+-- ====== RARITY LIST ======
 local RarityList = {
     "Common", "Uncommon", "Rare", "Epic",
     "Legendary", "Mythic", "Divine", "Ethereal", "Secret"
-}
-local RarityColors = {
-    Common = Color3.fromRGB(180, 180, 180),
-    Uncommon = Color3.fromRGB(80, 200, 80),
-    Rare = Color3.fromRGB(80, 150, 255),
-    Epic = Color3.fromRGB(180, 80, 255),
-    Legendary = Color3.fromRGB(255, 200, 50),
-    Mythic = Color3.fromRGB(255, 80, 80),
-    Divine = Color3.fromRGB(255, 255, 150),
-    Ethereal = Color3.fromRGB(150, 255, 255),
-    Secret = Color3.fromRGB(200, 200, 200),
 }
 
 -- ====== THEME ======
@@ -917,7 +906,7 @@ local function buildFPSWindow(parent)
 end
 
 -- ============================================================
--- BUILD MAIN WINDOW
+-- BUILD MAIN WINDOW (AUTO-DETECT PC & MOBILE)
 -- ============================================================
 local function buildMainWindow(parent)
     local screenGui = parent
@@ -1614,117 +1603,7 @@ local function buildMainWindow(parent)
     local autoPage = createPage("Auto")
     pages.Auto = autoPage
 
-    -- SPEED
-    local speedCard, speedContent = makeCard(autoPage, "SPEED", 1)
-    makeToggle(speedContent, "Aktifkan Speed", false, function(v) Shared.Speed_Enabled = v end)
-
-    local speedLbl = Instance.new("TextLabel")
-    speedLbl.Size = UDim2.new(1, 0, 0, 16)
-    speedLbl.BackgroundTransparency = 1
-    speedLbl.Text = "Speed: " .. (Shared.Speed_Value or 100)
-    speedLbl.TextColor3 = C.Muted
-    speedLbl.Font = Enum.Font.GothamSemibold
-    speedLbl.TextSize = CFG.FONT_MUTED
-    speedLbl.TextXAlignment = Enum.TextXAlignment.Left
-    speedLbl.LayoutOrder = 2
-    speedLbl.Parent = speedContent
-
-    local sliderBg = Instance.new("Frame")
-    sliderBg.Size = UDim2.new(1, 0, 0, 8)
-    sliderBg.BackgroundColor3 = C.Surface3
-    sliderBg.BorderSizePixel = 0
-    sliderBg.LayoutOrder = 3
-    sliderBg.Parent = speedContent
-    local sbc = Instance.new("UICorner"); sbc.CornerRadius = UDim.new(1,0); sbc.Parent = sliderBg
-
-    local sliderFill = Instance.new("Frame")
-    sliderFill.Size = UDim2.new((Shared.Speed_Value or 100) / 500, 0, 1, 0)
-    sliderFill.BackgroundColor3 = C.Accent
-    sliderFill.BorderSizePixel = 0
-    sliderFill.Parent = sliderBg
-    local sfc = Instance.new("UICorner"); sfc.CornerRadius = UDim.new(1,0); sfc.Parent = sliderFill
-
-    local sliderBtn = Instance.new("TextButton")
-    sliderBtn.Size = UDim2.new(1, 0, 1, 20)
-    sliderBtn.Position = UDim2.new(0, 0, 0.5, -10)
-    sliderBtn.BackgroundTransparency = 1
-    sliderBtn.Text = ""
-    sliderBtn.Parent = sliderBg
-
-    local draggingSlider = false
-    sliderBtn.InputBegan:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-            draggingSlider = true
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-            draggingSlider = false
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(i)
-        if draggingSlider and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-            local mouseX = UserInputService:GetMouseLocation().X
-            local rel = math.clamp((mouseX - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
-            Shared.Speed_Value = math.floor(rel * 500)
-            sliderFill.Size = UDim2.new(rel, 0, 1, 0)
-            speedLbl.Text = "Speed: " .. Shared.Speed_Value
-            if Features and Features.setSpeed then
-                Features.setSpeed(Shared.Speed_Value)
-            end
-        end
-    end)
-
-    -- INSTANT PICKUP (TOGGLE SENDIRI)
-    local ipCard, ipContent = makeCard(autoPage, "INSTANT PICKUP", 2)
-    makeToggle(ipContent, "Aktifkan Instant Pickup", false, function(v) Shared.InstantPickup_Enabled = v end)
-
-    local ipNote = Instance.new("TextLabel")
-    ipNote.Size = UDim2.new(1, 0, 0, 14)
-    ipNote.BackgroundTransparency = 1
-    ipNote.Text = "Ambil egg otomatis tanpa prompt"
-    ipNote.TextColor3 = C.Muted
-    ipNote.Font = Enum.Font.GothamSemibold
-    ipNote.TextSize = CFG.FONT_MUTED
-    ipNote.TextXAlignment = Enum.TextXAlignment.Left
-    ipNote.LayoutOrder = 2
-    ipNote.Parent = ipContent
-
-    -- AUTO FARM
-    local farmCard, farmContent = makeCard(autoPage, "AUTO FARM", 3)
-    makeToggle(farmContent, "Aktifkan Auto Farm", false, function(v) Shared.AutoFarm_Enabled = v end)
-    makeToggle(farmContent, "Auto Return ke Plot", true, function(v) Shared.AutoReturn_Enabled = v end)
-
-    local rarTitle = Instance.new("TextLabel")
-    rarTitle.Size = UDim2.new(1, 0, 0, 16)
-    rarTitle.BackgroundTransparency = 1
-    rarTitle.Text = "Pilih Rarity Egg:"
-    rarTitle.TextColor3 = C.Muted
-    rarTitle.Font = Enum.Font.GothamSemibold
-    rarTitle.TextSize = CFG.FONT_MUTED
-    rarTitle.TextXAlignment = Enum.TextXAlignment.Left
-    rarTitle.LayoutOrder = 3
-    rarTitle.Parent = farmContent
-
-    makeDropdownMulti(farmContent, RarityList, Shared.SelectedRarities, RarityColors, function(t) end)
-
-    local notifTitle = Instance.new("TextLabel")
-    notifTitle.Size = UDim2.new(1, 0, 0, 16)
-    notifTitle.BackgroundTransparency = 1
-    notifTitle.Text = "Notif cuma buat rarity:"
-    notifTitle.TextColor3 = C.Muted
-    notifTitle.Font = Enum.Font.GothamSemibold
-    notifTitle.TextSize = CFG.FONT_MUTED
-    notifTitle.TextXAlignment = Enum.TextXAlignment.Left
-    notifTitle.LayoutOrder = 20
-    notifTitle.Parent = farmContent
-
-    makeDropdownGlobal(farmContent, RarityList, "Legendary", function(v)
-        Shared.RarityNotifThreshold = v
-    end)
-
-    -- AUTO LAINNYA
-    local autoCard, autoContent = makeCard(autoPage, "AUTO LAINNYA", 4)
+    local autoCard, autoContent = makeCard(autoPage, "AUTO LAINNYA", 1)
     makeToggle(autoContent, "Auto Ride Pet", false, function(v) Shared.AutoRidePet_Enabled = v end)
     makeToggle(autoContent, "Auto Equip Best", false, function(v) Shared.AutoEquipBest_Enabled = v end)
 
@@ -1857,9 +1736,9 @@ end
 -- ============================================================
 function UI.Init(sharedState)
     Shared = sharedState
+
     Shared.Notify = notify
 
-    -- Defaults
     Shared.ESP_Eggs_Enabled = false
     Shared.ESP_EggName_Enabled = true
     Shared.ESP_EggLuck_Enabled = true
@@ -1877,24 +1756,6 @@ function UI.Init(sharedState)
     Shared.EggsInMap = {}
     Shared.EggPredictions = {}
 
-    -- SPEED
-    Shared.Speed_Enabled = false
-    Shared.Speed_Value = 100
-
-    -- INSTANT PICKUP (toggle sendiri)
-    Shared.InstantPickup_Enabled = false
-
-    -- AUTO FARM
-    Shared.AutoFarm_Enabled = false
-    Shared.SelectedRarities = {
-        ["Legendary"] = true,
-        ["Mythic"] = true,
-        ["Divine"] = true,
-        ["Ethereal"] = true,
-        ["Secret"] = true,
-    }
-    Shared.RarityNotifThreshold = "Legendary"
-
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "VRILZHUB_RideAPet"
     ScreenGui.ResetOnSpawn = false
@@ -1905,84 +1766,252 @@ function UI.Init(sharedState)
     setupNotifHolder(ScreenGui)
     setupDropdownLayer(ScreenGui)
 
+    -- ========================================================
+    -- LOADING SCREEN — V MUTER + LOADING TEXT
+    -- ========================================================
     local loading = Instance.new("Frame")
-    loading.Size = UDim2.fromOffset(IS_MOBILE and 340 or 400, IS_MOBILE and 220 or 240)
+    loading.Size = UDim2.fromOffset(IS_MOBILE and 300 or 380, IS_MOBILE and 300 or 380)
     loading.AnchorPoint = Vector2.new(0.5, 0.5)
     loading.Position = UDim2.fromScale(0.5, 0.5)
-    loading.BackgroundColor3 = C.Surface
+    loading.BackgroundColor3 = C.BG
     loading.BorderSizePixel = 0
     loading.ZIndex = 200
     loading.Parent = ScreenGui
-    registerTheme(loading, "Surface", "BackgroundColor3")
+    registerTheme(loading, "BG", "BackgroundColor3")
 
-    local lc = Instance.new("UICorner"); lc.CornerRadius = UDim.new(0, 14); lc.Parent = loading
-    local ls = Instance.new("UIStroke"); ls.Color = C.Accent; ls.Thickness = 2; ls.Transparency = 0.3; ls.Parent = loading
+    local lc = Instance.new("UICorner")
+    lc.CornerRadius = UDim.new(1, 0)
+    lc.Parent = loading
 
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, -40, 0, 30)
-    title.Position = UDim2.new(0, 20, 0, 16)
-    title.BackgroundTransparency = 1
-    title.Text = "⚡ VRILZHUB"
-    title.TextColor3 = C.Accent
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = IS_MOBILE and 18 or 20
-    title.ZIndex = 201
-    title.Parent = loading
-    registerTheme(title, "Accent", "TextColor3")
+    local ls = Instance.new("UIStroke")
+    ls.Color = C.Accent
+    ls.Thickness = 3
+    ls.Transparency = 0.2
+    ls.Parent = loading
+    registerTheme(ls, "Accent", "Color")
 
-    local subtitle = Instance.new("TextLabel")
-    subtitle.Size = UDim2.new(1, -40, 0, 16)
-    subtitle.Position = UDim2.new(0, 20, 0, 46)
-    subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Ride a Pet · Loading..."
-    subtitle.TextColor3 = C.Muted
-    subtitle.Font = Enum.Font.GothamSemibold
-    subtitle.TextSize = IS_MOBILE and 10 or 11
-    subtitle.ZIndex = 201
-    subtitle.Parent = loading
-    registerTheme(subtitle, "Muted", "TextColor3")
+    -- Glow effect
+    local glow = Instance.new("ImageLabel")
+    glow.Size = UDim2.fromScale(1.5, 1.5)
+    glow.Position = UDim2.fromScale(-0.25, -0.25)
+    glow.BackgroundTransparency = 1
+    glow.Image = "rbxassetid://5028857084"
+    glow.ImageColor3 = C.Accent
+    glow.ImageTransparency = 0.7
+    glow.ZIndex = 199
+    glow.Parent = loading
+    registerTheme(glow, "Accent", "ImageColor3")
 
+    -- ===== HURUF V MUTER =====
+    local vHolder = Instance.new("Frame")
+    vHolder.Size = UDim2.fromOffset(IS_MOBILE and 100 or 130, IS_MOBILE and 100 or 130)
+    vHolder.AnchorPoint = Vector2.new(0.5, 0.5)
+    vHolder.Position = UDim2.fromScale(0.5, 0.42)
+    vHolder.BackgroundTransparency = 1
+    vHolder.ZIndex = 202
+    vHolder.Parent = loading
+
+    local vLabel = Instance.new("TextLabel")
+    vLabel.Size = UDim2.fromScale(1, 1)
+    vLabel.BackgroundTransparency = 1
+    vLabel.Text = "V"
+    vLabel.TextColor3 = C.Accent
+    vLabel.Font = Enum.Font.GothamBlack
+    vLabel.TextSize = IS_MOBILE and 80 or 100
+    vLabel.ZIndex = 203
+    vLabel.Parent = vHolder
+    registerTheme(vLabel, "Accent", "TextColor3")
+
+    local vLabel2 = Instance.new("TextLabel")
+    vLabel2.Size = UDim2.fromScale(1, 1)
+    vLabel2.BackgroundTransparency = 1
+    vLabel2.Text = "V"
+    vLabel2.TextColor3 = Color3.new(1, 1, 1)
+    vLabel2.TextTransparency = 0.7
+    vLabel2.Font = Enum.Font.GothamBlack
+    vLabel2.TextSize = IS_MOBILE and 80 or 100
+    vLabel2.ZIndex = 202
+    vLabel2.Parent = vHolder
+
+    -- Spinner muter di sekeliling V
+    local spinner = Instance.new("Frame")
+    spinner.Size = UDim2.fromScale(1.4, 1.4)
+    spinner.AnchorPoint = Vector2.new(0.5, 0.5)
+    spinner.Position = UDim2.fromScale(0.5, 0.5)
+    spinner.BackgroundTransparency = 1
+    spinner.ZIndex = 201
+    spinner.Parent = vHolder
+
+    local spinnerDots = {}
+    local dotCount = 8
+    for i = 1, dotCount do
+        local angle = (i / dotCount) * math.pi * 2
+        local radius = IS_MOBILE and 60 or 80
+        local dot = Instance.new("Frame")
+        dot.Size = UDim2.fromOffset(8, 8)
+        dot.AnchorPoint = Vector2.new(0.5, 0.5)
+        dot.Position = UDim2.new(0.5, math.cos(angle) * radius, 0.5, math.sin(angle) * radius)
+        dot.BackgroundColor3 = C.Accent
+        dot.BorderSizePixel = 0
+        dot.BackgroundTransparency = i / dotCount * 0.8
+        dot.ZIndex = 201
+        dot.Parent = spinner
+        registerTheme(dot, "Accent", "BackgroundColor3")
+
+        local dotCorner = Instance.new("UICorner")
+        dotCorner.CornerRadius = UDim.new(1, 0)
+        dotCorner.Parent = dot
+
+        table.insert(spinnerDots, dot)
+    end
+
+    local spinnerAngle = 0
+    local spinnerRunning = true
+    task.spawn(function()
+        while spinnerRunning and spinner.Parent do
+            task.wait(0.03)
+            spinnerAngle = spinnerAngle + 0.15
+            spinner.Rotation = math.deg(spinnerAngle)
+        end
+    end)
+
+    task.spawn(function()
+        while vLabel.Parent do
+            task.wait(0.5)
+            TweenService:Create(vLabel, TweenInfo.new(0.5), {TextTransparency = 0.3}):Play()
+            task.wait(0.5)
+            TweenService:Create(vLabel, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
+        end
+    end)
+
+    -- ===== LOADING TEXT =====
+    local loadingText = Instance.new("TextLabel")
+    loadingText.Size = UDim2.new(1, -40, 0, 24)
+    loadingText.Position = UDim2.new(0, 20, 1, IS_MOBILE and -110 or -120)
+    loadingText.BackgroundTransparency = 1
+    loadingText.Text = "Loading..."
+    loadingText.TextColor3 = C.Text
+    loadingText.Font = Enum.Font.GothamBold
+    loadingText.TextSize = IS_MOBILE and 14 or 16
+    loadingText.ZIndex = 203
+    loadingText.Parent = loading
+    registerTheme(loadingText, "Text", "TextColor3")
+
+    -- ===== PROGRESS BAR =====
     local barBg = Instance.new("Frame")
-    barBg.Size = UDim2.new(1, -40, 0, 6)
-    barBg.Position = UDim2.new(0, 20, 0, IS_MOBILE and 72 or 80)
+    barBg.Size = UDim2.new(1, -60, 0, 6)
+    barBg.Position = UDim2.new(0, 30, 1, IS_MOBILE and -80 or -90)
     barBg.BackgroundColor3 = C.Surface3
     barBg.BorderSizePixel = 0
-    barBg.ZIndex = 201
+    barBg.ZIndex = 202
     barBg.Parent = loading
-    local bc = Instance.new("UICorner"); bc.CornerRadius = UDim.new(0, 3); bc.Parent = barBg
+    registerTheme(barBg, "Surface3", "BackgroundColor3")
+
+    local bc = Instance.new("UICorner")
+    bc.CornerRadius = UDim.new(1, 0)
+    bc.Parent = barBg
 
     local barFill = Instance.new("Frame")
     barFill.Size = UDim2.new(0, 0, 1, 0)
     barFill.BackgroundColor3 = C.Accent
     barFill.BorderSizePixel = 0
-    barFill.ZIndex = 202
+    barFill.ZIndex = 203
     barFill.Parent = barBg
-    local fc = Instance.new("UICorner"); fc.CornerRadius = UDim.new(0, 3); fc.Parent = barFill
     registerTheme(barFill, "Accent", "BackgroundColor3")
 
-    local statusLbl = Instance.new("TextLabel")
-    statusLbl.Size = UDim2.new(1, -40, 0, 16)
-    statusLbl.Position = UDim2.new(0, 20, 0, IS_MOBILE and 92 or 100)
-    statusLbl.BackgroundTransparency = 1
-    statusLbl.Text = "0%"
-    statusLbl.TextColor3 = C.Accent
-    statusLbl.Font = Enum.Font.GothamBold
-    statusLbl.TextSize = IS_MOBILE and 11 or 12
-    statusLbl.TextXAlignment = Enum.TextXAlignment.Right
-    statusLbl.ZIndex = 201
-    statusLbl.Parent = loading
-    registerTheme(statusLbl, "Accent", "TextColor3")
+    local fc = Instance.new("UICorner")
+    fc.CornerRadius = UDim.new(1, 0)
+    fc.Parent = barFill
 
+    -- ===== PERCENT TEXT =====
+    local percentLbl = Instance.new("TextLabel")
+    percentLbl.Size = UDim2.new(1, -60, 0, 18)
+    percentLbl.Position = UDim2.new(0, 30, 1, IS_MOBILE and -62 or -70)
+    percentLbl.BackgroundTransparency = 1
+    percentLbl.Text = "0%"
+    percentLbl.TextColor3 = C.Accent
+    percentLbl.Font = Enum.Font.GothamBold
+    percentLbl.TextSize = IS_MOBILE and 11 or 12
+    percentLbl.TextXAlignment = Enum.TextXAlignment.Right
+    percentLbl.ZIndex = 203
+    percentLbl.Parent = loading
+    registerTheme(percentLbl, "Accent", "TextColor3")
+
+    -- ===== VRILZHUB BRAND =====
+    local brandLbl = Instance.new("TextLabel")
+    brandLbl.Size = UDim2.new(1, -40, 0, 16)
+    brandLbl.Position = UDim2.new(0, 20, 1, IS_MOBILE and -40 or -45)
+    brandLbl.BackgroundTransparency = 1
+    brandLbl.Text = "V R I L Z H U B"
+    brandLbl.TextColor3 = C.Muted
+    brandLbl.Font = Enum.Font.GothamBold
+    brandLbl.TextSize = IS_MOBILE and 10 or 11
+    brandLbl.ZIndex = 203
+    brandLbl.Parent = loading
+    registerTheme(brandLbl, "Muted", "TextColor3")
+
+    -- ===== FADE IN LOADING =====
+    loading.BackgroundTransparency = 1
+    TweenService:Create(loading, TweenInfo.new(0.5), {BackgroundTransparency = 0}):Play()
+    vLabel.TextTransparency = 1
+    TweenService:Create(vLabel, TweenInfo.new(0.8), {TextTransparency = 0}):Play()
+    loadingText.TextTransparency = 1
+    TweenService:Create(loadingText, TweenInfo.new(0.8), {TextTransparency = 0}):Play()
+
+    -- ===== ANIMASI LOADING (3 detik + 10 detik) =====
     task.spawn(function()
         local start = os.clock()
-        while loading.Parent do
-            local p = math.clamp((os.clock() - start) / 3, 0, 1)
+
+        -- FASE 1: 3 detik pertama
+        loadingText.Text = "Initializing..."
+        for i = 1, 30 do
+            task.wait(0.1)
+            local p = (i / 30) * 0.15
             barFill.Size = UDim2.new(p, 0, 1, 0)
-            statusLbl.Text = math.floor(p * 100) .. "%"
-            if p >= 1 then break end
-            task.wait(0.05)
+            percentLbl.Text = math.floor(p * 100) .. "%"
         end
-        task.wait(0.3)
+
+        -- FASE 2: 10 detik
+        local phases = {
+            {text = "Loading modules...", target = 0.4, duration = 2.5},
+            {text = "Connecting to server...", target = 0.6, duration = 2.5},
+            {text = "Loading features...", target = 0.8, duration = 2.5},
+            {text = "Finalizing...", target = 1.0, duration = 2.5},
+        }
+
+        for _, phase in ipairs(phases) do
+            loadingText.Text = phase.text
+            local startP = barFill.Size.X.Scale
+            local steps = math.floor(phase.duration / 0.05)
+            for i = 1, steps do
+                task.wait(0.05)
+                local t = i / steps
+                local p = startP + (phase.target - startP) * t
+                barFill.Size = UDim2.new(p, 0, 1, 0)
+                percentLbl.Text = math.floor(p * 100) .. "%"
+            end
+        end
+
+        loadingText.Text = "Ready!"
+        percentLbl.Text = "100%"
+        task.wait(0.8)
+
+        -- Fade out
+        spinnerRunning = false
+        TweenService:Create(loading, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(vLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+        TweenService:Create(vLabel2, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+        TweenService:Create(loadingText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+        TweenService:Create(brandLbl, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+        TweenService:Create(percentLbl, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+        TweenService:Create(barBg, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(barFill, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(glow, TweenInfo.new(0.5), {ImageTransparency = 1}):Play()
+        for _, dot in ipairs(spinnerDots) do
+            TweenService:Create(dot, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        end
+        task.wait(0.6)
+
         if loading then loading:Destroy() end
         buildMainWindow(ScreenGui)
         notify("Welcome, " .. LocalPlayer.DisplayName, "success")
