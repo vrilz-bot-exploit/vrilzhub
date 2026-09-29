@@ -91,12 +91,14 @@ local EggNames = {
     "Bloom", "Aurora", "White", "Brown"
 }
 
--- ====== RARITY ======
+-- ====== RARITY (TAMBAH NONE) ======
 local RarityList = {
+    "None",
     "Common", "Uncommon", "Rare", "Epic",
     "Legendary", "Mythic", "Divine", "Ethereal", "Secret"
 }
 local RarityColors = {
+    None = Color3.fromRGB(100, 100, 100),
     Common = Color3.fromRGB(180, 180, 180),
     Uncommon = Color3.fromRGB(80, 200, 80),
     Rare = Color3.fromRGB(80, 150, 255),
@@ -274,14 +276,14 @@ local function notify(text, type)
     end)
 end
 
--- ====== CARD ======
+-- ====== CARD (DENGAN EFFECT HOVER + PRESS + RIPPLE) ======
 local function makeCard(parent, title, layoutOrder)
     local card = Instance.new("Frame")
     card.Size = UDim2.new(1, 0, 0, 0)
     card.AutomaticSize = Enum.AutomaticSize.Y
     card.BackgroundColor3 = C.Surface
     card.BorderSizePixel = 0
-    card.ClipsDescendants = false
+    card.ClipsDescendants = true
     card.LayoutOrder = layoutOrder or 1
     card.ZIndex = 1
     card.Parent = parent
@@ -298,6 +300,86 @@ local function makeCard(parent, title, layoutOrder)
     stroke.Parent = card
     registerTheme(stroke, "Accent", "Color")
 
+    -- ===== RIPPLE LAYER =====
+    local rippleLayer = Instance.new("Frame")
+    rippleLayer.Name = "RippleLayer"
+    rippleLayer.Size = UDim2.fromScale(1, 1)
+    rippleLayer.BackgroundTransparency = 1
+    rippleLayer.ClipsDescendants = true
+    rippleLayer.ZIndex = 99
+    rippleLayer.Parent = card
+
+    -- ===== HOVER EFFECT =====
+    local hoverOffset = IS_MOBILE and 1 or 2
+    local originalStrokeTrans = 0.5
+
+    card.MouseEnter:Connect(function()
+        if not IS_MOBILE then
+            TweenService:Create(card, TweenInfo.new(0.2), {
+                Position = UDim2.new(0, 0, 0, -hoverOffset)
+            }):Play()
+            TweenService:Create(stroke, TweenInfo.new(0.2), {
+                Transparency = 0.1,
+                Thickness = 2
+            }):Play()
+        end
+    end)
+
+    card.MouseLeave:Connect(function()
+        if not IS_MOBILE then
+            TweenService:Create(card, TweenInfo.new(0.2), {
+                Position = UDim2.new(0, 0, 0, 0)
+            }):Play()
+            TweenService:Create(stroke, TweenInfo.new(0.2), {
+                Transparency = originalStrokeTrans,
+                Thickness = 1
+            }):Play()
+        end
+    end)
+
+    -- ===== PRESS + RIPPLE EFFECT =====
+    card.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            -- Scale down
+            TweenService:Create(card, TweenInfo.new(0.08), {
+                Size = UDim2.new(0.98, 0, 0, card.AbsoluteSize.Y * 0.98)
+            }):Play()
+
+            -- Ripple
+            local ripple = Instance.new("Frame")
+            ripple.Size = UDim2.fromOffset(0, 0)
+            ripple.Position = UDim2.fromOffset(input.Position.X - card.AbsolutePosition.X, input.Position.Y - card.AbsolutePosition.Y)
+            ripple.AnchorPoint = Vector2.new(0.5, 0.5)
+            ripple.BackgroundColor3 = C.Accent
+            ripple.BackgroundTransparency = 0.7
+            ripple.BorderSizePixel = 0
+            ripple.ZIndex = 100
+            ripple.Parent = rippleLayer
+
+            local rippleCorner = Instance.new("UICorner")
+            rippleCorner.CornerRadius = UDim.new(1, 0)
+            rippleCorner.Parent = ripple
+
+            TweenService:Create(ripple, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = UDim2.fromOffset(card.AbsoluteSize.X * 2, card.AbsoluteSize.X * 2),
+                BackgroundTransparency = 1
+            }):Play()
+
+            task.delay(0.7, function()
+                if ripple then ripple:Destroy() end
+            end)
+        end
+    end)
+
+    card.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            TweenService:Create(card, TweenInfo.new(0.1, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                Size = UDim2.new(1, 0, 0, card.AbsoluteSize.Y / 0.98)
+            }):Play()
+        end
+    end)
+
+    -- Header
     local headerFrame = Instance.new("Frame")
     headerFrame.Size = UDim2.new(1, 0, 0, CFG.CARD_HEADER)
     headerFrame.BackgroundColor3 = C.Surface2
@@ -627,7 +709,7 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     return container
 end
 
--- ====== DROPDOWN MULTI-SELECT ======
+-- ====== DROPDOWN MULTI-SELECT (DENGAN LOGIKA NONE) ======
 local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, onChanged)
     local isOpen = false
 
@@ -713,6 +795,8 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     local itemHeight = CFG.DROPDOWN_ITEM
     local maxH = math.min(#items * (itemHeight + 2) + 10, IS_MOBILE and 220 or 180)
 
+    local optionButtons = {} -- Simpan reference
+
     local function updateLabel()
         local selected = {}
         for _, r in ipairs(items) do
@@ -720,11 +804,22 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         end
         if #selected == 0 then
             selectedLbl.Text = "Pilih Rarity..."
+        elseif #selected == 1 and selected[1] == "None" then
+            selectedLbl.Text = "None"
         elseif #selected <= 2 then
             selectedLbl.Text = table.concat(selected, ", ")
         else
             selectedLbl.Text = #selected .. " rarity dipilih"
         end
+    end
+
+    local function updateButtonVisual(item)
+        local opt = optionButtons[item]
+        if not opt then return end
+        local on = sharedTable[item] == true
+        opt.chk.Text = on and "✓" or "○"
+        opt.bg.BackgroundColor3 = on and ((itemColors and itemColors[item]) or C.Accent) or C.Surface3
+        opt.txt.TextColor3 = on and Color3.new(1, 1, 1) or ((itemColors and itemColors[item]) or C.Text)
     end
 
     local function closeList()
@@ -829,12 +924,58 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
             txt.TextColor3 = Color3.new(1, 1, 1)
         end
 
+        optionButtons[item] = {bg = opt, chk = chk, txt = txt}
+
         opt.MouseButton1Click:Connect(function()
-            sharedTable[item] = not sharedTable[item]
-            local on = sharedTable[item]
-            chk.Text = on and "✓" or "○"
-            opt.BackgroundColor3 = on and ((itemColors and itemColors[item]) or C.Accent) or C.Surface3
-            txt.TextColor3 = on and Color3.new(1, 1, 1) or ((itemColors and itemColors[item]) or C.Text)
+            local isNone = (item == "None")
+
+            if isNone then
+                -- Klik None: kalau ON, uncheck semua rarity lain + keep None
+                -- kalau OFF, jangan biarin (harus ada yg kepilih)
+                if sharedTable["None"] then
+                    -- Coba uncheck None → cek apakah masih ada rarity lain
+                    local anyOther = false
+                    for _, r in ipairs(items) do
+                        if r ~= "None" and sharedTable[r] then anyOther = true break end
+                    end
+                    if not anyOther then
+                        -- Gak boleh uncheck None kalau gak ada yg lain
+                        return
+                    end
+                    sharedTable["None"] = false
+                    updateButtonVisual("None")
+                else
+                    -- Check None: uncheck semua rarity lain
+                    for _, r in ipairs(items) do
+                        if r ~= "None" then sharedTable[r] = false end
+                    end
+                    sharedTable["None"] = true
+                    for _, r in ipairs(items) do updateButtonVisual(r) end
+                end
+            else
+                -- Klik rarity biasa
+                sharedTable[item] = not sharedTable[item]
+                if sharedTable[item] then
+                    -- Kalau baru check rarity, uncheck None
+                    if sharedTable["None"] then
+                        sharedTable["None"] = false
+                        updateButtonVisual("None")
+                    end
+                else
+                    -- Kalau uncheck rarity, cek apakah semua rarity off
+                    local anyOn = false
+                    for _, r in ipairs(items) do
+                        if r ~= "None" and sharedTable[r] then anyOn = true break end
+                    end
+                    if not anyOn then
+                        -- Semua rarity off → check None
+                        sharedTable["None"] = true
+                        updateButtonVisual("None")
+                    end
+                end
+                updateButtonVisual(item)
+            end
+
             updateLabel()
             if onChanged then onChanged(sharedTable) end
         end)
@@ -1324,10 +1465,13 @@ local function buildMainWindow(parent)
         return page
     end
 
-    -- TAB INFO
+    -- ========================================================
+    -- TAB INFO (DENGAN DISCORD + INFORMASI)
+    -- ========================================================
     local infoPage = createPage("Info")
     pages.Info = infoPage
 
+    -- Card profile
     local infoCard, infoContent = makeCard(infoPage, "INFORMASI CLIENT", 1)
 
     local avRow = Instance.new("Frame")
@@ -1406,9 +1550,98 @@ local function buildMainWindow(parent)
         end
     end)
 
+    -- Card Info Update
+    local updateCard, updateContent = makeCard(infoPage, "📢 INFORMASI UPDATE", 2)
+
+    local infoLines = {
+        "Version        : 5.5",
+        "Last Update    : 29 Sept 2026",
+        "Status         : Online ✅",
+        "Changelog      : Speed, Auto Farm",
+        "                 Instant Pickup, Rarity",
+    }
+    for i, line in ipairs(infoLines) do
+        local lbl = Instance.new("TextLabel")
+        lbl.Size = UDim2.new(1, 0, 0, 14)
+        lbl.BackgroundTransparency = 1
+        lbl.Text = line
+        lbl.TextColor3 = C.Muted
+        lbl.Font = Enum.Font.GothamSemibold
+        lbl.TextSize = CFG.FONT_MUTED
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+        lbl.LayoutOrder = i
+        lbl.ZIndex = 3
+        lbl.Parent = updateContent
+        registerTheme(lbl, "Muted", "TextColor3")
+    end
+
+    -- Card Exploit Support
+    local explCard, explContent = makeCard(infoPage, "🎮 EXPLOIT SUPPORT", 3)
+
+    local explLines = {
+        "✅ Delta       ✅ Fluxus",
+        "✅ Xeno        ✅ Codex",
+        "✅ Solara      ✅ Wave",
+    }
+    for i, line in ipairs(explLines) do
+        local lbl = Instance.new("TextLabel")
+        lbl.Size = UDim2.new(1, 0, 0, 14)
+        lbl.BackgroundTransparency = 1
+        lbl.Text = line
+        lbl.TextColor3 = C.Muted
+        lbl.Font = Enum.Font.GothamSemibold
+        lbl.TextSize = CFG.FONT_MUTED
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+        lbl.LayoutOrder = i
+        lbl.ZIndex = 3
+        lbl.Parent = explContent
+        registerTheme(lbl, "Muted", "TextColor3")
+    end
+
+    -- Card Discord (KLIK → COPY LINK)
+    local discordCard, discordContent = makeCard(infoPage, "💬 JOIN DISCORD", 4)
+    local DISCORD_LINK = "https://discord.gg/psWhrYWbq"
+
+    local discordLinkLbl = Instance.new("TextLabel")
+    discordLinkLbl.Size = UDim2.new(1, 0, 0, 18)
+    discordLinkLbl.BackgroundTransparency = 1
+    discordLinkLbl.Text = "discord.gg/psWhrYWbq"
+    discordLinkLbl.TextColor3 = C.Accent
+    discordLinkLbl.Font = Enum.Font.GothamBold
+    discordLinkLbl.TextSize = CFG.FONT_LABEL
+    discordLinkLbl.TextXAlignment = Enum.TextXAlignment.Center
+    discordLinkLbl.LayoutOrder = 1
+    discordLinkLbl.ZIndex = 3
+    discordLinkLbl.Parent = discordContent
+    registerTheme(discordLinkLbl, "Accent", "TextColor3")
+
+    local discordBtn = Instance.new("TextButton")
+    discordBtn.Size = UDim2.new(1, 0, 0, 32)
+    discordBtn.BackgroundColor3 = C.Accent
+    discordBtn.Text = "[ KLIK UNTUK JOIN ]"
+    discordBtn.TextColor3 = Color3.new(1, 1, 1)
+    discordBtn.Font = Enum.Font.GothamBold
+    discordBtn.TextSize = CFG.FONT_LABEL
+    discordBtn.AutoButtonColor = false
+    discordBtn.LayoutOrder = 2
+    discordBtn.ZIndex = 3
+    discordBtn.Parent = discordContent
+    registerTheme(discordBtn, "Accent", "BackgroundColor3")
+
+    local discordBtnCorner = Instance.new("UICorner")
+    discordBtnCorner.CornerRadius = UDim.new(0, 8)
+    discordBtnCorner.Parent = discordBtn
+
+    discordBtn.MouseButton1Click:Connect(function()
+        pcall(function() setclipboard(DISCORD_LINK) end)
+        notify("✓ Discord link dicopy!", "success")
+    end)
+
     registerTab("Info", "ℹ", "Info")
 
+    -- ========================================================
     -- TAB PREDIKSI
+    -- ========================================================
     local predPage = createPage("Prediksi")
     pages.Prediksi = predPage
 
@@ -1561,18 +1794,20 @@ local function buildMainWindow(parent)
 
     registerTab("Prediksi", "◎", "Prediksi")
 
+    -- ========================================================
     -- TAB EGG
+    -- ========================================================
     local eggPage = createPage("Egg")
     pages.Egg = eggPage
 
     local eggEspCard, eggEspContent = makeCard(eggPage, "EGG ESP", 1)
     makeToggle(eggEspContent, "Aktifkan Egg ESP", false, function(v) Shared.ESP_Eggs_Enabled = v end)
-    makeToggle(eggEspContent, "Tampilkan Nama", true, function(v) Shared.ESP_EggName_Enabled = v end)
-    makeToggle(eggEspContent, "Tampilkan Luck", true, function(v) Shared.ESP_EggLuck_Enabled = v end)
+    makeToggle(eggEspContent, "Tampilkan Nama", false, function(v) Shared.ESP_EggName_Enabled = v end)
+    makeToggle(eggEspContent, "Tampilkan Luck", false, function(v) Shared.ESP_EggLuck_Enabled = v end)
 
     local autoStealCard, autoStealContent = makeCard(eggPage, "AUTO STEAL", 2)
     makeToggle(autoStealContent, "Aktifkan Auto Steal", false, function(v) Shared.AutoSteal_Enabled = v end)
-    makeToggle(autoStealContent, "Auto Return ke Plot", true, function(v) Shared.AutoReturn_Enabled = v end)
+    makeToggle(autoStealContent, "Auto Return ke Plot", false, function(v) Shared.AutoReturn_Enabled = v end)
     makeToggle(autoStealContent, "Auto Hatch", false, function(v) Shared.AutoHatch_Enabled = v end)
 
     local eggNameLbl = Instance.new("TextLabel")
@@ -1593,24 +1828,28 @@ local function buildMainWindow(parent)
 
     registerTab("Egg", "◯", "Egg")
 
+    -- ========================================================
     -- TAB VISUAL
+    -- ========================================================
     local visualPage = createPage("Visual")
     pages.Visual = visualPage
 
     local pEspCard, pEspContent = makeCard(visualPage, "PLAYER ESP", 1)
     makeToggle(pEspContent, "Player ESP", false, function(v) Shared.ESP_Players_Enabled = v end)
-    makeToggle(pEspContent, "Player Chams", true, function(v) Shared.ESP_PlayerChams_Enabled = v end)
-    makeToggle(pEspContent, "Player Studs", true, function(v) Shared.ESP_PlayerStuds_Enabled = v end)
+    makeToggle(pEspContent, "Player Chams", false, function(v) Shared.ESP_PlayerChams_Enabled = v end)
+    makeToggle(pEspContent, "Player Studs", false, function(v) Shared.ESP_PlayerStuds_Enabled = v end)
 
     local petEspCard, petEspContent = makeCard(visualPage, "PET ESP", 2)
     makeToggle(petEspContent, "Pet ESP", false, function(v) Shared.ESP_Pets_Enabled = v end)
-    makeToggle(petEspContent, "Tampilkan Nama", true, function(v) Shared.ESP_PetName_Enabled = v end)
-    makeToggle(petEspContent, "Tampilkan Cash", true, function(v) Shared.ESP_PetCash_Enabled = v end)
-    makeToggle(petEspContent, "Tampilkan Speed", true, function(v) Shared.ESP_PetSpeed_Enabled = v end)
+    makeToggle(petEspContent, "Tampilkan Nama", false, function(v) Shared.ESP_PetName_Enabled = v end)
+    makeToggle(petEspContent, "Tampilkan Cash", false, function(v) Shared.ESP_PetCash_Enabled = v end)
+    makeToggle(petEspContent, "Tampilkan Speed", false, function(v) Shared.ESP_PetSpeed_Enabled = v end)
 
     registerTab("Visual", "◆", "Visual")
 
+    -- ========================================================
     -- TAB AUTO
+    -- ========================================================
     local autoPage = createPage("Auto")
     pages.Auto = autoPage
 
@@ -1675,7 +1914,7 @@ local function buildMainWindow(parent)
         end
     end)
 
-    -- INSTANT PICKUP (TOGGLE SENDIRI)
+    -- INSTANT PICKUP
     local ipCard, ipContent = makeCard(autoPage, "INSTANT PICKUP", 2)
     makeToggle(ipContent, "Aktifkan Instant Pickup", false, function(v) Shared.InstantPickup_Enabled = v end)
 
@@ -1693,7 +1932,7 @@ local function buildMainWindow(parent)
     -- AUTO FARM
     local farmCard, farmContent = makeCard(autoPage, "AUTO FARM", 3)
     makeToggle(farmContent, "Aktifkan Auto Farm", false, function(v) Shared.AutoFarm_Enabled = v end)
-    makeToggle(farmContent, "Auto Return ke Plot", true, function(v) Shared.AutoReturn_Enabled = v end)
+    makeToggle(farmContent, "Auto Return ke Plot", false, function(v) Shared.AutoReturn_Enabled = v end)
 
     local rarTitle = Instance.new("TextLabel")
     rarTitle.Size = UDim2.new(1, 0, 0, 16)
@@ -1730,7 +1969,9 @@ local function buildMainWindow(parent)
 
     registerTab("Auto", "▶", "Auto")
 
+    -- ========================================================
     -- TAB SETTINGS
+    -- ========================================================
     local setPage = createPage("Settings")
     pages.Settings = setPage
 
@@ -1858,7 +2099,6 @@ end
 local function buildLoadingScreen(parent)
     local viewport = (workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize) or Vector2.new(1280, 720)
 
-    -- Kotak tegas (TIDAK ADA UICorner di luar)
     local winW = IS_MOBILE and 280 or 360
     local winH = IS_MOBILE and 200 or 240
 
@@ -1873,21 +2113,18 @@ local function buildLoadingScreen(parent)
     loading.ClipsDescendants = true
     loading.Parent = parent
 
-    -- Stroke merah tebal (brutal)
     local stroke1 = Instance.new("UIStroke")
     stroke1.Color = Color3.fromRGB(255, 30, 60)
     stroke1.Thickness = 3
     stroke1.Transparency = 0
     stroke1.Parent = loading
 
-    -- Stroke putih tipis (double border)
     local stroke2 = Instance.new("UIStroke")
     stroke2.Color = Color3.fromRGB(255, 255, 255)
     stroke2.Thickness = 1
     stroke2.Transparency = 0.7
     stroke2.Parent = loading
 
-    -- Garis brutal atas
     local topBar = Instance.new("Frame")
     topBar.Size = UDim2.new(1, 0, 0, 4)
     topBar.Position = UDim2.fromOffset(0, 0)
@@ -1896,7 +2133,6 @@ local function buildLoadingScreen(parent)
     topBar.ZIndex = 310
     topBar.Parent = loading
 
-    -- Garis brutal bawah
     local botBar = Instance.new("Frame")
     botBar.Size = UDim2.new(1, 0, 0, 4)
     botBar.Position = UDim2.new(0, 0, 1, -4)
@@ -1905,7 +2141,6 @@ local function buildLoadingScreen(parent)
     botBar.ZIndex = 310
     botBar.Parent = loading
 
-    -- Corner brackets (4 sudut)
     local function makeBracket(posX, posY, sizeX, sizeY)
         local b = Instance.new("Frame")
         b.Size = UDim2.fromOffset(sizeX, sizeY)
@@ -1926,7 +2161,6 @@ local function buildLoadingScreen(parent)
     makeBracket(winW - 28, winH - 8, 22, 2)
     makeBracket(winW - 8, winH - 28, 2, 22)
 
-    -- Scanline
     local scanlines = Instance.new("Frame")
     scanlines.Size = UDim2.fromScale(1, 1)
     scanlines.BackgroundTransparency = 1
@@ -1945,7 +2179,6 @@ local function buildLoadingScreen(parent)
         line.Parent = scanlines
     end
 
-    -- Noise
     local noise = Instance.new("Frame")
     noise.Size = UDim2.fromScale(1, 1)
     noise.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -1954,7 +2187,6 @@ local function buildLoadingScreen(parent)
     noise.ZIndex = 319
     noise.Parent = loading
 
-    -- Glitch bars
     local glitchBars = {}
     for i = 1, 6 do
         local bar = Instance.new("Frame")
@@ -1969,7 +2201,6 @@ local function buildLoadingScreen(parent)
         table.insert(glitchBars, bar)
     end
 
-    -- Holder V
     local vHolder = Instance.new("Frame")
     vHolder.Size = UDim2.fromScale(1, 0.55)
     vHolder.Position = UDim2.fromScale(0, 0.15)
@@ -1977,7 +2208,6 @@ local function buildLoadingScreen(parent)
     vHolder.ZIndex = 305
     vHolder.Parent = loading
 
-    -- V glow
     local vGlow = Instance.new("TextLabel")
     vGlow.Size = UDim2.fromScale(1, 1)
     vGlow.BackgroundTransparency = 1
@@ -1989,7 +2219,6 @@ local function buildLoadingScreen(parent)
     vGlow.ZIndex = 304
     vGlow.Parent = vHolder
 
-    -- V RGB split merah
     local vRed = Instance.new("TextLabel")
     vRed.Size = UDim2.fromScale(1, 1)
     vRed.Position = UDim2.fromOffset(-2, 0)
@@ -2002,7 +2231,6 @@ local function buildLoadingScreen(parent)
     vRed.ZIndex = 305
     vRed.Parent = vHolder
 
-    -- V RGB split biru
     local vBlue = Instance.new("TextLabel")
     vBlue.Size = UDim2.fromScale(1, 1)
     vBlue.Position = UDim2.fromOffset(2, 0)
@@ -2015,7 +2243,6 @@ local function buildLoadingScreen(parent)
     vBlue.ZIndex = 305
     vBlue.Parent = vHolder
 
-    -- V utama
     local vLabel = Instance.new("TextLabel")
     vLabel.Size = UDim2.fromScale(1, 1)
     vLabel.BackgroundTransparency = 1
@@ -2026,7 +2253,6 @@ local function buildLoadingScreen(parent)
     vLabel.ZIndex = 306
     vLabel.Parent = vHolder
 
-    -- Petir holder
     local lightningHolder = Instance.new("Frame")
     lightningHolder.Size = UDim2.fromScale(1, 1)
     lightningHolder.BackgroundTransparency = 1
@@ -2034,7 +2260,6 @@ local function buildLoadingScreen(parent)
     lightningHolder.ClipsDescendants = true
     lightningHolder.Parent = loading
 
-    -- Fungsi bikin petir
     local function createLightning()
         local bolt = Instance.new("Frame")
         bolt.BackgroundTransparency = 1
@@ -2092,7 +2317,6 @@ local function buildLoadingScreen(parent)
         end)
     end
 
-    -- Loading text
     local loadingText = Instance.new("TextLabel")
     loadingText.Size = UDim2.new(1, -20, 0, 18)
     loadingText.Position = UDim2.new(0, 10, 0, winH - 68)
@@ -2105,7 +2329,6 @@ local function buildLoadingScreen(parent)
     loadingText.ZIndex = 306
     loadingText.Parent = loading
 
-    -- Progress bar
     local barBg = Instance.new("Frame")
     barBg.Size = UDim2.new(1, -20, 0, 6)
     barBg.Position = UDim2.new(0, 10, 0, winH - 44)
@@ -2127,7 +2350,6 @@ local function buildLoadingScreen(parent)
     barFill.ZIndex = 306
     barFill.Parent = barBg
 
-    -- Percent
     local percentLbl = Instance.new("TextLabel")
     percentLbl.Size = UDim2.new(1, -20, 0, 14)
     percentLbl.Position = UDim2.new(0, 10, 0, winH - 26)
@@ -2140,7 +2362,6 @@ local function buildLoadingScreen(parent)
     percentLbl.ZIndex = 306
     percentLbl.Parent = loading
 
-    -- Brand
     local brandLbl = Instance.new("TextLabel")
     brandLbl.Size = UDim2.new(1, -20, 0, 14)
     brandLbl.Position = UDim2.new(0, 10, 0, winH - 26)
@@ -2152,8 +2373,6 @@ local function buildLoadingScreen(parent)
     brandLbl.TextXAlignment = Enum.TextXAlignment.Left
     brandLbl.ZIndex = 306
     brandLbl.Parent = loading
-
-    -- ===== EFFECT LOOPS =====
 
     task.spawn(function()
         while loading.Parent do
@@ -2205,7 +2424,6 @@ local function buildLoadingScreen(parent)
         end
     end)
 
-    -- ===== ANIMASI V MEMBESAR =====
     task.spawn(function()
         local startSize = 1
         local endSize = IS_MOBILE and 130 or 170
@@ -2230,7 +2448,6 @@ local function buildLoadingScreen(parent)
         end
     end)
 
-    -- ===== ANIMASI LOADING =====
     task.spawn(function()
         loading.Size = UDim2.fromOffset(0, 0)
         TweenService:Create(loading, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
@@ -2238,7 +2455,6 @@ local function buildLoadingScreen(parent)
         }):Play()
         task.wait(0.6)
 
-        -- FASE 1: 3 detik
         loadingText.Text = "INITIALIZING..."
         for i = 1, 30 do
             task.wait(0.1)
@@ -2247,7 +2463,6 @@ local function buildLoadingScreen(parent)
             percentLbl.Text = math.floor(p * 100) .. "%"
         end
 
-        -- FASE 2: 10 detik
         local phases = {
             {text = "LOADING MODULES...", target = 0.4, duration = 2.5},
             {text = "CONNECTING SERVER...", target = 0.6, duration = 2.5},
@@ -2297,21 +2512,21 @@ function UI.Init(sharedState)
     Shared = sharedState
     Shared.Notify = notify
 
-    -- Defaults
+    -- Defaults SEMUA OFF
     Shared.ESP_Eggs_Enabled = false
-    Shared.ESP_EggName_Enabled = true
-    Shared.ESP_EggLuck_Enabled = true
+    Shared.ESP_EggName_Enabled = false
+    Shared.ESP_EggLuck_Enabled = false
     Shared.ESP_Pets_Enabled = false
-    Shared.ESP_PetName_Enabled = true
-    Shared.ESP_PetCash_Enabled = true
-    Shared.ESP_PetSpeed_Enabled = true
+    Shared.ESP_PetName_Enabled = false
+    Shared.ESP_PetCash_Enabled = false
+    Shared.ESP_PetSpeed_Enabled = false
     Shared.AutoSteal_Enabled = false
-    Shared.AutoReturn_Enabled = true
+    Shared.AutoReturn_Enabled = false
     Shared.AutoHatch_Enabled = false
     Shared.AutoRidePet_Enabled = false
     Shared.AutoEquipBest_Enabled = false
     Shared.SelectedEgg = "Cherub"
-    Shared.EggPrediction_Enabled = true
+    Shared.EggPrediction_Enabled = false
     Shared.EggsInMap = {}
     Shared.EggPredictions = {}
 
@@ -2319,17 +2534,22 @@ function UI.Init(sharedState)
     Shared.Speed_Enabled = false
     Shared.Speed_Value = 100
 
-    -- INSTANT PICKUP (toggle sendiri)
+    -- INSTANT PICKUP
     Shared.InstantPickup_Enabled = false
 
-    -- AUTO FARM
+    -- AUTO FARM - default None
     Shared.AutoFarm_Enabled = false
     Shared.SelectedRarities = {
-        ["Legendary"] = true,
-        ["Mythic"] = true,
-        ["Divine"] = true,
-        ["Ethereal"] = true,
-        ["Secret"] = true,
+        ["None"] = true,
+        ["Common"] = false,
+        ["Uncommon"] = false,
+        ["Rare"] = false,
+        ["Epic"] = false,
+        ["Legendary"] = false,
+        ["Mythic"] = false,
+        ["Divine"] = false,
+        ["Ethereal"] = false,
+        ["Secret"] = false,
     }
     Shared.RarityNotifThreshold = "Legendary"
 
@@ -2343,7 +2563,6 @@ function UI.Init(sharedState)
     setupNotifHolder(ScreenGui)
     setupDropdownLayer(ScreenGui)
 
-    -- PANGGIL LOADING SCREEN BRUTAL (BUKAN LOADING LAMA)
     buildLoadingScreen(ScreenGui)
 end
 
