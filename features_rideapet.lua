@@ -596,7 +596,7 @@ function Features.startInstantPickup()
 end
 
 -- ============================================================
--- AUTO FARM — TELEPORT, TUNGGU, PICKUP, RETURN (ANTI CRASH)
+-- AUTO FARM — TELEPORT → PICKUP → CEK → RETURN
 -- ============================================================
 local NotifiedEggs = {}
 
@@ -664,10 +664,25 @@ local function returnToMyPlot()
     end
 end
 
+-- Cek apakah egg masih ada di RenderedEggs
+local function isEggStillInMap(egg)
+    if not egg or not egg.Parent then return false end
+    return true
+end
+
 function Features.startAutoFarm()
     task.spawn(function()
         while task.wait(0.5) do
             if not Shared.AutoFarm_Enabled then continue end
+
+            -- Cek character hidup
+            local char = LocalPlayer.Character
+            local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if not myRoot or not hum or hum.Health <= 0 then
+                task.wait(1)
+                continue
+            end
 
             -- Cleanup
             local rendered = Workspace:FindFirstChild("RenderedEggs")
@@ -705,11 +720,8 @@ function Features.startAutoFarm()
                 end
             end
 
-            local char = LocalPlayer.Character
-            local myRoot = char and char:FindFirstChild("HumanoidRootPart")
-            local hum = char and char:FindFirstChildOfClass("Humanoid")
             local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
-            if not myRoot or not eggPart then continue end
+            if not eggPart then continue end
 
             -- Ubah prompt jadi instant
             local prompt = egg:FindFirstChild("Pickup", true)
@@ -717,29 +729,38 @@ function Features.startAutoFarm()
                 prompt.HoldDuration = 0
             end
 
-            -- 1. Teleport ke egg
-            myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
-            if hum then
-                hum:ChangeState(Enum.HumanoidStateType.Physics)
+            -- ===== STEP 1: TELEPORT =====
+            myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 5, 0)
+            task.wait(0.1)
+
+            -- ===== STEP 2: PICKUP + CEK SAMPE KE-PICKUP =====
+            local maxTries = 10
+            for i = 1, maxTries do
+                -- Fire pickup
+                if prompt and typeof(fireproximityprompt) == "function" then
+                    pcall(fireproximityprompt, prompt)
+                end
+                task.wait(0.3)
+
+                -- Cek apakah egg masih ada di map
+                if not isEggStillInMap(egg) then
+                    break
+                end
+
+                -- Kalau masih ada, teleport ulang (posisi kadang geser)
+                if eggPart and eggPart.Parent then
+                    myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 5, 0)
+                    task.wait(0.1)
+                end
             end
 
-            -- 2. Tunggu bentar (server register posisi)
-            task.wait(0.3)
-
-            -- 3. Fire pickup
-            if prompt and typeof(fireproximityprompt) == "function" then
-                pcall(fireproximityprompt, prompt)
-            end
-
-            -- 4. Tunggu pickup kelar
-            task.wait(0.5)
-
-            -- 5. Return ke plot
+            -- ===== STEP 3: RETURN KE PLOT =====
             if Shared.AutoReturn_Enabled then
                 returnToMyPlot()
+                task.wait(0.3)
             end
 
-            -- 6. Jeda sebelum loop lagi
+            -- Jeda sebelum loop berikutnya
             task.wait(0.3)
         end
     end)
