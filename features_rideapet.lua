@@ -1,7 +1,7 @@
 -- ============================================================
 -- VRILZHUB FEATURES — RIDE A PET v3.2
 -- + Egg Prediction System + Notif Egg No Spawn
--- + Speed + Instant Pickup (toggle) + Auto Farm (Rarity Multi)
+-- + Speed + Instant Pickup (no teleport) + Auto Farm
 -- ============================================================
 
 local Features = {}
@@ -591,21 +591,19 @@ function Features.startSpeed()
 end
 
 -- ============================================================
--- INSTANT PICKUP
+-- INSTANT PICKUP — FIRE REMOTE LANGSUNG (NO TELEPORT, NO HOLD)
 -- ============================================================
 function Features.instantPickup(egg)
-    local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
-    local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not eggPart or not root then return false end
-
-    root.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+    if not egg then return false end
 
     local remote = getRemote("EggPickup")
     if remote then
+        -- FIRE LANGSUNG, no hold, no loading
         pcall(function() remote:FireServer(egg) end)
         return true
     end
 
+    -- Fallback: fire prompt (masih ada hold 0.2s)
     local prompt = egg:FindFirstChild("Pickup", true)
     if prompt and typeof(fireproximityprompt) == "function" then
         pcall(fireproximityprompt, prompt)
@@ -614,41 +612,61 @@ function Features.instantPickup(egg)
     return false
 end
 
--- ============================================================
--- INSTANT PICKUP — TOGGLE SENDIRI
--- ============================================================
-local lastInstantPickup = 0
+-- Cari egg terdekat dalam radius
+local function getNearestEggInRange(radius)
+    radius = radius or 15
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return nil end
 
+    local rendered = Workspace:FindFirstChild("RenderedEggs")
+    if not rendered then return nil end
+
+    local best, bestDist = nil, radius
+    for _, egg in ipairs(rendered:GetChildren()) do
+        if egg:IsA("Model") then
+            local part = egg:FindFirstChildWhichIsA("BasePart", true)
+            if part then
+                local d = (part.Position - myRoot.Position).Magnitude
+                if d < bestDist then
+                    best, bestDist = egg, d
+                end
+            end
+        end
+    end
+    return best
+end
+
+-- Fungsi manual: dipanggil dari tombol UI
+function Features.pickupNearest()
+    local egg = getNearestEggInRange(15)
+    if not egg then
+        if Shared.Notify then
+            Shared.Notify("Nggak ada egg deket (max 15 studs)", "warning")
+        end
+        return false
+    end
+    local ok = Features.instantPickup(egg)
+    if ok and Shared.Notify then
+        Shared.Notify("✓ " .. egg.Name, "success")
+    end
+    return ok
+end
+
+-- Auto mode: deket egg → langsung fire
+local lastAutoPickup = 0
 function Features.startInstantPickup()
     task.spawn(function()
-        while task.wait(0.3) do
+        while task.wait(0.2) do
             if not Shared.InstantPickup_Enabled then continue end
             if Shared.AutoFarm_Enabled then continue end
 
-            local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if not myRoot then continue end
+            local egg = getNearestEggInRange(15)
+            if not egg then continue end
 
-            local rendered = Workspace:FindFirstChild("RenderedEggs")
-            if not rendered then continue end
+            if os.clock() - lastAutoPickup < 0.5 then continue end
+            lastAutoPickup = os.clock()
 
-            local best, bestDist = nil, math.huge
-            for _, egg in ipairs(rendered:GetChildren()) do
-                if egg:IsA("Model") and isRaritySelected(egg.Name) then
-                    local part = egg:FindFirstChildWhichIsA("BasePart", true)
-                    if part then
-                        local d = (part.Position - myRoot.Position).Magnitude
-                        if d < bestDist then
-                            best, bestDist = egg, d
-                        end
-                    end
-                end
-            end
-
-            if not best then continue end
-            if os.clock() - lastInstantPickup < 0.2 then continue end
-            lastInstantPickup = os.clock()
-
-            Features.instantPickup(best)
+            Features.instantPickup(egg)
         end
     end)
 end
@@ -767,7 +785,7 @@ function Features.startAutoFarm()
             local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
             if not myRoot or not eggPart then continue end
 
-            -- Teleport ke egg
+            -- Teleport ke egg (WAJIB buat Auto Farm, biar server validasi jarak)
             myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
             task.wait(0.1)
 
