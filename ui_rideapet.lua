@@ -1732,6 +1732,386 @@ local function buildMainWindow(parent)
 end
 
 -- ============================================================
+-- LOADING SCREEN BRUTAL — KOTAK, V ANIMASI MEMBESAR, EFEK BANYAK
+-- ============================================================
+local function buildLoadingScreen(parent)
+    local viewport = (workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize) or Vector2.new(1280, 720)
+
+    -- Container kotak
+    local winW = IS_MOBILE and 280 or 360
+    local winH = IS_MOBILE and 200 or 240
+
+    local loading = Instance.new("Frame")
+    loading.Name = "LoadingScreen"
+    loading.AnchorPoint = Vector2.new(0.5, 0.5)
+    loading.Position = UDim2.fromScale(0.5, 0.5)
+    loading.Size = UDim2.fromOffset(0, 0)
+    loading.BackgroundColor3 = Color3.fromRGB(8, 2, 5)
+    loading.BorderSizePixel = 0
+    loading.ZIndex = 300
+    loading.Parent = parent
+
+    local lc = Instance.new("UICorner")
+    lc.CornerRadius = UDim.new(0, 6)
+    lc.Parent = loading
+
+    -- Stroke brutal
+    local stroke1 = Instance.new("UIStroke")
+    stroke1.Color = Color3.fromRGB(255, 50, 80)
+    stroke1.Thickness = 3
+    stroke1.Transparency = 0
+    stroke1.Parent = loading
+
+    local stroke2 = Instance.new("UIStroke")
+    stroke2.Color = Color3.fromRGB(255, 255, 255)
+    stroke2.Thickness = 1
+    stroke2.Transparency = 0.6
+    stroke2.Parent = loading
+
+    -- ===== SCANLINE OVERLAY =====
+    local scanlines = Instance.new("Frame")
+    scanlines.Size = UDim2.fromScale(1, 1)
+    scanlines.BackgroundTransparency = 1
+    scanlines.ZIndex = 320
+    scanlines.ClipsDescendants = true
+    scanlines.Parent = loading
+
+    for i = 0, math.floor(winH / 4) do
+        local line = Instance.new("Frame")
+        line.Size = UDim2.new(1, 0, 0, 1)
+        line.Position = UDim2.fromOffset(0, i * 4)
+        line.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        line.BackgroundTransparency = 0.7
+        line.BorderSizePixel = 0
+        line.ZIndex = 320
+        line.Parent = scanlines
+    end
+
+    -- ===== NOISE/STATIC OVERLAY =====
+    local noise = Instance.new("Frame")
+    noise.Size = UDim2.fromScale(1, 1)
+    noise.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    noise.BackgroundTransparency = 0.92
+    noise.BorderSizePixel = 0
+    noise.ZIndex = 319
+    noise.Parent = loading
+
+    -- ===== GLITCH BARS =====
+    local glitchBars = {}
+    for i = 1, 5 do
+        local bar = Instance.new("Frame")
+        bar.Size = UDim2.new(1, 0, 0, math.random(2, 5))
+        bar.Position = UDim2.fromScale(0, math.random())
+        bar.BackgroundColor3 = Color3.fromRGB(255, 50, 80)
+        bar.BackgroundTransparency = 0.5
+        bar.BorderSizePixel = 0
+        bar.ZIndex = 330
+        bar.Visible = false
+        bar.Parent = loading
+        table.insert(glitchBars, bar)
+    end
+
+    -- ===== GARIS BRUTAL ATAS =====
+    local topBar = Instance.new("Frame")
+    topBar.Size = UDim2.new(1, 0, 0, 3)
+    topBar.Position = UDim2.fromOffset(0, 0)
+    topBar.BackgroundColor3 = Color3.fromRGB(255, 50, 80)
+    topBar.BorderSizePixel = 0
+    topBar.ZIndex = 310
+    topBar.Parent = loading
+
+    -- ===== GARIS BRUTAL BAWAH =====
+    local botBar = Instance.new("Frame")
+    botBar.Size = UDim2.new(1, 0, 0, 3)
+    botBar.Position = UDim2.new(0, 0, 1, -3)
+    botBar.BackgroundColor3 = Color3.fromRGB(255, 50, 80)
+    botBar.BorderSizePixel = 0
+    botBar.ZIndex = 310
+    botBar.Parent = loading
+
+    -- ===== CORNER BRACKETS =====
+    local function makeBracket(posX, posY, sizeX, sizeY)
+        local b = Instance.new("Frame")
+        b.Size = UDim2.fromOffset(sizeX, sizeY)
+        b.Position = UDim2.fromOffset(posX, posY)
+        b.BackgroundColor3 = Color3.fromRGB(255, 50, 80)
+        b.BorderSizePixel = 0
+        b.ZIndex = 311
+        b.Parent = loading
+        return b
+    end
+
+    -- 4 corner brackets (kiri atas, kanan atas, kiri bawah, kanan bawah)
+    makeBracket(8, 8, 20, 2)
+    makeBracket(8, 8, 2, 20)
+
+    makeBracket(winW - 28, 8, 20, 2)
+    makeBracket(winW - 10, 8, 2, 20)
+
+    makeBracket(8, winH - 10, 20, 2)
+    makeBracket(8, winH - 28, 2, 20)
+
+    makeBracket(winW - 28, winH - 10, 20, 2)
+    makeBracket(winW - 10, winH - 28, 2, 20)
+
+    -- ===== HURUF V ANIMASI MEMBESAR =====
+    local vHolder = Instance.new("Frame")
+    vHolder.Size = UDim2.fromScale(1, 0.5)
+    vHolder.Position = UDim2.fromScale(0, 0.2)
+    vHolder.BackgroundTransparency = 1
+    vHolder.ZIndex = 305
+    vHolder.Parent = loading
+
+    -- V background (glow)
+    local vGlow = Instance.new("TextLabel")
+    vGlow.Size = UDim2.fromScale(1, 1)
+    vGlow.BackgroundTransparency = 1
+    vGlow.Text = "V"
+    vGlow.TextColor3 = Color3.fromRGB(255, 50, 80)
+    vGlow.TextTransparency = 0.5
+    vGlow.Font = Enum.Font.GothamBlack
+    vGlow.TextSize = 1
+    vGlow.ZIndex = 304
+    vGlow.Parent = vHolder
+
+    -- V utama
+    local vLabel = Instance.new("TextLabel")
+    vLabel.Size = UDim2.fromScale(1, 1)
+    vLabel.BackgroundTransparency = 1
+    vLabel.Text = "V"
+    vLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    vLabel.Font = Enum.Font.GothamBlack
+    vLabel.TextSize = 1
+    vLabel.ZIndex = 306
+    vLabel.Parent = vHolder
+
+    -- V shadow (RGB split)
+    local vRed = Instance.new("TextLabel")
+    vRed.Size = UDim2.fromScale(1, 1)
+    vRed.Position = UDim2.fromOffset(-2, 0)
+    vRed.BackgroundTransparency = 1
+    vRed.Text = "V"
+    vRed.TextColor3 = Color3.fromRGB(255, 0, 0)
+    vRed.TextTransparency = 0.7
+    vRed.Font = Enum.Font.GothamBlack
+    vRed.TextSize = 1
+    vRed.ZIndex = 305
+    vRed.Parent = vHolder
+
+    local vBlue = Instance.new("TextLabel")
+    vBlue.Size = UDim2.fromScale(1, 1)
+    vBlue.Position = UDim2.fromOffset(2, 0)
+    vBlue.BackgroundTransparency = 1
+    vBlue.Text = "V"
+    vBlue.TextColor3 = Color3.fromRGB(0, 100, 255)
+    vBlue.TextTransparency = 0.7
+    vBlue.Font = Enum.Font.GothamBlack
+    vBlue.TextSize = 1
+    vBlue.ZIndex = 305
+    vBlue.Parent = vHolder
+
+    -- ===== LOADING TEXT =====
+    local loadingText = Instance.new("TextLabel")
+    loadingText.Size = UDim2.new(1, -20, 0, 20)
+    loadingText.Position = UDim2.new(0, 10, 0, winH - 70)
+    loadingText.BackgroundTransparency = 1
+    loadingText.Text = "LOADING..."
+    loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    loadingText.Font = Enum.Font.GothamBlack
+    loadingText.TextSize = 12
+    loadingText.TextXAlignment = Enum.TextXAlignment.Left
+    loadingText.ZIndex = 306
+    loadingText.Parent = loading
+
+    -- ===== PROGRESS BAR BRUTAL =====
+    local barBg = Instance.new("Frame")
+    barBg.Size = UDim2.new(1, -20, 0, 6)
+    barBg.Position = UDim2.new(0, 10, 0, winH - 40)
+    barBg.BackgroundColor3 = Color3.fromRGB(30, 10, 15)
+    barBg.BorderSizePixel = 0
+    barBg.ZIndex = 305
+    barBg.Parent = loading
+
+    local barStroke = Instance.new("UIStroke")
+    barStroke.Color = Color3.fromRGB(255, 50, 80)
+    barStroke.Thickness = 1
+    barStroke.Transparency = 0.3
+    barStroke.Parent = barBg
+
+    local barFill = Instance.new("Frame")
+    barFill.Size = UDim2.new(0, 0, 1, 0)
+    barFill.BackgroundColor3 = Color3.fromRGB(255, 50, 80)
+    barFill.BorderSizePixel = 0
+    barFill.ZIndex = 306
+    barFill.Parent = barBg
+
+    -- ===== PERCENT =====
+    local percentLbl = Instance.new("TextLabel")
+    percentLbl.Size = UDim2.new(1, -20, 0, 14)
+    percentLbl.Position = UDim2.new(0, 10, 0, winH - 24)
+    percentLbl.BackgroundTransparency = 1
+    percentLbl.Text = "0%"
+    percentLbl.TextColor3 = Color3.fromRGB(255, 50, 80)
+    percentLbl.Font = Enum.Font.GothamBlack
+    percentLbl.TextSize = 10
+    percentLbl.TextXAlignment = Enum.TextXAlignment.Right
+    percentLbl.ZIndex = 306
+    percentLbl.Parent = loading
+
+    -- ===== VRILZHUB BRAND =====
+    local brandLbl = Instance.new("TextLabel")
+    brandLbl.Size = UDim2.new(1, -20, 0, 14)
+    brandLbl.Position = UDim2.new(0, 10, 0, winH - 24)
+    brandLbl.BackgroundTransparency = 1
+    brandLbl.Text = "VRILZHUB"
+    brandLbl.TextColor3 = Color3.fromRGB(150, 100, 120)
+    brandLbl.Font = Enum.Font.GothamBold
+    brandLbl.TextSize = 10
+    brandLbl.TextXAlignment = Enum.TextXAlignment.Left
+    brandLbl.ZIndex = 306
+    brandLbl.Parent = loading
+
+    -- ===== EFFECT LOOPS =====
+
+    -- Glitch bars random
+    task.spawn(function()
+        while loading.Parent do
+            task.wait(math.random(10, 30) / 100)
+            for _, bar in ipairs(glitchBars) do
+                if math.random() < 0.3 then
+                    bar.Visible = true
+                    bar.Position = UDim2.fromScale(0, math.random())
+                    bar.Size = UDim2.new(1, 0, 0, math.random(2, 8))
+                    task.wait(0.03)
+                    bar.Visible = false
+                end
+            end
+        end
+    end)
+
+    -- RGB split random
+    task.spawn(function()
+        while loading.Parent do
+            task.wait(math.random(8, 20) / 100)
+            local offset = math.random(1, 5)
+            vRed.Position = UDim2.fromOffset(-offset, 0)
+            vBlue.Position = UDim2.fromOffset(offset, 0)
+            task.wait(0.05)
+            vRed.Position = UDim2.fromOffset(-1, 0)
+            vBlue.Position = UDim2.fromOffset(1, 0)
+        end
+    end)
+
+    -- Noise flicker
+    task.spawn(function()
+        while loading.Parent do
+            task.wait(0.05)
+            noise.BackgroundTransparency = 0.85 + math.random() * 0.1
+        end
+    end)
+
+    -- V pulse glow
+    task.spawn(function()
+        while loading.Parent do
+            task.wait(0.6)
+            TweenService:Create(vGlow, TweenInfo.new(0.6), {TextTransparency = 0.2}):Play()
+            task.wait(0.6)
+            TweenService:Create(vGlow, TweenInfo.new(0.6), {TextTransparency = 0.5}):Play()
+        end
+    end)
+
+    -- ===== ANIMASI V MEMBESAR =====
+    task.spawn(function()
+        -- V dari kecil ke besar
+        local startSize = 1
+        local endSize = IS_MOBILE and 120 or 160
+        local duration = 1.0
+        local steps = 30
+        for i = 1, steps do
+            task.wait(duration / steps)
+            local t = i / steps
+            -- Easing
+            local eased = 1 - (1 - t) ^ 3
+            local size = startSize + (endSize - startSize) * eased
+            vLabel.TextSize = size
+            vGlow.TextSize = size
+            vRed.TextSize = size
+            vBlue.TextSize = size
+        end
+
+        -- Efek patah-patah setelah V gede
+        task.wait(0.2)
+        for i = 1, 5 do
+            vLabel.Position = UDim2.fromOffset(math.random(-5, 5), math.random(-5, 5))
+            task.wait(0.04)
+            vLabel.Position = UDim2.fromOffset(0, 0)
+        end
+    end)
+
+    -- ===== ANIMASI LOADING =====
+    task.spawn(function()
+        -- Expand window dulu
+        loading.Size = UDim2.fromOffset(0, 0)
+        TweenService:Create(loading, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = UDim2.fromOffset(winW, winH)
+        }):Play()
+        task.wait(0.6)
+
+        -- FASE 1: 3 detik pertama
+        loadingText.Text = "INITIALIZING..."
+        for i = 1, 30 do
+            task.wait(0.1)
+            local p = (i / 30) * 0.15
+            barFill.Size = UDim2.new(p, 0, 1, 0)
+            percentLbl.Text = math.floor(p * 100) .. "%"
+        end
+
+        -- FASE 2: 10 detik
+        local phases = {
+            {text = "LOADING MODULES...", target = 0.4, duration = 2.5},
+            {text = "CONNECTING SERVER...", target = 0.6, duration = 2.5},
+            {text = "LOADING FEATURES...", target = 0.8, duration = 2.5},
+            {text = "FINALIZING...", target = 1.0, duration = 2.5},
+        }
+
+        for _, phase in ipairs(phases) do
+            loadingText.Text = phase.text
+            local startP = barFill.Size.X.Scale
+            local steps = math.floor(phase.duration / 0.05)
+            for i = 1, steps do
+                task.wait(0.05)
+                local t = i / steps
+                local p = startP + (phase.target - startP) * t
+                barFill.Size = UDim2.new(p, 0, 1, 0)
+                percentLbl.Text = math.floor(p * 100) .. "%"
+            end
+        end
+
+        loadingText.Text = "READY!"
+        percentLbl.Text = "100%"
+
+        -- Efek patah-patah terakhir
+        for i = 1, 8 do
+            loading.Position = UDim2.fromScale(0.5 + math.random(-20, 20)/1000, 0.5 + math.random(-20, 20)/1000)
+            task.wait(0.03)
+        end
+        loading.Position = UDim2.fromScale(0.5, 0.5)
+
+        task.wait(0.6)
+
+        -- Shrink out
+        TweenService:Create(loading, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+            Size = UDim2.fromOffset(0, 0)
+        }):Play()
+        task.wait(0.5)
+
+        if loading then loading:Destroy() end
+        buildMainWindow(parent)
+        notify("Welcome, " .. LocalPlayer.DisplayName, "success")
+    end)
+end
+
+-- ============================================================
 -- UI.INIT
 -- ============================================================
 function UI.Init(sharedState)
@@ -1766,256 +2146,8 @@ function UI.Init(sharedState)
     setupNotifHolder(ScreenGui)
     setupDropdownLayer(ScreenGui)
 
-    -- ========================================================
-    -- LOADING SCREEN — V MUTER + LOADING TEXT
-    -- ========================================================
-    local loading = Instance.new("Frame")
-    loading.Size = UDim2.fromOffset(IS_MOBILE and 300 or 380, IS_MOBILE and 300 or 380)
-    loading.AnchorPoint = Vector2.new(0.5, 0.5)
-    loading.Position = UDim2.fromScale(0.5, 0.5)
-    loading.BackgroundColor3 = C.BG
-    loading.BorderSizePixel = 0
-    loading.ZIndex = 200
-    loading.Parent = ScreenGui
-    registerTheme(loading, "BG", "BackgroundColor3")
-
-    local lc = Instance.new("UICorner")
-    lc.CornerRadius = UDim.new(1, 0)
-    lc.Parent = loading
-
-    local ls = Instance.new("UIStroke")
-    ls.Color = C.Accent
-    ls.Thickness = 3
-    ls.Transparency = 0.2
-    ls.Parent = loading
-    registerTheme(ls, "Accent", "Color")
-
-    -- Glow effect
-    local glow = Instance.new("ImageLabel")
-    glow.Size = UDim2.fromScale(1.5, 1.5)
-    glow.Position = UDim2.fromScale(-0.25, -0.25)
-    glow.BackgroundTransparency = 1
-    glow.Image = "rbxassetid://5028857084"
-    glow.ImageColor3 = C.Accent
-    glow.ImageTransparency = 0.7
-    glow.ZIndex = 199
-    glow.Parent = loading
-    registerTheme(glow, "Accent", "ImageColor3")
-
-    -- ===== HURUF V MUTER =====
-    local vHolder = Instance.new("Frame")
-    vHolder.Size = UDim2.fromOffset(IS_MOBILE and 100 or 130, IS_MOBILE and 100 or 130)
-    vHolder.AnchorPoint = Vector2.new(0.5, 0.5)
-    vHolder.Position = UDim2.fromScale(0.5, 0.42)
-    vHolder.BackgroundTransparency = 1
-    vHolder.ZIndex = 202
-    vHolder.Parent = loading
-
-    local vLabel = Instance.new("TextLabel")
-    vLabel.Size = UDim2.fromScale(1, 1)
-    vLabel.BackgroundTransparency = 1
-    vLabel.Text = "V"
-    vLabel.TextColor3 = C.Accent
-    vLabel.Font = Enum.Font.GothamBlack
-    vLabel.TextSize = IS_MOBILE and 80 or 100
-    vLabel.ZIndex = 203
-    vLabel.Parent = vHolder
-    registerTheme(vLabel, "Accent", "TextColor3")
-
-    local vLabel2 = Instance.new("TextLabel")
-    vLabel2.Size = UDim2.fromScale(1, 1)
-    vLabel2.BackgroundTransparency = 1
-    vLabel2.Text = "V"
-    vLabel2.TextColor3 = Color3.new(1, 1, 1)
-    vLabel2.TextTransparency = 0.7
-    vLabel2.Font = Enum.Font.GothamBlack
-    vLabel2.TextSize = IS_MOBILE and 80 or 100
-    vLabel2.ZIndex = 202
-    vLabel2.Parent = vHolder
-
-    -- Spinner muter di sekeliling V
-    local spinner = Instance.new("Frame")
-    spinner.Size = UDim2.fromScale(1.4, 1.4)
-    spinner.AnchorPoint = Vector2.new(0.5, 0.5)
-    spinner.Position = UDim2.fromScale(0.5, 0.5)
-    spinner.BackgroundTransparency = 1
-    spinner.ZIndex = 201
-    spinner.Parent = vHolder
-
-    local spinnerDots = {}
-    local dotCount = 8
-    for i = 1, dotCount do
-        local angle = (i / dotCount) * math.pi * 2
-        local radius = IS_MOBILE and 60 or 80
-        local dot = Instance.new("Frame")
-        dot.Size = UDim2.fromOffset(8, 8)
-        dot.AnchorPoint = Vector2.new(0.5, 0.5)
-        dot.Position = UDim2.new(0.5, math.cos(angle) * radius, 0.5, math.sin(angle) * radius)
-        dot.BackgroundColor3 = C.Accent
-        dot.BorderSizePixel = 0
-        dot.BackgroundTransparency = i / dotCount * 0.8
-        dot.ZIndex = 201
-        dot.Parent = spinner
-        registerTheme(dot, "Accent", "BackgroundColor3")
-
-        local dotCorner = Instance.new("UICorner")
-        dotCorner.CornerRadius = UDim.new(1, 0)
-        dotCorner.Parent = dot
-
-        table.insert(spinnerDots, dot)
-    end
-
-    local spinnerAngle = 0
-    local spinnerRunning = true
-    task.spawn(function()
-        while spinnerRunning and spinner.Parent do
-            task.wait(0.03)
-            spinnerAngle = spinnerAngle + 0.15
-            spinner.Rotation = math.deg(spinnerAngle)
-        end
-    end)
-
-    task.spawn(function()
-        while vLabel.Parent do
-            task.wait(0.5)
-            TweenService:Create(vLabel, TweenInfo.new(0.5), {TextTransparency = 0.3}):Play()
-            task.wait(0.5)
-            TweenService:Create(vLabel, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
-        end
-    end)
-
-    -- ===== LOADING TEXT =====
-    local loadingText = Instance.new("TextLabel")
-    loadingText.Size = UDim2.new(1, -40, 0, 24)
-    loadingText.Position = UDim2.new(0, 20, 1, IS_MOBILE and -110 or -120)
-    loadingText.BackgroundTransparency = 1
-    loadingText.Text = "Loading..."
-    loadingText.TextColor3 = C.Text
-    loadingText.Font = Enum.Font.GothamBold
-    loadingText.TextSize = IS_MOBILE and 14 or 16
-    loadingText.ZIndex = 203
-    loadingText.Parent = loading
-    registerTheme(loadingText, "Text", "TextColor3")
-
-    -- ===== PROGRESS BAR =====
-    local barBg = Instance.new("Frame")
-    barBg.Size = UDim2.new(1, -60, 0, 6)
-    barBg.Position = UDim2.new(0, 30, 1, IS_MOBILE and -80 or -90)
-    barBg.BackgroundColor3 = C.Surface3
-    barBg.BorderSizePixel = 0
-    barBg.ZIndex = 202
-    barBg.Parent = loading
-    registerTheme(barBg, "Surface3", "BackgroundColor3")
-
-    local bc = Instance.new("UICorner")
-    bc.CornerRadius = UDim.new(1, 0)
-    bc.Parent = barBg
-
-    local barFill = Instance.new("Frame")
-    barFill.Size = UDim2.new(0, 0, 1, 0)
-    barFill.BackgroundColor3 = C.Accent
-    barFill.BorderSizePixel = 0
-    barFill.ZIndex = 203
-    barFill.Parent = barBg
-    registerTheme(barFill, "Accent", "BackgroundColor3")
-
-    local fc = Instance.new("UICorner")
-    fc.CornerRadius = UDim.new(1, 0)
-    fc.Parent = barFill
-
-    -- ===== PERCENT TEXT =====
-    local percentLbl = Instance.new("TextLabel")
-    percentLbl.Size = UDim2.new(1, -60, 0, 18)
-    percentLbl.Position = UDim2.new(0, 30, 1, IS_MOBILE and -62 or -70)
-    percentLbl.BackgroundTransparency = 1
-    percentLbl.Text = "0%"
-    percentLbl.TextColor3 = C.Accent
-    percentLbl.Font = Enum.Font.GothamBold
-    percentLbl.TextSize = IS_MOBILE and 11 or 12
-    percentLbl.TextXAlignment = Enum.TextXAlignment.Right
-    percentLbl.ZIndex = 203
-    percentLbl.Parent = loading
-    registerTheme(percentLbl, "Accent", "TextColor3")
-
-    -- ===== VRILZHUB BRAND =====
-    local brandLbl = Instance.new("TextLabel")
-    brandLbl.Size = UDim2.new(1, -40, 0, 16)
-    brandLbl.Position = UDim2.new(0, 20, 1, IS_MOBILE and -40 or -45)
-    brandLbl.BackgroundTransparency = 1
-    brandLbl.Text = "V R I L Z H U B"
-    brandLbl.TextColor3 = C.Muted
-    brandLbl.Font = Enum.Font.GothamBold
-    brandLbl.TextSize = IS_MOBILE and 10 or 11
-    brandLbl.ZIndex = 203
-    brandLbl.Parent = loading
-    registerTheme(brandLbl, "Muted", "TextColor3")
-
-    -- ===== FADE IN LOADING =====
-    loading.BackgroundTransparency = 1
-    TweenService:Create(loading, TweenInfo.new(0.5), {BackgroundTransparency = 0}):Play()
-    vLabel.TextTransparency = 1
-    TweenService:Create(vLabel, TweenInfo.new(0.8), {TextTransparency = 0}):Play()
-    loadingText.TextTransparency = 1
-    TweenService:Create(loadingText, TweenInfo.new(0.8), {TextTransparency = 0}):Play()
-
-    -- ===== ANIMASI LOADING (3 detik + 10 detik) =====
-    task.spawn(function()
-        local start = os.clock()
-
-        -- FASE 1: 3 detik pertama
-        loadingText.Text = "Initializing..."
-        for i = 1, 30 do
-            task.wait(0.1)
-            local p = (i / 30) * 0.15
-            barFill.Size = UDim2.new(p, 0, 1, 0)
-            percentLbl.Text = math.floor(p * 100) .. "%"
-        end
-
-        -- FASE 2: 10 detik
-        local phases = {
-            {text = "Loading modules...", target = 0.4, duration = 2.5},
-            {text = "Connecting to server...", target = 0.6, duration = 2.5},
-            {text = "Loading features...", target = 0.8, duration = 2.5},
-            {text = "Finalizing...", target = 1.0, duration = 2.5},
-        }
-
-        for _, phase in ipairs(phases) do
-            loadingText.Text = phase.text
-            local startP = barFill.Size.X.Scale
-            local steps = math.floor(phase.duration / 0.05)
-            for i = 1, steps do
-                task.wait(0.05)
-                local t = i / steps
-                local p = startP + (phase.target - startP) * t
-                barFill.Size = UDim2.new(p, 0, 1, 0)
-                percentLbl.Text = math.floor(p * 100) .. "%"
-            end
-        end
-
-        loadingText.Text = "Ready!"
-        percentLbl.Text = "100%"
-        task.wait(0.8)
-
-        -- Fade out
-        spinnerRunning = false
-        TweenService:Create(loading, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(vLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-        TweenService:Create(vLabel2, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-        TweenService:Create(loadingText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-        TweenService:Create(brandLbl, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-        TweenService:Create(percentLbl, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-        TweenService:Create(barBg, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(barFill, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(glow, TweenInfo.new(0.5), {ImageTransparency = 1}):Play()
-        for _, dot in ipairs(spinnerDots) do
-            TweenService:Create(dot, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-        end
-        task.wait(0.6)
-
-        if loading then loading:Destroy() end
-        buildMainWindow(ScreenGui)
-        notify("Welcome, " .. LocalPlayer.DisplayName, "success")
-    end)
+    -- Build loading screen brutal
+    buildLoadingScreen(ScreenGui)
 end
 
 return UI
