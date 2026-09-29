@@ -19,8 +19,8 @@ local IS_MOBILE = UserInputService.TouchEnabled and not UserInputService.Keyboar
 -- ====== UI CONFIG ======
 local UI_CONFIG = {
     MOBILE = {
-        WIN_W_PCT = 0.88, WIN_H_PCT = 0.78,
-        SIDEBAR_W = 70, TAB_H = 40, TAB_ICON = 18, TAB_SHOW_LABEL = false,
+        WIN_W_PCT = 0.88, WIN_H_PCT = 0.85,
+        SIDEBAR_W = 70, TAB_H = 38, TAB_ICON = 18, TAB_SHOW_LABEL = false,
         CARD_HEADER = 28, CARD_PAD_TOP = 8, CARD_PAD_BOT = 8, CARD_PAD_SIDE = 10,
         CARD_GAP = 6, TOGGLE_H = 36, TOGGLE_W = 48, TOGGLE_KNOB = 20,
         DROPDOWN_H = 40, DROPDOWN_ITEM = 36, ACTION_H = 36,
@@ -1085,11 +1085,13 @@ local function buildMainWindow(parent)
     body.Parent = main
 
     local sidebarW = CFG.SIDEBAR_W
+    -- SIDEBAR CONTAINER
     local sidebar = Instance.new("Frame")
     sidebar.Size = UDim2.new(0, sidebarW, 1, 0)
     sidebar.BackgroundColor3 = C.Surface
     sidebar.BorderSizePixel = 0
     sidebar.ZIndex = 3
+    sidebar.ClipsDescendants = true
     sidebar.Parent = body
     registerTheme(sidebar, "Surface", "BackgroundColor3")
 
@@ -1104,18 +1106,31 @@ local function buildMainWindow(parent)
     sidebarStroke.Parent = sidebar
     registerTheme(sidebarStroke, "Accent", "Color")
 
+    -- SCROLLING FRAME DI DALAM SIDEBAR
+    local sidebarScroll = Instance.new("ScrollingFrame")
+    sidebarScroll.Size = UDim2.fromScale(1, 1)
+    sidebarScroll.BackgroundTransparency = 1
+    sidebarScroll.BorderSizePixel = 0
+    sidebarScroll.ScrollBarThickness = 2
+    sidebarScroll.ScrollBarImageColor3 = C.Accent
+    sidebarScroll.ScrollBarImageTransparency = 0.5
+    sidebarScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    sidebarScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    sidebarScroll.ZIndex = 4
+    sidebarScroll.Parent = sidebar
+
     local sidebarLayout = Instance.new("UIListLayout")
     sidebarLayout.Padding = UDim.new(0, 4)
     sidebarLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
     sidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    sidebarLayout.Parent = sidebar
+    sidebarLayout.Parent = sidebarScroll
 
     local sidebarPad = Instance.new("UIPadding")
     sidebarPad.PaddingTop = UDim.new(0, IS_MOBILE and 6 or 10)
     sidebarPad.PaddingBottom = UDim.new(0, IS_MOBILE and 6 or 10)
     sidebarPad.PaddingLeft = UDim.new(0, 6)
     sidebarPad.PaddingRight = UDim.new(0, 6)
-    sidebarPad.Parent = sidebar
+    sidebarPad.Parent = sidebarScroll
 
     local pageHolder = Instance.new("ScrollingFrame")
     pageHolder.Size = UDim2.new(1, -(sidebarW + 10), 1, 0)
@@ -1261,8 +1276,8 @@ local function buildMainWindow(parent)
         btn.BackgroundTransparency = 0.5
         btn.Text = ""
         btn.AutoButtonColor = false
-        btn.ZIndex = 4
-        btn.Parent = sidebar
+        btn.ZIndex = 5
+        btn.Parent = sidebarScroll
         registerTheme(btn, "Surface3", "BackgroundColor3")
 
         local corner = Instance.new("UICorner")
@@ -1282,7 +1297,7 @@ local function buildMainWindow(parent)
         ic.TextSize = CFG.TAB_ICON
         ic.Font = Enum.Font.GothamBold
         ic.TextColor3 = C.Accent
-        ic.ZIndex = 5
+        ic.ZIndex = 6
         ic.Parent = btn
         registerTheme(ic, "Accent", "TextColor3")
 
@@ -1296,7 +1311,7 @@ local function buildMainWindow(parent)
             lbl.TextSize = CFG.FONT_LABEL
             lbl.Font = Enum.Font.GothamSemibold
             lbl.TextXAlignment = Enum.TextXAlignment.Left
-            lbl.ZIndex = 5
+            lbl.ZIndex = 6
             lbl.Parent = btn
             registerTheme(lbl, "Muted", "TextColor3")
             navs[id] = {btn = btn, ic = ic, lbl = lbl}
@@ -1338,7 +1353,7 @@ local function buildMainWindow(parent)
         page.CanvasSize = UDim2.new(0, 0, 0, 0)
         page.AutomaticCanvasSize = Enum.AutomaticSize.Y
         page.Visible = false
-        page.ZIndex = 6
+        page.ZIndex = 7
         page.Parent = pageHolder
         local layout = Instance.new("UIListLayout")
         layout.Padding = UDim.new(0, IS_MOBILE and 8 or 12)
