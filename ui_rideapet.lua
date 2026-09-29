@@ -1486,7 +1486,8 @@ local function buildMainWindow(parent)
                         lbl.Size = UDim2.new(1, 0, 0, IS_MOBILE and 26 or 28)
                         lbl.BackgroundColor3 = C.Surface3
                         lbl.BackgroundTransparency = 0.3
-                        lbl.Text = "   🥚  " .. eggName                        lbl.TextColor3 = C.Text
+                        lbl.Text = "   🥚  " .. eggName
+                        lbl.TextColor3 = C.Text
                         lbl.Font = Enum.Font.GothamSemibold
                         lbl.TextSize = CFG.FONT_LABEL
                         lbl.TextXAlignment = Enum.TextXAlignment.Left
@@ -2342,7 +2343,7 @@ function UI.Init(sharedState)
     setupNotifHolder(ScreenGui)
     setupDropdownLayer(ScreenGui)
 
-    -- PANGGIL LOADING SCREEN BRUTAL
+    -- PANGGIL LOADING SCREEN BRUTAL (BUKAN LOADING LAMA)
     buildLoadingScreen(ScreenGui)
 end
 
