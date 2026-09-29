@@ -19,64 +19,24 @@ local IS_MOBILE = UserInputService.TouchEnabled and not UserInputService.Keyboar
 -- ====== UI CONFIG ======
 local UI_CONFIG = {
     MOBILE = {
-        WIN_W_PCT = 0.88,
-        WIN_H_PCT = 0.78,
-        SIDEBAR_W = 70,
-        TAB_H = 40,
-        TAB_ICON = 18,
-        TAB_SHOW_LABEL = false,
-        CARD_HEADER = 28,
-        CARD_PAD_TOP = 8,
-        CARD_PAD_BOT = 8,
-        CARD_PAD_SIDE = 10,
-        CARD_GAP = 6,
-        TOGGLE_H = 36,
-        TOGGLE_W = 48,
-        TOGGLE_KNOB = 20,
-        DROPDOWN_H = 40,
-        DROPDOWN_ITEM = 36,
-        ACTION_H = 36,
-        FONT_TITLE = 13,
-        FONT_LABEL = 11,
-        FONT_MUTED = 9,
-        FONT_SMALL = 10,
-        FONT_MED = 11,
-        FONT_LARGE = 14,
-        HEADER_H = 40,
-        SEARCH_H = 30,
-        NOTIF_W = 300,
-        NOTIF_H = 52,
-        OPEN_BTN = 52,
+        WIN_W_PCT = 0.88, WIN_H_PCT = 0.78,
+        SIDEBAR_W = 70, TAB_H = 40, TAB_ICON = 18, TAB_SHOW_LABEL = false,
+        CARD_HEADER = 28, CARD_PAD_TOP = 8, CARD_PAD_BOT = 8, CARD_PAD_SIDE = 10,
+        CARD_GAP = 6, TOGGLE_H = 36, TOGGLE_W = 48, TOGGLE_KNOB = 20,
+        DROPDOWN_H = 40, DROPDOWN_ITEM = 36, ACTION_H = 36,
+        FONT_TITLE = 13, FONT_LABEL = 11, FONT_MUTED = 9, FONT_SMALL = 10,
+        FONT_MED = 11, FONT_LARGE = 14,
+        HEADER_H = 40, SEARCH_H = 30, NOTIF_W = 300, NOTIF_H = 52, OPEN_BTN = 52,
     },
     PC = {
-        WIN_W = 800,
-        WIN_H = 580,
-        SIDEBAR_W = 140,
-        TAB_H = 44,
-        TAB_ICON = 16,
-        TAB_SHOW_LABEL = true,
-        CARD_HEADER = 30,
-        CARD_PAD_TOP = 10,
-        CARD_PAD_BOT = 12,
-        CARD_PAD_SIDE = 14,
-        CARD_GAP = 8,
-        TOGGLE_H = 30,
-        TOGGLE_W = 46,
-        TOGGLE_KNOB = 18,
-        DROPDOWN_H = 34,
-        DROPDOWN_ITEM = 28,
-        ACTION_H = 34,
-        FONT_TITLE = 12,
-        FONT_LABEL = 12,
-        FONT_MUTED = 10,
-        FONT_SMALL = 10,
-        FONT_MED = 12,
-        FONT_LARGE = 15,
-        HEADER_H = 52,
-        SEARCH_H = 34,
-        NOTIF_W = 380,
-        NOTIF_H = 52,
-        OPEN_BTN = 56,
+        WIN_W = 800, WIN_H = 580,
+        SIDEBAR_W = 140, TAB_H = 44, TAB_ICON = 16, TAB_SHOW_LABEL = true,
+        CARD_HEADER = 30, CARD_PAD_TOP = 10, CARD_PAD_BOT = 12, CARD_PAD_SIDE = 14,
+        CARD_GAP = 8, TOGGLE_H = 30, TOGGLE_W = 46, TOGGLE_KNOB = 18,
+        DROPDOWN_H = 34, DROPDOWN_ITEM = 28, ACTION_H = 34,
+        FONT_TITLE = 12, FONT_LABEL = 12, FONT_MUTED = 10, FONT_SMALL = 10,
+        FONT_MED = 12, FONT_LARGE = 15,
+        HEADER_H = 52, SEARCH_H = 34, NOTIF_W = 380, NOTIF_H = 52, OPEN_BTN = 56,
     },
 }
 
@@ -91,7 +51,7 @@ local EggNames = {
     "Bloom", "Aurora", "White", "Brown"
 }
 
--- ====== RARITY (TAMBAH NONE) ======
+-- ====== RARITY ======
 local RarityList = {
     "None",
     "Common", "Uncommon", "Rare", "Epic",
@@ -113,46 +73,28 @@ local RarityColors = {
 -- ====== THEME ======
 local Themes = {
     Brutal = {
-        BG = Color3.fromRGB(15, 5, 10),
-        Surface = Color3.fromRGB(25, 10, 20),
-        Surface2 = Color3.fromRGB(35, 15, 25),
-        Surface3 = Color3.fromRGB(45, 20, 35),
-        Stroke = Color3.fromRGB(255, 50, 80),
-        Text = Color3.fromRGB(255, 240, 245),
-        Muted = Color3.fromRGB(200, 150, 180),
-        Accent = Color3.fromRGB(255, 50, 80),
-        Accent2 = Color3.fromRGB(50, 150, 255),
-        Accent3 = Color3.fromRGB(150, 220, 255),
-        Success = Color3.fromRGB(50, 255, 150),
-        Error = Color3.fromRGB(255, 50, 80),
+        BG = Color3.fromRGB(15, 5, 10), Surface = Color3.fromRGB(25, 10, 20),
+        Surface2 = Color3.fromRGB(35, 15, 25), Surface3 = Color3.fromRGB(45, 20, 35),
+        Stroke = Color3.fromRGB(255, 50, 80), Text = Color3.fromRGB(255, 240, 245),
+        Muted = Color3.fromRGB(200, 150, 180), Accent = Color3.fromRGB(255, 50, 80),
+        Accent2 = Color3.fromRGB(50, 150, 255), Accent3 = Color3.fromRGB(150, 220, 255),
+        Success = Color3.fromRGB(50, 255, 150), Error = Color3.fromRGB(255, 50, 80),
     },
     Ice = {
-        BG = Color3.fromRGB(5, 10, 20),
-        Surface = Color3.fromRGB(10, 20, 35),
-        Surface2 = Color3.fromRGB(15, 30, 50),
-        Surface3 = Color3.fromRGB(20, 40, 65),
-        Stroke = Color3.fromRGB(150, 220, 255),
-        Text = Color3.fromRGB(240, 250, 255),
-        Muted = Color3.fromRGB(150, 200, 240),
-        Accent = Color3.fromRGB(50, 150, 255),
-        Accent2 = Color3.fromRGB(150, 220, 255),
-        Accent3 = Color3.fromRGB(255, 50, 80),
-        Success = Color3.fromRGB(50, 255, 150),
-        Error = Color3.fromRGB(255, 50, 80),
+        BG = Color3.fromRGB(5, 10, 20), Surface = Color3.fromRGB(10, 20, 35),
+        Surface2 = Color3.fromRGB(15, 30, 50), Surface3 = Color3.fromRGB(20, 40, 65),
+        Stroke = Color3.fromRGB(150, 220, 255), Text = Color3.fromRGB(240, 250, 255),
+        Muted = Color3.fromRGB(150, 200, 240), Accent = Color3.fromRGB(50, 150, 255),
+        Accent2 = Color3.fromRGB(150, 220, 255), Accent3 = Color3.fromRGB(255, 50, 80),
+        Success = Color3.fromRGB(50, 255, 150), Error = Color3.fromRGB(255, 50, 80),
     },
     Fire = {
-        BG = Color3.fromRGB(20, 5, 0),
-        Surface = Color3.fromRGB(35, 10, 5),
-        Surface2 = Color3.fromRGB(50, 15, 5),
-        Surface3 = Color3.fromRGB(65, 20, 10),
-        Stroke = Color3.fromRGB(255, 100, 50),
-        Text = Color3.fromRGB(255, 240, 230),
-        Muted = Color3.fromRGB(220, 170, 150),
-        Accent = Color3.fromRGB(255, 100, 50),
-        Accent2 = Color3.fromRGB(255, 200, 50),
-        Accent3 = Color3.fromRGB(255, 50, 80),
-        Success = Color3.fromRGB(50, 255, 150),
-        Error = Color3.fromRGB(255, 50, 80),
+        BG = Color3.fromRGB(20, 5, 0), Surface = Color3.fromRGB(35, 10, 5),
+        Surface2 = Color3.fromRGB(50, 15, 5), Surface3 = Color3.fromRGB(65, 20, 10),
+        Stroke = Color3.fromRGB(255, 100, 50), Text = Color3.fromRGB(255, 240, 230),
+        Muted = Color3.fromRGB(220, 170, 150), Accent = Color3.fromRGB(255, 100, 50),
+        Accent2 = Color3.fromRGB(255, 200, 50), Accent3 = Color3.fromRGB(255, 50, 80),
+        Success = Color3.fromRGB(50, 255, 150), Error = Color3.fromRGB(255, 50, 80),
     },
 }
 
@@ -276,7 +218,7 @@ local function notify(text, type)
     end)
 end
 
--- ====== CARD (HOVER + RIPPLE, TANPA MEMBESAR) ======
+-- ====== CARD (HOVER NAIK, KLIK TURUN, RIPPLE) ======
 local function makeCard(parent, title, layoutOrder)
     local card = Instance.new("Frame")
     card.Size = UDim2.new(1, 0, 0, 0)
@@ -300,7 +242,7 @@ local function makeCard(parent, title, layoutOrder)
     stroke.Parent = card
     registerTheme(stroke, "Accent", "Color")
 
-    -- ===== RIPPLE LAYER =====
+    -- Ripple layer
     local rippleLayer = Instance.new("Frame")
     rippleLayer.Name = "RippleLayer"
     rippleLayer.Size = UDim2.fromScale(1, 1)
@@ -309,37 +251,52 @@ local function makeCard(parent, title, layoutOrder)
     rippleLayer.ZIndex = 99
     rippleLayer.Parent = card
 
-    -- ===== HOVER EFFECT (NAIK + GLOW) =====
-    local hoverOffset = IS_MOBILE and 1 or 2
+    -- State
+    local isHovered = false
+    local isPressed = false
     local originalStrokeTrans = 0.5
+    local downOffset = IS_MOBILE and 2 or 3  -- geser ke bawah pas diklik
 
+    local function updatePosition()
+        local y = 0
+        if isPressed then
+            y = downOffset           -- turun pas diklik
+        elseif isHovered then
+            y = -2                    -- naik pas hover
+        end
+        TweenService:Create(card, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Position = UDim2.new(0, 0, 0, y)
+        }):Play()
+    end
+
+    -- HOVER
     card.MouseEnter:Connect(function()
         if not IS_MOBILE then
-            TweenService:Create(card, TweenInfo.new(0.2), {
-                Position = UDim2.new(0, 0, 0, -hoverOffset)
-            }):Play()
+            isHovered = true
+            updatePosition()
             TweenService:Create(stroke, TweenInfo.new(0.2), {
-                Transparency = 0.1,
-                Thickness = 2
+                Transparency = 0.1, Thickness = 2
             }):Play()
         end
     end)
 
     card.MouseLeave:Connect(function()
         if not IS_MOBILE then
-            TweenService:Create(card, TweenInfo.new(0.2), {
-                Position = UDim2.new(0, 0, 0, 0)
-            }):Play()
+            isHovered = false
+            updatePosition()
             TweenService:Create(stroke, TweenInfo.new(0.2), {
-                Transparency = originalStrokeTrans,
-                Thickness = 1
+                Transparency = originalStrokeTrans, Thickness = 1
             }):Play()
         end
     end)
 
-    -- ===== RIPPLE EFFECT SAJA (TANPA MEMBESAR/MENGECIL) =====
+    -- KLIK: TURUN + RIPPLE
     card.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            isPressed = true
+            updatePosition()
+
+            -- Ripple
             local ripple = Instance.new("Frame")
             ripple.Size = UDim2.fromOffset(0, 0)
             ripple.Position = UDim2.fromOffset(input.Position.X - card.AbsolutePosition.X, input.Position.Y - card.AbsolutePosition.Y)
@@ -362,6 +319,13 @@ local function makeCard(parent, title, layoutOrder)
             task.delay(0.7, function()
                 if ripple then ripple:Destroy() end
             end)
+        end
+    end)
+
+    card.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            isPressed = false
+            updatePosition()
         end
     end)
 
@@ -695,7 +659,7 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     return container
 end
 
--- ====== DROPDOWN MULTI-SELECT (DENGAN LOGIKA NONE) ======
+-- ====== DROPDOWN MULTI-SELECT (NONE LOGIC) ======
 local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, onChanged)
     local isOpen = false
 
@@ -921,9 +885,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
                     for _, r in ipairs(items) do
                         if r ~= "None" and sharedTable[r] then anyOther = true break end
                     end
-                    if not anyOther then
-                        return
-                    end
+                    if not anyOther then return end
                     sharedTable["None"] = false
                     updateButtonVisual("None")
                 else
@@ -959,7 +921,6 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     end
 
     updateLabel()
-
     return container
 end
 
@@ -1524,7 +1485,6 @@ local function buildMainWindow(parent)
         end
     end)
 
-    -- Card Info Update
     local updateCard, updateContent = makeCard(infoPage, "📢 INFORMASI UPDATE", 2)
 
     local infoLines = {
@@ -1549,7 +1509,6 @@ local function buildMainWindow(parent)
         registerTheme(lbl, "Muted", "TextColor3")
     end
 
-    -- Card Exploit Support
     local explCard, explContent = makeCard(infoPage, "🎮 EXPLOIT SUPPORT", 3)
 
     local explLines = {
@@ -1572,7 +1531,6 @@ local function buildMainWindow(parent)
         registerTheme(lbl, "Muted", "TextColor3")
     end
 
-    -- Card Discord
     local discordCard, discordContent = makeCard(infoPage, "💬 JOIN DISCORD", 4)
     local DISCORD_LINK = "https://discord.gg/psWhrYWbq"
 
