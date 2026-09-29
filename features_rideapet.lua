@@ -396,7 +396,7 @@ function Features.startAutoRidePet()
 end
 
 -- ============================================================
--- EGG PREDICTION SYSTEM — SELALU JALAN (TANPA CEK TOGGLE)
+-- EGG PREDICTION SYSTEM — SELALU JALAN
 -- ============================================================
 local EggHistory = {}
 local LastEggList = {}
@@ -415,7 +415,6 @@ function Features.startEggPrediction()
                 end
             end
 
-            -- Deteksi egg baru (masuk history)
             for _, eggName in ipairs(currentEggs) do
                 local found = false
                 for _, lastEgg in ipairs(LastEggList) do
@@ -439,7 +438,6 @@ function Features.startEggPrediction()
             Shared.EggsInMap = currentEggs
             Shared.EggHistory = EggHistory
 
-            -- Hitung frekuensi egg
             local eggCount = {}
             for _, entry in ipairs(EggHistory) do
                 eggCount[entry.name] = (eggCount[entry.name] or 0) + 1
@@ -451,7 +449,6 @@ function Features.startEggPrediction()
             end
             table.sort(sorted, function(a, b) return a.count > b.count end)
 
-            -- Prediksi: egg yang sering muncul tapi lagi gak ada di map
             local predictions = {}
             for _, entry in ipairs(sorted) do
                 local alreadyInMap = false
@@ -574,7 +571,7 @@ function Features.startSpeed()
 end
 
 -- ============================================================
--- INSTANT PICKUP — HoldDuration = 0 (KLIK SEKALI LANGSUNG AMBIL)
+-- INSTANT PICKUP — HoldDuration = 0
 -- ============================================================
 function Features.startInstantPickup()
     task.spawn(function()
@@ -599,7 +596,7 @@ function Features.startInstantPickup()
 end
 
 -- ============================================================
--- AUTO FARM — TELEPORT, DIAM 6 DETIK, PICKUP, DIAM 6 DETIK, RETURN
+-- AUTO FARM — TELEPORT, TUNGGU, PICKUP, RETURN (ANTI CRASH)
 -- ============================================================
 local NotifiedEggs = {}
 
@@ -708,7 +705,9 @@ function Features.startAutoFarm()
                 end
             end
 
-            local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            local char = LocalPlayer.Character
+            local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
             local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
             if not myRoot or not eggPart then continue end
 
@@ -720,30 +719,28 @@ function Features.startAutoFarm()
 
             -- 1. Teleport ke egg
             myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
-
-            -- 2. DIAM 6 DETIK (freeze posisi)
-            local savedCF = myRoot.CFrame
-            local t0 = os.clock()
-            while os.clock() - t0 < 6 do
-                task.wait(0.1)
-                myRoot.CFrame = savedCF
+            if hum then
+                hum:ChangeState(Enum.HumanoidStateType.Physics)
             end
+
+            -- 2. Tunggu bentar (server register posisi)
+            task.wait(0.3)
 
             -- 3. Fire pickup
             if prompt and typeof(fireproximityprompt) == "function" then
                 pcall(fireproximityprompt, prompt)
             end
 
-            -- 4. DIAM 6 DETIK LAGI (freeze posisi)
-            local t1 = os.clock()
-            while os.clock() - t1 < 6 do
-                task.wait(0.1)
-                myRoot.CFrame = savedCF
-            end
+            -- 4. Tunggu pickup kelar
+            task.wait(0.5)
 
             -- 5. Return ke plot
-            returnToMyPlot()
-            task.wait(0.5)
+            if Shared.AutoReturn_Enabled then
+                returnToMyPlot()
+            end
+
+            -- 6. Jeda sebelum loop lagi
+            task.wait(0.3)
         end
     end)
 end
