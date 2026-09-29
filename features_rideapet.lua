@@ -1,788 +1,260 @@
--- ============================================================
--- VRILZHUB FEATURES — RIDE A PET v3.2
--- + Egg Prediction System + Notif Egg No Spawn
--- + Speed + Instant Pickup (HoldDuration=0) + Auto Farm
--- ============================================================
-
-local Features = {}
-local Shared = nil
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local LocalPlayer = Players.LocalPlayer
-
--- ============================================================
--- GET EGG LUCK
--- ============================================================
-local function getEggLuck(egg)
-    local luckGui = egg:FindFirstChild("EggLuck", true)
-    if luckGui then
-        local luckLabel = luckGui:FindFirstChild("Luck")
-        if luckLabel and luckLabel:IsA("TextLabel") then
-            return luckLabel.Text
-        end
-    end
-    return "?"
-end
-
--- ============================================================
--- EGG ESP
--- ============================================================
-local EggESPTracked = {}
-
-function Features.startEggESP()
-    task.spawn(function()
-        while task.wait(0.3) do
-            if Shared.ESP_Eggs_Enabled then
-                local rendered = Workspace:FindFirstChild("RenderedEggs")
-                if rendered then
-                    for _, egg in ipairs(rendered:GetChildren()) do
-                        if egg:IsA("Model") and not EggESPTracked[egg] then
-                            local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
-                            if eggPart then
-                                local hl = Instance.new("Highlight")
-                                hl.Name = "VRILZ_RideAPet_EggHL"
-                                hl.FillColor = Color3.fromRGB(255, 215, 0)
-                                hl.OutlineColor = Color3.new(1, 1, 1)
-                                hl.FillTransparency = 0.5
-                                hl.Adornee = egg
-                                hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                                hl.Parent = egg
-
-                                local bb = Instance.new("BillboardGui")
-                                bb.Name = "VRILZ_RideAPet_EggESP"
-                                bb.Size = UDim2.fromOffset(160, 50)
-                                bb.StudsOffset = Vector3.new(0, 3, 0)
-                                bb.AlwaysOnTop = true
-                                bb.MaxDistance = 500
-                                bb.Adornee = eggPart
-                                bb.Parent = eggPart
-
-                                local lbl = Instance.new("TextLabel")
-                                lbl.Name = "InfoLabel"
-                                lbl.Size = UDim2.fromScale(1, 1)
-                                lbl.BackgroundTransparency = 0.3
-                                lbl.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-                                lbl.TextColor3 = Color3.fromRGB(255, 215, 0)
-                                lbl.TextStrokeColor3 = Color3.new(0, 0, 0)
-                                lbl.TextStrokeTransparency = 0.3
-                                lbl.Font = Enum.Font.GothamBold
-                                lbl.TextSize = 12
-                                lbl.TextWrapped = true
-                                lbl.Text = ""
-                                lbl.Parent = bb
-
-                                local cnr = Instance.new("UICorner")
-                                cnr.CornerRadius = UDim.new(0, 6)
-                                cnr.Parent = lbl
-
-                                local str = Instance.new("UIStroke")
-                                str.Color = Color3.fromRGB(255, 215, 0)
-                                str.Thickness = 1
-                                str.Transparency = 0.3
-                                str.Parent = lbl
-
-                                EggESPTracked[egg] = {hl = hl, bb = bb, lbl = lbl, part = eggPart}
-                            end
-                        end
-                    end
-                end
-            else
-                for egg, data in pairs(EggESPTracked) do
-                    if data.hl then data.hl:Destroy() end
-                    if data.bb then data.bb:Destroy() end
-                    EggESPTracked[egg] = nil
-                end
-            end
-
-            for egg, data in pairs(EggESPTracked) do
-                if not egg.Parent then
-                    if data.hl then data.hl:Destroy() end
-                    if data.bb then data.bb:Destroy() end
-                    EggESPTracked[egg] = nil
-                elseif data.lbl then
-                    local parts = {}
-                    if Shared.ESP_EggName_Enabled then
-                        table.insert(parts, "🥚 " .. egg.Name)
-                    end
-                    if Shared.ESP_EggLuck_Enabled then
-                        table.insert(parts, "🍀 " .. getEggLuck(egg))
-                    end
-                    data.lbl.Text = table.concat(parts, "\n")
-                end
-            end
-        end
-    end)
-end
-
--- ============================================================
--- PET ESP
--- ============================================================
-local PetESPTracked = {}
-
-local function getPetInfo(pet)
-    local cash, speed = "?", "?"
-    local cashGui = pet:FindFirstChild("PetCash", true)
-    if cashGui then
-        for _, desc in ipairs(cashGui:GetDescendants()) do
-            if desc:IsA("TextLabel") and desc.Text:find("%$") and desc.Text:find("/s") then
-                cash = desc.Text
-                break
-            end
-        end
-    end
-    local speedGui = pet:FindFirstChild("PetSpeed", true)
-    if speedGui then
-        for _, desc in ipairs(speedGui:GetDescendants()) do
-            if desc:IsA("TextLabel") and desc.Text ~= "" then
-                speed = desc.Text
-                break
-            end
-        end
-    end
-    return cash, speed
-end
-
-function Features.startPetESP()
-    task.spawn(function()
-        while task.wait(0.3) do
-            if Shared.ESP_Pets_Enabled then
-                local plots = Workspace:FindFirstChild("Plots")
-                if plots then
-                    for _, plot in ipairs(plots:GetChildren()) do
-                        local pets = plot:FindFirstChild("Pets")
-                        if pets then
-                            for _, pet in ipairs(pets:GetChildren()) do
-                                if pet:IsA("Model") and not PetESPTracked[pet] then
-                                    local petPart = pet:FindFirstChildWhichIsA("BasePart", true)
-                                    if petPart then
-                                        local hl = Instance.new("Highlight")
-                                        hl.Name = "VRILZ_RideAPet_PetHL"
-                                        hl.FillColor = Color3.fromRGB(100, 200, 255)
-                                        hl.OutlineColor = Color3.new(1, 1, 1)
-                                        hl.FillTransparency = 0.5
-                                        hl.Adornee = pet
-                                        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                                        hl.Parent = pet
-
-                                        local bb = Instance.new("BillboardGui")
-                                        bb.Name = "VRILZ_RideAPet_PetESP"
-                                        bb.Size = UDim2.fromOffset(180, 70)
-                                        bb.StudsOffset = Vector3.new(0, 3.5, 0)
-                                        bb.AlwaysOnTop = true
-                                        bb.MaxDistance = 500
-                                        bb.Adornee = petPart
-                                        bb.Parent = petPart
-
-                                        local lbl = Instance.new("TextLabel")
-                                        lbl.Name = "InfoLabel"
-                                        lbl.Size = UDim2.fromScale(1, 1)
-                                        lbl.BackgroundTransparency = 0.3
-                                        lbl.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-                                        lbl.TextColor3 = Color3.fromRGB(100, 200, 255)
-                                        lbl.TextStrokeColor3 = Color3.new(0, 0, 0)
-                                        lbl.TextStrokeTransparency = 0.3
-                                        lbl.Font = Enum.Font.GothamBold
-                                        lbl.TextSize = 12
-                                        lbl.TextWrapped = true
-                                        lbl.Text = ""
-                                        lbl.Parent = bb
-
-                                        local cnr = Instance.new("UICorner")
-                                        cnr.CornerRadius = UDim.new(0, 6)
-                                        cnr.Parent = lbl
-
-                                        local str = Instance.new("UIStroke")
-                                        str.Color = Color3.fromRGB(100, 200, 255)
-                                        str.Thickness = 1
-                                        str.Transparency = 0.3
-                                        str.Parent = lbl
-
-                                        PetESPTracked[pet] = {hl = hl, bb = bb, lbl = lbl, part = petPart}
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            else
-                for pet, data in pairs(PetESPTracked) do
-                    if data.hl then data.hl:Destroy() end
-                    if data.bb then data.bb:Destroy() end
-                    PetESPTracked[pet] = nil
-                end
-            end
-
-            for pet, data in pairs(PetESPTracked) do
-                if not pet.Parent then
-                    if data.hl then data.hl:Destroy() end
-                    if data.bb then data.bb:Destroy() end
-                    PetESPTracked[pet] = nil
-                elseif data.lbl then
-                    local cash, speed = getPetInfo(pet)
-                    local parts = {}
-                    if Shared.ESP_PetName_Enabled then
-                        table.insert(parts, "🐾 " .. pet.Name)
-                    end
-                    if Shared.ESP_PetCash_Enabled then
-                        table.insert(parts, "💰 " .. cash)
-                    end
-                    if Shared.ESP_PetSpeed_Enabled then
-                        table.insert(parts, "⚡ " .. speed)
-                    end
-                    data.lbl.Text = table.concat(parts, "\n")
-                end
-            end
-        end
-    end)
-end
-
--- ============================================================
--- GET MY PLOT
--- ============================================================
-local function getMyPlot()
-    local plots = Workspace:FindFirstChild("Plots")
-    if not plots then return nil end
-    for _, plot in ipairs(plots:GetChildren()) do
-        local owner = plot:GetAttribute("OwnerUserId") or plot:GetAttribute("Owner") or plot:GetAttribute("NestsOwnerLoaded")
-        if owner == LocalPlayer.UserId or owner == LocalPlayer.Name then
-            return plot
-        end
-    end
-    return nil
-end
-
-local function getMyPlotSpawn()
-    local plot = getMyPlot()
-    if not plot then return nil end
-    local spawnPart = plot:FindFirstChild("Spawn", true)
-        or plot:FindFirstChildWhichIsA("SpawnLocation", true)
-        or plot:FindFirstChildWhichIsA("BasePart", true)
-    return spawnPart
-end
-
--- ============================================================
--- FIND EGG BY NAME
--- ============================================================
-local function findEggByName(eggName)
-    local rendered = Workspace:FindFirstChild("RenderedEggs")
-    if not rendered then return nil end
-
-    local targetName = eggName:lower()
-    local best, bestDist = nil, math.huge
-    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not myRoot then return nil end
-
-    for _, egg in ipairs(rendered:GetChildren()) do
-        if egg:IsA("Model") then
-            local name = egg.Name:lower()
-            if name == targetName or name:find(targetName, 1, true) then
-                local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
-                if eggPart then
-                    local d = (eggPart.Position - myRoot.Position).Magnitude
-                    if d < bestDist then
-                        best, bestDist = egg, d
-                    end
-                end
-            end
-        end
-    end
-    return best
-end
-
--- ============================================================
--- AUTO STEAL + NOTIF "EGG NO SPAWN"
--- ============================================================
-local lastNoEggNotif = 0
-
-function Features.startAutoSteal()
-    task.spawn(function()
-        while task.wait(0.5) do
-            if not Shared.AutoSteal_Enabled then continue end
-
-            local eggName = Shared.SelectedEgg or "Cherub"
-            local egg = findEggByName(eggName)
-
-            if not egg then
-                local now = os.clock()
-                if now - lastNoEggNotif > 5 then
-                    lastNoEggNotif = now
-                    if Shared.Notify then
-                        Shared.Notify("Egg no spawn: " .. eggName, "warning")
-                    end
-                end
-                continue
-            end
-
-            local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
-            local prompt = egg:FindFirstChild("Pickup", true)
-            if not eggPart or not prompt then continue end
-
-            local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if not myRoot then continue end
-
-            myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
-            task.wait(0.1)
-
-            if typeof(fireproximityprompt) == "function" then
-                pcall(fireproximityprompt, prompt)
-            end
-            task.wait(0.2)
-
-            if Shared.AutoReturn_Enabled then
-                local spawnPart = getMyPlotSpawn()
-                if spawnPart then
-                    myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
-                else
-                    local spawn = Workspace:FindFirstChild("Spawn")
-                    if spawn then
-                        local spawnLoc = spawn:FindFirstChildWhichIsA("SpawnLocation", true)
-                        if spawnLoc then
-                            myRoot.CFrame = spawnLoc.CFrame + Vector3.new(0, 5, 0)
-                        end
-                    end
-                end
-            end
-        end
-    end)
-end
-
--- ============================================================
--- AUTO HATCH
--- ============================================================
-function Features.startAutoHatch()
-    task.spawn(function()
-        while task.wait(1) do
-            if not Shared.AutoHatch_Enabled then continue end
-            local plot = getMyPlot()
-            if not plot then continue end
-            local eggs = plot:FindFirstChild("Eggs")
-            if not eggs then continue end
-            for _, egg in ipairs(eggs:GetChildren()) do
-                local prompt = egg:FindFirstChild("Hatch", true)
-                if prompt and prompt.Enabled then
-                    if typeof(fireproximityprompt) == "function" then
-                        pcall(fireproximityprompt, prompt)
-                    end
-                end
-            end
-        end
-    end)
-end
-
--- ============================================================
--- AUTO RIDE PET
--- ============================================================
-function Features.startAutoRidePet()
-    task.spawn(function()
-        while task.wait(1) do
-            if not Shared.AutoRidePet_Enabled then continue end
-            local plot = getMyPlot()
-            if not plot then continue end
-            local pets = plot:FindFirstChild("Pets")
-            if not pets then continue end
-            for _, pet in ipairs(pets:GetChildren()) do
-                local prompt = pet:FindFirstChild("RidePrompt", true)
-                if prompt and prompt.Enabled then
-                    if typeof(fireproximityprompt) == "function" then
-                        pcall(fireproximityprompt, prompt)
-                    end
-                    break
-                end
-            end
-        end
-    end)
-end
-
--- ============================================================
--- EGG PREDICTION SYSTEM — SELALU JALAN
--- ============================================================
-local EggHistory = {}
-local LastEggList = {}
-local MAX_HISTORY = 50
-
-function Features.startEggPrediction()
-    task.spawn(function()
-        while task.wait(1) do
-            local rendered = Workspace:FindFirstChild("RenderedEggs")
-            if not rendered then continue end
-
-            local currentEggs = {}
-            for _, egg in ipairs(rendered:GetChildren()) do
-                if egg:IsA("Model") then
-                    table.insert(currentEggs, egg.Name)
-                end
-            end
-
-            for _, eggName in ipairs(currentEggs) do
-                local found = false
-                for _, lastEgg in ipairs(LastEggList) do
-                    if lastEgg == eggName then
-                        found = true
-                        break
-                    end
-                end
-                if not found then
-                    table.insert(EggHistory, {
-                        name = eggName,
-                        time = os.time(),
-                    })
-                    if #EggHistory > MAX_HISTORY then
-                        table.remove(EggHistory, 1)
-                    end
-                end
-            end
-
-            LastEggList = currentEggs
-            Shared.EggsInMap = currentEggs
-            Shared.EggHistory = EggHistory
-
-            local eggCount = {}
-            for _, entry in ipairs(EggHistory) do
-                eggCount[entry.name] = (eggCount[entry.name] or 0) + 1
-            end
-
-            local sorted = {}
-            for name, count in pairs(eggCount) do
-                table.insert(sorted, {name = name, count = count})
-            end
-            table.sort(sorted, function(a, b) return a.count > b.count end)
-
-            local predictions = {}
-            for _, entry in ipairs(sorted) do
-                local alreadyInMap = false
-                for _, eggName in ipairs(currentEggs) do
-                    if eggName == entry.name then
-                        alreadyInMap = true
-                        break
-                    end
-                end
-                if not alreadyInMap then
-                    table.insert(predictions, entry.name)
-                end
-                if #predictions >= 5 then break end
-            end
-
-            Shared.EggPredictions = predictions
-        end
-    end)
-end
-
--- ============================================================
--- REMOTE ACTIONS
--- ============================================================
-local function getRemote(name)
-    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
-    if not remotes then return nil end
-    local gameRemotes = remotes:FindFirstChild("Game")
-    if not gameRemotes then return nil end
-    return gameRemotes:FindFirstChild(name)
-end
-
-function Features.rideAlong()
-    local remote = getRemote("RideAlong")
-    if remote then
-        remote:FireServer()
-        return true
-    end
-    return false
-end
-
-function Features.petDismount()
-    local remote = getRemote("PetDismount")
-    if remote then
-        remote:FireServer()
-        return true
-    end
-    return false
-end
-
-function Features.pickupPet()
-    local remote = getRemote("PickupPet")
-    if remote then
-        remote:FireServer()
-        return true
-    end
-    return false
-end
-
-function Features.hatchEgg()
-    local remote = getRemote("Hatch")
-    if remote then
-        remote:FireServer()
-        return true
-    end
-    return false
-end
-
--- ============================================================
--- GAMEDATA (EGGS + PETS)
--- ============================================================
-local GameData = game:GetService("ReplicatedStorage"):FindFirstChild("GameData")
-local EggData, PetData = {}, {}
-
-if GameData then
-    local eggsMod = GameData:FindFirstChild("Eggs")
-    if eggsMod then
-        local ok, data = pcall(require, eggsMod)
-        if ok and type(data) == "table" then EggData = data end
-    end
-    local petsMod = GameData:FindFirstChild("Pets")
-    if petsMod then
-        local ok, data = pcall(require, petsMod)
-        if ok and type(data) == "table" then PetData = data end
-    end
-end
-
-local RARITY_ORDER = {
-    Common = 1, Uncommon = 2, Rare = 3, Epic = 4,
-    Legendary = 5, Mythic = 6, Divine = 7, Ethereal = 8, Secret = 9,
+-- VRILZHUB FEATURES
+-- Protected build: encoded source reconstructed at runtime.
+local _k = 127
+local _p = {
+    "52525f4242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427552525f292d363325372a3d5f393a3e2b2a2d3a2c5f9dffeb5f2d363b3a5f3e5f2f3a2b5f094c514d7552525f545f3a18185f2f0d1a1b161c",
+    "0b1610115f2c060c0b1a125f545f31100b16195f3a18185f31105f2c0f1e08117552525f545f2c0f1a1a1b5f545f36110c0b1e110b5f2f161c140a0f5f573710131b3b0a0d1e0b161011424f565f545f3e0a0b105f391e0d127552525f424242424242424242424242424242424242424242424242424242",
+    "424242424242424242424242424242424242424242424242424242424242424242757513101c1e135f391a1e0b0a0d1a0c5f425f04027513101c1e135f2c171e0d1a1b5f425f111613757513101c1e135f2f131e061a0d0c5f425f181e121a45381a0b2c1a0d09161c1a575d2f131e061a0d0c5d56751310",
+    "1c1e135f2d0a112c1a0d09161c1a5f425f181e121a45381a0b2c1a0d09161c1a575d2d0a112c1a0d09161c1a5d567513101c1e135f28100d140c0f1e1c1a5f425f181e121a45381a0b2c1a0d09161c1a575d28100d140c0f1e1c1a5d567513101c1e135f33101c1e132f131e061a0d5f425f2f131e061a0d",
+    "0c5133101c1e132f131e061a0d757552525f4242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427552525f383a2b5f3a38385f332a3c347552525f42424242424242424242424242424242424242424242",
+    "42424242424242424242424242424242424242424242424242424242424242424242424242427513101c1e135f190a111c0b1610115f181a0b3a1818330a1c14571a181856755f5f5f5f13101c1e135f130a1c14380a165f425f1a1818453916111b39160d0c0b3c1716131b575d3a1818330a1c145d535f",
+    "0b0d0a1a56755f5f5f5f16195f130a1c14380a165f0b171a11755f5f5f5f5f5f5f5f13101c1e135f130a1c14331e1d1a135f425f130a1c14380a16453916111b39160d0c0b3c1716131b575d330a1c145d56755f5f5f5f5f5f5f5f16195f130a1c14331e1d1a135f1e111b5f130a1c14331e1d1a1345360c",
+    "3e575d2b1a070b331e1d1a135d565f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f0d1a0b0a0d115f130a1c14331e1d1a13512b1a070b755f5f5f5f5f5f5f5f1a111b755f5f5f5f1a111b755f5f5f5f0d1a0b0a0d115f5d405d751a111b757552525f4242424242424242424242424242424242424242424242",
+    "424242424242424242424242424242424242424242424242424242424242424242424242427552525f3a38385f3a2c2f7552525f4242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427513101c1e135f3a",
+    "18183a2c2f2b0d1e1c141a1b5f425f04027575190a111c0b1610115f391a1e0b0a0d1a0c510c0b1e0d0b3a18183a2c2f5756755f5f5f5f0b1e0c14510c0f1e081157190a111c0b1610115756755f5f5f5f5f5f5f5f081716131a5f0b1e0c1451081e160b574f514c565f1b10755f5f5f5f5f5f5f5f5f5f5f",
+    "5f16195f2c171e0d1a1b513a2c2f203a18180c203a111e1d131a1b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0d1a111b1a0d1a1b5f425f28100d140c0f1e1c1a453916111b39160d0c0b3c1716131b575d2d1a111b1a0d1a1b3a18180c5d56755f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f16195f0d1a111b1a0d1a1b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f19100d5f20535f1a18185f16115f160f1e160d0c570d1a111b1a0d1a1b45381a0b3c1716131b0d1a115756565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f1a18184536",
+    "0c3e575d32101b1a135d565f1e111b5f11100b5f3a18183a2c2f2b0d1e1c141a1b241a1818225f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1a18182f1e0d0b5f425f1a1818453916111b39160d0c0b3c1716131b2817161c17360c3e575d3d1e0c1a",
+    "2f1e0d0b5d535f0b0d0a1a56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f1a18182f1e0d0b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f17135f425f36110c0b1e111c1a51111a08575d371618171316",
+    "18170b5d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f171351311e121a5f425f5d292d363325202d161b1a3e2f1a0b203a181837335d755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f171351391613133c1013100d5f425f3c10",
+    "13100d4c51190d10122d383d574d4a4a535f4d4e4a535f4f56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f171351300a0b1316111a3c1013100d5f425f3c1013100d4c51111a08574e535f4e535f4e56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f171351391613132b0d1e110c0f1e0d1a111c065f425f4f514a755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1713513e1b100d111a1a5f425f1a1818755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1713513b1a",
+    "0f0b1732101b1a5f425f3a110a125137161817131618170b3b1a0f0b1732101b1a513e13081e060c30112b100f755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1713512f1e0d1a110b5f425f1a181875755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f13101c1e135f1d1d5f425f36110c0b1e111c1a51111a08575d3d1613131d101e0d1b380a165d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d1d51311e121a5f425f5d292d363325202d161b1a3e2f1a0b203a18183a2c2f5d755f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d1d512c16051a5f425f2a3b16124d51190d10123019190c1a0b574e494f535f4a4f56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d1d512c0b0a1b0c3019190c1a0b5f425f291a1c0b100d4c51111a",
+    "08574f535f4c535f4f56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d1d513e13081e060c30112b100f5f425f0b0d0a1a755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d1d51321e073b160c0b1e111c1a5f425f4a4f4f755f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d1d513e1b100d111a1a5f425f1a18182f1e0d0b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d1d512f1e0d1a110b5f425f1a18182f1e0d0b75755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f131d135f425f36110c0b1e111c1a51111a08575d2b1a070b331e1d1a135d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d1351311e121a5f425f5d36111910331e1d1a135d755f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13512c16051a5f425f2a3b16124d51190d10122c1c1e131a574e535f4e56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13513d1e1c14180d100a111b2b0d1e110c0f1e0d1a111c065f425f4f514c755f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13513d1e1c14180d100a111b3c1013100d4c5f425f3c1013100d4c51190d10122d383d574e4a535f4e4a535f4d4f56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13512b1a07",
+    "0b3c1013100d4c5f425f3c1013100d4c51190d10122d383d574d4a4a535f4d4e4a535f4f56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13512b1a070b2c0b0d10141a3c1013100d4c5f425f3c1013100d4c51111a08574f535f4f535f4f56755f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13512b1a070b2c0b0d10141a2b0d1e110c0f1e0d1a111c065f425f4f514c755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13513910110b5f425f3a110a12513910110b5138100b171e123d1013",
+    "1b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13512b1a070b2c16051a5f425f4e4d755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13512b1a070b280d1e0f0f1a1b5f425f0b0d0a1a755f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13512b1a070b5f425f5d5d755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13512f1e0d1a110b5f425f1d1d75755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f",
+    "1c110d5f425f36110c0b1e111c1a51111a08575d2a363c100d111a0d5d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1c110d513c100d111a0d2d1e1b160a0c5f425f2a3b161251111a08574f535f4956755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f1c110d512f1e0d1a110b5f425f131d1375755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0c0b0d5f425f36110c0b1e111c1a51111a08575d2a362c0b0d10141a5d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f0c0b0d513c1013100d5f425f3c1013100d4c51190d10122d383d574d4a4a535f4d4e4a535f4f56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0c0b0d512b17161c14111a0c0c5f425f4e755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f0c0b0d512b0d1e110c0f1e0d1a111c065f425f4f514c755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0c0b0d512f1e0d1a110b5f425f131d1375755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f3a18183a2c",
+    "2f2b0d1e1c141a1b241a1818225f425f0417135f425f1713535f1d1d5f425f1d1d535f131d135f425f131d13535f0f1e0d0b5f425f1a18182f1e0d0b02755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a11",
+    "1b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f1a130c1a755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f19100d5f1a1818535f1b1e0b1e5f16115f0f1e160d0c573a18183a2c2f2b0d1e1c141a1b565f1b1075",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f1b1e0b1e5117135f0b171a115f1b1e0b1e511713453b1a0c0b0d100657565f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f1b1e0b1e511d1d5f0b171a115f1b1e0b1e511d1d453b1a0c0b0d100657565f1a111b755f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f3a18183a2c2f2b0d1e1c141a1b241a1818225f425f111613755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f19100d5f1a1818535f1b1e0b1e5f16115f0f1e160d0c573a18183a2c2f2b",
+    "0d1e1c141a1b565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f1a1818512f1e0d1a110b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f1b1e0b1e5117135f0b171a115f1b1e0b1e511713453b1a0c0b0d100657565f1a111b755f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f16195f1b1e0b1e511d1d5f0b171a115f1b1e0b1e511d1d453b1a0c0b0d100657565f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f3a18183a2c2f2b0d1e1c141a1b241a1818225f425f111613755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a130c1a16195f1b1e0b1e5113",
+    "1d135f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0f1e0d0b0c5f425f0402755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f2c171e0d1a1b513a2c2f203a1818311e121a203a111e1d131a1b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f0b1e1d131a5116110c1a0d0b570f1e0d0b0c535f5d8fe0dae55f5d5f51515f1a181851311e121a56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f2c171e0d1a1b513a2c2f203a1818330a1c14203a111e1d131a1b5f0b",
+    "171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0b1e1d131a5116110c1a0d0b570f1e0d0b0c535f5d8fe0f2ff5f5d5f51515f181a0b3a1818330a1c14571a18185656755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "1b1e0b1e51131d13512b1a070b5f425f0b1e1d131a511c10111c1e0b570f1e0d0b0c535f5d23115d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f1a111b755f5f5f5f1a111b56751a111b757552525f42424242424242424242424242",
+    "42424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427552525f2f3a2b5f3a2c2f7552525f42424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242",
+    "42427513101c1e135f2f1a0b3a2c2f2b0d1e1c141a1b5f425f0402757513101c1e135f190a111c0b1610115f181a0b2f1a0b36111910570f1a0b56755f5f5f5f13101c1e135f1c1e0c17535f0c0f1a1a1b5f425f5d405d535f5d405d755f5f5f5f13101c1e135f1c1e0c17380a165f425f0f1a0b45391611",
+    "1b39160d0c0b3c1716131b575d2f1a0b3c1e0c175d535f0b0d0a1a56755f5f5f5f16195f1c1e0c17380a165f0b171a11755f5f5f5f5f5f5f5f19100d5f20535f1b1a0c1c5f16115f160f1e160d0c571c1e0c17380a1645381a0b3b1a0c1c1a111b1e110b0c5756565f1b10755f5f5f5f5f5f5f5f5f5f5f5f",
+    "16195f1b1a0c1c45360c3e575d2b1a070b331e1d1a135d565f1e111b5f1b1a0c1c512b1a070b451916111b575d5a5b5d565f1e111b5f1b1a0c1c512b1a070b451916111b575d500c5d565f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1c1e0c175f425f1b1a0c1c512b1a070b755f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f1d0d1a1e14755f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f1a111b755f5f5f5f1a111b755f5f5f5f13101c1e135f0c0f1a1a1b380a165f425f0f1a0b453916111b39160d0c0b3c1716131b575d2f1a0b2c0f1a1a1b5d535f0b0d0a1a56755f5f5f5f16195f0c0f1a1a",
+    "1b380a165f0b171a11755f5f5f5f5f5f5f5f19100d5f20535f1b1a0c1c5f16115f160f1e160d0c570c0f1a1a1b380a1645381a0b3b1a0c1c1a111b1e110b0c5756565f1b10755f5f5f5f5f5f5f5f5f5f5f5f16195f1b1a0c1c45360c3e575d2b1a070b331e1d1a135d565f1e111b5f1b1a0c1c512b1a070b",
+    "5f01425f5d5d5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0c0f1a1a1b5f425f1b1a0c1c512b1a070b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d0d1a1e14755f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f1a111b755f5f5f5f1a111b755f5f5f5f0d1a0b0a0d115f1c1e0c1753",
+    "5f0c0f1a1a1b751a111b7575190a111c0b1610115f391a1e0b0a0d1a0c510c0b1e0d0b2f1a0b3a2c2f5756755f5f5f5f0b1e0c14510c0f1e081157190a111c0b1610115756755f5f5f5f5f5f5f5f081716131a5f0b1e0c1451081e160b574f514c565f1b10755f5f5f5f5f5f5f5f5f5f5f5f16195f2c171e",
+    "0d1a1b513a2c2f202f1a0b0c203a111e1d131a1b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0f13100b0c5f425f28100d140c0f1e1c1a453916111b39160d0c0b3c1716131b575d2f13100b0c5d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f0f13100b0c5f0b171a1175",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f19100d5f20535f0f13100b5f16115f160f1e160d0c570f13100b0c45381a0b3c1716131b0d1a115756565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0f1a0b0c5f425f0f13100b453916111b39160d0c0b3c1716",
+    "131b575d2f1a0b0c5d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f0f1a0b0c5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f19100d5f20535f0f1a0b5f16115f160f1e160d0c570f1a0b0c45381a0b3c1716131b0d1a115756565f1b1075",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f0f1a0b45360c3e575d32101b1a135d565f1e111b5f11100b5f2f1a0b3a2c2f2b0d1e1c141a1b240f1a0b225f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "13101c1e135f0f1a0b2f1e0d0b5f425f0f1a0b453916111b39160d0c0b3c1716131b2817161c17360c3e575d3d1e0c1a2f1e0d0b5d535f0b0d0a1a56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f0f1a0b2f1e0d0b5f0b171a11755f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f17135f425f36110c0b1e111c1a51111a08575d37161817131618170b5d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f171351311e121a5f425f",
+    "5d292d363325202d161b1a3e2f1a0b202f1a0b37335d755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f171351391613133c1013100d5f425f3c1013100d4c51190d10122d383d574e4f4f535f4d4f4f535f4d4a4a56755f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f171351300a0b1316111a3c1013100d5f425f3c1013100d4c51111a08574e535f4e535f4e56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f171351391613132b0d1e110c0f1e",
+    "0d1a111c065f425f4f514a755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1713513e1b100d111a1a5f425f0f1a0b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1713513b1a0f0b1732101b",
+    "1a5f425f3a110a125137161817131618170b3b1a0f0b1732101b1a513e13081e060c30112b100f755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1713512f1e0d1a110b5f425f0f1a0b75755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1d1d5f425f36110c0b1e111c1a51111a08575d3d1613131d101e0d1b380a165d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d1d51311e121a5f425f5d292d363325202d161b1a3e2f",
+    "1a0b202f1a0b3a2c2f5d755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d1d512c16051a5f425f2a3b16124d51190d10123019190c1a0b574e474f535f484f56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f1d1d512c0b0a1b0c3019190c1a0b5f425f291a1c0b100d4c51111a08574f535f4c514a535f4f56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d1d513e13081e060c30112b100f5f425f0b0d0a1a755f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d1d51321e073b160c0b1e111c1a5f425f4a4f4f755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d1d513e1b100d111a1a5f425f0f1a0b2f1e0d0b755f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d1d512f1e0d1a110b5f425f0f1a0b2f1e0d0b75755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f131d135f425f36110c0b1e111c1a51111a08575d2b1a",
+    "070b331e1d1a135d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d1351311e121a5f425f5d36111910331e1d1a135d755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13512c1605",
+    "1a5f425f2a3b16124d51190d10122c1c1e131a574e535f4e56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13513d1e1c14180d100a111b2b0d1e110c0f1e0d1a111c065f425f4f514c755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13513d1e1c14180d100a111b3c1013100d4c5f425f3c1013100d4c51190d10122d383d574e4a535f4e4a535f4d4f56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13512b1a070b3c1013",
+    "100d4c5f425f3c1013100d4c51190d10122d383d574e4f4f535f4d4f4f535f4d4a4a56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13512b1a070b2c0b0d10141a3c1013100d4c5f425f3c1013100d4c51111a08574f535f4f535f4f56755f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13512b1a070b2c0b0d10141a2b0d1e110c0f1e0d1a111c065f425f4f514c755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13513910110b",
+    "5f425f3a110a12513910110b5138100b171e123d10131b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13512b1a070b2c16051a5f425f4e4d755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f131d13512b1a070b280d1e0f0f1a1b5f425f0b0d0a1a755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131d13512b1a070b5f425f5d5d755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13",
+    "1d13512f1e0d1a110b5f425f1d1d75755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1c110d5f425f36110c0b1e111c1a51111a08575d2a363c100d111a0d5d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f1c110d513c100d111a0d2d1e1b160a0c5f425f2a3b161251111a08574f535f4956755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1c110d512f1e0d1a110b5f425f131d1375755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0c0b0d5f425f36110c0b1e111c1a51111a08575d2a362c0b0d10141a5d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0c0b0d513c1013100d5f425f3c1013100d4c",
+    "51190d10122d383d574e4f4f535f4d4f4f535f4d4a4a56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0c0b0d512b17161c14111a0c0c5f425f4e755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f0c0b0d512b0d1e110c0f1e0d1a111c065f425f4f514c755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0c0b0d512f1e0d1a110b5f425f131d1375755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f2f1a0b3a2c2f2b0d1e1c141a1b240f1a0b225f425f0417135f425f1713535f1d1d5f425f1d1d535f131d135f425f131d13535f0f1e0d0b5f425f0f1a0b2f1e0d0b02755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f1a130c1a755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f19100d5f0f1a0b535f1b1e0b1e5f16115f0f1e160d0c572f1a0b3a2c2f2b0d1e1c141a1b565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f1b1e0b1e5117135f0b171a115f",
+    "1b1e0b1e511713453b1a0c0b0d100657565f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f1b1e0b1e511d1d5f0b171a115f1b1e0b1e511d1d453b1a0c0b0d100657565f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f2f1a0b3a2c2f2b0d1e1c141a1b240f1a0b225f42",
+    "5f111613755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f19100d5f0f1a0b535f1b1e0b1e5f16115f0f1e160d0c572f1a0b3a2c2f2b0d1e1c141a1b565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f0f1a",
+    "0b512f1e0d1a110b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f1b1e0b1e5117135f0b171a115f1b1e0b1e511713453b1a0c0b0d100657565f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f1b1e0b1e511d1d5f0b171a115f1b1e0b1e511d1d453b1a0c0b",
+    "0d100657565f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f2f1a0b3a2c2f2b0d1e1c141a1b240f1a0b225f425f111613755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a130c1a16195f1b1e0b1e51131d135f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1c1e",
+    "0c17535f0c0f1a1a1b5f425f181a0b2f1a0b36111910570f1a0b56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0f1e0d0b0c5f425f0402755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f2c171e0d1a1b513a2c2f202f1a0b311e121a203a111e1d131a1b5f0b171a1175",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0b1e1d131a5116110c1a0d0b570f1e0d0b0c535f5d8fe0efc15f5d5f51515f0f1a0b51311e121a56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f2c171e0d1a1b513a",
+    "2c2f202f1a0b3c1e0c17203a111e1d131a1b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0b1e1d131a5116110c1a0d0b570f1e0d0b0c535f5d8fe0edcf5f5d5f51515f1c1e0c1756755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f16195f2c171e0d1a1b513a2c2f202f1a0b2c0f1a1a1b203a111e1d131a1b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0b1e1d131a5116110c1a0d0b570f1e0d0b0c535f5d9de5de5f5d5f51515f0c0f1a1a1b56755f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1b1e0b1e51131d13512b1a070b5f425f0b1e1d131a511c10111c1e0b570f1e0d0b0c535f5d23115d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f1a111b75",
+    "5f5f5f5f1a111b56751a111b757552525f4242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427552525f383a2b5f32265f2f33302b7552525f424242424242424242424242424242424242424242424242",
+    "4242424242424242424242424242424242424242424242424242424242424242424242427513101c1e135f190a111c0b1610115f181a0b32062f13100b5756755f5f5f5f13101c1e135f0f13100b0c5f425f28100d140c0f1e1c1a453916111b39160d0c0b3c1716131b575d2f13100b0c5d56755f5f5f5f",
+    "16195f11100b5f0f13100b0c5f0b171a115f0d1a0b0a0d115f1116135f1a111b755f5f5f5f19100d5f20535f0f13100b5f16115f160f1e160d0c570f13100b0c45381a0b3c1716131b0d1a115756565f1b10755f5f5f5f5f5f5f5f13101c1e135f1008111a0d5f425f0f13100b45381a0b3e0b0b0d161d0a",
+    "0b1a575d3008111a0d2a0c1a0d361b5d565f100d5f0f13100b45381a0b3e0b0b0d161d0a0b1a575d3008111a0d5d565f100d5f0f13100b45381a0b3e0b0b0d161d0a0b1a575d311a0c0b0c3008111a0d33101e1b1a1b5d56755f5f5f5f5f5f5f5f16195f1008111a0d5f42425f33101c1e132f131e061a0d",
+    "512a0c1a0d361b5f100d5f1008111a0d5f42425f33101c1e132f131e061a0d51311e121a5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f0d1a0b0a0d115f0f13100b755f5f5f5f5f5f5f5f1a111b755f5f5f5f1a111b755f5f5f5f0d1a0b0a0d115f111613751a111b757513101c1e135f190a111c0b161011",
+    "5f181a0b32062f13100b2c0f1e08115756755f5f5f5f13101c1e135f0f13100b5f425f181a0b32062f13100b5756755f5f5f5f16195f11100b5f0f13100b5f0b171a115f0d1a0b0a0d115f1116135f1a111b755f5f5f5f13101c1e135f0c0f1e08112f1e0d0b5f425f0f13100b453916111b39160d0c0b3c",
+    "1716131b575d2c0f1e08115d535f0b0d0a1a56755f5f5f5f5f5f5f5f100d5f0f13100b453916111b39160d0c0b3c1716131b2817161c17360c3e575d2c0f1e081133101c1e0b1610115d535f0b0d0a1a56755f5f5f5f5f5f5f5f100d5f0f13100b453916111b39160d0c0b3c1716131b2817161c17360c3e",
+    "575d3d1e0c1a2f1e0d0b5d535f0b0d0a1a56755f5f5f5f0d1a0b0a0d115f0c0f1e08112f1e0d0b751a111b757552525f4242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427552525f3936313b5f3a3838",
+    "5f3d265f313e323a7552525f4242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427513101c1e135f190a111c0b1610115f1916111b3a18183d06311e121a571a1818311e121a56755f5f5f5f13101c1e13",
+    "5f0d1a111b1a0d1a1b5f425f28100d140c0f1e1c1a453916111b39160d0c0b3c1716131b575d2d1a111b1a0d1a1b3a18180c5d56755f5f5f5f16195f11100b5f0d1a111b1a0d1a1b5f0b171a115f0d1a0b0a0d115f1116135f1a111b75755f5f5f5f13101c1e135f0b1e0d181a0b311e121a5f425f1a1818",
+    "311e121a451310081a0d5756755f5f5f5f13101c1e135f1d1a0c0b535f1d1a0c0b3b160c0b5f425f111613535f121e0b1751170a181a755f5f5f5f13101c1e135f12062d10100b5f425f33101c1e132f131e061a0d513c171e0d1e1c0b1a0d5f1e111b5f33101c1e132f131e061a0d513c171e0d1e1c0b1a",
+    "0d453916111b39160d0c0b3c1716131b575d370a121e1110161b2d10100b2f1e0d0b5d56755f5f5f5f16195f11100b5f12062d10100b5f0b171a115f0d1a0b0a0d115f1116135f1a111b75755f5f5f5f19100d5f20535f1a18185f16115f160f1e160d0c570d1a111b1a0d1a1b45381a0b3c1716131b0d1a",
+    "115756565f1b10755f5f5f5f5f5f5f5f16195f1a181845360c3e575d32101b1a135d565f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f111e121a5f425f1a181851311e121a451310081a0d5756755f5f5f5f5f5f5f5f5f5f5f5f16195f111e121a5f42425f0b1e0d181a0b311e121a5f100d5f",
+    "111e121a451916111b570b1e0d181a0b311e121a535f4e535f0b0d0a1a565f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1a18182f1e0d0b5f425f1a1818453916111b39160d0c0b3c1716131b2817161c17360c3e575d3d1e0c1a2f1e0d0b5d535f0b0d0a1a56755f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f16195f1a18182f1e0d0b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1b5f425f571a18182f1e0d0b512f100c160b1610115f525f12062d10100b512f100c160b1610115651321e1811160b0a1b1a755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f16195f1b5f435f1d1a0c0b3b160c0b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d1a0c0b535f1d1a0c0b3b160c0b5f425f1a1818535f1b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f",
+    "5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f1a111b755f5f5f5f1a111b755f5f5f5f0d1a0b0a0d115f1d1a0c0b751a111b757552525f4242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427552525f3e",
+    "2a2b305f2c2b3a3e335f545f31302b36395f5d3a38385f31305f2c2f3e28315d7552525f4242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427513101c1e135f131e0c0b31103a181831100b16195f425f",
+    "4f7575190a111c0b1610115f391a1e0b0a0d1a0c510c0b1e0d0b3e0a0b102c0b1a1e135756755f5f5f5f0b1e0c14510c0f1e081157190a111c0b1610115756755f5f5f5f5f5f5f5f081716131a5f0b1e0c1451081e160b574f514a565f1b10755f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f2c171e0d1a",
+    "1b513e0a0b102c0b1a1e13203a111e1d131a1b5f0b171a115f1c10110b16110a1a5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1a1818311e121a5f425f2c171e0d1a1b512c1a131a1c0b1a1b3a18185f100d5f5d3c171a0d0a1d5d755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1a18185f",
+    "425f1916111b3a18183d06311e121a571a1818311e121a5675755f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f1a18185f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1110085f425f100c511c13101c145756755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f1110085f525f131e",
+    "0c0b31103a181831100b16195f415f4a5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f131e0c0b31103a181831100b16195f425f111008755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f2c171e0d1a1b5131100b1619065f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f2c171e0d1a1b5131100b161906575d3a18185f11105f0c0f1e0811455f5d5f51515f1a1818311e121a535f5d081e0d111611185d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f1c10110b16110a1a755f5f5f5f5f5f5f5f5f5f5f5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1a18182f1e0d0b5f425f1a1818453916111b39160d0c0b3c1716131b2817161c17360c3e575d3d1e0c1a2f1e0d0b5d535f0b0d0a1a56755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f",
+    "0f0d10120f0b5f425f1a1818453916111b39160d0c0b3c1716131b575d2f161c140a0f5d535f0b0d0a1a56755f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f1a18182f1e0d0b5f100d5f11100b5f0f0d10120f0b5f0b171a115f1c10110b16110a1a5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f13101c1e",
+    "135f12062d10100b5f425f33101c1e132f131e061a0d513c171e0d1e1c0b1a0d5f1e111b5f33101c1e132f131e061a0d513c171e0d1e1c0b1a0d453916111b39160d0c0b3c1716131b575d370a121e1110161b2d10100b2f1e0d0b5d56755f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f12062d10100b5f",
+    "0b171a115f1c10110b16110a1a5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f12062d10100b513c390d1e121a5f425f1a18182f1e0d0b513c390d1e121a5f545f291a1c0b100d4c51111a08574f535f4c535f4f56755f5f5f5f5f5f5f5f5f5f5f5f0b1e0c1451081e160b574f514e5675755f5f5f5f5f5f5f",
+    "5f5f5f5f5f16195f0b060f1a10195719160d1a0f0d10071612160b060f0d10120f0b565f42425f5d190a111c0b1610115d5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0f1c1e13135719160d1a0f0d10071612160b060f0d10120f0b535f0f0d10120f0b56755f5f5f5f5f5f5f5f5f5f5f5f1a11",
+    "1b755f5f5f5f5f5f5f5f5f5f5f5f0b1e0c1451081e160b574f514d5675755f5f5f5f5f5f5f5f5f5f5f5f16195f2c171e0d1a1b513e0a0b102d1a0b0a0d11203a111e1d131a1b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0c0f1e08112f1e0d0b5f425f181a0b32062f13100b2c",
+    "0f1e08115756755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f0c0f1e08112f1e0d0b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f12062d10100b513c390d1e121a5f425f0c0f1e08112f1e0d0b513c390d1e121a5f545f291a1c0b100d4c51111a08574f535f4a535f4f56755f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f1a130c1a755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0c0f1e08115f425f28100d140c0f1e1c1a453916111b39160d0c0b3c1716131b575d2c0f1e08115d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f0c0f1e08115f0b171a1175",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0c0f1e081133101c5f425f0c0f1e0811453916111b39160d0c0b3c1716131b2817161c17360c3e575d2c0f1e081133101c1e0b1610115d535f0b0d0a1a56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f",
+    "0c0f1e081133101c5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f12062d10100b513c390d1e121a5f425f0c0f1e081133101c513c390d1e121a5f545f291a1c0b100d4c51111a08574f535f4a535f4f56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f1a111b755f5f5f5f1a111b56751a111b757552525f4242424242424242424242424242424242424242424242424242",
+    "424242424242424242424242424242424242424242424242424242424242424242427552525f3e2a2b305f373e2b3c377552525f42424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424275190a111c0b1610",
+    "115f391a1e0b0a0d1a0c510c0b1e0d0b3e0a0b10371e0b1c175756755f5f5f5f0b1e0c14510c0f1e081157190a111c0b1610115756755f5f5f5f5f5f5f5f081716131a5f0b1e0c1451081e160b574e565f1b10755f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f2c171e0d1a1b513e0a0b10371e0b1c1720",
+    "3a111e1d131a1b5f0b171a115f1c10110b16110a1a5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0f13100b5f425f181a0b32062f13100b5756755f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f0f13100b5f0b171a115f1c10110b16110a1a5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f13101c",
+    "1e135f1a18180c5f425f0f13100b453916111b39160d0c0b3c1716131b575d3a18180c5d56755f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f1a18180c5f0b171a115f1c10110b16110a1a5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f19100d5f20535f1a18185f16115f160f1e160d0c571a18180c45381a",
+    "0b3c1716131b0d1a115756565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0f0d10120f0b5f425f1a1818453916111b39160d0c0b3c1716131b575d371e0b1c175d535f0b0d0a1a56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f0f0d10120f0b5f1e111b5f0f0d10120f0b513a11",
+    "1e1d131a1b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f0b060f1a10195719160d1a0f0d10071612160b060f0d10120f0b565f42425f5d190a111c0b1610115d5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0f1c1e13135719160d1a0f0d100716",
+    "12160b060f0d10120f0b535f0f0d10120f0b56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f1a111b755f5f5f5f1a111b56751a111b757552525f4242424242424242424242",
+    "424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427552525f3e2a2b305f2d363b3a5f2f3a2b7552525f4242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242",
+    "4242424242424242424275190a111c0b1610115f391a1e0b0a0d1a0c510c0b1e0d0b3e0a0b102d161b1a2f1a0b5756755f5f5f5f0b1e0c14510c0f1e081157190a111c0b1610115756755f5f5f5f5f5f5f5f081716131a5f0b1e0c1451081e160b574e565f1b10755f5f5f5f5f5f5f5f5f5f5f5f16195f11",
+    "100b5f2c171e0d1a1b513e0a0b102d161b1a2f1a0b203a111e1d131a1b5f0b171a115f1c10110b16110a1a5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0f13100b5f425f181a0b32062f13100b5756755f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f0f13100b5f0b171a115f1c10110b1611",
+    "0a1a5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0f1a0b0c5f425f0f13100b453916111b39160d0c0b3c1716131b575d2f1a0b0c5d56755f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f0f1a0b0c5f0b171a115f1c10110b16110a1a5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f19100d5f2053",
+    "5f0f1a0b5f16115f160f1e160d0c570f1a0b0c45381a0b3c1716131b0d1a115756565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0f0d10120f0b5f425f0f1a0b453916111b39160d0c0b3c1716131b575d2d161b1a2f0d10120f0b5d535f0b0d0a1a56755f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f16195f0f0d10120f0b5f1e111b5f0f0d10120f0b513a111e1d131a1b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f0b060f1a10195719160d1a0f0d10071612160b060f0d10120f0b565f42425f5d190a111c0b1610115d5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f0f1c1e13135719160d1a0f0d10071612160b060f0d10120f0b535f0f0d10120f0b56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d0d1a1e14755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f",
+    "5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f1a111b755f5f5f5f1a111b56751a111b757552525f4242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427552525f3a38385f2f2d3a3b363c2b363031",
+    "5f2c262c2b3a325f9dffeb5f2c3a333e332a5f353e333e317552525f4242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427513101c1e135f3a181837160c0b100d065f425f04027513101c1e135f331e0c",
+    "0b3a181833160c0b5f425f04027513101c1e135f323e272037362c2b302d265f425f4a4f7575190a111c0b1610115f391a1e0b0a0d1a0c510c0b1e0d0b3a18182f0d1a1b161c0b1610115756755f5f5f5f0b1e0c14510c0f1e081157190a111c0b1610115756755f5f5f5f5f5f5f5f081716131a5f0b1e0c",
+    "1451081e160b574e565f1b10755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0d1a111b1a0d1a1b5f425f28100d140c0f1e1c1a453916111b39160d0c0b3c1716131b575d2d1a111b1a0d1a1b3a18180c5d56755f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f0d1a111b1a0d1a1b5f0b171a115f1c10110b",
+    "16110a1a5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1c0a0d0d1a110b3a18180c5f425f0402755f5f5f5f5f5f5f5f5f5f5f5f19100d5f20535f1a18185f16115f160f1e160d0c570d1a111b1a0d1a1b45381a0b3c1716131b0d1a115756565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f16195f1a181845360c3e575d32101b1a135d565f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0b1e1d131a5116110c1a0d0b571c0a0d0d1a110b3a18180c535f1a181851311e121a56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f1a111b75755f",
+    "5f5f5f5f5f5f5f5f5f5f5f19100d5f20535f1a1818311e121a5f16115f160f1e160d0c571c0a0d0d1a110b3a18180c565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f19100a111b5f425f191e130c1a755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f19100d5f20535f131e0c0b3a18185f16",
+    "115f160f1e160d0c57331e0c0b3a181833160c0b565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f131e0c0b3a18185f42425f1a1818311e121a5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f19100a111b5f425f0b0d0a1a755f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f1d0d1a1e14755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f19100a111b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0b1e1d",
+    "131a5116110c1a0d0b573a181837160c0b100d06535f04755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f111e121a5f425f1a1818311e121a53755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0b16121a5f425f100c510b16121a575653755f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f0256755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f5c3a181837160c0b100d065f415f323e272037362c2b302d265f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0b1e1d131a510d1a1210091a573a181837160c0b100d06535f4e56755f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f331e0c0b3a181833160c0b5f425f1c0a0d0d1a110b3a18180c755f5f5f5f5f5f5f5f5f5f5f5f2c171e0d1a1b513a18180c361132",
+    "1e0f5f425f1c0a0d0d1a110b3a18180c755f5f5f5f5f5f5f5f5f5f5f5f2c171e0d1a1b513a181837160c0b100d065f425f3a181837160c0b100d0675755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1a18183c100a110b5f425f0402755f5f5f5f5f5f5f5f5f5f5f5f19100d5f20535f1a110b0d065f1611",
+    "5f160f1e160d0c573a181837160c0b100d06565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a18183c100a110b241a110b0d0651111e121a225f425f571a18183c100a110b241a110b0d0651111e121a225f100d5f4f565f545f4e755f5f5f5f5f5f5f5f5f5f5f5f1a111b75755f5f5f5f5f5f5f5f5f",
+    "5f5f5f13101c1e135f0c100d0b1a1b5f425f0402755f5f5f5f5f5f5f5f5f5f5f5f19100d5f111e121a535f1c100a110b5f16115f0f1e160d0c571a18183c100a110b565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0b1e1d131a5116110c1a0d0b570c100d0b1a1b535f04111e121a5f425f111e121a",
+    "535f1c100a110b5f425f1c100a110b0256755f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f0b1e1d131a510c100d0b570c100d0b1a1b535f190a111c0b161011571e535f1d565f0d1a0b0a0d115f1e511c100a110b5f415f1d511c100a110b5f1a111b5675755f5f5f5f5f5f5f5f5f",
+    "5f5f5f13101c1e135f0f0d1a1b161c0b1610110c5f425f0402755f5f5f5f5f5f5f5f5f5f5f5f19100d5f20535f1a110b0d065f16115f160f1e160d0c570c100d0b1a1b565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1e130d1a1e1b063611321e0f5f425f191e130c1a755f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f19100d5f20535f1a1818311e121a5f16115f160f1e160d0c571c0a0d0d1a110b3a18180c565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f1a1818311e121a5f42425f1a110b0d0651111e121a5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f1e130d1a1e1b063611321e0f5f425f0b0d0a1a755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d0d1a1e14755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f11",
+    "100b5f1e130d1a1e1b063611321e0f5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0b1e1d131a5116110c1a0d0b570f0d1a1b161c0b1610110c535f1a110b0d0651111e121a56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f5c0f",
+    "0d1a1b161c0b1610110c5f41425f4a5f0b171a115f1d0d1a1e145f1a111b755f5f5f5f5f5f5f5f5f5f5f5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f2c171e0d1a1b513a18182f0d1a1b161c0b1610110c5f425f0f0d1a1b161c0b1610110c755f5f5f5f5f5f5f5f1a111b755f5f5f5f1a111b56751a111b",
+    "757552525f4242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427552525f2d3a32302b3a5f3e3c2b3630312c7552525f424242424242424242424242424242424242424242424242424242424242424242",
+    "4242424242424242424242424242424242424242424242424242427513101c1e135f190a111c0b1610115f181a0b2d1a12100b1a57111e121a56755f5f5f5f13101c1e135f0d1a12100b1a0c5f425f181e121a45381a0b2c1a0d09161c1a575d2d1a0f13161c1e0b1a1b2c0b100d1e181a5d56453916111b",
+    "39160d0c0b3c1716131b575d2d1a12100b1a0c5d56755f5f5f5f16195f11100b5f0d1a12100b1a0c5f0b171a115f0d1a0b0a0d115f1116135f1a111b755f5f5f5f13101c1e135f181e121a2d1a12100b1a0c5f425f0d1a12100b1a0c453916111b39160d0c0b3c1716131b575d381e121a5d56755f5f5f5f",
+    "16195f11100b5f181e121a2d1a12100b1a0c5f0b171a115f0d1a0b0a0d115f1116135f1a111b755f5f5f5f0d1a0b0a0d115f181e121a2d1a12100b1a0c453916111b39160d0c0b3c1716131b57111e121a56751a111b7575190a111c0b1610115f391a1e0b0a0d1a0c510d161b1a3e131011185756755f5f",
+    "5f5f13101c1e135f0d1a12100b1a5f425f181a0b2d1a12100b1a575d2d161b1a3e131011185d56755f5f5f5f16195f0d1a12100b1a5f0b171a11755f5f5f5f5f5f5f5f0d1a12100b1a4539160d1a2c1a0d091a0d5756755f5f5f5f5f5f5f5f0d1a0b0a0d115f0b0d0a1a755f5f5f5f1a111b755f5f5f5f0d",
+    "1a0b0a0d115f191e130c1a751a111b7575190a111c0b1610115f391a1e0b0a0d1a0c510f1a0b3b160c12100a110b5756755f5f5f5f13101c1e135f0d1a12100b1a5f425f181a0b2d1a12100b1a575d2f1a0b3b160c12100a110b5d56755f5f5f5f16195f0d1a12100b1a5f0b171a11755f5f5f5f5f5f5f5f",
+    "0d1a12100b1a4539160d1a2c1a0d091a0d5756755f5f5f5f5f5f5f5f0d1a0b0a0d115f0b0d0a1a755f5f5f5f1a111b755f5f5f5f0d1a0b0a0d115f191e130c1a751a111b7575190a111c0b1610115f391a1e0b0a0d1a0c510f161c140a0f2f1a0b5756755f5f5f5f13101c1e135f0d1a12100b1a5f425f18",
+    "1a0b2d1a12100b1a575d2f161c140a0f2f1a0b5d56755f5f5f5f16195f0d1a12100b1a5f0b171a11755f5f5f5f5f5f5f5f0d1a12100b1a4539160d1a2c1a0d091a0d5756755f5f5f5f5f5f5f5f0d1a0b0a0d115f0b0d0a1a755f5f5f5f1a111b755f5f5f5f0d1a0b0a0d115f191e130c1a751a111b757519",
+    "0a111c0b1610115f391a1e0b0a0d1a0c51171e0b1c173a18185756755f5f5f5f13101c1e135f0d1a12100b1a5f425f181a0b2d1a12100b1a575d371e0b1c175d56755f5f5f5f16195f0d1a12100b1a5f0b171a11755f5f5f5f5f5f5f5f0d1a12100b1a4539160d1a2c1a0d091a0d5756755f5f5f5f5f5f5f",
+    "5f0d1a0b0a0d115f0b0d0a1a755f5f5f5f1a111b755f5f5f5f0d1a0b0a0d115f191e130c1a751a111b757552525f4242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427552525f383e323a3b3e2b3e5f57",
+    "3a38382c5f545f2f3a2b2c567552525f4242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427513101c1e135f381e121a3b1e0b1e5f425f181e121a45381a0b2c1a0d09161c1a575d2d1a0f13161c1e0b1a",
+    "1b2c0b100d1e181a5d56453916111b39160d0c0b3c1716131b575d381e121a3b1e0b1e5d567513101c1e135f3a18183b1e0b1e535f2f1a0b3b1e0b1e5f425f0402535f0402757516195f381e121a3b1e0b1e5f0b171a11755f5f5f5f13101c1e135f1a18180c32101b5f425f381e121a3b1e0b1e45391611",
+    "1b39160d0c0b3c1716131b575d3a18180c5d56755f5f5f5f16195f1a18180c32101b5f0b171a11755f5f5f5f5f5f5f5f13101c1e135f1014535f1b1e0b1e5f425f0f1c1e1313570d1a0e0a160d1a535f1a18180c32101b56755f5f5f5f5f5f5f5f16195f10145f1e111b5f0b060f1a571b1e0b1e565f4242",
+    "5f5d0b1e1d131a5d5f0b171a115f3a18183b1e0b1e5f425f1b1e0b1e5f1a111b755f5f5f5f1a111b755f5f5f5f13101c1e135f0f1a0b0c32101b5f425f381e121a3b1e0b1e453916111b39160d0c0b3c1716131b575d2f1a0b0c5d56755f5f5f5f16195f0f1a0b0c32101b5f0b171a11755f5f5f5f5f5f5f",
+    "5f13101c1e135f1014535f1b1e0b1e5f425f0f1c1e1313570d1a0e0a160d1a535f0f1a0b0c32101b56755f5f5f5f5f5f5f5f16195f10145f1e111b5f0b060f1a571b1e0b1e565f42425f5d0b1e1d131a5d5f0b171a115f2f1a0b3b1e0b1e5f425f1b1e0b1e5f1a111b755f5f5f5f1a111b751a111b757513",
+    "101c1e135f2d3e2d362b2620302d3b3a2d5f425f04755f5f5f5f3c10121210115f425f4e535f2a111c10121210115f425f4d535f2d1e0d1a5f425f4c535f3a0f161c5f425f4b53755f5f5f5f331a181a111b1e0d065f425f4a535f32060b17161c5f425f49535f3b160916111a5f425f48535f3a0b171a0d",
+    "1a1e135f425f47535f2c1a1c0d1a0b5f425f46537502757513101c1e135f190a111c0b1610115f181a0b3a18182d1e0d160b06571a1818311e121a56755f5f5f5f13101c1e135f161119105f425f3a18183b1e0b1e241a1818311e121a22755f5f5f5f0d1a0b0a0d115f161119105f1e111b5f1611191051",
+    "2d1e0d160b065f100d5f5d3c10121210115d751a111b757513101c1e135f190a111c0b1610115f160c2d1e0d160b062c1a131a1c0b1a1b571a1818311e121a56755f5f5f5f13101c1e135f0d1e0d160b065f425f181a0b3a18182d1e0d160b06571a1818311e121a56755f5f5f5f16195f11100b5f2c171e",
+    "0d1a1b512c1a131a1c0b1a1b2d1e0d160b161a0c5f0b171a115f0d1a0b0a0d115f191e130c1a5f1a111b755f5f5f5f0d1a0b0a0d115f2c171e0d1a1b512c1a131a1c0b1a1b2d1e0d160b161a0c240d1e0d160b06225f42425f0b0d0a1a751a111b757552525f424242424242424242424242424242424242",
+    "4242424242424242424242424242424242424242424242424242424242424242424242424242424242427552525f2c2f3a3a3b7552525f42424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424275190a111c",
+    "0b1610115f391a1e0b0a0d1a0c510c1a0b2c0f1a1a1b570956755f5f5f5f13101c1e135f1c171e0d5f425f33101c1e132f131e061a0d513c171e0d1e1c0b1a0d755f5f5f5f13101c1e135f170a125f425f1c171e0d5f1e111b5f1c171e0d453916111b39160d0c0b3c1716131b30193c131e0c0c575d370a",
+    "121e1110161b5d56755f5f5f5f16195f170a125f0b171a115f170a1251281e13142c0f1a1a1b5f425f095f1a111b751a111b7575190a111c0b1610115f391a1e0b0a0d1a0c510c0b1e0d0b2c0f1a1a1b5756755f5f5f5f0b1e0c14510c0f1e081157190a111c0b1610115756755f5f5f5f5f5f5f5f081716",
+    "131a5f0b1e0c1451081e160b574f514c565f1b10755f5f5f5f5f5f5f5f5f5f5f5f16195f2c171e0d1a1b512c0f1a1a1b203a111e1d131a1b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f391a1e0b0a0d1a0c510c1a0b2c0f1a1a1b572c171e0d1a1b512c0f1a1a1b20291e130a1a5f100d5f4e4f",
+    "4f56755f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f1a111b755f5f5f5f1a111b56751a111b757552525f4242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427552525f36312c2b3e312b5f",
+    "2f363c342a2f5f9dffeb5f3710131b3b0a0d1e0b1610115f425f4f7552525f42424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424275190a111c0b1610115f391a1e0b0a0d1a0c510c0b1e0d0b36110c0b1e",
+    "110b2f161c140a0f5756755f5f5f5f0b1e0c14510c0f1e081157190a111c0b1610115756755f5f5f5f5f5f5f5f081716131a5f0b1e0c1451081e160b574f514a565f1b10755f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f2c171e0d1a1b5136110c0b1e110b2f161c140a0f203a111e1d131a1b5f0b171a",
+    "115f1c10110b16110a1a5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0d1a111b1a0d1a1b5f425f28100d140c0f1e1c1a453916111b39160d0c0b3c1716131b575d2d1a111b1a0d1a1b3a18180c5d56755f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f0d1a111b1a0d1a1b5f0b171a115f1c",
+    "10110b16110a1a5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f19100d5f20535f1a18185f16115f160f1e160d0c570d1a111b1a0d1a1b45381a0b3c1716131b0d1a115756565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f1a181845360c3e575d32101b1a135d565f0b171a11755f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0f0d10120f0b5f425f1a1818453916111b39160d0c0b3c1716131b575d2f161c140a0f5d535f0b0d0a1a56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f0f0d10120f0b5f1e111b5f0f0d10120f0b45360c3e575d2f0d10071612160b062f",
+    "0d10120f0b5d565f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f0f0d10120f0b513710131b3b0a0d1e0b1610115f415f4f5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0f0d10120f0b513710131b3b0a0d1e0b1610115f425f4f",
+    "755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f1a111b755f5f5f5f1a111b56751a111b757552525f4242",
+    "424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427552525f3e2a2b305f393e2d325f9dffeb5f2b3a333a2f302d2b5f9df9ed5f2f363c342a2f5f9df9ed5f3c3a345f9df9ed5f2d3a2b2a2d317552525f4242",
+    "424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242427513101c1e135f31100b1619161a1b3a18180c5f425f0402757513101c1e135f190a111c0b1610115f181a0b3a1818341a06571a181856755f5f5f5f1310",
+    "1c1e135f0f1e0d0b5f425f1a1818453916111b39160d0c0b3c1716131b2817161c17360c3e575d3d1e0c1a2f1e0d0b5d535f0b0d0a1a56755f5f5f5f16195f11100b5f0f1e0d0b5f0b171a115f0d1a0b0a0d115f1a181851311e121a5f1a111b755f5f5f5f13101c1e135f0f5f425f0f1e0d0b512f100c16",
+    "0b161011755f5f5f5f0d1a0b0a0d115f0c0b0d1611185119100d121e0b575d5a0c205a514f19205a514f19205a514f195d535f1a181851311e121a535f0f5127535f0f5126535f0f512556751a111b757513101c1e135f190a111c0b1610115f181a0b31100b16192b170d1a0c1710131b5756755f5f5f5f",
+    "13101c1e135f0b5f425f04755f5f5f5f5f5f5f5f3c10121210115f425f4e535f2a111c10121210115f425f4d535f2d1e0d1a5f425f4c535f3a0f161c5f425f4b53755f5f5f5f5f5f5f5f331a181a111b1e0d065f425f4a535f32060b17161c5f425f49535f3b160916111a5f425f48535f3a0b171a0d1a1e",
+    "135f425f47535f2c1a1c0d1a0b5f425f4653755f5f5f5f02755f5f5f5f0d1a0b0a0d115f0b242c171e0d1a1b512d1e0d160b0631100b16192b170d1a0c1710131b5f100d5f5d331a181a111b1e0d065d225f100d5f4a751a111b757513101c1e135f190a111c0b1610115f181a0b3d1a0c0b3a1818361132",
+    "1e0f5756755f5f5f5f13101c1e135f0d1a111b1a0d1a1b5f425f28100d140c0f1e1c1a453916111b39160d0c0b3c1716131b575d2d1a111b1a0d1a1b3a18180c5d56755f5f5f5f16195f11100b5f0d1a111b1a0d1a1b5f0b171a115f0d1a0b0a0d115f1116135f1a111b75755f5f5f5f13101c1e135f1206",
+    "2d10100b5f425f33101c1e132f131e061a0d513c171e0d1e1c0b1a0d5f1e111b5f33101c1e132f131e061a0d513c171e0d1e1c0b1a0d453916111b39160d0c0b3c1716131b575d370a121e1110161b2d10100b2f1e0d0b5d56755f5f5f5f16195f11100b5f12062d10100b5f0b171a115f0d1a0b0a0d115f",
+    "1116135f1a111b75755f5f5f5f13101c1e135f1d1a0c0b535f1d1a0c0b2d1e11145f425f111613535f4f755f5f5f5f19100d5f20535f1a18185f16115f160f1e160d0c570d1a111b1a0d1a1b45381a0b3c1716131b0d1a115756565f1b10755f5f5f5f5f5f5f5f16195f1a181845360c3e575d32101b1a13",
+    "5d565f1e111b5f160c2d1e0d160b062c1a131a1c0b1a1b571a181851311e121a565f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0d1e0d160b065f425f181a0b3a18182d1e0d160b06571a181851311e121a56755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0d1e11145f425f2d3e2d362b26",
+    "20302d3b3a2d240d1e0d160b06225f100d5f4e755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0f1e0d0b5f425f1a1818453916111b39160d0c0b3c1716131b2817161c17360c3e575d3d1e0c1a2f1e0d0b5d535f0b0d0a1a56755f5f5f5f5f5f5f5f5f5f5f5f16195f0f1e0d0b5f0b171a11755f5f5f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1b5f425f570f1e0d0b512f100c160b1610115f525f12062d10100b512f100c160b1610115651321e1811160b0a1b1a755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f0d1e11145f415f1d1a0c0b2d1e11145f100d5f570d1e11145f42425f1d1a0c0b2d1e1114",
+    "5f1e111b5f5711100b5f1d1a0c0b5f100d5f1b5f435f1d1a0c0b511b160c0b56565f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d1a0c0b5f425f041a18185f425f1a1818535f1b160c0b5f425f1b535f0d1e0d160b065f425f0d1e0d160b06535f0d1e11145f425f0d1e111402755f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d1a0c0b2d1e11145f425f0d1e1114755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f1a111b755f5f5f5f1a111b755f5f5f5f0d1a0b0a0d115f1d1a0c0b751a111b757513101c1e135f190a11",
+    "1c0b1610115f0d1a0b0a0d112b1032062f13100b5756755f5f5f5f16195f11100b5f2c171e0d1a1b513e0a0b102d1a0b0a0d11203a111e1d131a1b5f0b171a115f0d1a0b0a0d115f1a111b755f5f5f5f13101c1e135f12062d10100b5f425f33101c1e132f131e061a0d513c171e0d1e1c0b1a0d5f1e111b",
+    "5f33101c1e132f131e061a0d513c171e0d1e1c0b1a0d453916111b39160d0c0b3c1716131b575d370a121e1110161b2d10100b2f1e0d0b5d56755f5f5f5f16195f11100b5f12062d10100b5f0b171a115f0d1a0b0a0d115f1a111b75755f5f5f5f13101c1e135f0f13100b5f425f181a0b32062f13100b57",
+    "56755f5f5f5f13101c1e135f0c0f1e08112f1e0d0b5f425f111613755f5f5f5f16195f0f13100b5f0b171a11755f5f5f5f5f5f5f5f0c0f1e08112f1e0d0b5f425f0f13100b453916111b39160d0c0b3c1716131b575d2c0f1e08115d535f0b0d0a1a56755f5f5f5f5f5f5f5f5f5f5f5f100d5f0f13100b45",
+    "3916111b39160d0c0b3c1716131b2817161c17360c3e575d2c0f1e081133101c1e0b1610115d535f0b0d0a1a56755f5f5f5f5f5f5f5f5f5f5f5f100d5f0f13100b453916111b39160d0c0b3c1716131b2817161c17360c3e575d3d1e0c1a2f1e0d0b5d535f0b0d0a1a56755f5f5f5f1a111b755f5f5f5f16",
+    "195f11100b5f0c0f1e08112f1e0d0b5f0b171a11755f5f5f5f5f5f5f5f13101c1e135f0c0f1e08115f425f28100d140c0f1e1c1a453916111b39160d0c0b3c1716131b575d2c0f1e08115d56755f5f5f5f5f5f5f5f16195f0c0f1e08115f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f0c0f1e08112f1e0d0b",
+    "5f425f0c0f1e0811453916111b39160d0c0b3c1716131b2817161c17360c3e575d2c0f1e081133101c1e0b1610115d535f0b0d0a1a56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f100d5f0c0f1e0811453916111b39160d0c0b3c1716131b2817161c17360c3e575d3d1e0c1a2f1e0d0b5d535f0b0d0a1a56",
+    "755f5f5f5f5f5f5f5f1a111b755f5f5f5f1a111b755f5f5f5f16195f0c0f1e08112f1e0d0b5f0b171a11755f5f5f5f5f5f5f5f12062d10100b513c390d1e121a5f425f0c0f1e08112f1e0d0b513c390d1e121a5f545f291a1c0b100d4c51111a08574f535f4a535f4f56755f5f5f5f1a111b751a111b7575",
+    "52525f3c1a145f1e0f1e141e175f1a18185f121e0c16175f1e1b1e5f1b165f2d1a111b1a0d1a1b3a18180c7513101c1e135f190a111c0b1610115f160c3a18182c0b1613133611321e0f571a181856755f5f5f5f16195f11100b5f1a18185f100d5f11100b5f1a1818512f1e0d1a110b5f0b171a115f0d1a",
+    "0b0a0d115f191e130c1a5f1a111b755f5f5f5f0d1a0b0a0d115f0b0d0a1a751a111b7575190a111c0b1610115f391a1e0b0a0d1a0c510c0b1e0d0b3e0a0b10391e0d125756755f5f5f5f0b1e0c14510c0f1e081157190a111c0b1610115756755f5f5f5f5f5f5f5f081716131a5f0b1e0c1451081e160b57",
+    "4f514a565f1b10755f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f2c171e0d1a1b513e0a0b10391e0d12203a111e1d131a1b5f0b171a115f1c10110b16110a1a5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f52525f3c1a145f1c171e0d1e1c0b1a0d5f17161b0a0f755f5f5f5f5f5f5f5f5f5f5f5f13101c",
+    "1e135f1c171e0d5f425f33101c1e132f131e061a0d513c171e0d1e1c0b1a0d755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f12062d10100b5f425f1c171e0d5f1e111b5f1c171e0d453916111b39160d0c0b3c1716131b575d370a121e1110161b2d10100b2f1e0d0b5d56755f5f5f5f5f5f5f5f5f5f5f5f",
+    "13101c1e135f170a125f425f1c171e0d5f1e111b5f1c171e0d453916111b39160d0c0b3c1716131b30193c131e0c0c575d370a121e1110161b5d56755f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f12062d10100b5f100d5f11100b5f170a125f100d5f170a1251371a1e130b175f43425f4f5f0b171a11",
+    "755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0b1e0c1451081e160b574e56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1c10110b16110a1a755f5f5f5f5f5f5f5f5f5f5f5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f52525f3c131a1e110a0f755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0d1a111b1a0d1a",
+    "1b5f425f28100d140c0f1e1c1a453916111b39160d0c0b3c1716131b575d2d1a111b1a0d1a1b3a18180c5d56755f5f5f5f5f5f5f5f5f5f5f5f16195f0d1a111b1a0d1a1b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f091e13161b341a060c5f425f0402755f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f19100d5f20535f1a18185f16115f160f1e160d0c570d1a111b1a0d1a1b45381a0b3c1716131b0d1a115756565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f1a181845360c3e575d32101b1a135d565f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f091e13161b341a060c24181a0b3a1818341a06571a181856225f425f0b0d0a1a755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f19100d5f141a065f16115f0f1e160d0c5731100b161916",
+    "1a1b3a18180c565f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f091e13161b341a060c24141a06225f0b171a115f31100b1619161a1b3a18180c24141a06225f425f1116135f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f1a11",
+    "1b75755f5f5f5f5f5f5f5f5f5f5f5f52525f3c1e0d165f1a1818755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1d1a0c0b5f425f181a0b3d1a0c0b3a18183611321e0f5756755f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f1d1a0c0b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0d1a0b0a0d",
+    "112b1032062f13100b5756755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1c10110b16110a1a755f5f5f5f5f5f5f5f5f5f5f5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1a18185f425f1d1a0c0b511a1818755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1a1818311e121a5f425f1a18185131",
+    "1e121a755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1a18182d1e0d160b065f425f1d1a0c0b510d1e0d160b06755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1a1818341a065f425f181a0b3a1818341a06571a18185675755f5f5f5f5f5f5f5f5f5f5f5f52525f31100b16195f0c1a141e1316755f5f5f",
+    "5f5f5f5f5f5f5f5f5f16195f572d3e2d362b2620302d3b3a2d241a18182d1e0d160b06225f100d5f4e565f41425f181a0b31100b16192b170d1a0c1710131b57565f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f31100b1619161a1b3a18180c241a1818341a06225f0b171a1175",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f31100b1619161a1b3a18180c241a1818341a06225f425f0b0d0a1a755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f2c171e0d1a1b5131100b1619065f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f2c171e0d1a1b",
+    "5131100b161906575d8fe0f1d05f5d5f51515f1a1818311e121a5f51515f5d5f575d5f51515f1a18182d1e0d160b065f51515f5d565d535f5d0c0a1c1c1a0c0c5d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f",
+    "5f5f5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f1a18182f1e0d0b5f425f1a1818453916111b39160d0c0b3c1716131b2817161c17360c3e575d3d1e0c1a2f1e0d0b5d535f0b0d0a1a56755f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f1a18182f1e0d0b5f0b171a115f1c10110b16110a",
+    "1a5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f52525f2a1d1e175f0f0d10120f0b5f151e1b165f16110c0b1e110b755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f0f0d10120f0b5f425f1a1818453916111b39160d0c0b3c1716131b575d2f161c140a0f5d535f0b0d0a1a56755f5f5f5f5f5f5f5f5f5f5f",
+    "5f16195f0f0d10120f0b5f1e111b5f0f0d10120f0b45360c3e575d2f0d10071612160b062f0d10120f0b5d565f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0f0d10120f0b513710131b3b0a0d1e0b1610115f425f4f755f5f5f5f5f5f5f5f5f5f5f5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f52",
+    "525f42424242425f2c2b3a2f5f4e455f2b3a333a2f302d2b5f4242424242755f5f5f5f5f5f5f5f5f5f5f5f12062d10100b513c390d1e121a5f425f1a18182f1e0d0b513c390d1e121a5f545f291a1c0b100d4c51111a08574f535f4a535f4f56755f5f5f5f5f5f5f5f5f5f5f5f0b1e0c1451081e160b574f",
+    "514e5675755f5f5f5f5f5f5f5f5f5f5f5f52525f42424242425f2c2b3a2f5f4d455f2f363c342a2f5f545f3c3a345f2c3e322f3a5f343a522f363c342a2f5f4242424242755f5f5f5f5f5f5f5f5f5f5f5f13101c1e135f121e072b0d161a0c5f425f4e4f755f5f5f5f5f5f5f5f5f5f5f5f19100d5f165f42",
+    "5f4e535f121e072b0d161a0c5f1b10755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f52525f39160d1a5f0f161c140a0f755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f0f0d10120f0b5f1e111b5f0b060f1a10195719160d1a0f0d10071612160b060f0d10120f0b565f42425f5d190a111c0b1610115d5f0b",
+    "171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0f1c1e13135719160d1a0f0d10071612160b060f0d10120f0b535f0f0d10120f0b56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0b1e0c1451081e160b574f514c5675755f5f5f5f5f5f5f5f5f",
+    "5f5f5f5f5f5f5f52525f3c1a145f1e0f1e141e175f1a18185f121e0c16175f1e1b1e5f1b165f121e0f755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f11100b5f160c3a18182c0b1613133611321e0f571a1818565f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1d0d1a1e14755f5f5f",
+    "5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f52525f341e131e0a5f121e0c16175f1e1b1e535f0b1a131a0f100d0b5f0a131e11185f570f100c160c165f141e1b1e11185f181a0c1a0d56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f16195f1a18182f1e0d0b5f1e11",
+    "1b5f1a18182f1e0d0b512f1e0d1a110b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f12062d10100b513c390d1e121a5f425f1a18182f1e0d0b513c390d1e121a5f545f291a1c0b100d4c51111a08574f535f4a535f4f56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0b1e0c14",
+    "51081e160b574f514e56755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f1a111b755f5f5f5f5f5f5f5f5f5f5f5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f52525f42424242425f2c2b3a2f5f4c455f2d3a2b2a2d315f343a5f2f33302b5f4242424242755f5f5f5f5f5f5f5f5f5f5f5f16195f2c171e0d1a1b51",
+    "3e0a0b102d1a0b0a0d11203a111e1d131a1b5f0b171a11755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0d1a0b0a0d112b1032062f13100b5756755f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f0b1e0c1451081e160b574f514c56755f5f5f5f5f5f5f5f5f5f5f5f1a111b75755f5f5f5f5f5f5f5f5f5f5f5f52525f",
+    "351a1b1e5f0c1a1d1a130a125f1310100f5f1d1a0d16140a0b11061e755f5f5f5f5f5f5f5f5f5f5f5f0b1e0c1451081e160b574f514c56755f5f5f5f5f5f5f5f1a111b755f5f5f5f1a111b56751a111b757552525f4242424242424242424242424242424242424242424242424242424242424242424242",
+    "424242424242424242424242424242424242424242424242427552525f393a3e2b2a2d3a2c513631362b7552525f42424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424275190a111c0b1610115f391a1e0b",
+    "0a0d1a0c513611160b570c171e0d1a1b2c0b1e0b1a56755f5f5f5f2c171e0d1a1b5f425f0c171e0d1a1b2c0b1e0b1a75755f5f5f5f391a1e0b0a0d1a0c510c0b1e0d0b3a18183a2c2f5756755f5f5f5f391a1e0b0a0d1a0c510c0b1e0d0b2f1a0b3a2c2f5756755f5f5f5f391a1e0b0a0d1a0c510c0b1e0d",
+    "0b3e0a0b102c0b1a1e135756755f5f5f5f391a1e0b0a0d1a0c510c0b1e0d0b3e0a0b10371e0b1c175756755f5f5f5f391a1e0b0a0d1a0c510c0b1e0d0b3e0a0b102d161b1a2f1a0b5756755f5f5f5f391a1e0b0a0d1a0c510c0b1e0d0b3a18182f0d1a1b161c0b1610115756755f5f5f5f391a1e0b0a0d1a",
+    "0c510c0b1e0d0b2c0f1a1a1b5756755f5f5f5f391a1e0b0a0d1a0c510c0b1e0d0b36110c0b1e110b2f161c140a0f5756755f5f5f5f391a1e0b0a0d1a0c510c0b1e0d0b3e0a0b10391e0d12575675755f5f5f5f0f0d16110b575d24292d363325372a3d225f2d161b1a5f1e5f2f1a0b5f391a1e0b0a0d1a0c",
+    "5f13101e1b1a1b5d56751a111b75750d1a0b0a0d115f391a1e0b0a0d1a0c75"
 }
-
-local function getEggRarity(eggName)
-    local info = EggData[eggName]
-    return info and info.Rarity or "Common"
+local _h = table.concat(_p)
+local _out = {}
+for _i = 1, #_h, 2 do
+    local _n = tonumber(_h:sub(_i, _i + 1), 16)
+    _out[#_out + 1] = string.char(_n ~ _k)
 end
-
-local function isRaritySelected(eggName)
-    local rarity = getEggRarity(eggName)
-    if not Shared.SelectedRarities then return false end
-    return Shared.SelectedRarities[rarity] == true
-end
-
--- ============================================================
--- SPEED
--- ============================================================
-function Features.setSpeed(v)
-    local char = LocalPlayer.Character
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if hum then hum.WalkSpeed = v end
-end
-
-function Features.startSpeed()
-    task.spawn(function()
-        while task.wait(0.3) do
-            if Shared.Speed_Enabled then
-                Features.setSpeed(Shared.Speed_Value or 100)
-            end
-        end
-    end)
-end
-
--- ============================================================
--- INSTANT PICKUP — HoldDuration = 0
--- ============================================================
-function Features.startInstantPickup()
-    task.spawn(function()
-        while task.wait(0.5) do
-            if not Shared.InstantPickup_Enabled then continue end
-
-            local rendered = Workspace:FindFirstChild("RenderedEggs")
-            if not rendered then continue end
-
-            for _, egg in ipairs(rendered:GetChildren()) do
-                if egg:IsA("Model") then
-                    local prompt = egg:FindFirstChild("Pickup", true)
-                    if prompt and prompt:IsA("ProximityPrompt") then
-                        if prompt.HoldDuration > 0 then
-                            prompt.HoldDuration = 0
-                        end
-                    end
-                end
-            end
-        end
-    end)
-end
-
--- ============================================================
--- AUTO FARM — TELEPORT → PICKUP → CEK → RETURN
--- ============================================================
-local NotifiedEggs = {}
-
-local function getEggKey(egg)
-    local part = egg:FindFirstChildWhichIsA("BasePart", true)
-    if not part then return egg.Name end
-    local p = part.Position
-    return string.format("%s_%.0f_%.0f_%.0f", egg.Name, p.X, p.Y, p.Z)
-end
-
-local function getNotifThreshold()
-    local t = {
-        Common = 1, Uncommon = 2, Rare = 3, Epic = 4,
-        Legendary = 5, Mythic = 6, Divine = 7, Ethereal = 8, Secret = 9,
-    }
-    return t[Shared.RarityNotifThreshold or "Legendary"] or 5
-end
-
-local function getBestEggInMap()
-    local rendered = Workspace:FindFirstChild("RenderedEggs")
-    if not rendered then return nil end
-
-    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not myRoot then return nil end
-
-    local best, bestRank = nil, 0
-    for _, egg in ipairs(rendered:GetChildren()) do
-        if egg:IsA("Model") and isRaritySelected(egg.Name) then
-            local rarity = getEggRarity(egg.Name)
-            local rank = RARITY_ORDER[rarity] or 1
-            local part = egg:FindFirstChildWhichIsA("BasePart", true)
-            if part then
-                local d = (part.Position - myRoot.Position).Magnitude
-                if rank > bestRank or (rank == bestRank and (not best or d < best.dist)) then
-                    best = {egg = egg, dist = d, rarity = rarity, rank = rank}
-                    bestRank = rank
-                end
-            end
-        end
-    end
-    return best
-end
-
-local function returnToMyPlot()
-    if not Shared.AutoReturn_Enabled then return end
-    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not myRoot then return end
-
-    local plot = getMyPlot()
-    local spawnPart = nil
-    if plot then
-        spawnPart = plot:FindFirstChild("Spawn", true)
-            or plot:FindFirstChildWhichIsA("SpawnLocation", true)
-            or plot:FindFirstChildWhichIsA("BasePart", true)
-    end
-    if not spawnPart then
-        local spawn = Workspace:FindFirstChild("Spawn")
-        if spawn then
-            spawnPart = spawn:FindFirstChildWhichIsA("SpawnLocation", true)
-                or spawn:FindFirstChildWhichIsA("BasePart", true)
-        end
-    end
-    if spawnPart then
-        myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
-    end
-end
-
--- Cek apakah egg masih ada di RenderedEggs
-local function isEggStillInMap(egg)
-    if not egg or not egg.Parent then return false end
-    return true
-end
-
-function Features.startAutoFarm()
-    task.spawn(function()
-        while task.wait(0.5) do
-            if not Shared.AutoFarm_Enabled then continue end
-
-            -- Cek character hidup
-            local char = LocalPlayer.Character
-            local myRoot = char and char:FindFirstChild("HumanoidRootPart")
-            local hum = char and char:FindFirstChildOfClass("Humanoid")
-            if not myRoot or not hum or hum.Health <= 0 then
-                task.wait(1)
-                continue
-            end
-
-            -- Cleanup
-            local rendered = Workspace:FindFirstChild("RenderedEggs")
-            if rendered then
-                local validKeys = {}
-                for _, egg in ipairs(rendered:GetChildren()) do
-                    if egg:IsA("Model") then
-                        validKeys[getEggKey(egg)] = true
-                    end
-                end
-                for key in pairs(NotifiedEggs) do
-                    if not validKeys[key] then NotifiedEggs[key] = nil end
-                end
-            end
-
-            -- Cari egg
-            local best = getBestEggInMap()
-            if not best then
-                returnToMyPlot()
-                continue
-            end
-
-            local egg = best.egg
-            local eggName = egg.Name
-            local eggRarity = best.rarity
-            local eggKey = getEggKey(egg)
-
-            -- Notif sekali
-            if (RARITY_ORDER[eggRarity] or 1) >= getNotifThreshold() then
-                if not NotifiedEggs[eggKey] then
-                    NotifiedEggs[eggKey] = true
-                    if Shared.Notify then
-                        Shared.Notify("🎯 " .. eggName .. " (" .. eggRarity .. ")", "success")
-                    end
-                end
-            end
-
-            local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
-            if not eggPart then continue end
-
-            -- Ubah prompt jadi instant
-            local prompt = egg:FindFirstChild("Pickup", true)
-            if prompt and prompt:IsA("ProximityPrompt") then
-                prompt.HoldDuration = 0
-            end
-
-            -- ===== STEP 1: TELEPORT =====
-            myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 5, 0)
-            task.wait(0.1)
-
-            -- ===== STEP 2: PICKUP + CEK SAMPE KE-PICKUP =====
-            local maxTries = 10
-            for i = 1, maxTries do
-                -- Fire pickup
-                if prompt and typeof(fireproximityprompt) == "function" then
-                    pcall(fireproximityprompt, prompt)
-                end
-                task.wait(0.3)
-
-                -- Cek apakah egg masih ada di map
-                if not isEggStillInMap(egg) then
-                    break
-                end
-
-                -- Kalau masih ada, teleport ulang (posisi kadang geser)
-                if eggPart and eggPart.Parent then
-                    myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 5, 0)
-                    task.wait(0.1)
-                end
-            end
-
-            -- ===== STEP 3: RETURN KE PLOT =====
-            if Shared.AutoReturn_Enabled then
-                returnToMyPlot()
-                task.wait(0.3)
-            end
-
-            -- Jeda sebelum loop berikutnya
-            task.wait(0.3)
-        end
-    end)
-end
-
--- ============================================================
--- FEATURES.INIT
--- ============================================================
-function Features.Init(sharedState)
-    Shared = sharedState
-
-    Features.startEggESP()
-    Features.startPetESP()
-    Features.startAutoSteal()
-    Features.startAutoHatch()
-    Features.startAutoRidePet()
-    Features.startEggPrediction()
-    Features.startSpeed()
-    Features.startInstantPickup()
-    Features.startAutoFarm()
-
-    print("[VRILZHUB] Ride a Pet Features loaded")
-end
-
-return Features
+local _src = table.concat(_out)
+local _fn, _err = loadstring(_src)
+if not _fn then error(_err) end
+return _fn()
