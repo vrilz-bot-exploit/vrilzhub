@@ -1,6 +1,6 @@
 -- ============================================================
--- VRILZHUB UI — RIDE A PET v5.5 (AUTO-DETECT PC & MOBILE)
--- PC: 800x580 | Mobile: 88% x 78% viewport
+-- VRILZHUB UI — RIDE A PET v6.0 (AUTO-DETECT PC & MOBILE)
+-- + Auto Farm by Rarity + Speed + Skip Loading
 -- ============================================================
 
 local UI = {}
@@ -13,70 +13,28 @@ local TweenService = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 
--- ====== AUTO-DETECT MOBILE ======
 local IS_MOBILE = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 
--- ====== UI CONFIG (PC & MOBILE BEDA) ======
 local UI_CONFIG = {
     MOBILE = {
-        WIN_W_PCT = 0.88,
-        WIN_H_PCT = 0.78,
-        SIDEBAR_W = 70,
-        TAB_H = 40,
-        TAB_ICON = 18,
-        TAB_SHOW_LABEL = false,
-        CARD_HEADER = 28,
-        CARD_PAD_TOP = 8,
-        CARD_PAD_BOT = 8,
-        CARD_PAD_SIDE = 10,
-        CARD_GAP = 6,
-        TOGGLE_H = 36,
-        TOGGLE_W = 48,
-        TOGGLE_KNOB = 20,
-        DROPDOWN_H = 40,
-        DROPDOWN_ITEM = 36,
-        ACTION_H = 36,
-        FONT_TITLE = 13,
-        FONT_LABEL = 11,
-        FONT_MUTED = 9,
-        FONT_SMALL = 10,
-        FONT_MED = 11,
-        FONT_LARGE = 14,
-        HEADER_H = 40,
-        SEARCH_H = 30,
-        NOTIF_W = 300,
-        NOTIF_H = 52,
-        OPEN_BTN = 52,
+        WIN_W_PCT = 0.88, WIN_H_PCT = 0.78,
+        SIDEBAR_W = 70, TAB_H = 40, TAB_ICON = 18, TAB_SHOW_LABEL = false,
+        CARD_HEADER = 28, CARD_PAD_TOP = 8, CARD_PAD_BOT = 8, CARD_PAD_SIDE = 10,
+        CARD_GAP = 6, TOGGLE_H = 36, TOGGLE_W = 48, TOGGLE_KNOB = 20,
+        DROPDOWN_H = 40, DROPDOWN_ITEM = 36, ACTION_H = 36,
+        FONT_TITLE = 13, FONT_LABEL = 11, FONT_MUTED = 9, FONT_SMALL = 10,
+        FONT_MED = 11, FONT_LARGE = 14,
+        HEADER_H = 40, SEARCH_H = 30, NOTIF_W = 300, NOTIF_H = 52, OPEN_BTN = 52,
     },
     PC = {
-        WIN_W = 800,
-        WIN_H = 580,
-        SIDEBAR_W = 140,
-        TAB_H = 44,
-        TAB_ICON = 16,
-        TAB_SHOW_LABEL = true,
-        CARD_HEADER = 30,
-        CARD_PAD_TOP = 10,
-        CARD_PAD_BOT = 12,
-        CARD_PAD_SIDE = 14,
-        CARD_GAP = 8,
-        TOGGLE_H = 30,
-        TOGGLE_W = 46,
-        TOGGLE_KNOB = 18,
-        DROPDOWN_H = 34,
-        DROPDOWN_ITEM = 28,
-        ACTION_H = 34,
-        FONT_TITLE = 12,
-        FONT_LABEL = 12,
-        FONT_MUTED = 10,
-        FONT_SMALL = 10,
-        FONT_MED = 12,
-        FONT_LARGE = 15,
-        HEADER_H = 52,
-        SEARCH_H = 34,
-        NOTIF_W = 380,
-        NOTIF_H = 52,
-        OPEN_BTN = 56,
+        WIN_W = 800, WIN_H = 580,
+        SIDEBAR_W = 140, TAB_H = 44, TAB_ICON = 16, TAB_SHOW_LABEL = true,
+        CARD_HEADER = 30, CARD_PAD_TOP = 10, CARD_PAD_BOT = 12, CARD_PAD_SIDE = 14,
+        CARD_GAP = 8, TOGGLE_H = 30, TOGGLE_W = 46, TOGGLE_KNOB = 18,
+        DROPDOWN_H = 34, DROPDOWN_ITEM = 28, ACTION_H = 34,
+        FONT_TITLE = 12, FONT_LABEL = 12, FONT_MUTED = 10, FONT_SMALL = 10,
+        FONT_MED = 12, FONT_LARGE = 15,
+        HEADER_H = 52, SEARCH_H = 34, NOTIF_W = 380, NOTIF_H = 52, OPEN_BTN = 56,
     },
 }
 
@@ -84,56 +42,56 @@ local CFG = IS_MOBILE and UI_CONFIG.MOBILE or UI_CONFIG.PC
 
 -- ====== EGG NAMES ======
 local EggNames = {
-    "Cherub", "Volcanic", "Blackhole", "Solaris", "Galaxy",
-    "Crystal", "Golden", "Glass", "Skull", "Sinister",
-    "Soul", "Dominus", "Slime", "Flower", "Leaf",
-    "Stone", "Easter", "Cracked", "Ice", "Tidal",
-    "Bloom", "Aurora", "White", "Brown"
+    "White Egg", "Brown Egg", "Cracked Egg", "Stone Egg", "Leaf Egg",
+    "Flower Egg", "Slime Egg", "Easter Egg", "Glass Egg", "Ice Egg",
+    "Tidal Egg", "Bloom Egg", "Aurora Egg", "Cherub Egg", "Volcanic Egg",
+    "Flaming Egg", "Crystal Egg", "Golden Egg", "Skull Egg", "Sinister Egg",
+    "Soul Egg", "Dominus Egg", "Solaris Egg", "Galaxy Egg", "Blackhole Egg",
+}
+
+-- ====== RARITY ======
+local RarityList = {
+    "Common", "Uncommon", "Rare", "Epic",
+    "Legendary", "Mythic", "Divine", "Ethereal", "Secret"
+}
+
+local RarityColors = {
+    Common = Color3.fromRGB(180, 180, 180),
+    Uncommon = Color3.fromRGB(80, 200, 80),
+    Rare = Color3.fromRGB(80, 150, 255),
+    Epic = Color3.fromRGB(180, 80, 255),
+    Legendary = Color3.fromRGB(255, 200, 50),
+    Mythic = Color3.fromRGB(255, 80, 80),
+    Divine = Color3.fromRGB(255, 255, 150),
+    Ethereal = Color3.fromRGB(150, 255, 255),
+    Secret = Color3.fromRGB(200, 200, 200),
 }
 
 -- ====== THEME ======
 local Themes = {
     Brutal = {
-        BG = Color3.fromRGB(15, 5, 10),
-        Surface = Color3.fromRGB(25, 10, 20),
-        Surface2 = Color3.fromRGB(35, 15, 25),
-        Surface3 = Color3.fromRGB(45, 20, 35),
-        Stroke = Color3.fromRGB(255, 50, 80),
-        Text = Color3.fromRGB(255, 240, 245),
-        Muted = Color3.fromRGB(200, 150, 180),
-        Accent = Color3.fromRGB(255, 50, 80),
-        Accent2 = Color3.fromRGB(50, 150, 255),
-        Accent3 = Color3.fromRGB(150, 220, 255),
-        Success = Color3.fromRGB(50, 255, 150),
-        Error = Color3.fromRGB(255, 50, 80),
+        BG = Color3.fromRGB(15, 5, 10), Surface = Color3.fromRGB(25, 10, 20),
+        Surface2 = Color3.fromRGB(35, 15, 25), Surface3 = Color3.fromRGB(45, 20, 35),
+        Stroke = Color3.fromRGB(255, 50, 80), Text = Color3.fromRGB(255, 240, 245),
+        Muted = Color3.fromRGB(200, 150, 180), Accent = Color3.fromRGB(255, 50, 80),
+        Accent2 = Color3.fromRGB(50, 150, 255), Accent3 = Color3.fromRGB(150, 220, 255),
+        Success = Color3.fromRGB(50, 255, 150), Error = Color3.fromRGB(255, 50, 80),
     },
     Ice = {
-        BG = Color3.fromRGB(5, 10, 20),
-        Surface = Color3.fromRGB(10, 20, 35),
-        Surface2 = Color3.fromRGB(15, 30, 50),
-        Surface3 = Color3.fromRGB(20, 40, 65),
-        Stroke = Color3.fromRGB(150, 220, 255),
-        Text = Color3.fromRGB(240, 250, 255),
-        Muted = Color3.fromRGB(150, 200, 240),
-        Accent = Color3.fromRGB(50, 150, 255),
-        Accent2 = Color3.fromRGB(150, 220, 255),
-        Accent3 = Color3.fromRGB(255, 50, 80),
-        Success = Color3.fromRGB(50, 255, 150),
-        Error = Color3.fromRGB(255, 50, 80),
+        BG = Color3.fromRGB(5, 10, 20), Surface = Color3.fromRGB(10, 20, 35),
+        Surface2 = Color3.fromRGB(15, 30, 50), Surface3 = Color3.fromRGB(20, 40, 65),
+        Stroke = Color3.fromRGB(150, 220, 255), Text = Color3.fromRGB(240, 250, 255),
+        Muted = Color3.fromRGB(150, 200, 240), Accent = Color3.fromRGB(50, 150, 255),
+        Accent2 = Color3.fromRGB(150, 220, 255), Accent3 = Color3.fromRGB(255, 50, 80),
+        Success = Color3.fromRGB(50, 255, 150), Error = Color3.fromRGB(255, 50, 80),
     },
     Fire = {
-        BG = Color3.fromRGB(20, 5, 0),
-        Surface = Color3.fromRGB(35, 10, 5),
-        Surface2 = Color3.fromRGB(50, 15, 5),
-        Surface3 = Color3.fromRGB(65, 20, 10),
-        Stroke = Color3.fromRGB(255, 100, 50),
-        Text = Color3.fromRGB(255, 240, 230),
-        Muted = Color3.fromRGB(220, 170, 150),
-        Accent = Color3.fromRGB(255, 100, 50),
-        Accent2 = Color3.fromRGB(255, 200, 50),
-        Accent3 = Color3.fromRGB(255, 50, 80),
-        Success = Color3.fromRGB(50, 255, 150),
-        Error = Color3.fromRGB(255, 50, 80),
+        BG = Color3.fromRGB(20, 5, 0), Surface = Color3.fromRGB(35, 10, 5),
+        Surface2 = Color3.fromRGB(50, 15, 5), Surface3 = Color3.fromRGB(65, 20, 10),
+        Stroke = Color3.fromRGB(255, 100, 50), Text = Color3.fromRGB(255, 240, 230),
+        Muted = Color3.fromRGB(220, 170, 150), Accent = Color3.fromRGB(255, 100, 50),
+        Accent2 = Color3.fromRGB(255, 200, 50), Accent3 = Color3.fromRGB(255, 50, 80),
+        Success = Color3.fromRGB(50, 255, 150), Error = Color3.fromRGB(255, 50, 80),
     },
 }
 
@@ -401,7 +359,7 @@ local function makeToggle(parent, text, default, callback)
     end)
 end
 
--- ====== DROPDOWN GLOBAL (PAKAI _G) ======
+-- ====== DROPDOWN GLOBAL ======
 _G.VRILZ_DropdownLayer = nil
 _G.VRILZ_DropdownCloseOverlay = nil
 _G.VRILZ_DropdownActive = nil
@@ -682,13 +640,12 @@ local function buildFPSWindow(parent)
 end
 
 -- ============================================================
--- BUILD MAIN WINDOW (AUTO-DETECT PC & MOBILE)
+-- BUILD MAIN WINDOW
 -- ============================================================
 local function buildMainWindow(parent)
     local screenGui = parent
     local viewport = (workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize) or Vector2.new(1280, 720)
 
-    -- Hitung ukuran window
     local winW, winH
     if IS_MOBILE then
         winW = math.floor(viewport.X * CFG.WIN_W_PCT)
@@ -720,9 +677,7 @@ local function buildMainWindow(parent)
     stroke.Parent = main
     registerTheme(stroke, "Accent", "Color")
 
-    -- ========================================================
     -- HEADER
-    -- ========================================================
     local header = Instance.new("Frame")
     header.Size = UDim2.new(1, 0, 0, CFG.HEADER_H)
     header.BackgroundColor3 = C.Surface
@@ -776,7 +731,7 @@ local function buildMainWindow(parent)
     subtitle.Size = UDim2.new(0, 300, 0, 14)
     subtitle.Position = UDim2.fromOffset(IS_MOBILE and 48 or 58, IS_MOBILE and 26 or 28)
     subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Ride a Pet · v5.5"
+    subtitle.Text = "Ride a Pet · v6.0"
     subtitle.TextColor3 = C.Muted
     subtitle.Font = Enum.Font.GothamSemibold
     subtitle.TextSize = IS_MOBILE and 9 or 10
@@ -785,7 +740,6 @@ local function buildMainWindow(parent)
     subtitle.Parent = header
     registerTheme(subtitle, "Muted", "TextColor3")
 
-    -- Minimize
     local minBtn = Instance.new("TextButton")
     minBtn.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
     minBtn.Position = UDim2.new(1, -(IS_MOBILE and 66 or 78), 0.5, -(IS_MOBILE and 14 or 16))
@@ -804,7 +758,6 @@ local function buildMainWindow(parent)
     minCorner.CornerRadius = UDim.new(0, 8)
     minCorner.Parent = minBtn
 
-    -- Close
     local closeBtn = Instance.new("TextButton")
     closeBtn.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
     closeBtn.Position = UDim2.new(1, -(IS_MOBILE and 34 or 40), 0.5, -(IS_MOBILE and 14 or 16))
@@ -823,9 +776,7 @@ local function buildMainWindow(parent)
     closeCorner.CornerRadius = UDim.new(0, 8)
     closeCorner.Parent = closeBtn
 
-    -- ========================================================
     -- BODY
-    -- ========================================================
     local body = Instance.new("Frame")
     body.Size = UDim2.new(1, -20, 1, -(CFG.HEADER_H + 20))
     body.Position = UDim2.new(0, 10, 0, CFG.HEADER_H + 10)
@@ -833,7 +784,6 @@ local function buildMainWindow(parent)
     body.ZIndex = 2
     body.Parent = main
 
-    -- Sidebar
     local sidebarW = CFG.SIDEBAR_W
     local sidebar = Instance.new("Frame")
     sidebar.Size = UDim2.new(0, sidebarW, 1, 0)
@@ -867,7 +817,6 @@ local function buildMainWindow(parent)
     sidebarPad.PaddingRight = UDim.new(0, 6)
     sidebarPad.Parent = sidebar
 
-    -- Page Holder
     local pageHolder = Instance.new("ScrollingFrame")
     pageHolder.Size = UDim2.new(1, -(sidebarW + 10), 1, 0)
     pageHolder.Position = UDim2.new(0, sidebarW + 10, 0, 0)
@@ -888,9 +837,7 @@ local function buildMainWindow(parent)
     pageHolderPad.PaddingRight = UDim.new(0, IS_MOBILE and 6 or 10)
     pageHolderPad.Parent = pageHolder
 
-    -- ========================================================
-    -- RESIZE HANDLE (PC only)
-    -- ========================================================
+    -- RESIZE (PC only)
     if not IS_MOBILE then
         local resizeHandle = Instance.new("TextButton")
         resizeHandle.Size = UDim2.fromOffset(22, 22)
@@ -929,9 +876,7 @@ local function buildMainWindow(parent)
         end)
     end
 
-    -- ========================================================
     -- OPEN BUTTON
-    -- ========================================================
     local openBtn = Instance.new("TextButton")
     openBtn.Size = UDim2.fromOffset(CFG.OPEN_BTN, CFG.OPEN_BTN)
     openBtn.Position = UDim2.fromOffset(20, 20)
@@ -1005,9 +950,7 @@ local function buildMainWindow(parent)
         end)
     end)
 
-    -- ========================================================
     -- TAB SYSTEM
-    -- ========================================================
     local pages = {}
     local navs = {}
 
@@ -1357,7 +1300,7 @@ local function buildMainWindow(parent)
     makeToggle(eggEspContent, "Tampilkan Nama", true, function(v) Shared.ESP_EggName_Enabled = v end)
     makeToggle(eggEspContent, "Tampilkan Luck", true, function(v) Shared.ESP_EggLuck_Enabled = v end)
 
-    local autoStealCard, autoStealContent = makeCard(eggPage, "AUTO STEAL", 2)
+    local autoStealCard, autoStealContent = makeCard(eggPage, "AUTO STEAL (LEGACY)", 2)
     makeToggle(autoStealContent, "Aktifkan Auto Steal", false, function(v) Shared.AutoSteal_Enabled = v end)
     makeToggle(autoStealContent, "Auto Return ke Plot", true, function(v) Shared.AutoReturn_Enabled = v end)
     makeToggle(autoStealContent, "Auto Hatch", false, function(v) Shared.AutoHatch_Enabled = v end)
@@ -1373,7 +1316,7 @@ local function buildMainWindow(parent)
     eggNameLbl.ZIndex = 3
     eggNameLbl.Parent = autoStealContent
 
-    makeDropdownGlobal(autoStealContent, EggNames, "Cherub", function(v)
+    makeDropdownGlobal(autoStealContent, EggNames, "Cherub Egg", function(v)
         Shared.SelectedEgg = v
         notify("Egg: " .. v, "info")
     end)
@@ -1400,14 +1343,136 @@ local function buildMainWindow(parent)
     registerTab("Visual", "◆", "Visual")
 
     -- ========================================================
-    -- TAB AUTO
+    -- TAB AUTO — SPEED + AUTO FARM
     -- ========================================================
     local autoPage = createPage("Auto")
     pages.Auto = autoPage
 
-    local autoCard, autoContent = makeCard(autoPage, "AUTO LAINNYA", 1)
-    makeToggle(autoContent, "Auto Ride Pet", false, function(v) Shared.AutoRidePet_Enabled = v end)
-    makeToggle(autoContent, "Auto Equip Best", false, function(v) Shared.AutoEquipBest_Enabled = v end)
+    -- ==== SPEED ====
+    local speedCard, speedContent = makeCard(autoPage, "SPEED", 1)
+    makeToggle(speedContent, "Aktifkan Speed", false, function(v) Shared.Speed_Enabled = v end)
+
+    local speedLbl = Instance.new("TextLabel")
+    speedLbl.Size = UDim2.new(1, 0, 0, 16)
+    speedLbl.BackgroundTransparency = 1
+    speedLbl.Text = "Speed: " .. (Shared.Speed_Value or 50)
+    speedLbl.TextColor3 = C.Muted
+    speedLbl.Font = Enum.Font.GothamSemibold
+    speedLbl.TextSize = CFG.FONT_MUTED
+    speedLbl.TextXAlignment = Enum.TextXAlignment.Left
+    speedLbl.LayoutOrder = 2
+    speedLbl.Parent = speedContent
+
+    local speedRow = Instance.new("Frame")
+    speedRow.Size = UDim2.new(1, 0, 0, 36)
+    speedRow.BackgroundTransparency = 1
+    speedRow.LayoutOrder = 3
+    speedRow.Parent = speedContent
+
+    local function makeSpeedBtn(txt, xPos, delta)
+        local b = Instance.new("TextButton")
+        b.Size = UDim2.fromOffset(55, 30)
+        b.Position = UDim2.fromOffset(xPos, 3)
+        b.BackgroundColor3 = C.Surface3
+        b.Text = txt
+        b.TextColor3 = C.Text
+        b.Font = Enum.Font.GothamBold
+        b.TextSize = 14
+        b.AutoButtonColor = false
+        b.Parent = speedRow
+        local c = Instance.new("UICorner"); c.CornerRadius = UDim.new(0,6); c.Parent = b
+        b.MouseButton1Click:Connect(function()
+            Shared.Speed_Value = math.clamp((Shared.Speed_Value or 50) + delta, 16, 300)
+            speedLbl.Text = "Speed: " .. Shared.Speed_Value
+            if Features and Features.setSpeed then
+                Features.setSpeed(Shared.Speed_Value)
+            end
+        end)
+    end
+    makeSpeedBtn("-10", 0, -10)
+    makeSpeedBtn("-1", 60, -1)
+    makeSpeedBtn("+1", 120, 1)
+    makeSpeedBtn("+10", 180, 10)
+
+    -- ==== AUTO FARM ====
+    local farmCard, farmContent = makeCard(autoPage, "AUTO FARM", 2)
+    makeToggle(farmContent, "Aktifkan Auto Farm", false, function(v) Shared.AutoFarm_Enabled = v end)
+    makeToggle(farmContent, "Auto Return ke Plot", true, function(v) Shared.AutoReturn_Enabled = v end)
+
+    -- Rarity multi-select
+    local rarTitle = Instance.new("TextLabel")
+    rarTitle.Size = UDim2.new(1, 0, 0, 16)
+    rarTitle.BackgroundTransparency = 1
+    rarTitle.Text = "Pilih Rarity Egg (bisa banyak):"
+    rarTitle.TextColor3 = C.Muted
+    rarTitle.Font = Enum.Font.GothamSemibold
+    rarTitle.TextSize = CFG.FONT_MUTED
+    rarTitle.TextXAlignment = Enum.TextXAlignment.Left
+    rarTitle.LayoutOrder = 3
+    rarTitle.Parent = farmContent
+
+    for _, rar in ipairs(RarityList) do
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, 0, 0, 26)
+        local on = Shared.SelectedRarities[rar] == true
+        btn.BackgroundColor3 = on and (RarityColors[rar] or C.Accent) or C.Surface3
+        btn.Text = (on and "✓ " or "○ ") .. rar
+        btn.TextColor3 = on and Color3.new(1,1,1) or C.Muted
+        btn.Font = Enum.Font.GothamBold
+        btn.TextSize = CFG.FONT_LABEL
+        btn.AutoButtonColor = false
+        btn.Parent = farmContent
+        local c = Instance.new("UICorner"); c.CornerRadius = UDim.new(0,6); c.Parent = btn
+
+        btn.MouseButton1Click:Connect(function()
+            Shared.SelectedRarities[rar] = not Shared.SelectedRarities[rar]
+            local isOn = Shared.SelectedRarities[rar]
+            btn.BackgroundColor3 = isOn and (RarityColors[rar] or C.Accent) or C.Surface3
+            btn.Text = (isOn and "✓ " or "○ ") .. rar
+            btn.TextColor3 = isOn and Color3.new(1,1,1) or C.Muted
+        end)
+    end
+
+    -- Notif threshold
+    local notifTitle = Instance.new("TextLabel")
+    notifTitle.Size = UDim2.new(1, 0, 0, 16)
+    notifTitle.BackgroundTransparency = 1
+    notifTitle.Text = "Notif cuma buat rarity:"
+    notifTitle.TextColor3 = C.Muted
+    notifTitle.Font = Enum.Font.GothamSemibold
+    notifTitle.TextSize = CFG.FONT_MUTED
+    notifTitle.TextXAlignment = Enum.TextXAlignment.Left
+    notifTitle.LayoutOrder = 20
+    notifTitle.Parent = farmContent
+
+    makeDropdownGlobal(farmContent, RarityList, "Legendary", function(v)
+        Shared.RarityNotifThreshold = v
+    end)
+
+    -- ==== AUTO RIDE BY RARITY ====
+    local rideCard, rideContent = makeCard(autoPage, "AUTO RIDE BY RARITY", 3)
+    makeToggle(rideContent, "Aktifkan", false, function(v) Shared.AutoRideRarity_Enabled = v end)
+
+    local rideRarLbl = Instance.new("TextLabel")
+    rideRarLbl.Size = UDim2.new(1, 0, 0, 16)
+    rideRarLbl.BackgroundTransparency = 1
+    rideRarLbl.Text = "Min Rarity Pet:"
+    rideRarLbl.TextColor3 = C.Muted
+    rideRarLbl.Font = Enum.Font.GothamSemibold
+    rideRarLbl.TextSize = CFG.FONT_MUTED
+    rideRarLbl.TextXAlignment = Enum.TextXAlignment.Left
+    rideRarLbl.LayoutOrder = 2
+    rideRarLbl.Parent = rideContent
+
+    makeDropdownGlobal(rideContent, RarityList, "Mythic", function(v)
+        Shared.RideMinRarity = v
+        notify("Ride min rarity: " .. v, "info")
+    end)
+
+    -- ==== AUTO LAINNYA ====
+    local otherCard, otherContent = makeCard(autoPage, "AUTO LAINNYA", 4)
+    makeToggle(otherContent, "Auto Ride Pet (Legacy)", false, function(v) Shared.AutoRidePet_Enabled = v end)
+    makeToggle(otherContent, "Auto Equip Best", false, function(v) Shared.AutoEquipBest_Enabled = v end)
 
     registerTab("Auto", "▶", "Auto")
 
@@ -1445,53 +1510,17 @@ local function buildMainWindow(parent)
         if v then
             pcall(function() Lighting.GlobalShadows = false end)
             pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
-            task.spawn(function()
-                local hidden = {}
-                for _, obj in ipairs(Workspace:GetDescendants()) do
-                    if obj:IsA("BasePart") then
-                        local name = string.lower(obj.Name)
-                        local parentName = obj.Parent and string.lower(obj.Parent.Name) or ""
-                        local skip = false
-                        if obj:FindFirstChildWhichIsA("Humanoid") then skip = true end
-                        if name:find("egg") or name:find("nest") then skip = true end
-                        if parentName:find("plot") or parentName:find("char") then skip = true end
-                        if obj:FindFirstChildWhichIsA("ProximityPrompt") then skip = true end
-                        if not skip then
-                            local isDeco = false
-                            if obj.Transparency >= 0.5 then isDeco = true end
-                            if name:find("tree") or name:find("rock") or name:find("bush") then isDeco = true end
-                            if name:find("grass") or name:find("flower") or name:find("cloud") then isDeco = true end
-                            if isDeco and obj.Size.Magnitude < 50 then
-                                obj.LocalTransparencyModifier = 1
-                                obj.CanCollide = false
-                                table.insert(hidden, obj)
-                            end
-                        end
-                    end
-                end
-                UI._fpsHiddenParts = hidden
-                notify("FPS Boost: " .. #hidden .. " part disembunyiin", "info")
-            end)
             notify("FPS Boost aktif", "success")
         else
             pcall(function() Lighting.GlobalShadows = true end)
             pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level10 end)
-            if UI._fpsHiddenParts then
-                for _, part in ipairs(UI._fpsHiddenParts) do
-                    if part and part.Parent then
-                        part.LocalTransparencyModifier = 0
-                        part.CanCollide = true
-                    end
-                end
-                UI._fpsHiddenParts = nil
-            end
             notify("FPS Boost nonaktif", "info")
         end
-    end, "FPS Boost")
+    end)
 
     makeToggle(fpsContent, "FPS Window", false, function(v)
         if fpsWin then fpsWin.Visible = v end
-    end, "FPS Window")
+    end)
 
     registerTab("Settings", "⚙", "Settings")
 
@@ -1536,13 +1565,13 @@ local function buildMainWindow(parent)
 end
 
 -- ============================================================
--- UI.INIT
+-- UI.INIT — SKIP LOADING
 -- ============================================================
 function UI.Init(sharedState)
     Shared = sharedState
-
     Shared.Notify = notify
 
+    -- Defaults
     Shared.ESP_Eggs_Enabled = false
     Shared.ESP_EggName_Enabled = true
     Shared.ESP_EggLuck_Enabled = true
@@ -1555,10 +1584,29 @@ function UI.Init(sharedState)
     Shared.AutoHatch_Enabled = false
     Shared.AutoRidePet_Enabled = false
     Shared.AutoEquipBest_Enabled = false
-    Shared.SelectedEgg = "Cherub"
+    Shared.SelectedEgg = "Cherub Egg"
     Shared.EggPrediction_Enabled = true
     Shared.EggsInMap = {}
     Shared.EggPredictions = {}
+
+    -- Speed
+    Shared.Speed_Enabled = false
+    Shared.Speed_Value = 50
+
+    -- Auto Farm baru
+    Shared.AutoFarm_Enabled = false
+    Shared.SelectedRarities = {
+        ["Legendary"] = true,
+        ["Mythic"] = true,
+        ["Divine"] = true,
+        ["Ethereal"] = true,
+        ["Secret"] = true,
+    }
+    Shared.RarityNotifThreshold = "Legendary"
+
+    -- Auto Ride by Rarity
+    Shared.AutoRideRarity_Enabled = false
+    Shared.RideMinRarity = "Mythic"
 
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "VRILZHUB_RideAPet"
@@ -1570,88 +1618,9 @@ function UI.Init(sharedState)
     setupNotifHolder(ScreenGui)
     setupDropdownLayer(ScreenGui)
 
-    local loading = Instance.new("Frame")
-    loading.Size = UDim2.fromOffset(IS_MOBILE and 340 or 400, IS_MOBILE and 220 or 240)
-    loading.AnchorPoint = Vector2.new(0.5, 0.5)
-    loading.Position = UDim2.fromScale(0.5, 0.5)
-    loading.BackgroundColor3 = C.Surface
-    loading.BorderSizePixel = 0
-    loading.ZIndex = 200
-    loading.Parent = ScreenGui
-    registerTheme(loading, "Surface", "BackgroundColor3")
-
-    local lc = Instance.new("UICorner"); lc.CornerRadius = UDim.new(0, 14); lc.Parent = loading
-    local ls = Instance.new("UIStroke"); ls.Color = C.Accent; ls.Thickness = 2; ls.Transparency = 0.3; ls.Parent = loading
-
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, -40, 0, 30)
-    title.Position = UDim2.new(0, 20, 0, 16)
-    title.BackgroundTransparency = 1
-    title.Text = "⚡ VRILZHUB"
-    title.TextColor3 = C.Accent
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = IS_MOBILE and 18 or 20
-    title.ZIndex = 201
-    title.Parent = loading
-    registerTheme(title, "Accent", "TextColor3")
-
-    local subtitle = Instance.new("TextLabel")
-    subtitle.Size = UDim2.new(1, -40, 0, 16)
-    subtitle.Position = UDim2.new(0, 20, 0, 46)
-    subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Ride a Pet · Loading..."
-    subtitle.TextColor3 = C.Muted
-    subtitle.Font = Enum.Font.GothamSemibold
-    subtitle.TextSize = IS_MOBILE and 10 or 11
-    subtitle.ZIndex = 201
-    subtitle.Parent = loading
-    registerTheme(subtitle, "Muted", "TextColor3")
-
-    local barBg = Instance.new("Frame")
-    barBg.Size = UDim2.new(1, -40, 0, 6)
-    barBg.Position = UDim2.new(0, 20, 0, IS_MOBILE and 72 or 80)
-    barBg.BackgroundColor3 = C.Surface3
-    barBg.BorderSizePixel = 0
-    barBg.ZIndex = 201
-    barBg.Parent = loading
-    local bc = Instance.new("UICorner"); bc.CornerRadius = UDim.new(0, 3); bc.Parent = barBg
-
-    local barFill = Instance.new("Frame")
-    barFill.Size = UDim2.new(0, 0, 1, 0)
-    barFill.BackgroundColor3 = C.Accent
-    barFill.BorderSizePixel = 0
-    barFill.ZIndex = 202
-    barFill.Parent = barBg
-    local fc = Instance.new("UICorner"); fc.CornerRadius = UDim.new(0, 3); fc.Parent = barFill
-    registerTheme(barFill, "Accent", "BackgroundColor3")
-
-    local statusLbl = Instance.new("TextLabel")
-    statusLbl.Size = UDim2.new(1, -40, 0, 16)
-    statusLbl.Position = UDim2.new(0, 20, 0, IS_MOBILE and 92 or 100)
-    statusLbl.BackgroundTransparency = 1
-    statusLbl.Text = "0%"
-    statusLbl.TextColor3 = C.Accent
-    statusLbl.Font = Enum.Font.GothamBold
-    statusLbl.TextSize = IS_MOBILE and 11 or 12
-    statusLbl.TextXAlignment = Enum.TextXAlignment.Right
-    statusLbl.ZIndex = 201
-    statusLbl.Parent = loading
-    registerTheme(statusLbl, "Accent", "TextColor3")
-
-    task.spawn(function()
-        local start = os.clock()
-        while loading.Parent do
-            local p = math.clamp((os.clock() - start) / 3, 0, 1)
-            barFill.Size = UDim2.new(p, 0, 1, 0)
-            statusLbl.Text = math.floor(p * 100) .. "%"
-            if p >= 1 then break end
-            task.wait(0.05)
-        end
-        task.wait(0.3)
-        if loading then loading:Destroy() end
-        buildMainWindow(ScreenGui)
-        notify("Welcome, " .. LocalPlayer.DisplayName, "success")
-    end)
+    -- SKIP LOADING — langsung build
+    buildMainWindow(ScreenGui)
+    notify("Welcome, " .. LocalPlayer.DisplayName, "success")
 end
 
 return UI
