@@ -218,7 +218,7 @@ local function notify(text, type)
     end)
 end
 
--- ====== CARD (HOVER NAIK, KLIK TURUN, RIPPLE) ======
+-- ====== CARD (RIPPLE SAJA) ======
 local function makeCard(parent, title, layoutOrder)
     local card = Instance.new("Frame")
     card.Size = UDim2.new(1, 0, 0, 0)
@@ -251,52 +251,9 @@ local function makeCard(parent, title, layoutOrder)
     rippleLayer.ZIndex = 99
     rippleLayer.Parent = card
 
-    -- State
-    local isHovered = false
-    local isPressed = false
-    local originalStrokeTrans = 0.5
-    local downOffset = IS_MOBILE and 2 or 3  -- geser ke bawah pas diklik
-
-    local function updatePosition()
-        local y = 0
-        if isPressed then
-            y = downOffset           -- turun pas diklik
-        elseif isHovered then
-            y = -2                    -- naik pas hover
-        end
-        TweenService:Create(card, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Position = UDim2.new(0, 0, 0, y)
-        }):Play()
-    end
-
-    -- HOVER
-    card.MouseEnter:Connect(function()
-        if not IS_MOBILE then
-            isHovered = true
-            updatePosition()
-            TweenService:Create(stroke, TweenInfo.new(0.2), {
-                Transparency = 0.1, Thickness = 2
-            }):Play()
-        end
-    end)
-
-    card.MouseLeave:Connect(function()
-        if not IS_MOBILE then
-            isHovered = false
-            updatePosition()
-            TweenService:Create(stroke, TweenInfo.new(0.2), {
-                Transparency = originalStrokeTrans, Thickness = 1
-            }):Play()
-        end
-    end)
-
-    -- KLIK: TURUN + RIPPLE
+    -- RIPPLE SAJA (TANPA NAIK/TURUN)
     card.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            isPressed = true
-            updatePosition()
-
-            -- Ripple
             local ripple = Instance.new("Frame")
             ripple.Size = UDim2.fromOffset(0, 0)
             ripple.Position = UDim2.fromOffset(input.Position.X - card.AbsolutePosition.X, input.Position.Y - card.AbsolutePosition.Y)
@@ -319,13 +276,6 @@ local function makeCard(parent, title, layoutOrder)
             task.delay(0.7, function()
                 if ripple then ripple:Destroy() end
             end)
-        end
-    end)
-
-    card.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            isPressed = false
-            updatePosition()
         end
     end)
 
@@ -2469,7 +2419,7 @@ function UI.Init(sharedState)
     ScreenGui.ResetOnSpawn = false
     ScreenGui.IgnoreGuiInset = true
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    ScreenGui.Parent = game:GetService("CoreGUI")
+    ScreenGui.Parent = game:GetService("CoreGui")
 
     setupNotifHolder(ScreenGui)
     setupDropdownLayer(ScreenGui)
