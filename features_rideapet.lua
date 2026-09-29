@@ -1,7 +1,7 @@
 -- ============================================================
 -- VRILZHUB FEATURES — RIDE A PET v3.2
 -- + Egg Prediction System + Notif Egg No Spawn
--- + Speed + Auto Farm (Rarity Multi + Auto Return + Instant Pickup)
+-- + Speed + Instant Pickup (toggle) + Auto Farm (Rarity Multi)
 -- ============================================================
 
 local Features = {}
@@ -245,7 +245,7 @@ local function getMyPlot()
     local plots = Workspace:FindFirstChild("Plots")
     if not plots then return nil end
     for _, plot in ipairs(plots:GetChildren()) do
-        local owner = plot:GetAttribute("OwnerUserId") or plot:GetAttribute("Owner")
+        local owner = plot:GetAttribute("OwnerUserId") or plot:GetAttribute("Owner") or plot:GetAttribute("NestsOwnerLoaded")
         if owner == LocalPlayer.UserId or owner == LocalPlayer.Name then
             return plot
         end
@@ -537,26 +537,7 @@ function Features.hatchEgg()
 end
 
 -- ============================================================
--- SPEED
--- ============================================================
-function Features.setSpeed(v)
-    local char = LocalPlayer.Character
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if hum then hum.WalkSpeed = v end
-end
-
-function Features.startSpeed()
-    task.spawn(function()
-        while task.wait(0.3) do
-            if Shared.Speed_Enabled then
-                Features.setSpeed(Shared.Speed_Value or 100)
-            end
-        end
-    end)
-end
-
--- ============================================================
--- LOAD GAMEDATA (EGGS + PETS + RARITY)
+-- GAMEDATA (EGGS + PETS)
 -- ============================================================
 local GameData = game:GetService("ReplicatedStorage"):FindFirstChild("GameData")
 local EggData, PetData = {}, {}
@@ -591,6 +572,25 @@ local function isRaritySelected(eggName)
 end
 
 -- ============================================================
+-- SPEED
+-- ============================================================
+function Features.setSpeed(v)
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if hum then hum.WalkSpeed = v end
+end
+
+function Features.startSpeed()
+    task.spawn(function()
+        while task.wait(0.3) do
+            if Shared.Speed_Enabled then
+                Features.setSpeed(Shared.Speed_Value or 100)
+            end
+        end
+    end)
+end
+
+-- ============================================================
 -- INSTANT PICKUP
 -- ============================================================
 function Features.instantPickup(egg)
@@ -615,7 +615,46 @@ function Features.instantPickup(egg)
 end
 
 -- ============================================================
--- AUTO FARM — RARITY MULTI + AUTO RETURN + INSTANT PICKUP
+-- INSTANT PICKUP — TOGGLE SENDIRI
+-- ============================================================
+local lastInstantPickup = 0
+
+function Features.startInstantPickup()
+    task.spawn(function()
+        while task.wait(0.3) do
+            if not Shared.InstantPickup_Enabled then continue end
+            if Shared.AutoFarm_Enabled then continue end
+
+            local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if not myRoot then continue end
+
+            local rendered = Workspace:FindFirstChild("RenderedEggs")
+            if not rendered then continue end
+
+            local best, bestDist = nil, math.huge
+            for _, egg in ipairs(rendered:GetChildren()) do
+                if egg:IsA("Model") and isRaritySelected(egg.Name) then
+                    local part = egg:FindFirstChildWhichIsA("BasePart", true)
+                    if part then
+                        local d = (part.Position - myRoot.Position).Magnitude
+                        if d < bestDist then
+                            best, bestDist = egg, d
+                        end
+                    end
+                end
+            end
+
+            if not best then continue end
+            if os.clock() - lastInstantPickup < 0.2 then continue end
+            lastInstantPickup = os.clock()
+
+            Features.instantPickup(best)
+        end
+    end)
+end
+
+-- ============================================================
+-- AUTO FARM — RARITY MULTI + WAJIB RETURN DULU
 -- ============================================================
 local NotifiedEggs = {}
 
@@ -665,11 +704,19 @@ local function returnToMyPlot()
     if not myRoot then return end
 
     local plot = getMyPlot()
-    local spawnPart = plot and (
-        plot:FindFirstChild("Spawn", true)
-        or plot:FindFirstChildWhichIsA("SpawnLocation", true)
-        or plot:FindFirstChildWhichIsA("BasePart", true)
-    )
+    local spawnPart = nil
+    if plot then
+        spawnPart = plot:FindFirstChild("Spawn", true)
+            or plot:FindFirstChildWhichIsA("SpawnLocation", true)
+            or plot:FindFirstChildWhichIsA("BasePart", true)
+    end
+    if not spawnPart then
+        local spawn = Workspace:FindFirstChild("Spawn")
+        if spawn then
+            spawnPart = spawn:FindFirstChildWhichIsA("SpawnLocation", true)
+                or spawn:FindFirstChildWhichIsA("BasePart", true)
+        end
+    end
     if spawnPart then
         myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
     end
@@ -677,10 +724,10 @@ end
 
 function Features.startAutoFarm()
     task.spawn(function()
-        while task.wait(0.4) do
+        while task.wait(0.5) do
             if not Shared.AutoFarm_Enabled then continue end
 
-            -- Cleanup NotifiedEggs
+            -- Cleanup
             local rendered = Workspace:FindFirstChild("RenderedEggs")
             if rendered then
                 local validKeys = {}
@@ -694,15 +741,19 @@ function Features.startAutoFarm()
                 end
             end
 
+            -- Cari egg
             local best = getBestEggInMap()
-            if not best then continue end
+            if not best then
+                returnToMyPlot()
+                continue
+            end
 
             local egg = best.egg
             local eggName = egg.Name
             local eggRarity = best.rarity
             local eggKey = getEggKey(egg)
 
-            -- Notif SEKALI AJA, cuma rarity tinggi
+            -- Notif sekali
             if (RARITY_ORDER[eggRarity] or 1) >= getNotifThreshold() then
                 if not NotifiedEggs[eggKey] then
                     NotifiedEggs[eggKey] = true
@@ -716,14 +767,17 @@ function Features.startAutoFarm()
             local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
             if not myRoot or not eggPart then continue end
 
+            -- Teleport ke egg
             myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
             task.wait(0.1)
 
+            -- Pickup
             Features.instantPickup(egg)
-            task.wait(0.15)
+            task.wait(0.2)
 
+            -- WAJIB RETURN DULU
             returnToMyPlot()
-            task.wait(0.3)
+            task.wait(0.5)
         end
     end)
 end
@@ -741,6 +795,7 @@ function Features.Init(sharedState)
     Features.startAutoRidePet()
     Features.startEggPrediction()
     Features.startSpeed()
+    Features.startInstantPickup()
     Features.startAutoFarm()
 
     print("[VRILZHUB] Ride a Pet Features loaded")
