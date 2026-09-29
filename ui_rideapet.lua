@@ -16,7 +16,7 @@ local LocalPlayer = Players.LocalPlayer
 -- ====== AUTO-DETECT MOBILE ======
 local IS_MOBILE = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 
--- ====== UI CONFIG (PC & MOBILE BEDA) ======
+-- ====== UI CONFIG ======
 local UI_CONFIG = {
     MOBILE = {
         WIN_W_PCT = 0.88,
@@ -91,7 +91,7 @@ local EggNames = {
     "Bloom", "Aurora", "White", "Brown"
 }
 
--- ====== RARITY LIST ======
+-- ====== RARITY ======
 local RarityList = {
     "Common", "Uncommon", "Rare", "Epic",
     "Legendary", "Mythic", "Divine", "Ethereal", "Secret"
@@ -418,7 +418,7 @@ local function makeToggle(parent, text, default, callback)
     end)
 end
 
--- ====== DROPDOWN GLOBAL (PAKAI _G) ======
+-- ====== DROPDOWN GLOBAL ======
 _G.VRILZ_DropdownLayer = nil
 _G.VRILZ_DropdownCloseOverlay = nil
 _G.VRILZ_DropdownActive = nil
@@ -627,7 +627,7 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     return container
 end
 
--- ====== DROPDOWN MULTI-SELECT (BUAT RARITY) ======
+-- ====== DROPDOWN MULTI-SELECT ======
 local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, onChanged)
     local isOpen = false
 
@@ -917,7 +917,7 @@ local function buildFPSWindow(parent)
 end
 
 -- ============================================================
--- BUILD MAIN WINDOW (AUTO-DETECT PC & MOBILE)
+-- BUILD MAIN WINDOW
 -- ============================================================
 local function buildMainWindow(parent)
     local screenGui = parent
@@ -1114,7 +1114,6 @@ local function buildMainWindow(parent)
     pageHolderPad.PaddingRight = UDim.new(0, IS_MOBILE and 6 or 10)
     pageHolderPad.Parent = pageHolder
 
-    -- RESIZE HANDLE (PC only)
     if not IS_MOBILE then
         local resizeHandle = Instance.new("TextButton")
         resizeHandle.Size = UDim2.fromOffset(22, 22)
@@ -1325,9 +1324,7 @@ local function buildMainWindow(parent)
         return page
     end
 
-    -- ========================================================
     -- TAB INFO
-    -- ========================================================
     local infoPage = createPage("Info")
     pages.Info = infoPage
 
@@ -1411,9 +1408,7 @@ local function buildMainWindow(parent)
 
     registerTab("Info", "ℹ", "Info")
 
-    -- ========================================================
     -- TAB PREDIKSI
-    -- ========================================================
     local predPage = createPage("Prediksi")
     pages.Prediksi = predPage
 
@@ -1566,9 +1561,7 @@ local function buildMainWindow(parent)
 
     registerTab("Prediksi", "◎", "Prediksi")
 
-    -- ========================================================
     -- TAB EGG
-    -- ========================================================
     local eggPage = createPage("Egg")
     pages.Egg = eggPage
 
@@ -1600,9 +1593,7 @@ local function buildMainWindow(parent)
 
     registerTab("Egg", "◯", "Egg")
 
-    -- ========================================================
     -- TAB VISUAL
-    -- ========================================================
     local visualPage = createPage("Visual")
     pages.Visual = visualPage
 
@@ -1619,13 +1610,11 @@ local function buildMainWindow(parent)
 
     registerTab("Visual", "◆", "Visual")
 
-    -- ========================================================
-    -- TAB AUTO — SPEED + AUTO FARM
-    -- ========================================================
+    -- TAB AUTO
     local autoPage = createPage("Auto")
     pages.Auto = autoPage
 
-    -- ==== SPEED ====
+    -- SPEED
     local speedCard, speedContent = makeCard(autoPage, "SPEED", 1)
     makeToggle(speedContent, "Aktifkan Speed", false, function(v) Shared.Speed_Enabled = v end)
 
@@ -1686,12 +1675,26 @@ local function buildMainWindow(parent)
         end
     end)
 
-    -- ==== AUTO FARM ====
-    local farmCard, farmContent = makeCard(autoPage, "AUTO FARM", 2)
+    -- INSTANT PICKUP (TOGGLE SENDIRI)
+    local ipCard, ipContent = makeCard(autoPage, "INSTANT PICKUP", 2)
+    makeToggle(ipContent, "Aktifkan Instant Pickup", false, function(v) Shared.InstantPickup_Enabled = v end)
+
+    local ipNote = Instance.new("TextLabel")
+    ipNote.Size = UDim2.new(1, 0, 0, 14)
+    ipNote.BackgroundTransparency = 1
+    ipNote.Text = "Ambil egg otomatis tanpa prompt"
+    ipNote.TextColor3 = C.Muted
+    ipNote.Font = Enum.Font.GothamSemibold
+    ipNote.TextSize = CFG.FONT_MUTED
+    ipNote.TextXAlignment = Enum.TextXAlignment.Left
+    ipNote.LayoutOrder = 2
+    ipNote.Parent = ipContent
+
+    -- AUTO FARM
+    local farmCard, farmContent = makeCard(autoPage, "AUTO FARM", 3)
     makeToggle(farmContent, "Aktifkan Auto Farm", false, function(v) Shared.AutoFarm_Enabled = v end)
     makeToggle(farmContent, "Auto Return ke Plot", true, function(v) Shared.AutoReturn_Enabled = v end)
 
-    -- ==== RARITY DROPDOWN MULTI ====
     local rarTitle = Instance.new("TextLabel")
     rarTitle.Size = UDim2.new(1, 0, 0, 16)
     rarTitle.BackgroundTransparency = 1
@@ -1703,11 +1706,8 @@ local function buildMainWindow(parent)
     rarTitle.LayoutOrder = 3
     rarTitle.Parent = farmContent
 
-    makeDropdownMulti(farmContent, RarityList, Shared.SelectedRarities, RarityColors, function(t)
-        -- callback kalau perlu
-    end)
+    makeDropdownMulti(farmContent, RarityList, Shared.SelectedRarities, RarityColors, function(t) end)
 
-    -- ==== NOTIF THRESHOLD ====
     local notifTitle = Instance.new("TextLabel")
     notifTitle.Size = UDim2.new(1, 0, 0, 16)
     notifTitle.BackgroundTransparency = 1
@@ -1723,16 +1723,14 @@ local function buildMainWindow(parent)
         Shared.RarityNotifThreshold = v
     end)
 
-    -- ==== AUTO LAINNYA ====
-    local autoCard, autoContent = makeCard(autoPage, "AUTO LAINNYA", 3)
+    -- AUTO LAINNYA
+    local autoCard, autoContent = makeCard(autoPage, "AUTO LAINNYA", 4)
     makeToggle(autoContent, "Auto Ride Pet", false, function(v) Shared.AutoRidePet_Enabled = v end)
     makeToggle(autoContent, "Auto Equip Best", false, function(v) Shared.AutoEquipBest_Enabled = v end)
 
     registerTab("Auto", "▶", "Auto")
 
-    -- ========================================================
     -- TAB SETTINGS
-    -- ========================================================
     local setPage = createPage("Settings")
     pages.Settings = setPage
 
@@ -1859,9 +1857,9 @@ end
 -- ============================================================
 function UI.Init(sharedState)
     Shared = sharedState
-
     Shared.Notify = notify
 
+    -- Defaults
     Shared.ESP_Eggs_Enabled = false
     Shared.ESP_EggName_Enabled = true
     Shared.ESP_EggLuck_Enabled = true
@@ -1882,6 +1880,9 @@ function UI.Init(sharedState)
     -- SPEED
     Shared.Speed_Enabled = false
     Shared.Speed_Value = 100
+
+    -- INSTANT PICKUP (toggle sendiri)
+    Shared.InstantPickup_Enabled = false
 
     -- AUTO FARM
     Shared.AutoFarm_Enabled = false
