@@ -396,7 +396,7 @@ function Features.startAutoRidePet()
 end
 
 -- ============================================================
--- EGG PREDICTION SYSTEM
+-- EGG PREDICTION SYSTEM — SELALU JALAN (TANPA CEK TOGGLE)
 -- ============================================================
 local EggHistory = {}
 local LastEggList = {}
@@ -405,8 +405,6 @@ local MAX_HISTORY = 50
 function Features.startEggPrediction()
     task.spawn(function()
         while task.wait(1) do
-            if not Shared.EggPrediction_Enabled then continue end
-
             local rendered = Workspace:FindFirstChild("RenderedEggs")
             if not rendered then continue end
 
@@ -417,6 +415,7 @@ function Features.startEggPrediction()
                 end
             end
 
+            -- Deteksi egg baru (masuk history)
             for _, eggName in ipairs(currentEggs) do
                 local found = false
                 for _, lastEgg in ipairs(LastEggList) do
@@ -433,24 +432,6 @@ function Features.startEggPrediction()
                     if #EggHistory > MAX_HISTORY then
                         table.remove(EggHistory, 1)
                     end
-                    if Shared.Notify then
-                        Shared.Notify("🎯 Egg spawn: " .. eggName, "success")
-                    end
-                end
-            end
-
-            for _, lastEgg in ipairs(LastEggList) do
-                local found = false
-                for _, eggName in ipairs(currentEggs) do
-                    if eggName == lastEgg then
-                        found = true
-                        break
-                    end
-                end
-                if not found then
-                    if Shared.Notify then
-                        Shared.Notify("❌ Egg hilang: " .. lastEgg, "warning")
-                    end
                 end
             end
 
@@ -458,6 +439,7 @@ function Features.startEggPrediction()
             Shared.EggsInMap = currentEggs
             Shared.EggHistory = EggHistory
 
+            -- Hitung frekuensi egg
             local eggCount = {}
             for _, entry in ipairs(EggHistory) do
                 eggCount[entry.name] = (eggCount[entry.name] or 0) + 1
@@ -469,6 +451,7 @@ function Features.startEggPrediction()
             end
             table.sort(sorted, function(a, b) return a.count > b.count end)
 
+            -- Prediksi: egg yang sering muncul tapi lagi gak ada di map
             local predictions = {}
             for _, entry in ipairs(sorted) do
                 local alreadyInMap = false
@@ -616,7 +599,7 @@ function Features.startInstantPickup()
 end
 
 -- ============================================================
--- AUTO FARM — RARITY MULTI + WAJIB RETURN DULU
+-- AUTO FARM — TELEPORT, DIAM 6 DETIK, PICKUP, DIAM 6 DETIK, RETURN
 -- ============================================================
 local NotifiedEggs = {}
 
@@ -735,17 +718,30 @@ function Features.startAutoFarm()
                 prompt.HoldDuration = 0
             end
 
-            -- Teleport ke egg
+            -- 1. Teleport ke egg
             myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
-            task.wait(0.1)
 
-            -- Fire prompt (instan karena HoldDuration = 0)
+            -- 2. DIAM 6 DETIK (freeze posisi)
+            local savedCF = myRoot.CFrame
+            local t0 = os.clock()
+            while os.clock() - t0 < 6 do
+                task.wait(0.1)
+                myRoot.CFrame = savedCF
+            end
+
+            -- 3. Fire pickup
             if prompt and typeof(fireproximityprompt) == "function" then
                 pcall(fireproximityprompt, prompt)
             end
-            task.wait(0.2)
 
-            -- WAJIB RETURN DULU
+            -- 4. DIAM 6 DETIK LAGI (freeze posisi)
+            local t1 = os.clock()
+            while os.clock() - t1 < 6 do
+                task.wait(0.1)
+                myRoot.CFrame = savedCF
+            end
+
+            -- 5. Return ke plot
             returnToMyPlot()
             task.wait(0.5)
         end
