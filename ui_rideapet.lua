@@ -1649,30 +1649,63 @@ ecfec45586dccf4fd6822542620350be49b0aa8e41a8a1d53074cdd17d99ea5b0c6def72aada4a16
 2c8dcc9bddfb6a7bfdbfc1a09551ecda513eea7bdad2
 ]]
 local function _hx(s)
-    -- Payload is wrapped across multiple lines; remove all whitespace first.
     s = s:gsub("%s+", "")
+    if (#s % 2) ~= 0 then
+        error("VRILZHUB: invalid encoded payload length")
+    end
     local t={}
     for i=1,#s,2 do
-        local pair = s:sub(i,i+1)
-        local n = tonumber(pair,16)
-        if not n then
-            error("VRILZHUB: invalid encoded payload at byte " .. tostring(i))
+        local pair=s:sub(i,i+1):lower()
+        local hi=pair:byte(1)
+        local lo=pair:byte(2)
+        if not hi or not lo then
+            error("VRILZHUB: invalid encoded payload at byte "..tostring(i))
         end
-        t[#t+1]=string.char(n)
+        local function hd(b)
+            if b>=48 and b<=57 then return b-48 end
+            if b>=97 and b<=102 then return b-87 end
+            return nil
+        end
+        local a,b=hd(hi),hd(lo)
+        if a==nil or b==nil then
+            error("VRILZHUB: invalid encoded payload at byte "..tostring(i))
+        end
+        t[#t+1]=string.char(a*16+b)
     end
     return table.concat(t)
+end
+local function _bxor8(a,b)
+    local r=0
+    local p=1
+    for _=1,8 do
+        local aa=a%2
+        local bb=b%2
+        if aa~=bb then r=r+p end
+        a=(a-aa)/2
+        b=(b-bb)/2
+        p=p*2
+    end
+    return r
 end
 local function _unpack(s)
     local raw=_hx(s)
     local out={}
     local kl=#_k/2
     for i=1,#raw do
-        local v=string.byte(raw,i)
+        local v=string.byte(raw,i) or 0
         local j=i-1
         local kh=string.sub(_k,(j%kl)*2+1,(j%kl)*2+2)
-        local k=tonumber(kh,16)
+        local hi=kh:byte(1) or 48
+        local lo=kh:byte(2) or 48
+        local function hd(b)
+            if b>=48 and b<=57 then return b-48 end
+            if b>=97 and b<=102 then return b-87 end
+            if b>=65 and b<=70 then return b-55 end
+            return 0
+        end
+        local k=hd(hi)*16+hd(lo)
         v=(v-(j*17+31))%256
-        out[i]=string.char(bit32.bxor(v,k))
+        out[i]=string.char(_bxor8(v,k))
     end
     return table.concat(out)
 end
