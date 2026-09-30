@@ -1649,9 +1649,16 @@ ecfec45586dccf4fd6822542620350be49b0aa8e41a8a1d53074cdd17d99ea5b0c6def72aada4a16
 2c8dcc9bddfb6a7bfdbfc1a09551ecda513eea7bdad2
 ]]
 local function _hx(s)
+    -- Payload is wrapped across multiple lines; remove all whitespace first.
+    s = s:gsub("%s+", "")
     local t={}
     for i=1,#s,2 do
-        t[#t+1]=string.char(tonumber(s:sub(i,i+1),16))
+        local pair = s:sub(i,i+1)
+        local n = tonumber(pair,16)
+        if not n then
+            error("VRILZHUB: invalid encoded payload at byte " .. tostring(i))
+        end
+        t[#t+1]=string.char(n)
     end
     return table.concat(t)
 end
