@@ -2091,8 +2091,8 @@ local function applyKeyInfo(data, key)
     if type(data) ~= "table" then return end
     Shared = Shared or {}
     Shared.KeyValue = key
-    Shared.KeyType = tostring(data.type or "UNKNOWN"):upper()
-    Shared.KeyExpiresAt = tonumber(data.expires_at) or 0
+    Shared.KeyType = tostring(data.type or data.key_type or "UNKNOWN"):upper()
+    Shared.KeyExpiresAt = tonumber(data.expires_at or data.expiry or 0) or 0
 end
 
 local function verifyKeyWithServer(key)
@@ -2360,10 +2360,11 @@ local function buildKeyWindow(parent, onSuccess)
         status.TextColor3 = C.Muted
 
         task.spawn(function()
-            local valid, message = verifyKeyWithServer(box.Text)
+            local valid, message, data = verifyKeyWithServer(box.Text)
             if valid then
-                saveKey(box.Text)
-                applyKeyInfo(data, tostring(box.Text):gsub("^%s+", ""):gsub("%s+$", ""):upper())
+                local normalizedKey = tostring(box.Text):gsub("^%s+", ""):gsub("%s+$", ""):upper()
+                saveKey(normalizedKey)
+                applyKeyInfo(data, normalizedKey)
                 status.Text = "Status: " .. message
                 status.TextColor3 = C.Success
                 task.wait(0.35)
