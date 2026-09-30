@@ -292,6 +292,14 @@ local function findEggByName(eggName)
 end
 
 -- ============================================================
+-- CEK EGG MASIH DI MAP
+-- ============================================================
+local function isEggStillInMap(egg)
+    if not egg or not egg.Parent then return false end
+    return true
+end
+
+-- ============================================================
 -- AUTO STEAL + NOTIF "EGG NO SPAWN"
 -- ============================================================
 local lastNoEggNotif = 0
@@ -300,6 +308,15 @@ function Features.startAutoSteal()
     task.spawn(function()
         while task.wait(0.5) do
             if not Shared.AutoSteal_Enabled then continue end
+
+            -- Cek character hidup
+            local char = LocalPlayer.Character
+            local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if not myRoot or not hum or hum.Health <= 0 then
+                task.wait(1)
+                continue
+            end
 
             local eggName = Shared.SelectedEgg or "Cherub"
             local egg = findEggByName(eggName)
@@ -319,18 +336,39 @@ function Features.startAutoSteal()
             local prompt = egg:FindFirstChild("Pickup", true)
             if not eggPart or not prompt then continue end
 
-            local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if not myRoot then continue end
+            -- Ubah prompt jadi instant
+            if prompt:IsA("ProximityPrompt") then
+                prompt.HoldDuration = 0
+            end
 
+            -- ===== STEP 1: TELEPORT KE EGG =====
             myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
             task.wait(0.1)
 
-            if typeof(fireproximityprompt) == "function" then
-                pcall(fireproximityprompt, prompt)
-            end
-            task.wait(0.2)
+            -- ===== STEP 2: PICKUP SAMPE DAPET =====
+            local picked = false
+            local maxTries = 10
+            for i = 1, maxTries do
+                if typeof(fireproximityprompt) == "function" then
+                    pcall(fireproximityprompt, prompt)
+                end
+                task.wait(0.3)
 
-            if Shared.AutoReturn_Enabled then
+                -- ✅ Cek egg udah ilang dari map = berhasil pickup
+                if not isEggStillInMap(egg) then
+                    picked = true
+                    break
+                end
+
+                -- Kalo masih ada, teleport ulang (posisi geser)
+                if eggPart and eggPart.Parent then
+                    myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+                    task.wait(0.1)
+                end
+            end
+
+            -- ===== STEP 3: RETURN KE PLOT (cuma kalo berhasil) =====
+            if picked and Shared.AutoReturn_Enabled then
                 local spawnPart = getMyPlotSpawn()
                 if spawnPart then
                     myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
@@ -344,6 +382,8 @@ function Features.startAutoSteal()
                     end
                 end
             end
+
+            task.wait(0.3)
         end
     end)
 end
@@ -662,12 +702,6 @@ local function returnToMyPlot()
     if spawnPart then
         myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
     end
-end
-
--- Cek apakah egg masih ada di RenderedEggs
-local function isEggStillInMap(egg)
-    if not egg or not egg.Parent then return false end
-    return true
 end
 
 function Features.startAutoFarm()
