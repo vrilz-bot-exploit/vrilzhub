@@ -1974,7 +1974,7 @@ end
 -- Only adds a window before the existing loading screen.
 -- Existing main UI/loading code remains unchanged.
 -- ============================================================
-local KEY_SYSTEM_URL = "https://YOUR-KEY-SYSTEM-DOMAIN.workers.dev"
+local KEY_SYSTEM_URL = "https://key-system.vrilzwops.workers.dev/"
 
 local function getHttpRequest()
     return (syn and syn.request)
