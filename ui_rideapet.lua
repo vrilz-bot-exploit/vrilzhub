@@ -1433,6 +1433,54 @@ local function buildMainWindow(parent)
     sessionLbl.Parent = infoContent
     registerTheme(sessionLbl, "Accent2", "TextColor3")
 
+    local keyTypeLbl = Instance.new("TextLabel")
+    keyTypeLbl.Size = UDim2.new(1, 0, 0, 20)
+    keyTypeLbl.BackgroundTransparency = 1
+    keyTypeLbl.Text = "Jenis Key: " .. tostring(Shared.KeyType or "UNKNOWN")
+    keyTypeLbl.TextColor3 = C.Text
+    keyTypeLbl.Font = Enum.Font.GothamBold
+    keyTypeLbl.TextSize = CFG.FONT_LABEL
+    keyTypeLbl.TextXAlignment = Enum.TextXAlignment.Left
+    keyTypeLbl.LayoutOrder = 3
+    keyTypeLbl.ZIndex = 3
+    keyTypeLbl.Parent = infoContent
+    registerTheme(keyTypeLbl, "Text", "TextColor3")
+
+    local keyExpiryLbl = Instance.new("TextLabel")
+    keyExpiryLbl.Size = UDim2.new(1, 0, 0, 20)
+    keyExpiryLbl.BackgroundTransparency = 1
+    keyExpiryLbl.TextColor3 = C.Muted
+    keyExpiryLbl.Font = Enum.Font.GothamSemibold
+    keyExpiryLbl.TextSize = CFG.FONT_LABEL
+    keyExpiryLbl.TextXAlignment = Enum.TextXAlignment.Left
+    keyExpiryLbl.LayoutOrder = 4
+    keyExpiryLbl.ZIndex = 3
+    keyExpiryLbl.Parent = infoContent
+    registerTheme(keyExpiryLbl, "Muted", "TextColor3")
+
+    local function refreshKeyInfo()
+        local keyType = tostring(Shared.KeyType or "UNKNOWN"):upper()
+        local expiresAt = tonumber(Shared.KeyExpiresAt or 0) or 0
+        keyTypeLbl.Text = "Jenis Key: " .. keyType
+        if expiresAt > 0 then
+            local secondsLeft = math.max(0, math.floor(expiresAt / 1000 - os.time()))
+            local days = math.floor(secondsLeft / 86400)
+            local hours = math.floor((secondsLeft % 86400) / 3600)
+            local mins = math.floor((secondsLeft % 3600) / 60)
+            local expiryText = os.date("%d/%m/%Y %H:%M:%S", math.floor(expiresAt / 1000))
+            keyExpiryLbl.Text = string.format("Expired: %s | Sisa: %dd %02dj %02dm", expiryText, days, hours, mins)
+            if secondsLeft <= 0 then
+                keyExpiryLbl.Text = "Expired: KEY EXPIRED"
+                keyExpiryLbl.TextColor3 = C.Error
+            else
+                keyExpiryLbl.TextColor3 = C.Muted
+            end
+        else
+            keyExpiryLbl.Text = "Expired: -"
+        end
+    end
+    refreshKeyInfo()
+
     local sessionStart = os.clock()
     task.spawn(function()
         while sessionLbl.Parent do
@@ -1983,6 +2031,70 @@ local function getHttpRequest()
         or (request)
 end
 
+local function getKeyStorage()
+    local ok, env = pcall(function()
+        if getgenv then
+            return getgenv()
+        end
+        return _G
+    end)
+    if ok and type(env) == "table" then
+        return env
+    end
+    return _G
+end
+
+local function loadSavedKey()
+    local env = getKeyStorage()
+    local saved = env.VRILZ_KEY
+    if type(saved) == "string" and saved:gsub("%s+", "") ~= "" then
+        return saved
+    end
+
+    if readfile and isfile then
+        local okFile, exists = pcall(isfile, "vrilz_key.txt")
+        if okFile and exists then
+            local okRead, content = pcall(readfile, "vrilz_key.txt")
+            if okRead and type(content) == "string" and content:gsub("%s+", "") ~= "" then
+                return content
+            end
+        end
+    end
+
+    return nil
+end
+
+local function saveKey(key)
+    key = tostring(key or ""):gsub("^%s+", ""):gsub("%s+$", ""):upper()
+    if key == "" then return end
+
+    local env = getKeyStorage()
+    env.VRILZ_KEY = key
+
+    if writefile then
+        pcall(writefile, "vrilz_key.txt", key)
+    end
+end
+
+local function clearSavedKey()
+    local env = getKeyStorage()
+    env.VRILZ_KEY = nil
+    if delfile and isfile then
+        local okFile, exists = pcall(isfile, "vrilz_key.txt")
+        if okFile and exists then
+            pcall(delfile, "vrilz_key.txt")
+        end
+    end
+end
+
+local function applyKeyInfo(data, key)
+    if type(data) ~= "table" then return end
+    Shared = Shared or {}
+    Shared.KeyValue = key
+    Shared.KeyType = tostring(data.type or "UNKNOWN"):upper()
+    Shared.KeyExpiresAt = tonumber(data.expires_at) or 0
+end
+
 local function verifyKeyWithServer(key)
     key = tostring(key or ""):gsub("^%s+", ""):gsub("%s+$", ""):upper()
     if key == "" then
@@ -2038,9 +2150,73 @@ local function verifyKeyWithServer(key)
 
     if decodedOk and type(data) == "table" then
         if data.success == true then
-            return true, data.message or "Key valid."
+            return true, data.message or "Key valid.", data
         end
-        return false, data.message or "Key tidak valid."
+        return false, data.message or "Key tidak valid.", data
+    end
+
+    if status >= 200 and status < 300 then
+        return false, "Respons Key System tidak valid."
+    end
+
+    return false, "Key tidak valid."
+end
+
+-- Mengecek key yang SUDAH pernah diredeem tanpa membuat redeem kedua.
+local function verifySavedKeyWithServer(key)
+    key = tostring(key or ""):gsub("^%s+", ""):gsub("%s+$", ""):upper()
+    if key == "" then
+        return false, "Key tersimpan kosong."
+    end
+
+    local HttpService = game:GetService("HttpService")
+    local payload = HttpService:JSONEncode({
+        username = LocalPlayer.Name,
+        key = key,
+    })
+    local url = KEY_SYSTEM_URL:gsub("/$", "") .. "/api/verify"
+
+    local ok, response = pcall(function()
+        local req = getHttpRequest()
+        if req then
+            return req({
+                Url = url,
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json",
+                    ["Accept"] = "application/json",
+                },
+                Body = payload,
+            })
+        end
+
+        return {
+            StatusCode = 200,
+            Body = HttpService:PostAsync(
+                url,
+                payload,
+                Enum.HttpContentType.ApplicationJson,
+                false,
+                { ["Accept"] = "application/json" }
+            )
+        }
+    end)
+
+    if not ok or not response then
+        return false, "Tidak dapat memverifikasi key tersimpan."
+    end
+
+    local status = tonumber(response.StatusCode or response.Status or 0) or 0
+    local body = response.Body or response.body or ""
+    local decodedOk, data = pcall(function()
+        return HttpService:JSONDecode(body)
+    end)
+
+    if decodedOk and type(data) == "table" then
+        if data.success == true then
+            return true, data.message or "Key masih aktif.", data
+        end
+        return false, data.message or "Key tidak valid.", data
     end
 
     if status >= 200 and status < 300 then
@@ -2186,6 +2362,8 @@ local function buildKeyWindow(parent, onSuccess)
         task.spawn(function()
             local valid, message = verifyKeyWithServer(box.Text)
             if valid then
+                saveKey(box.Text)
+                applyKeyInfo(data, tostring(box.Text):gsub("^%s+", ""):gsub("%s+$", ""):upper())
                 status.Text = "Status: " .. message
                 status.TextColor3 = C.Success
                 task.wait(0.35)
@@ -2673,9 +2851,33 @@ function UI.Init(sharedState)
     setupNotifHolder(ScreenGui)
     setupDropdownLayer(ScreenGui)
 
-    buildKeyWindow(ScreenGui, function()
+    local function startLoading()
         buildLoadingScreen(ScreenGui)
-    end)
+    end
+
+    local function showKeyWindow()
+        buildKeyWindow(ScreenGui, function()
+            startLoading()
+        end)
+    end
+
+    local savedKey = loadSavedKey()
+    if savedKey then
+        task.spawn(function()
+            local valid, message, data = verifySavedKeyWithServer(savedKey)
+            if valid then
+                applyKeyInfo(data, savedKey)
+                startLoading()
+                return
+            end
+
+            -- Jika expired / tidak valid, hapus key tersimpan supaya gate muncul lagi.
+            clearSavedKey()
+            showKeyWindow()
+        end)
+    else
+        showKeyWindow()
+    end
 end
 
 return UI
