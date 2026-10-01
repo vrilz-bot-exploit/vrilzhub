@@ -19,21 +19,21 @@ local IS_MOBILE = UserInputService.TouchEnabled and not UserInputService.Keyboar
 -- ====== UI CONFIG ======
 local UI_CONFIG = {
     MOBILE = {
-        WIN_W_PCT = 0.88, WIN_H_PCT = 0.85,
-        SIDEBAR_W = 70, TAB_H = 38, TAB_ICON = 18, TAB_SHOW_LABEL = false,
-        CARD_HEADER = 28, CARD_PAD_TOP = 8, CARD_PAD_BOT = 8, CARD_PAD_SIDE = 10,
-        CARD_GAP = 6, TOGGLE_H = 36, TOGGLE_W = 48, TOGGLE_KNOB = 20,
-        DROPDOWN_H = 40, DROPDOWN_ITEM = 36, ACTION_H = 36,
+        WIN_W_PCT = 0.92, WIN_H_PCT = 0.88,
+        SIDEBAR_W = 78, TAB_H = 42, TAB_ICON = 18, TAB_SHOW_LABEL = false,
+        CARD_HEADER = 34, CARD_PAD_TOP = 10, CARD_PAD_BOT = 12, CARD_PAD_SIDE = 12,
+        CARD_GAP = 8, TOGGLE_H = 38, TOGGLE_W = 50, TOGGLE_KNOB = 20,
+        DROPDOWN_H = 42, DROPDOWN_ITEM = 32, ACTION_H = 36,
         FONT_TITLE = 13, FONT_LABEL = 11, FONT_MUTED = 9, FONT_SMALL = 10,
         FONT_MED = 11, FONT_LARGE = 14,
         HEADER_H = 40, SEARCH_H = 30, NOTIF_W = 300, NOTIF_H = 52, OPEN_BTN = 52,
     },
     PC = {
         WIN_W = 800, WIN_H = 580,
-        SIDEBAR_W = 140, TAB_H = 44, TAB_ICON = 16, TAB_SHOW_LABEL = true,
-        CARD_HEADER = 30, CARD_PAD_TOP = 10, CARD_PAD_BOT = 12, CARD_PAD_SIDE = 14,
-        CARD_GAP = 8, TOGGLE_H = 30, TOGGLE_W = 46, TOGGLE_KNOB = 18,
-        DROPDOWN_H = 34, DROPDOWN_ITEM = 28, ACTION_H = 34,
+        SIDEBAR_W = 152, TAB_H = 46, TAB_ICON = 17, TAB_SHOW_LABEL = true,
+        CARD_HEADER = 36, CARD_PAD_TOP = 12, CARD_PAD_BOT = 14, CARD_PAD_SIDE = 16,
+        CARD_GAP = 9, TOGGLE_H = 34, TOGGLE_W = 48, TOGGLE_KNOB = 18,
+        DROPDOWN_H = 38, DROPDOWN_ITEM = 30, ACTION_H = 34,
         FONT_TITLE = 12, FONT_LABEL = 12, FONT_MUTED = 10, FONT_SMALL = 10,
         FONT_MED = 12, FONT_LARGE = 15,
         HEADER_H = 52, SEARCH_H = 34, NOTIF_W = 380, NOTIF_H = 52, OPEN_BTN = 56,
@@ -258,10 +258,23 @@ local function makeCard(parent, title, layoutOrder)
     })
     cardGradient.Parent = card
 
+    local gloss = Instance.new("Frame")
+    gloss.Name = "Gloss"
+    gloss.Size = UDim2.new(1, -18, 0, 1)
+    gloss.Position = UDim2.fromOffset(9, 1)
+    gloss.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    gloss.BackgroundTransparency = 0.86
+    gloss.BorderSizePixel = 0
+    gloss.ZIndex = 2
+    gloss.Parent = card
+    local glossCorner = Instance.new("UICorner")
+    glossCorner.CornerRadius = UDim.new(1, 0)
+    glossCorner.Parent = gloss
+
     local stroke = Instance.new("UIStroke")
     stroke.Color = C.Accent
-    stroke.Thickness = 1.35
-    stroke.Transparency = 0.32
+    stroke.Thickness = 1.6
+    stroke.Transparency = 0.22
     stroke.Parent = card
     registerTheme(stroke, "Accent", "Color")
 
@@ -539,6 +552,21 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     listFrame.Parent = _G.VRILZ_DropdownLayer
     registerTheme(listFrame, "Surface2", "BackgroundColor3")
 
+    local listShadow = Instance.new("Frame")
+    listShadow.Name = "DropdownShadow"
+    listShadow.AnchorPoint = Vector2.new(0.5, 0.5)
+    listShadow.Position = UDim2.new(0.5, 0, 0.5, 6)
+    listShadow.Size = UDim2.new(1, 10, 1, 10)
+    listShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    listShadow.BackgroundTransparency = 0.35
+    listShadow.BorderSizePixel = 0
+    listShadow.ZIndex = 2000
+    listShadow.Visible = false
+    listShadow.Parent = listFrame
+    local listShadowCorner = Instance.new("UICorner")
+    listShadowCorner.CornerRadius = UDim.new(0, 12)
+    listShadowCorner.Parent = listShadow
+
     local listGradient = Instance.new("UIGradient")
     listGradient.Rotation = 90
     listGradient.Color = ColorSequence.new({
@@ -558,6 +586,19 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     listStroke.Parent = listFrame
     registerTheme(listStroke, "Accent", "Color")
 
+    local listTopGlow = Instance.new("Frame")
+    listTopGlow.Size = UDim2.new(1, -18, 0, 2)
+    listTopGlow.Position = UDim2.fromOffset(9, 1)
+    listTopGlow.BackgroundColor3 = C.Accent2
+    listTopGlow.BackgroundTransparency = 0.08
+    listTopGlow.BorderSizePixel = 0
+    listTopGlow.ZIndex = 2003
+    listTopGlow.Parent = listFrame
+    local listTopCorner = Instance.new("UICorner")
+    listTopCorner.CornerRadius = UDim.new(1, 0)
+    listTopCorner.Parent = listTopGlow
+    registerTheme(listTopGlow, "Accent2", "BackgroundColor3")
+
     local listLayout = Instance.new("UIListLayout")
     listLayout.Padding = UDim.new(0, 2)
     listLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -571,7 +612,7 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     listPad.Parent = listFrame
 
     local itemHeight = CFG.DROPDOWN_ITEM
-    local maxH = math.min(#items * (itemHeight + 2) + 10, IS_MOBILE and 220 or 180)
+    local maxH = math.min(#items * (itemHeight + 2) + 10, IS_MOBILE and 132 or 154)
 
     local function closeList()
         isOpen = false
@@ -645,12 +686,32 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
         registerTheme(opt, "Text", "TextColor3")
 
         local optCorner = Instance.new("UICorner")
-        optCorner.CornerRadius = UDim.new(0, 5)
+        optCorner.CornerRadius = UDim.new(0, 8)
         optCorner.Parent = opt
+
+        local optStroke = Instance.new("UIStroke")
+        optStroke.Color = C.Accent
+        optStroke.Thickness = 1
+        optStroke.Transparency = 1
+        optStroke.Parent = opt
 
         if item == selectedValue then
             opt.BackgroundColor3 = C.Accent
+            optStroke.Transparency = 0.15
         end
+
+        opt.MouseEnter:Connect(function()
+            if item ~= selectedValue then
+                TweenService:Create(opt, TweenInfo.new(0.12), {BackgroundColor3 = C.Surface2}):Play()
+            end
+            TweenService:Create(optStroke, TweenInfo.new(0.12), {Transparency = item == selectedValue and 0.15 or 0.45}):Play()
+        end)
+        opt.MouseLeave:Connect(function()
+            if item ~= selectedValue then
+                TweenService:Create(opt, TweenInfo.new(0.12), {BackgroundColor3 = C.Surface3}):Play()
+            end
+            TweenService:Create(optStroke, TweenInfo.new(0.12), {Transparency = item == selectedValue and 0.15 or 1}):Play()
+        end)
 
         opt.MouseButton1Click:Connect(function()
             selectedValue = item
@@ -705,7 +766,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     arrow.BackgroundTransparency = 1
     arrow.Text = "⌄"
     arrow.TextColor3 = C.Accent
-    arrow.TextSize = 10
+    arrow.TextSize = IS_MOBILE and 17 or 18
     arrow.ZIndex = 4
     arrow.Parent = container
     registerTheme(arrow, "Accent", "TextColor3")
@@ -755,7 +816,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     listPad.Parent = listFrame
 
     local itemHeight = CFG.DROPDOWN_ITEM
-    local maxH = math.min(#items * (itemHeight + 2) + 10, IS_MOBILE and 220 or 180)
+    local maxH = math.min(#items * (itemHeight + 2) + 10, IS_MOBILE and 132 or 154)
 
     local optionButtons = {}
 
@@ -1043,8 +1104,25 @@ local function buildMainWindow(parent)
     shadow.ZIndex = 0
     shadow.Parent = main
     local shadowCorner = Instance.new("UICorner")
-    shadowCorner.CornerRadius = UDim.new(0, 20)
+    shadowCorner.CornerRadius = UDim.new(0, 24)
     shadowCorner.Parent = shadow
+
+    local bevel = Instance.new("Frame")
+    bevel.Name = "WindowBevel"
+    bevel.Size = UDim2.new(1, -2, 1, -2)
+    bevel.Position = UDim2.fromOffset(1, 1)
+    bevel.BackgroundTransparency = 1
+    bevel.BorderSizePixel = 0
+    bevel.ZIndex = 1
+    bevel.Parent = main
+    local bevelCorner = Instance.new("UICorner")
+    bevelCorner.CornerRadius = UDim.new(0, 21)
+    bevelCorner.Parent = bevel
+    local bevelStroke = Instance.new("UIStroke")
+    bevelStroke.Color = Color3.fromRGB(255, 255, 255)
+    bevelStroke.Thickness = 1
+    bevelStroke.Transparency = 0.88
+    bevelStroke.Parent = bevel
 
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 18)
@@ -1061,8 +1139,8 @@ local function buildMainWindow(parent)
 
     local stroke = Instance.new("UIStroke")
     stroke.Color = C.Accent
-    stroke.Thickness = 2.2
-    stroke.Transparency = 0.18
+    stroke.Thickness = 2.6
+    stroke.Transparency = 0.08
     stroke.Parent = main
     registerTheme(stroke, "Accent", "Color")
 
@@ -1151,6 +1229,83 @@ local function buildMainWindow(parent)
     subtitle.Parent = header
     registerTheme(subtitle, "Muted", "TextColor3")
 
+    -- PLAYER PROFILE CHIP
+    local profile = Instance.new("Frame")
+    profile.Name = "PlayerProfile"
+    profile.Size = UDim2.fromOffset(IS_MOBILE and 126 or 168, IS_MOBILE and 34 or 38)
+    profile.Position = UDim2.new(1, -(IS_MOBILE and 166 or 250), 0.5, -(IS_MOBILE and 17 or 19))
+    profile.BackgroundColor3 = C.Surface2
+    profile.BorderSizePixel = 0
+    profile.ZIndex = 12
+    profile.Parent = header
+    registerTheme(profile, "Surface2", "BackgroundColor3")
+    local profileCorner = Instance.new("UICorner")
+    profileCorner.CornerRadius = UDim.new(1, 0)
+    profileCorner.Parent = profile
+    local profileStroke = Instance.new("UIStroke")
+    profileStroke.Color = C.Accent
+    profileStroke.Thickness = 1
+    profileStroke.Transparency = 0.45
+    profileStroke.Parent = profile
+    registerTheme(profileStroke, "Accent", "Color")
+
+    local profileAvatar = Instance.new("ImageLabel")
+    profileAvatar.Size = UDim2.fromOffset(IS_MOBILE and 27 or 31, IS_MOBILE and 27 or 31)
+    profileAvatar.Position = UDim2.fromOffset(4, IS_MOBILE and 3.5 or 3.5)
+    profileAvatar.BackgroundColor3 = C.Surface3
+    profileAvatar.BorderSizePixel = 0
+    profileAvatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"
+    profileAvatar.ZIndex = 13
+    profileAvatar.Parent = profile
+    local profileAvatarCorner = Instance.new("UICorner")
+    profileAvatarCorner.CornerRadius = UDim.new(1, 0)
+    profileAvatarCorner.Parent = profileAvatar
+    local profileAvatarStroke = Instance.new("UIStroke")
+    profileAvatarStroke.Color = C.Accent2
+    profileAvatarStroke.Thickness = 1
+    profileAvatarStroke.Parent = profileAvatar
+    registerTheme(profileAvatarStroke, "Accent2", "Color")
+
+    local profileName = Instance.new("TextLabel")
+    profileName.Size = UDim2.new(1, -(IS_MOBILE and 60 or 68), 0, 16)
+    profileName.Position = UDim2.fromOffset(IS_MOBILE and 37 or 43, 4)
+    profileName.BackgroundTransparency = 1
+    profileName.Text = LocalPlayer.DisplayName
+    profileName.TextColor3 = C.Text
+    profileName.Font = Enum.Font.GothamBold
+    profileName.TextSize = IS_MOBILE and 10 or 11
+    profileName.TextXAlignment = Enum.TextXAlignment.Left
+    profileName.TextTruncate = Enum.TextTruncate.AtEnd
+    profileName.ZIndex = 13
+    profileName.Parent = profile
+    registerTheme(profileName, "Text", "TextColor3")
+
+    local profileUser = Instance.new("TextLabel")
+    profileUser.Size = UDim2.new(1, -(IS_MOBILE and 60 or 68), 0, 12)
+    profileUser.Position = UDim2.fromOffset(IS_MOBILE and 37 or 43, 20)
+    profileUser.BackgroundTransparency = 1
+    profileUser.Text = "@" .. LocalPlayer.Name
+    profileUser.TextColor3 = C.Muted
+    profileUser.Font = Enum.Font.GothamSemibold
+    profileUser.TextSize = IS_MOBILE and 8 or 9
+    profileUser.TextXAlignment = Enum.TextXAlignment.Left
+    profileUser.TextTruncate = Enum.TextTruncate.AtEnd
+    profileUser.ZIndex = 13
+    profileUser.Parent = profile
+    registerTheme(profileUser, "Muted", "TextColor3")
+
+    local online = Instance.new("Frame")
+    online.Size = UDim2.fromOffset(7, 7)
+    online.Position = UDim2.new(1, -12, 0, IS_MOBILE and 6 or 7)
+    online.BackgroundColor3 = C.Success
+    online.BorderSizePixel = 0
+    online.ZIndex = 14
+    online.Parent = profile
+    local onlineCorner = Instance.new("UICorner")
+    onlineCorner.CornerRadius = UDim.new(1, 0)
+    onlineCorner.Parent = online
+    registerTheme(online, "Success", "BackgroundColor3")
+
     local minBtn = Instance.new("TextButton")
     minBtn.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
     minBtn.Position = UDim2.new(1, -(IS_MOBILE and 66 or 78), 0.5, -(IS_MOBILE and 14 or 16))
@@ -1166,7 +1321,7 @@ local function buildMainWindow(parent)
     registerTheme(minBtn, "Text", "TextColor3")
 
     local minCorner = Instance.new("UICorner")
-    minCorner.CornerRadius = UDim.new(0, 10)
+    minCorner.CornerRadius = UDim.new(1, 0)
     minCorner.Parent = minBtn
 
     local closeBtn = Instance.new("TextButton")
@@ -1184,7 +1339,7 @@ local function buildMainWindow(parent)
     registerTheme(closeBtn, "Text", "TextColor3")
 
     local closeCorner = Instance.new("UICorner")
-    closeCorner.CornerRadius = UDim.new(0, 10)
+    closeCorner.CornerRadius = UDim.new(1, 0)
     closeCorner.Parent = closeBtn
 
     -- BODY
@@ -1224,6 +1379,19 @@ local function buildMainWindow(parent)
     sidebarStroke.Transparency = 0.7
     sidebarStroke.Parent = sidebar
     registerTheme(sidebarStroke, "Accent", "Color")
+
+    local sidebarGlow = Instance.new("Frame")
+    sidebarGlow.Size = UDim2.new(1, -18, 0, 2)
+    sidebarGlow.Position = UDim2.fromOffset(9, 1)
+    sidebarGlow.BackgroundColor3 = C.Accent2
+    sidebarGlow.BackgroundTransparency = 0.1
+    sidebarGlow.BorderSizePixel = 0
+    sidebarGlow.ZIndex = 5
+    sidebarGlow.Parent = sidebar
+    local sidebarGlowCorner = Instance.new("UICorner")
+    sidebarGlowCorner.CornerRadius = UDim.new(1, 0)
+    sidebarGlowCorner.Parent = sidebarGlow
+    registerTheme(sidebarGlow, "Accent2", "BackgroundColor3")
 
     -- SCROLLING FRAME DI DALAM SIDEBAR
     local sidebarScroll = Instance.new("ScrollingFrame")
@@ -1408,8 +1576,15 @@ local function buildMainWindow(parent)
         registerTheme(btn, "Surface3", "BackgroundColor3")
 
         local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 8)
+        corner.CornerRadius = UDim.new(0, 11)
         corner.Parent = btn
+
+        local tabStroke = Instance.new("UIStroke")
+        tabStroke.Color = C.Accent
+        tabStroke.Thickness = 1
+        tabStroke.Transparency = 0.82
+        tabStroke.Parent = btn
+        registerTheme(tabStroke, "Accent", "Color")
 
         local ic = Instance.new("TextLabel")
         if CFG.TAB_SHOW_LABEL then
@@ -1455,11 +1630,13 @@ local function buildMainWindow(parent)
                     x.btn.BackgroundColor3 = C.Accent
                     x.btn.BackgroundTransparency = 0
                     x.ic.TextColor3 = Color3.new(1, 1, 1)
+                    if x.btn:FindFirstChildOfClass("UIStroke") then x.btn:FindFirstChildOfClass("UIStroke").Transparency = 0.15 end
                     if x.lbl then x.lbl.TextColor3 = Color3.new(1, 1, 1) end
                 else
                     x.btn.BackgroundColor3 = C.Surface3
                     x.btn.BackgroundTransparency = 0.5
                     x.ic.TextColor3 = C.Accent
+                    if x.btn:FindFirstChildOfClass("UIStroke") then x.btn:FindFirstChildOfClass("UIStroke").Transparency = 0.82 end
                     if x.lbl then x.lbl.TextColor3 = C.Muted end
                 end
             end
@@ -1502,6 +1679,19 @@ local function buildMainWindow(parent)
     avRow.Parent = infoContent
 
     local avSz = IS_MOBILE and 50 or 60
+    local avatarGlow = Instance.new("Frame")
+    avatarGlow.Size = UDim2.fromOffset(avSz + 8, avSz + 8)
+    avatarGlow.Position = UDim2.fromOffset(-4, 1)
+    avatarGlow.BackgroundColor3 = C.Accent
+    avatarGlow.BackgroundTransparency = 0.84
+    avatarGlow.BorderSizePixel = 0
+    avatarGlow.ZIndex = 2
+    avatarGlow.Parent = avRow
+    local avatarGlowCorner = Instance.new("UICorner")
+    avatarGlowCorner.CornerRadius = UDim.new(1, 0)
+    avatarGlowCorner.Parent = avatarGlow
+    registerTheme(avatarGlow, "Accent", "BackgroundColor3")
+
     local avatar = Instance.new("ImageLabel")
     avatar.Size = UDim2.fromOffset(avSz, avSz)
     avatar.Position = UDim2.fromOffset(0, 5)
@@ -1517,7 +1707,7 @@ local function buildMainWindow(parent)
 
     local avStroke = Instance.new("UIStroke")
     avStroke.Color = C.Accent
-    avStroke.Thickness = 2
+    avStroke.Thickness = 2.5
     avStroke.Parent = avatar
     registerTheme(avStroke, "Accent", "Color")
 
