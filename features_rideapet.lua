@@ -1,8 +1,6 @@
 -- ============================================================
 -- VRILZHUB FEATURES — RIDE A PET v3.3
--- + Egg Prediction + Notif Egg No Spawn
--- + Speed + Instant Pickup + Auto Farm
--- + AUTO MUTATION (VolcanoDip)
+-- + Auto Mutation (VolcanoDip)
 -- ============================================================
 
 local Features = {}
@@ -303,7 +301,7 @@ local function isEggStillInMap(egg)
 end
 
 -- ============================================================
--- AUTO STEAL + NOTIF "EGG NO SPAWN"
+-- AUTO STEAL
 -- ============================================================
 local lastNoEggNotif = 0
 
@@ -368,14 +366,6 @@ function Features.startAutoSteal()
                 local spawnPart = getMyPlotSpawn()
                 if spawnPart then
                     myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
-                else
-                    local spawn = Workspace:FindFirstChild("Spawn")
-                    if spawn then
-                        local spawnLoc = spawn:FindFirstChildWhichIsA("SpawnLocation", true)
-                        if spawnLoc then
-                            myRoot.CFrame = spawnLoc.CFrame + Vector3.new(0, 5, 0)
-                        end
-                    end
                 end
             end
 
@@ -432,7 +422,7 @@ function Features.startAutoRidePet()
 end
 
 -- ============================================================
--- EGG PREDICTION SYSTEM
+-- EGG PREDICTION
 -- ============================================================
 local EggHistory = {}
 local LastEggList = {}
@@ -515,37 +505,25 @@ end
 
 function Features.rideAlong()
     local remote = getRemote("RideAlong")
-    if remote then
-        remote:FireServer()
-        return true
-    end
+    if remote then remote:FireServer(); return true end
     return false
 end
 
 function Features.petDismount()
     local remote = getRemote("PetDismount")
-    if remote then
-        remote:FireServer()
-        return true
-    end
+    if remote then remote:FireServer(); return true end
     return false
 end
 
 function Features.pickupPet()
     local remote = getRemote("PickupPet")
-    if remote then
-        remote:FireServer()
-        return true
-    end
+    if remote then remote:FireServer(); return true end
     return false
 end
 
 function Features.hatchEgg()
     local remote = getRemote("Hatch")
-    if remote then
-        remote:FireServer()
-        return true
-    end
+    if remote then remote:FireServer(); return true end
     return false
 end
 
@@ -782,14 +760,14 @@ function Features.startAutoFarm()
 end
 
 -- ============================================================
--- AUTO MUTATION (NEW)
+-- ⭐ AUTO MUTATION (NEW)
 -- ============================================================
 local VOLCANO_TOP_FALLBACK = Vector3.new(-5102.84, 41405.63, -3489.11)
 local TP_ABOVE_TOP = 200
 local DROP_TIMEOUT = 15
 local RETURN_TIMEOUT = 45
+local MIN_WAIT_RETURN = 5
 
-local _eggLocked = false
 local _mutRunning = false
 
 -- Net module
@@ -802,6 +780,7 @@ task.spawn(function()
             local ok, result = pcall(require, netModule)
             if ok then
                 Net = result
+                print("[VRILZHUB] ✅ Net module loaded")
             end
         end
     end
@@ -956,17 +935,19 @@ local function runMutationOnce()
     if not eggReleased then
         print("[VRILZHUB] Mut: ⚠️ egg GAK LEPAS")
         _mutRunning = false
-        _eggLocked = false
         return false
     end
 
     print("[VRILZHUB] Mut: STEP 3 — tunggu balik")
     local retWaited = 0
     local gotBack = false
+
     while retWaited < RETURN_TIMEOUT do
         task.wait(1)
         retWaited = retWaited + 1
-        if isHoldingEggFeature() then
+
+        -- ⭐ Baru cek egg balik setelah MIN_WAIT_RETURN
+        if retWaited >= MIN_WAIT_RETURN and isHoldingEggFeature() then
             gotBack = true
             print("[VRILZHUB] Mut: ✅ egg BALIK @ " .. retWaited .. "s")
             break
@@ -984,8 +965,7 @@ local function runMutationOnce()
 
     task.wait(2)
     _mutRunning = false
-    _eggLocked = false
-    print("[VRILZHUB] Mut: 🔓 UNLOCKED")
+    print("[VRILZHUB] Mut: 🔓 DONE")
     return true
 end
 
@@ -1019,7 +999,8 @@ end
 -- FEATURES.INIT
 -- ============================================================
 function Features.Init(sharedState)
-    Shared = sharedState
+    local env = getgenv and getgenv() or _G
+    Shared = env.Shared or sharedState
 
     Features.startEggESP()
     Features.startPetESP()
@@ -1032,7 +1013,7 @@ function Features.Init(sharedState)
     Features.startAutoFarm()
     Features.startAutoMutation()
 
-    print("[VRILZHUB] Ride a Pet Features v3.3 loaded")
+    print("[VRILZHUB] Features v3.3 loaded — Shared synced")
 end
 
 return Features
