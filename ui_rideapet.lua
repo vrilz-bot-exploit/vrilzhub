@@ -1,5 +1,5 @@
 -- ============================================================
--- VRILZHUB UI — RIDE A PET v5.6 (TAB EGG MUT BARU)
+-- VRILZHUB UI — RIDE A PET v5.6 (TAB EGG MUT)
 -- PC: 800x580 | Mobile: 88% x 78% viewport
 -- ============================================================
 
@@ -1351,7 +1351,7 @@ local function buildMainWindow(parent)
         return page
     end
 
-    -- ===== TAB INFO =====
+    -- TAB INFO
     local infoPage = createPage("Info")
     pages.Info = infoPage
 
@@ -1566,7 +1566,7 @@ local function buildMainWindow(parent)
 
     registerTab("Info", "ℹ", "Info")
 
-    -- ===== TAB PREDIKSI =====
+    -- TAB PREDIKSI
     local predPage = createPage("Prediksi")
     pages.Prediksi = predPage
 
@@ -1719,7 +1719,7 @@ local function buildMainWindow(parent)
 
     registerTab("Prediksi", "◎", "Prediksi")
 
-    -- ===== TAB EGG =====
+    -- TAB EGG
     local eggPage = createPage("Egg")
     pages.Egg = eggPage
 
@@ -1751,7 +1751,7 @@ local function buildMainWindow(parent)
 
     registerTab("Egg", "◯", "Egg")
 
-    -- ===== TAB VISUAL =====
+    -- TAB VISUAL
     local visualPage = createPage("Visual")
     pages.Visual = visualPage
 
@@ -1768,7 +1768,7 @@ local function buildMainWindow(parent)
 
     registerTab("Visual", "◆", "Visual")
 
-    -- ===== TAB AUTO =====
+    -- TAB AUTO
     local autoPage = createPage("Auto")
     pages.Auto = autoPage
 
@@ -1885,12 +1885,11 @@ local function buildMainWindow(parent)
     registerTab("Auto", "▶", "Auto")
 
     -- ============================================================
-    -- TAB EGG MUT (NEW)
+    -- ⭐ TAB EGG MUT (NEW)
     -- ============================================================
     local eggMutPage = createPage("EggMut")
     pages.EggMut = eggMutPage
 
-    -- Card 1: Auto Steal & Mutation
     local mutToggleCard, mutToggleContent = makeCard(eggMutPage, "AUTO STEAL & MUTATION", 1)
 
     makeToggle(mutToggleContent, "Auto Steal", false, function(v)
@@ -1905,7 +1904,6 @@ local function buildMainWindow(parent)
         Shared.AutoReturn_Enabled = v
     end)
 
-    -- Card 2: Rarity Filter
     local mutRarityCard, mutRarityContent = makeCard(eggMutPage, "RARITY FILTER", 2)
 
     local mutRarTitle = Instance.new("TextLabel")
@@ -1925,7 +1923,7 @@ local function buildMainWindow(parent)
     local mutNote = Instance.new("TextLabel")
     mutNote.Size = UDim2.new(1, 0, 0, 30)
     mutNote.BackgroundTransparency = 1
-    mutNote.Text = "Auto Steal prioritas rarity tertinggi. Kalau lagi pegang egg, gak akan steal lagi."
+    mutNote.Text = "Auto Steal prioritas rarity tertinggi."
     mutNote.TextColor3 = C.Muted
     mutNote.Font = Enum.Font.Gotham
     mutNote.TextSize = CFG.FONT_MUTED
@@ -1937,7 +1935,7 @@ local function buildMainWindow(parent)
 
     registerTab("EggMut", "⚡", "Egg Mut")
 
-    -- ===== TAB SETTINGS =====
+    -- TAB SETTINGS
     local setPage = createPage("Settings")
     pages.Settings = setPage
 
@@ -2072,14 +2070,10 @@ end
 
 local function getKeyStorage()
     local ok, env = pcall(function()
-        if getgenv then
-            return getgenv()
-        end
+        if getgenv then return getgenv() end
         return _G
     end)
-    if ok and type(env) == "table" then
-        return env
-    end
+    if ok and type(env) == "table" then return env end
     return _G
 end
 
@@ -2136,44 +2130,28 @@ end
 
 local function verifyKeyWithServer(key)
     key = tostring(key or ""):gsub("^%s+", ""):gsub("%s+$", ""):upper()
-    if key == "" then
-        return false, "Masukkan key terlebih dahulu."
-    end
+    if key == "" then return false, "Masukkan key terlebih dahulu." end
 
     if KEY_SYSTEM_URL:find("YOUR%-KEY%-SYSTEM") then
         return false, "Set URL Key System terlebih dahulu."
     end
 
     local HttpService = game:GetService("HttpService")
-    local payload = HttpService:JSONEncode({
-        username = LocalPlayer.Name,
-        key = key,
-    })
+    local payload = HttpService:JSONEncode({username = LocalPlayer.Name, key = key})
     local url = KEY_SYSTEM_URL:gsub("/$", "") .. "/api/redeem"
 
     local ok, response = pcall(function()
         local req = getHttpRequest()
         if req then
             return req({
-                Url = url,
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json",
-                    ["Accept"] = "application/json",
-                },
+                Url = url, Method = "POST",
+                Headers = {["Content-Type"] = "application/json", ["Accept"] = "application/json"},
                 Body = payload,
             })
         end
-
         return {
             StatusCode = 200,
-            Body = HttpService:PostAsync(
-                url,
-                payload,
-                Enum.HttpContentType.ApplicationJson,
-                false,
-                { ["Accept"] = "application/json" }
-            )
+            Body = HttpService:PostAsync(url, payload, Enum.HttpContentType.ApplicationJson, false, {["Accept"] = "application/json"})
         }
     end)
 
@@ -2183,9 +2161,7 @@ local function verifyKeyWithServer(key)
 
     local status = tonumber(response.StatusCode or response.Status or 0) or 0
     local body = response.Body or response.body or ""
-    local decodedOk, data = pcall(function()
-        return HttpService:JSONDecode(body)
-    end)
+    local decodedOk, data = pcall(function() return HttpService:JSONDecode(body) end)
 
     if decodedOk and type(data) == "table" then
         if data.success == true then
@@ -2203,40 +2179,24 @@ end
 
 local function verifySavedKeyWithServer(key)
     key = tostring(key or ""):gsub("^%s+", ""):gsub("%s+$", ""):upper()
-    if key == "" then
-        return false, "Key tersimpan kosong."
-    end
+    if key == "" then return false, "Key tersimpan kosong." end
 
     local HttpService = game:GetService("HttpService")
-    local payload = HttpService:JSONEncode({
-        username = LocalPlayer.Name,
-        key = key,
-    })
+    local payload = HttpService:JSONEncode({username = LocalPlayer.Name, key = key})
     local url = KEY_SYSTEM_URL:gsub("/$", "") .. "/api/verify"
 
     local ok, response = pcall(function()
         local req = getHttpRequest()
         if req then
             return req({
-                Url = url,
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json",
-                    ["Accept"] = "application/json",
-                },
+                Url = url, Method = "POST",
+                Headers = {["Content-Type"] = "application/json", ["Accept"] = "application/json"},
                 Body = payload,
             })
         end
-
         return {
             StatusCode = 200,
-            Body = HttpService:PostAsync(
-                url,
-                payload,
-                Enum.HttpContentType.ApplicationJson,
-                false,
-                { ["Accept"] = "application/json" }
-            )
+            Body = HttpService:PostAsync(url, payload, Enum.HttpContentType.ApplicationJson, false, {["Accept"] = "application/json"})
         }
     end)
 
@@ -2246,9 +2206,7 @@ local function verifySavedKeyWithServer(key)
 
     local status = tonumber(response.StatusCode or response.Status or 0) or 0
     local body = response.Body or response.body or ""
-    local decodedOk, data = pcall(function()
-        return HttpService:JSONDecode(body)
-    end)
+    local decodedOk, data = pcall(function() return HttpService:JSONDecode(body) end)
 
     if decodedOk and type(data) == "table" then
         if data.success == true then
@@ -2278,9 +2236,7 @@ local function buildKeyWindow(parent, onSuccess)
     gate.ZIndex = 400
     gate.Parent = parent
 
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = gate
+    Instance.new("UICorner", gate).CornerRadius = UDim.new(0, 8)
 
     local stroke = Instance.new("UIStroke")
     stroke.Color = C.Stroke
@@ -2327,9 +2283,7 @@ local function buildKeyWindow(parent, onSuccess)
     box.ZIndex = 401
     box.Parent = gate
 
-    local boxCorner = Instance.new("UICorner")
-    boxCorner.CornerRadius = UDim.new(0, 6)
-    boxCorner.Parent = box
+    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
 
     local boxPad = Instance.new("UIPadding")
     boxPad.PaddingLeft = UDim.new(0, 10)
@@ -2351,13 +2305,9 @@ local function buildKeyWindow(parent, onSuccess)
         btn.TextColor3 = Color3.new(1, 1, 1)
         btn.Font = Enum.Font.GothamBlack
         btn.TextSize = 11
-        btn.AutoButtonColor = true
         btn.ZIndex = 401
         btn.Parent = gate
-
-        local c = Instance.new("UICorner")
-        c.CornerRadius = UDim.new(0, 6)
-        c.Parent = btn
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
         return btn
     end
 
@@ -2382,10 +2332,10 @@ local function buildKeyWindow(parent, onSuccess)
     getBtn.MouseButton1Click:Connect(function()
         if setclipboard then
             pcall(setclipboard, KEY_SYSTEM_URL)
-            status.Text = "Key System link copied. Open it, create your key, then paste it here."
+            status.Text = "Key System link copied."
             status.TextColor3 = C.Muted
         else
-            status.Text = "Setclipboard is unavailable. Open the Key System URL manually."
+            status.Text = "Setclipboard is unavailable."
             status.TextColor3 = C.Muted
         end
     end)
@@ -2406,9 +2356,7 @@ local function buildKeyWindow(parent, onSuccess)
                 status.Text = "Status: " .. message
                 status.TextColor3 = C.Success
                 task.wait(0.35)
-                if gate and gate.Parent then
-                    gate:Destroy()
-                end
+                if gate and gate.Parent then gate:Destroy() end
                 onSuccess()
             else
                 status.Text = "Status: " .. message
@@ -2427,11 +2375,9 @@ local function buildKeyWindow(parent, onSuccess)
 end
 
 -- ============================================================
--- LOADING SCREEN BRUTAL
+-- LOADING SCREEN
 -- ============================================================
 local function buildLoadingScreen(parent)
-    local viewport = (workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize) or Vector2.new(1280, 720)
-
     local winW = IS_MOBILE and 280 or 360
     local winH = IS_MOBILE and 200 or 240
 
@@ -2449,7 +2395,6 @@ local function buildLoadingScreen(parent)
     local stroke1 = Instance.new("UIStroke")
     stroke1.Color = Color3.fromRGB(255, 30, 60)
     stroke1.Thickness = 3
-    stroke1.Transparency = 0
     stroke1.Parent = loading
 
     local stroke2 = Instance.new("UIStroke")
@@ -2460,7 +2405,6 @@ local function buildLoadingScreen(parent)
 
     local topBar = Instance.new("Frame")
     topBar.Size = UDim2.new(1, 0, 0, 4)
-    topBar.Position = UDim2.fromOffset(0, 0)
     topBar.BackgroundColor3 = Color3.fromRGB(255, 30, 60)
     topBar.BorderSizePixel = 0
     topBar.ZIndex = 310
@@ -2473,66 +2417,6 @@ local function buildLoadingScreen(parent)
     botBar.BorderSizePixel = 0
     botBar.ZIndex = 310
     botBar.Parent = loading
-
-    local function makeBracket(posX, posY, sizeX, sizeY)
-        local b = Instance.new("Frame")
-        b.Size = UDim2.fromOffset(sizeX, sizeY)
-        b.Position = UDim2.fromOffset(posX, posY)
-        b.BackgroundColor3 = Color3.fromRGB(255, 30, 60)
-        b.BorderSizePixel = 0
-        b.ZIndex = 311
-        b.Parent = loading
-        return b
-    end
-
-    makeBracket(6, 6, 22, 2)
-    makeBracket(6, 6, 2, 22)
-    makeBracket(winW - 28, 6, 22, 2)
-    makeBracket(winW - 8, 6, 2, 22)
-    makeBracket(6, winH - 8, 22, 2)
-    makeBracket(6, winH - 28, 2, 22)
-    makeBracket(winW - 28, winH - 8, 22, 2)
-    makeBracket(winW - 8, winH - 28, 2, 22)
-
-    local scanlines = Instance.new("Frame")
-    scanlines.Size = UDim2.fromScale(1, 1)
-    scanlines.BackgroundTransparency = 1
-    scanlines.ZIndex = 320
-    scanlines.ClipsDescendants = true
-    scanlines.Parent = loading
-
-    for i = 0, math.floor(winH / 4) do
-        local line = Instance.new("Frame")
-        line.Size = UDim2.new(1, 0, 0, 1)
-        line.Position = UDim2.fromOffset(0, i * 4)
-        line.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        line.BackgroundTransparency = 0.65
-        line.BorderSizePixel = 0
-        line.ZIndex = 320
-        line.Parent = scanlines
-    end
-
-    local noise = Instance.new("Frame")
-    noise.Size = UDim2.fromScale(1, 1)
-    noise.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    noise.BackgroundTransparency = 0.93
-    noise.BorderSizePixel = 0
-    noise.ZIndex = 319
-    noise.Parent = loading
-
-    local glitchBars = {}
-    for i = 1, 6 do
-        local bar = Instance.new("Frame")
-        bar.Size = UDim2.new(1, 0, 0, math.random(2, 5))
-        bar.Position = UDim2.fromScale(0, math.random())
-        bar.BackgroundColor3 = Color3.fromRGB(255, 30, 60)
-        bar.BackgroundTransparency = 0.4
-        bar.BorderSizePixel = 0
-        bar.ZIndex = 330
-        bar.Visible = false
-        bar.Parent = loading
-        table.insert(glitchBars, bar)
-    end
 
     local vHolder = Instance.new("Frame")
     vHolder.Size = UDim2.fromScale(1, 0.55)
@@ -2552,30 +2436,6 @@ local function buildLoadingScreen(parent)
     vGlow.ZIndex = 304
     vGlow.Parent = vHolder
 
-    local vRed = Instance.new("TextLabel")
-    vRed.Size = UDim2.fromScale(1, 1)
-    vRed.Position = UDim2.fromOffset(-2, 0)
-    vRed.BackgroundTransparency = 1
-    vRed.Text = "V"
-    vRed.TextColor3 = Color3.fromRGB(255, 0, 0)
-    vRed.TextTransparency = 0.6
-    vRed.Font = Enum.Font.GothamBlack
-    vRed.TextSize = 1
-    vRed.ZIndex = 305
-    vRed.Parent = vHolder
-
-    local vBlue = Instance.new("TextLabel")
-    vBlue.Size = UDim2.fromScale(1, 1)
-    vBlue.Position = UDim2.fromOffset(2, 0)
-    vBlue.BackgroundTransparency = 1
-    vBlue.Text = "V"
-    vBlue.TextColor3 = Color3.fromRGB(0, 100, 255)
-    vBlue.TextTransparency = 0.6
-    vBlue.Font = Enum.Font.GothamBlack
-    vBlue.TextSize = 1
-    vBlue.ZIndex = 305
-    vBlue.Parent = vHolder
-
     local vLabel = Instance.new("TextLabel")
     vLabel.Size = UDim2.fromScale(1, 1)
     vLabel.BackgroundTransparency = 1
@@ -2585,70 +2445,6 @@ local function buildLoadingScreen(parent)
     vLabel.TextSize = 1
     vLabel.ZIndex = 306
     vLabel.Parent = vHolder
-
-    local lightningHolder = Instance.new("Frame")
-    lightningHolder.Size = UDim2.fromScale(1, 1)
-    lightningHolder.BackgroundTransparency = 1
-    lightningHolder.ZIndex = 340
-    lightningHolder.ClipsDescendants = true
-    lightningHolder.Parent = loading
-
-    local function createLightning()
-        local bolt = Instance.new("Frame")
-        bolt.BackgroundTransparency = 1
-        bolt.Size = UDim2.fromScale(1, 1)
-        bolt.ZIndex = 341
-        bolt.Parent = lightningHolder
-
-        local segments = 8
-        local startX = winW * 0.5
-        local startY = 0
-        local endX = winW * 0.5
-        local endY = winH * 0.5
-
-        for i = 1, segments do
-            local t1 = (i - 1) / segments
-            local t2 = i / segments
-            local x1 = startX + (endX - startX) * t1 + math.random(-20, 20)
-            local y1 = startY + (endY - startY) * t1
-            local x2 = startX + (endX - startX) * t2 + math.random(-20, 20)
-            local y2 = startY + (endY - startY) * t2
-
-            local dx = x2 - x1
-            local dy = y2 - y1
-            local length = math.sqrt(dx * dx + dy * dy)
-            local angle = math.atan2(dy, dx)
-
-            local seg = Instance.new("Frame")
-            seg.Size = UDim2.fromOffset(length, 2)
-            seg.Position = UDim2.fromOffset((x1 + x2) / 2 - length / 2, (y1 + y2) / 2 - 1)
-            seg.Rotation = math.deg(angle)
-            seg.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            seg.BorderSizePixel = 0
-            seg.ZIndex = 342
-            seg.Parent = bolt
-
-            local glowSeg = Instance.new("Frame")
-            glowSeg.Size = UDim2.fromOffset(length + 4, 6)
-            glowSeg.Position = UDim2.fromOffset((x1 + x2) / 2 - (length + 4) / 2, (y1 + y2) / 2 - 3)
-            glowSeg.Rotation = math.deg(angle)
-            glowSeg.BackgroundColor3 = Color3.fromRGB(255, 30, 60)
-            glowSeg.BackgroundTransparency = 0.5
-            glowSeg.BorderSizePixel = 0
-            glowSeg.ZIndex = 341
-            glowSeg.Parent = bolt
-        end
-
-        TweenService:Create(bolt, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-        for _, child in ipairs(bolt:GetChildren()) do
-            if child:IsA("Frame") then
-                TweenService:Create(child, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-            end
-        end
-        task.delay(0.4, function()
-            if bolt then bolt:Destroy() end
-        end)
-    end
 
     local loadingText = Instance.new("TextLabel")
     loadingText.Size = UDim2.new(1, -20, 0, 18)
@@ -2695,68 +2491,6 @@ local function buildLoadingScreen(parent)
     percentLbl.ZIndex = 306
     percentLbl.Parent = loading
 
-    local brandLbl = Instance.new("TextLabel")
-    brandLbl.Size = UDim2.new(1, -20, 0, 14)
-    brandLbl.Position = UDim2.new(0, 10, 0, winH - 26)
-    brandLbl.BackgroundTransparency = 1
-    brandLbl.Text = "V R I L Z H U B"
-    brandLbl.TextColor3 = Color3.fromRGB(150, 80, 100)
-    brandLbl.Font = Enum.Font.GothamBold
-    brandLbl.TextSize = 10
-    brandLbl.TextXAlignment = Enum.TextXAlignment.Left
-    brandLbl.ZIndex = 306
-    brandLbl.Parent = loading
-
-    task.spawn(function()
-        while loading.Parent do
-            task.wait(math.random(8, 25) / 100)
-            for _, bar in ipairs(glitchBars) do
-                if math.random() < 0.4 then
-                    bar.Visible = true
-                    bar.Position = UDim2.fromScale(0, math.random())
-                    bar.Size = UDim2.new(1, 0, 0, math.random(2, 10))
-                    task.wait(0.03)
-                    bar.Visible = false
-                end
-            end
-        end
-    end)
-
-    task.spawn(function()
-        while loading.Parent do
-            task.wait(math.random(6, 15) / 100)
-            local offset = math.random(1, 6)
-            vRed.Position = UDim2.fromOffset(-offset, 0)
-            vBlue.Position = UDim2.fromOffset(offset, 0)
-            task.wait(0.05)
-            vRed.Position = UDim2.fromOffset(-1, 0)
-            vBlue.Position = UDim2.fromOffset(1, 0)
-        end
-    end)
-
-    task.spawn(function()
-        while loading.Parent do
-            task.wait(0.05)
-            noise.BackgroundTransparency = 0.88 + math.random() * 0.08
-        end
-    end)
-
-    task.spawn(function()
-        while loading.Parent do
-            task.wait(0.5)
-            TweenService:Create(vGlow, TweenInfo.new(0.5), {TextTransparency = 0.1}):Play()
-            task.wait(0.5)
-            TweenService:Create(vGlow, TweenInfo.new(0.5), {TextTransparency = 0.4}):Play()
-        end
-    end)
-
-    task.spawn(function()
-        while loading.Parent do
-            task.wait(math.random(15, 40) / 10)
-            createLightning()
-        end
-    end)
-
     task.spawn(function()
         local startSize = 1
         local endSize = IS_MOBILE and 130 or 170
@@ -2769,15 +2503,6 @@ local function buildLoadingScreen(parent)
             local size = startSize + (endSize - startSize) * eased
             vLabel.TextSize = size
             vGlow.TextSize = size
-            vRed.TextSize = size
-            vBlue.TextSize = size
-        end
-
-        task.wait(0.2)
-        for i = 1, 6 do
-            vLabel.Position = UDim2.fromOffset(math.random(-6, 6), math.random(-6, 6))
-            task.wait(0.04)
-            vLabel.Position = UDim2.fromOffset(0, 0)
         end
     end)
 
@@ -2818,13 +2543,6 @@ local function buildLoadingScreen(parent)
 
         loadingText.Text = "READY!"
         percentLbl.Text = "100%"
-
-        for i = 1, 8 do
-            loading.Position = UDim2.fromScale(0.5 + math.random(-15, 15)/1000, 0.5 + math.random(-15, 15)/1000)
-            task.wait(0.03)
-        end
-        loading.Position = UDim2.fromScale(0.5, 0.5)
-
         task.wait(0.6)
 
         TweenService:Create(loading, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
@@ -2842,8 +2560,12 @@ end
 -- UI.INIT
 -- ============================================================
 function UI.Init(sharedState)
-    Shared = sharedState
+    local env = getgenv and getgenv() or _G
+    Shared = env.Shared or sharedState
+    env.Shared = Shared
+
     Shared.Notify = notify
+    Shared.AutoMutation_Enabled = Shared.AutoMutation_Enabled or false
 
     Shared.ESP_Eggs_Enabled = false
     Shared.ESP_EggName_Enabled = false
@@ -2857,7 +2579,6 @@ function UI.Init(sharedState)
     Shared.AutoHatch_Enabled = false
     Shared.AutoRidePet_Enabled = false
     Shared.AutoEquipBest_Enabled = false
-    Shared.AutoMutation_Enabled = false
     Shared.SelectedEgg = "Cherub"
     Shared.EggPrediction_Enabled = false
     Shared.EggsInMap = {}
@@ -2867,7 +2588,7 @@ function UI.Init(sharedState)
     Shared.Speed_Value = 100
     Shared.InstantPickup_Enabled = false
     Shared.AutoFarm_Enabled = false
-    Shared.SelectedRarities = {
+    Shared.SelectedRarities = Shared.SelectedRarities or {
         ["None"] = true,
         ["Common"] = false,
         ["Uncommon"] = false,
@@ -2910,7 +2631,6 @@ function UI.Init(sharedState)
                 startLoading()
                 return
             end
-
             clearSavedKey()
             showKeyWindow()
         end)
