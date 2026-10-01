@@ -527,28 +527,21 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     selectedLbl.Parent = container
     registerTheme(selectedLbl, "Text", "TextColor3")
 
+    -- CHEVRON ONLY: no square/box behind the dropdown icon.
     local arrow = Instance.new("TextLabel")
-    arrow.Size = UDim2.fromOffset(IS_MOBILE and 28 or 30, IS_MOBILE and 28 or 30)
-    arrow.Position = UDim2.new(1, -(IS_MOBILE and 34 or 36), 0.5, -(IS_MOBILE and 14 or 15))
-    arrow.BackgroundColor3 = C.Surface2
+    arrow.Size = UDim2.fromOffset(IS_MOBILE and 22 or 24, IS_MOBILE and 22 or 24)
+    arrow.Position = UDim2.new(1, -(IS_MOBILE and 28 or 30), 0.5, -(IS_MOBILE and 11 or 12))
+    arrow.BackgroundTransparency = 1
+    arrow.BorderSizePixel = 0
     arrow.Text = "⌄"
     arrow.TextColor3 = C.Accent2
     arrow.Font = Enum.Font.GothamBold
-    arrow.TextSize = IS_MOBILE and 16 or 17
+    arrow.TextSize = IS_MOBILE and 17 or 18
+    arrow.TextXAlignment = Enum.TextXAlignment.Center
+    arrow.TextYAlignment = Enum.TextYAlignment.Center
     arrow.ZIndex = 4
     arrow.Parent = container
-    registerTheme(arrow, "Surface2", "BackgroundColor3")
     registerTheme(arrow, "Accent2", "TextColor3")
-
-    local arrowCorner = Instance.new("UICorner")
-    arrowCorner.CornerRadius = UDim.new(0, 9)
-    arrowCorner.Parent = arrow
-    local arrowStroke = Instance.new("UIStroke")
-    arrowStroke.Color = C.Accent
-    arrowStroke.Thickness = 1
-    arrowStroke.Transparency = 0.45
-    arrowStroke.Parent = arrow
-    registerTheme(arrowStroke, "Accent", "Color")
 
     local listFrame = Instance.new("ScrollingFrame")
     local popupWidth = CFG.DROPDOWN_POPUP_W
@@ -1292,10 +1285,20 @@ local function buildMainWindow(parent)
     registerTheme(subtitle, "Muted", "TextColor3")
 
     -- PLAYER PROFILE CHIP
+    -- Keep avatar/name safely inside the header with a consistent gap from
+    -- minimize and close on both mobile and PC.
+    local headerActionGap = IS_MOBILE and 10 or 12
+    local headerCloseW = IS_MOBILE and 28 or 32
+    local headerMinW = IS_MOBILE and 28 or 32
+    local headerCloseRight = IS_MOBILE and 6 or 8
+    local headerMinLeft = -(headerCloseRight + headerCloseW + headerActionGap)
+    local profileRight = headerMinLeft - headerActionGap
+
     local profile = Instance.new("Frame")
     profile.Name = "PlayerProfile"
-    profile.Size = UDim2.fromOffset(IS_MOBILE and 126 or 168, IS_MOBILE and 34 or 38)
-    profile.Position = UDim2.new(1, -(IS_MOBILE and 166 or 250), 0.5, -(IS_MOBILE and 17 or 19))
+    profile.Size = UDim2.fromOffset(IS_MOBILE and 120 or 160, IS_MOBILE and 34 or 38)
+    profile.AnchorPoint = Vector2.new(1, 0.5)
+    profile.Position = UDim2.new(1, profileRight, 0.5, 0)
     profile.BackgroundColor3 = C.Surface2
     profile.BorderSizePixel = 0
     profile.ZIndex = 12
@@ -1356,21 +1359,9 @@ local function buildMainWindow(parent)
     profileUser.Parent = profile
     registerTheme(profileUser, "Muted", "TextColor3")
 
-    local online = Instance.new("Frame")
-    online.Size = UDim2.fromOffset(7, 7)
-    online.Position = UDim2.new(1, -12, 0, IS_MOBILE and 6 or 7)
-    online.BackgroundColor3 = C.Success
-    online.BorderSizePixel = 0
-    online.ZIndex = 14
-    online.Parent = profile
-    local onlineCorner = Instance.new("UICorner")
-    onlineCorner.CornerRadius = UDim.new(1, 0)
-    onlineCorner.Parent = online
-    registerTheme(online, "Success", "BackgroundColor3")
-
     local minBtn = Instance.new("TextButton")
-    minBtn.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
-    minBtn.Position = UDim2.new(1, -(IS_MOBILE and 66 or 78), 0.5, -(IS_MOBILE and 14 or 16))
+    minBtn.Size = UDim2.fromOffset(headerMinW, IS_MOBILE and 28 or 32)
+    minBtn.Position = UDim2.new(1, headerMinLeft, 0.5, -(IS_MOBILE and 14 or 16))
     minBtn.BackgroundColor3 = C.Surface3
     minBtn.Text = "−"
     minBtn.TextColor3 = C.Text
@@ -1387,8 +1378,8 @@ local function buildMainWindow(parent)
     minCorner.Parent = minBtn
 
     local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
-    closeBtn.Position = UDim2.new(1, -(IS_MOBILE and 34 or 40), 0.5, -(IS_MOBILE and 14 or 16))
+    closeBtn.Size = UDim2.fromOffset(headerCloseW, IS_MOBILE and 28 or 32)
+    closeBtn.Position = UDim2.new(1, -(headerCloseRight + headerCloseW), 0.5, -(IS_MOBILE and 14 or 16))
     closeBtn.BackgroundColor3 = C.Surface3
     closeBtn.Text = "×"
     closeBtn.TextColor3 = C.Text
