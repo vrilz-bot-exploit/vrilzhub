@@ -23,7 +23,7 @@ local UI_CONFIG = {
         SIDEBAR_W = 78, TAB_H = 42, TAB_ICON = 18, TAB_SHOW_LABEL = false,
         CARD_HEADER = 34, CARD_PAD_TOP = 10, CARD_PAD_BOT = 12, CARD_PAD_SIDE = 12,
         CARD_GAP = 8, TOGGLE_H = 38, TOGGLE_W = 50, TOGGLE_KNOB = 20,
-        DROPDOWN_H = 42, DROPDOWN_ITEM = 32, DROPDOWN_POPUP_W = 132, ACTION_H = 36,
+        DROPDOWN_H = 42, DROPDOWN_ITEM = 32, DROPDOWN_POPUP_W = 118, ACTION_H = 36,
         FONT_TITLE = 13, FONT_LABEL = 11, FONT_MUTED = 9, FONT_SMALL = 10,
         FONT_MED = 11, FONT_LARGE = 14,
         HEADER_H = 40, SEARCH_H = 30, NOTIF_W = 300, NOTIF_H = 52, OPEN_BTN = 52,
@@ -33,7 +33,7 @@ local UI_CONFIG = {
         SIDEBAR_W = 152, TAB_H = 46, TAB_ICON = 17, TAB_SHOW_LABEL = true,
         CARD_HEADER = 36, CARD_PAD_TOP = 12, CARD_PAD_BOT = 14, CARD_PAD_SIDE = 16,
         CARD_GAP = 9, TOGGLE_H = 34, TOGGLE_W = 48, TOGGLE_KNOB = 18,
-        DROPDOWN_H = 38, DROPDOWN_ITEM = 30, DROPDOWN_POPUP_W = 150, ACTION_H = 34,
+        DROPDOWN_H = 38, DROPDOWN_ITEM = 30, DROPDOWN_POPUP_W = 136, ACTION_H = 34,
         FONT_TITLE = 12, FONT_LABEL = 12, FONT_MUTED = 10, FONT_SMALL = 10,
         FONT_MED = 12, FONT_LARGE = 15,
         HEADER_H = 52, SEARCH_H = 34, NOTIF_W = 380, NOTIF_H = 52, OPEN_BTN = 56,
@@ -659,16 +659,54 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
         local arrowSize = arrow.AbsoluteSize
         local containerAbsY = container.AbsolutePosition.Y
         local containerAbsH = container.AbsoluteSize.Y
-        local viewport = workspace.CurrentCamera.ViewportSize
-        local screenW = viewport.X
-        local screenH = viewport.Y
-        local spaceBelow = screenH - (containerAbsY + containerAbsH + 8)
-        local realMaxH = math.min(maxH, math.max(spaceBelow, 82))
 
-        -- Center the small popup under the chevron, with safe screen margins.
+        -- The popup lives on ScreenGui, so its position is in screen coordinates.
+        -- Clamp it to the actual MainWindow bounds, not the whole screen. This prevents
+        -- the dropdown from escaping to the left/right or appearing outside the window.
+        local mainWindow = anchorFrame:FindFirstAncestor("MainWindow")
+        local winX, winY, winW, winH
+        if mainWindow then
+            winX = mainWindow.AbsolutePosition.X
+            winY = mainWindow.AbsolutePosition.Y
+            winW = mainWindow.AbsoluteSize.X
+            winH = mainWindow.AbsoluteSize.Y
+        else
+            local viewport = workspace.CurrentCamera.ViewportSize
+            winX, winY, winW, winH = 0, 0, viewport.X, viewport.Y
+        end
+
+        local safe = IS_MOBILE and 8 or 12
+        local minX = winX + safe
+        local maxX = winX + winW - width - safe
         local popupLeft = arrowAbs.X + (arrowSize.X * 0.5) - (width * 0.5)
-        popupLeft = math.clamp(popupLeft, 8, screenW - width - 8)
-        listFrame.Position = UDim2.fromOffset(popupLeft, containerAbsY + containerAbsH + 6)
+        if maxX >= minX then
+            popupLeft = math.clamp(popupLeft, minX, maxX)
+        else
+            popupLeft = winX + math.max(0, (winW - width) * 0.5)
+        end
+
+        local belowY = containerAbsY + containerAbsH + 6
+        local bottomLimit = winY + winH - safe
+        local availableBelow = bottomLimit - belowY
+        local desiredH = math.min(maxH, bottomLimit - belowY)
+
+        -- Keep the popup compact. If there isn't enough room below the field,
+        -- place the same compact card above it rather than letting it escape.
+        local openAbove = availableBelow < math.min(maxH, 72) and (containerAbsY - winY) > 72
+        local popupTop
+        local realMaxH
+        if openAbove then
+            realMaxH = math.min(maxH, containerAbsY - winY - 6 - safe)
+            realMaxH = math.max(40, realMaxH)
+            popupTop = containerAbsY - 6 - realMaxH
+        else
+            realMaxH = math.max(40, desiredH)
+            popupTop = belowY
+        end
+
+        -- Final vertical safety clamp inside the window.
+        popupTop = math.clamp(popupTop, winY + safe, winY + winH - safe - realMaxH)
+        listFrame.Position = UDim2.fromOffset(popupLeft, popupTop)
 
         TweenService:Create(listFrame, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
             Size = UDim2.fromOffset(width, realMaxH)
@@ -924,16 +962,54 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         local arrowSize = arrow.AbsoluteSize
         local containerAbsY = container.AbsolutePosition.Y
         local containerAbsH = container.AbsoluteSize.Y
-        local viewport = workspace.CurrentCamera.ViewportSize
-        local screenW = viewport.X
-        local screenH = viewport.Y
-        local spaceBelow = screenH - (containerAbsY + containerAbsH + 8)
-        local realMaxH = math.min(maxH, math.max(spaceBelow, 82))
 
-        -- Center the small popup under the chevron, with safe screen margins.
+        -- The popup lives on ScreenGui, so its position is in screen coordinates.
+        -- Clamp it to the actual MainWindow bounds, not the whole screen. This prevents
+        -- the dropdown from escaping to the left/right or appearing outside the window.
+        local mainWindow = anchorFrame:FindFirstAncestor("MainWindow")
+        local winX, winY, winW, winH
+        if mainWindow then
+            winX = mainWindow.AbsolutePosition.X
+            winY = mainWindow.AbsolutePosition.Y
+            winW = mainWindow.AbsoluteSize.X
+            winH = mainWindow.AbsoluteSize.Y
+        else
+            local viewport = workspace.CurrentCamera.ViewportSize
+            winX, winY, winW, winH = 0, 0, viewport.X, viewport.Y
+        end
+
+        local safe = IS_MOBILE and 8 or 12
+        local minX = winX + safe
+        local maxX = winX + winW - width - safe
         local popupLeft = arrowAbs.X + (arrowSize.X * 0.5) - (width * 0.5)
-        popupLeft = math.clamp(popupLeft, 8, screenW - width - 8)
-        listFrame.Position = UDim2.fromOffset(popupLeft, containerAbsY + containerAbsH + 6)
+        if maxX >= minX then
+            popupLeft = math.clamp(popupLeft, minX, maxX)
+        else
+            popupLeft = winX + math.max(0, (winW - width) * 0.5)
+        end
+
+        local belowY = containerAbsY + containerAbsH + 6
+        local bottomLimit = winY + winH - safe
+        local availableBelow = bottomLimit - belowY
+        local desiredH = math.min(maxH, bottomLimit - belowY)
+
+        -- Keep the popup compact. If there isn't enough room below the field,
+        -- place the same compact card above it rather than letting it escape.
+        local openAbove = availableBelow < math.min(maxH, 72) and (containerAbsY - winY) > 72
+        local popupTop
+        local realMaxH
+        if openAbove then
+            realMaxH = math.min(maxH, containerAbsY - winY - 6 - safe)
+            realMaxH = math.max(40, realMaxH)
+            popupTop = containerAbsY - 6 - realMaxH
+        else
+            realMaxH = math.max(40, desiredH)
+            popupTop = belowY
+        end
+
+        -- Final vertical safety clamp inside the window.
+        popupTop = math.clamp(popupTop, winY + safe, winY + winH - safe - realMaxH)
+        listFrame.Position = UDim2.fromOffset(popupLeft, popupTop)
 
         TweenService:Create(listFrame, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
             Size = UDim2.fromOffset(width, realMaxH)
@@ -1288,10 +1364,20 @@ local function buildMainWindow(parent)
     -- PLAYER PROFILE CHIP
     local profile = Instance.new("Frame")
     profile.Name = "PlayerProfile"
-    profile.Size = UDim2.fromOffset(IS_MOBILE and 150 or 188, IS_MOBILE and 36 or 40)
-    -- Keep the profile completely separated from the action buttons on both mobile and PC.
-    -- Right edge is calculated from the minimize button area, leaving a fixed visual gap.
-    profile.Position = UDim2.new(1, -(IS_MOBILE and 92 or 104), 0.5, -(IS_MOBILE and 18 or 20))
+    local profileW = IS_MOBILE and 150 or 188
+    local profileH = IS_MOBILE and 36 or 40
+    local actionGap = IS_MOBILE and 10 or 12
+    local closeW = IS_MOBILE and 28 or 32
+    local minW = IS_MOBILE and 28 or 32
+    local closeRight = IS_MOBILE and 10 or 14
+    local closeLeft = -(closeRight + closeW)
+    local minLeft = closeLeft - actionGap - minW
+    local profileRight = minLeft - actionGap
+    profile.Size = UDim2.fromOffset(profileW, profileH)
+    profile.AnchorPoint = Vector2.new(1, 0.5)
+    -- Anchor the profile by its RIGHT edge. This keeps the avatar/name safely
+    -- inside the header and leaves a real gap before the minimize button.
+    profile.Position = UDim2.new(1, profileRight, 0.5, 0)
     profile.BackgroundColor3 = C.Surface2
     profile.BorderSizePixel = 0
     profile.ZIndex = 12
@@ -1365,8 +1451,8 @@ local function buildMainWindow(parent)
     registerTheme(online, "Success", "BackgroundColor3")
 
     local minBtn = Instance.new("TextButton")
-    minBtn.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
-    minBtn.Position = UDim2.new(1, -(IS_MOBILE and 52 or 58), 0.5, -(IS_MOBILE and 14 or 16))
+    minBtn.Size = UDim2.fromOffset(minW, IS_MOBILE and 28 or 32)
+    minBtn.Position = UDim2.new(1, minLeft, 0.5, -(IS_MOBILE and 14 or 16))
     minBtn.BackgroundColor3 = C.Surface3
     minBtn.Text = "−"
     minBtn.TextColor3 = C.Text
@@ -1383,8 +1469,8 @@ local function buildMainWindow(parent)
     minCorner.Parent = minBtn
 
     local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
-    closeBtn.Position = UDim2.new(1, -(IS_MOBILE and 12 or 14), 0.5, -(IS_MOBILE and 14 or 16))
+    closeBtn.Size = UDim2.fromOffset(closeW, IS_MOBILE and 28 or 32)
+    closeBtn.Position = UDim2.new(1, closeLeft, 0.5, -(IS_MOBILE and 14 or 16))
     closeBtn.BackgroundColor3 = C.Surface3
     closeBtn.Text = "×"
     closeBtn.TextColor3 = C.Text
