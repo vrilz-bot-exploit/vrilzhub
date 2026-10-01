@@ -23,7 +23,7 @@ local UI_CONFIG = {
         SIDEBAR_W = 78, TAB_H = 42, TAB_ICON = 18, TAB_SHOW_LABEL = false,
         CARD_HEADER = 34, CARD_PAD_TOP = 10, CARD_PAD_BOT = 12, CARD_PAD_SIDE = 12,
         CARD_GAP = 8, TOGGLE_H = 38, TOGGLE_W = 50, TOGGLE_KNOB = 20,
-        DROPDOWN_H = 42, DROPDOWN_ITEM = 32, DROPDOWN_POPUP_W = 154, ACTION_H = 36,
+        DROPDOWN_H = 42, DROPDOWN_ITEM = 32, DROPDOWN_POPUP_W = 132, ACTION_H = 36,
         FONT_TITLE = 13, FONT_LABEL = 11, FONT_MUTED = 9, FONT_SMALL = 10,
         FONT_MED = 11, FONT_LARGE = 14,
         HEADER_H = 40, SEARCH_H = 30, NOTIF_W = 300, NOTIF_H = 52, OPEN_BTN = 52,
@@ -33,7 +33,7 @@ local UI_CONFIG = {
         SIDEBAR_W = 152, TAB_H = 46, TAB_ICON = 17, TAB_SHOW_LABEL = true,
         CARD_HEADER = 36, CARD_PAD_TOP = 12, CARD_PAD_BOT = 14, CARD_PAD_SIDE = 16,
         CARD_GAP = 9, TOGGLE_H = 34, TOGGLE_W = 48, TOGGLE_KNOB = 18,
-        DROPDOWN_H = 38, DROPDOWN_ITEM = 30, DROPDOWN_POPUP_W = 180, ACTION_H = 34,
+        DROPDOWN_H = 38, DROPDOWN_ITEM = 30, DROPDOWN_POPUP_W = 150, ACTION_H = 34,
         FONT_TITLE = 12, FONT_LABEL = 12, FONT_MUTED = 10, FONT_SMALL = 10,
         FONT_MED = 12, FONT_LARGE = 15,
         HEADER_H = 52, SEARCH_H = 34, NOTIF_W = 380, NOTIF_H = 52, OPEN_BTN = 56,
@@ -650,23 +650,24 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
         listFrame.Visible = true
         arrow.Text = "⌃"
 
-        -- Compact popover: jangan selebar field/window.
-        local width = math.min(CFG.DROPDOWN_POPUP_W, math.max(132, container.AbsoluteSize.X * 0.52))
+        -- Compact popover: ukurannya kecil dan menempel tepat di bawah chevron,
+        -- bukan mengikuti lebar field.
+        local width = CFG.DROPDOWN_POPUP_W
         listFrame.Size = UDim2.fromOffset(width, 0)
 
-        local containerAbsX = container.AbsolutePosition.X
+        local arrowAbs = arrow.AbsolutePosition
+        local arrowSize = arrow.AbsoluteSize
         local containerAbsY = container.AbsolutePosition.Y
-        local containerAbsW = container.AbsoluteSize.X
         local containerAbsH = container.AbsoluteSize.Y
         local viewport = workspace.CurrentCamera.ViewportSize
         local screenW = viewport.X
         local screenH = viewport.Y
         local spaceBelow = screenH - (containerAbsY + containerAbsH + 8)
-        local realMaxH = math.min(maxH, math.max(spaceBelow, 90))
+        local realMaxH = math.min(maxH, math.max(spaceBelow, 82))
 
-        -- Tetap tepat di bawah dropdown, rata kanan dengan tombol <>.
-        local popupRight = math.min(screenW - 8, containerAbsX + containerAbsW - (IS_MOBILE and 6 or 8))
-        local popupLeft = math.max(8, popupRight - width)
+        -- Center the small popup under the chevron, with safe screen margins.
+        local popupLeft = arrowAbs.X + (arrowSize.X * 0.5) - (width * 0.5)
+        popupLeft = math.clamp(popupLeft, 8, screenW - width - 8)
         listFrame.Position = UDim2.fromOffset(popupLeft, containerAbsY + containerAbsH + 6)
 
         TweenService:Create(listFrame, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
@@ -914,23 +915,24 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         listFrame.Visible = true
         arrow.Text = "⌃"
 
-        -- Compact popover: jangan selebar field/window.
-        local width = math.min(CFG.DROPDOWN_POPUP_W, math.max(132, container.AbsoluteSize.X * 0.52))
+        -- Compact popover: ukurannya kecil dan menempel tepat di bawah chevron,
+        -- bukan mengikuti lebar field.
+        local width = CFG.DROPDOWN_POPUP_W
         listFrame.Size = UDim2.fromOffset(width, 0)
 
-        local containerAbsX = container.AbsolutePosition.X
+        local arrowAbs = arrow.AbsolutePosition
+        local arrowSize = arrow.AbsoluteSize
         local containerAbsY = container.AbsolutePosition.Y
-        local containerAbsW = container.AbsoluteSize.X
         local containerAbsH = container.AbsoluteSize.Y
         local viewport = workspace.CurrentCamera.ViewportSize
         local screenW = viewport.X
         local screenH = viewport.Y
         local spaceBelow = screenH - (containerAbsY + containerAbsH + 8)
-        local realMaxH = math.min(maxH, math.max(spaceBelow, 90))
+        local realMaxH = math.min(maxH, math.max(spaceBelow, 82))
 
-        -- Tetap tepat di bawah dropdown, rata kanan dengan tombol <>.
-        local popupRight = math.min(screenW - 8, containerAbsX + containerAbsW - (IS_MOBILE and 6 or 8))
-        local popupLeft = math.max(8, popupRight - width)
+        -- Center the small popup under the chevron, with safe screen margins.
+        local popupLeft = arrowAbs.X + (arrowSize.X * 0.5) - (width * 0.5)
+        popupLeft = math.clamp(popupLeft, 8, screenW - width - 8)
         listFrame.Position = UDim2.fromOffset(popupLeft, containerAbsY + containerAbsH + 6)
 
         TweenService:Create(listFrame, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
@@ -1289,7 +1291,7 @@ local function buildMainWindow(parent)
     profile.Size = UDim2.fromOffset(IS_MOBILE and 150 or 188, IS_MOBILE and 36 or 40)
     -- Keep the profile completely separated from the action buttons on both mobile and PC.
     -- Right edge is calculated from the minimize button area, leaving a fixed visual gap.
-    profile.Position = UDim2.new(1, -(IS_MOBILE and 84 or 96), 0.5, -(IS_MOBILE and 18 or 20))
+    profile.Position = UDim2.new(1, -(IS_MOBILE and 92 or 104), 0.5, -(IS_MOBILE and 18 or 20))
     profile.BackgroundColor3 = C.Surface2
     profile.BorderSizePixel = 0
     profile.ZIndex = 12
@@ -1364,7 +1366,7 @@ local function buildMainWindow(parent)
 
     local minBtn = Instance.new("TextButton")
     minBtn.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
-    minBtn.Position = UDim2.new(1, -(IS_MOBILE and 74 or 86), 0.5, -(IS_MOBILE and 14 or 16))
+    minBtn.Position = UDim2.new(1, -(IS_MOBILE and 52 or 58), 0.5, -(IS_MOBILE and 14 or 16))
     minBtn.BackgroundColor3 = C.Surface3
     minBtn.Text = "−"
     minBtn.TextColor3 = C.Text
