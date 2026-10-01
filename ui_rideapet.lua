@@ -2560,12 +2560,8 @@ end
 -- UI.INIT
 -- ============================================================
 function UI.Init(sharedState)
-    local env = getgenv and getgenv() or _G
-    Shared = env.Shared or sharedState
-    env.Shared = Shared
-
+    Shared = sharedState
     Shared.Notify = notify
-    Shared.AutoMutation_Enabled = Shared.AutoMutation_Enabled or false
 
     Shared.ESP_Eggs_Enabled = false
     Shared.ESP_EggName_Enabled = false
@@ -2579,6 +2575,7 @@ function UI.Init(sharedState)
     Shared.AutoHatch_Enabled = false
     Shared.AutoRidePet_Enabled = false
     Shared.AutoEquipBest_Enabled = false
+    Shared.AutoMutation_Enabled = false
     Shared.SelectedEgg = "Cherub"
     Shared.EggPrediction_Enabled = false
     Shared.EggsInMap = {}
