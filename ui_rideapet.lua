@@ -1603,7 +1603,7 @@ local function buildMainWindow(parent)
     openStroke.Transparency = 0.3
     openStroke.Parent = openBtn
 
-    -- MINIMIZE ICON ONLY: lightweight faux-3D VH (no layout/feature changes)
+    -- MINIMIZE ICON ONLY: clearer VH + lightweight lightning effect
     local vhShadow = Instance.new("TextLabel")
     vhShadow.Name = "VH3DShadow"
     vhShadow.Size = UDim2.fromScale(1, 1)
@@ -1611,8 +1611,8 @@ local function buildMainWindow(parent)
     vhShadow.BackgroundTransparency = 1
     vhShadow.Text = "VH"
     vhShadow.TextColor3 = Color3.fromRGB(0, 0, 0)
-    vhShadow.TextTransparency = 0.25
-    vhShadow.TextSize = IS_MOBILE and 14 or 16
+    vhShadow.TextTransparency = 0.05
+    vhShadow.TextSize = IS_MOBILE and 22 or 26
     vhShadow.Font = Enum.Font.GothamBlack
     vhShadow.ZIndex = 401
     vhShadow.Parent = openBtn
@@ -1624,8 +1624,8 @@ local function buildMainWindow(parent)
     vhDepth.BackgroundTransparency = 1
     vhDepth.Text = "VH"
     vhDepth.TextColor3 = C.Accent
-    vhDepth.TextTransparency = 0.25
-    vhDepth.TextSize = IS_MOBILE and 14 or 16
+    vhDepth.TextTransparency = 0
+    vhDepth.TextSize = IS_MOBILE and 22 or 26
     vhDepth.Font = Enum.Font.GothamBlack
     vhDepth.ZIndex = 402
     vhDepth.Parent = openBtn
@@ -1637,17 +1637,17 @@ local function buildMainWindow(parent)
     vhFace.Position = UDim2.fromOffset(0, 0)
     vhFace.BackgroundTransparency = 1
     vhFace.Text = "VH"
-    vhFace.TextColor3 = C.Text
-    vhFace.TextSize = IS_MOBILE and 14 or 16
+    vhFace.TextColor3 = Color3.fromRGB(255, 255, 255)
+    vhFace.TextSize = IS_MOBILE and 22 or 26
     vhFace.Font = Enum.Font.GothamBlack
     vhFace.TextStrokeColor3 = C.Accent
-    vhFace.TextStrokeTransparency = 0.15
+    vhFace.TextStrokeTransparency = 0
     vhFace.ZIndex = 403
     vhFace.Parent = openBtn
-    registerTheme(vhFace, "Text", "TextColor3")
+    registerTheme(vhFace, "Accent", "TextStrokeColor3")
 
     local function playMinimizeLightning()
-        -- Lightweight strike: only a few UI frames, then destroy.
+        -- Lightweight visual strike: a few short UI segments, then cleanup.
         local holder = Instance.new("Frame")
         holder.Name = "MinimizeLightning"
         holder.Size = UDim2.fromScale(1, 1)
@@ -1656,23 +1656,32 @@ local function buildMainWindow(parent)
         holder.ZIndex = 410
         holder.Parent = openBtn
 
-        local bolt = Instance.new("Frame")
-        bolt.AnchorPoint = Vector2.new(0.5, 0.5)
-        bolt.Size = UDim2.fromOffset(3, math.max(18, CFG.OPEN_BTN - 12))
-        bolt.Position = UDim2.fromScale(0.58, 0.5)
-        bolt.Rotation = 24
-        bolt.BackgroundColor3 = C.Accent
-        bolt.BorderSizePixel = 0
-        bolt.ZIndex = 411
-        bolt.Parent = holder
-        local bc = Instance.new("UICorner")
-        bc.CornerRadius = UDim.new(1, 0)
-        bc.Parent = bolt
+        local segments = {
+            {0.46, 0.18, 18, -28},
+            {0.56, 0.39, 15, 24},
+            {0.48, 0.58, 16, -22},
+            {0.57, 0.77, 13, 26},
+        }
+
+        for _, seg in ipairs(segments) do
+            local bolt = Instance.new("Frame")
+            bolt.AnchorPoint = Vector2.new(0.5, 0.5)
+            bolt.Size = UDim2.fromOffset(2, seg[3])
+            bolt.Position = UDim2.fromScale(seg[1], seg[2])
+            bolt.Rotation = seg[4]
+            bolt.BackgroundColor3 = Color3.fromRGB(170, 220, 255)
+            bolt.BorderSizePixel = 0
+            bolt.ZIndex = 411
+            bolt.Parent = holder
+            local bc = Instance.new("UICorner")
+            bc.CornerRadius = UDim.new(1, 0)
+            bc.Parent = bolt
+        end
 
         local flash = Instance.new("Frame")
         flash.Size = UDim2.fromScale(1, 1)
         flash.BackgroundColor3 = C.Accent
-        flash.BackgroundTransparency = 0.82
+        flash.BackgroundTransparency = 0.9
         flash.BorderSizePixel = 0
         flash.ZIndex = 410
         flash.Parent = holder
@@ -1682,7 +1691,11 @@ local function buildMainWindow(parent)
 
         task.spawn(function()
             tween(flash, {BackgroundTransparency = 1}, 0.10)
-            tween(bolt, {BackgroundTransparency = 1, Rotation = 8, Size = UDim2.fromOffset(2, math.max(10, CFG.OPEN_BTN - 24))}, 0.16)
+            for _, child in ipairs(holder:GetChildren()) do
+                if child:IsA("Frame") and child ~= flash then
+                    tween(child, {BackgroundTransparency = 1}, 0.16)
+                end
+            end
             task.wait(0.18)
             if holder then holder:Destroy() end
         end)
