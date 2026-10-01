@@ -23,7 +23,7 @@ local UI_CONFIG = {
         SIDEBAR_W = 78, TAB_H = 42, TAB_ICON = 18, TAB_SHOW_LABEL = false,
         CARD_HEADER = 34, CARD_PAD_TOP = 10, CARD_PAD_BOT = 12, CARD_PAD_SIDE = 12,
         CARD_GAP = 8, TOGGLE_H = 38, TOGGLE_W = 50, TOGGLE_KNOB = 20,
-        DROPDOWN_H = 42, DROPDOWN_ITEM = 32, ACTION_H = 36,
+        DROPDOWN_H = 42, DROPDOWN_ITEM = 32, DROPDOWN_POPUP_W = 154, ACTION_H = 36,
         FONT_TITLE = 13, FONT_LABEL = 11, FONT_MUTED = 9, FONT_SMALL = 10,
         FONT_MED = 11, FONT_LARGE = 14,
         HEADER_H = 40, SEARCH_H = 30, NOTIF_W = 300, NOTIF_H = 52, OPEN_BTN = 52,
@@ -33,7 +33,7 @@ local UI_CONFIG = {
         SIDEBAR_W = 152, TAB_H = 46, TAB_ICON = 17, TAB_SHOW_LABEL = true,
         CARD_HEADER = 36, CARD_PAD_TOP = 12, CARD_PAD_BOT = 14, CARD_PAD_SIDE = 16,
         CARD_GAP = 9, TOGGLE_H = 34, TOGGLE_W = 48, TOGGLE_KNOB = 18,
-        DROPDOWN_H = 38, DROPDOWN_ITEM = 30, ACTION_H = 34,
+        DROPDOWN_H = 38, DROPDOWN_ITEM = 30, DROPDOWN_POPUP_W = 180, ACTION_H = 34,
         FONT_TITLE = 12, FONT_LABEL = 12, FONT_MUTED = 10, FONT_SMALL = 10,
         FONT_MED = 12, FONT_LARGE = 15,
         HEADER_H = 52, SEARCH_H = 34, NOTIF_W = 380, NOTIF_H = 52, OPEN_BTN = 56,
@@ -528,19 +528,31 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     registerTheme(selectedLbl, "Text", "TextColor3")
 
     local arrow = Instance.new("TextLabel")
-    arrow.Size = UDim2.fromOffset(30, CFG.DROPDOWN_H)
-    arrow.Position = UDim2.new(1, -34, 0, 0)
-    arrow.BackgroundTransparency = 1
+    arrow.Size = UDim2.fromOffset(IS_MOBILE and 28 or 30, IS_MOBILE and 28 or 30)
+    arrow.Position = UDim2.new(1, -(IS_MOBILE and 34 or 36), 0.5, -(IS_MOBILE and 14 or 15))
+    arrow.BackgroundColor3 = C.Surface2
     arrow.Text = "⌄"
-    arrow.TextColor3 = C.Accent
+    arrow.TextColor3 = C.Accent2
     arrow.Font = Enum.Font.GothamBold
-    arrow.TextSize = IS_MOBILE and 17 or 18
+    arrow.TextSize = IS_MOBILE and 16 or 17
     arrow.ZIndex = 4
     arrow.Parent = container
-    registerTheme(arrow, "Accent", "TextColor3")
+    registerTheme(arrow, "Surface2", "BackgroundColor3")
+    registerTheme(arrow, "Accent2", "TextColor3")
+
+    local arrowCorner = Instance.new("UICorner")
+    arrowCorner.CornerRadius = UDim.new(0, 9)
+    arrowCorner.Parent = arrow
+    local arrowStroke = Instance.new("UIStroke")
+    arrowStroke.Color = C.Accent
+    arrowStroke.Thickness = 1
+    arrowStroke.Transparency = 0.45
+    arrowStroke.Parent = arrow
+    registerTheme(arrowStroke, "Accent", "Color")
 
     local listFrame = Instance.new("ScrollingFrame")
-    listFrame.Size = UDim2.fromOffset(200, 0)
+    local popupWidth = CFG.DROPDOWN_POPUP_W
+    listFrame.Size = UDim2.fromOffset(popupWidth, 0)
     listFrame.BackgroundColor3 = C.Surface2
     listFrame.BorderSizePixel = 0
     listFrame.ScrollBarThickness = 4
@@ -599,6 +611,15 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     listTopCorner.Parent = listTopGlow
     registerTheme(listTopGlow, "Accent2", "BackgroundColor3")
 
+    local popupHighlight = Instance.new("Frame")
+    popupHighlight.Size = UDim2.new(1, -16, 0, 1)
+    popupHighlight.Position = UDim2.fromOffset(8, 4)
+    popupHighlight.BackgroundColor3 = Color3.new(1, 1, 1)
+    popupHighlight.BackgroundTransparency = 0.88
+    popupHighlight.BorderSizePixel = 0
+    popupHighlight.ZIndex = 2003
+    popupHighlight.Parent = listFrame
+
     local listLayout = Instance.new("UIListLayout")
     listLayout.Padding = UDim.new(0, 2)
     listLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -612,13 +633,13 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     listPad.Parent = listFrame
 
     local itemHeight = CFG.DROPDOWN_ITEM
-    local maxH = math.min(#items * (itemHeight + 2) + 10, IS_MOBILE and 132 or 154)
+    local maxH = math.min(#items * (itemHeight + 2) + 10, IS_MOBILE and 126 or 148)
 
     local function closeList()
         isOpen = false
         arrow.Text = "⌄"
         local w = listFrame.Size.X.Offset
-        TweenService:Create(listFrame, TweenInfo.new(0.2), {Size = UDim2.fromOffset(w, 0)}):Play()
+        TweenService:Create(listFrame, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.fromOffset(w, 0)}):Play()
         task.delay(0.2, function()
             if not isOpen then listFrame.Visible = false end
         end)
@@ -637,19 +658,26 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
         listFrame.Visible = true
         arrow.Text = "⌃"
 
-        local width = container.AbsoluteSize.X
+        -- Compact popover: jangan selebar field/window.
+        local width = math.min(CFG.DROPDOWN_POPUP_W, math.max(140, container.AbsoluteSize.X - 12))
         listFrame.Size = UDim2.fromOffset(width, 0)
 
+        local containerAbsX = container.AbsolutePosition.X
         local containerAbsY = container.AbsolutePosition.Y
+        local containerAbsW = container.AbsoluteSize.X
         local containerAbsH = container.AbsoluteSize.Y
-        local screenH = workspace.CurrentCamera.ViewportSize.Y
-        local spaceBelow = screenH - (containerAbsY + containerAbsH + 10)
-        local realMaxH = math.min(maxH, math.max(spaceBelow, 100))
+        local viewport = workspace.CurrentCamera.ViewportSize
+        local screenW = viewport.X
+        local screenH = viewport.Y
+        local spaceBelow = screenH - (containerAbsY + containerAbsH + 8)
+        local realMaxH = math.min(maxH, math.max(spaceBelow, 90))
 
-        -- SELALU DI BAWAH
-        listFrame.Position = UDim2.fromOffset(container.AbsolutePosition.X, containerAbsY + containerAbsH + 4)
+        -- Tetap tepat di bawah dropdown, rata kanan dengan tombol <>.
+        local popupRight = math.min(screenW - 8, containerAbsX + containerAbsW)
+        local popupLeft = math.max(8, popupRight - width)
+        listFrame.Position = UDim2.fromOffset(popupLeft, containerAbsY + containerAbsH + 6)
 
-        TweenService:Create(listFrame, TweenInfo.new(0.2), {
+        TweenService:Create(listFrame, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
             Size = UDim2.fromOffset(width, realMaxH)
         }):Play()
 
@@ -672,7 +700,8 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
 
     for i, item in ipairs(items) do
         local opt = Instance.new("TextButton")
-        opt.Size = UDim2.new(1, 0, 0, itemHeight)
+        opt.Size = UDim2.new(1, -8, 0, itemHeight)
+        opt.Position = UDim2.fromOffset(4, 0)
         opt.BackgroundColor3 = C.Surface3
         opt.Text = item
         opt.TextColor3 = C.Text
@@ -772,7 +801,8 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     registerTheme(arrow, "Accent", "TextColor3")
 
     local listFrame = Instance.new("ScrollingFrame")
-    listFrame.Size = UDim2.fromOffset(200, 0)
+    local popupWidth = CFG.DROPDOWN_POPUP_W
+    listFrame.Size = UDim2.fromOffset(popupWidth, 0)
     listFrame.BackgroundColor3 = C.Surface2
     listFrame.BorderSizePixel = 0
     listFrame.ScrollBarThickness = 4
@@ -803,6 +833,30 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     listStroke.Parent = listFrame
     registerTheme(listStroke, "Accent", "Color")
 
+    local listShadow = Instance.new("Frame")
+    listShadow.Name = "DropdownShadow"
+    listShadow.AnchorPoint = Vector2.new(0.5, 0.5)
+    listShadow.Position = UDim2.new(0.5, 0, 0.5, 6)
+    listShadow.Size = UDim2.new(1, 10, 1, 10)
+    listShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    listShadow.BackgroundTransparency = 0.35
+    listShadow.BorderSizePixel = 0
+    listShadow.ZIndex = 2000
+    listShadow.Visible = false
+    listShadow.Parent = listFrame
+    local listShadowCorner = Instance.new("UICorner")
+    listShadowCorner.CornerRadius = UDim.new(0, 12)
+    listShadowCorner.Parent = listShadow
+
+    local popupHighlight = Instance.new("Frame")
+    popupHighlight.Size = UDim2.new(1, -16, 0, 1)
+    popupHighlight.Position = UDim2.fromOffset(8, 4)
+    popupHighlight.BackgroundColor3 = Color3.new(1, 1, 1)
+    popupHighlight.BackgroundTransparency = 0.88
+    popupHighlight.BorderSizePixel = 0
+    popupHighlight.ZIndex = 2003
+    popupHighlight.Parent = listFrame
+
     local listLayout = Instance.new("UIListLayout")
     listLayout.Padding = UDim.new(0, 2)
     listLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -816,7 +870,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     listPad.Parent = listFrame
 
     local itemHeight = CFG.DROPDOWN_ITEM
-    local maxH = math.min(#items * (itemHeight + 2) + 10, IS_MOBILE and 132 or 154)
+    local maxH = math.min(#items * (itemHeight + 2) + 10, IS_MOBILE and 126 or 148)
 
     local optionButtons = {}
 
@@ -849,7 +903,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         isOpen = false
         arrow.Text = "⌄"
         local w = listFrame.Size.X.Offset
-        TweenService:Create(listFrame, TweenInfo.new(0.2), {Size = UDim2.fromOffset(w, 0)}):Play()
+        TweenService:Create(listFrame, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.fromOffset(w, 0)}):Play()
         task.delay(0.2, function()
             if not isOpen then listFrame.Visible = false end
         end)
@@ -868,19 +922,26 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         listFrame.Visible = true
         arrow.Text = "⌃"
 
-        local width = container.AbsoluteSize.X
+        -- Compact popover: jangan selebar field/window.
+        local width = math.min(CFG.DROPDOWN_POPUP_W, math.max(140, container.AbsoluteSize.X - 12))
         listFrame.Size = UDim2.fromOffset(width, 0)
 
+        local containerAbsX = container.AbsolutePosition.X
         local containerAbsY = container.AbsolutePosition.Y
+        local containerAbsW = container.AbsoluteSize.X
         local containerAbsH = container.AbsoluteSize.Y
-        local screenH = workspace.CurrentCamera.ViewportSize.Y
-        local spaceBelow = screenH - (containerAbsY + containerAbsH + 10)
-        local realMaxH = math.min(maxH, math.max(spaceBelow, 100))
+        local viewport = workspace.CurrentCamera.ViewportSize
+        local screenW = viewport.X
+        local screenH = viewport.Y
+        local spaceBelow = screenH - (containerAbsY + containerAbsH + 8)
+        local realMaxH = math.min(maxH, math.max(spaceBelow, 90))
 
-        -- SELALU DI BAWAH
-        listFrame.Position = UDim2.fromOffset(container.AbsolutePosition.X, containerAbsY + containerAbsH + 4)
+        -- Tetap tepat di bawah dropdown, rata kanan dengan tombol <>.
+        local popupRight = math.min(screenW - 8, containerAbsX + containerAbsW)
+        local popupLeft = math.max(8, popupRight - width)
+        listFrame.Position = UDim2.fromOffset(popupLeft, containerAbsY + containerAbsH + 6)
 
-        TweenService:Create(listFrame, TweenInfo.new(0.2), {
+        TweenService:Create(listFrame, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
             Size = UDim2.fromOffset(width, realMaxH)
         }):Play()
 
@@ -903,7 +964,8 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
 
     for i, item in ipairs(items) do
         local opt = Instance.new("TextButton")
-        opt.Size = UDim2.new(1, 0, 0, itemHeight)
+        opt.Size = UDim2.new(1, -8, 0, itemHeight)
+        opt.Position = UDim2.fromOffset(4, 0)
         opt.BackgroundColor3 = C.Surface3
         opt.Text = ""
         opt.AutoButtonColor = false
