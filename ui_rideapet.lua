@@ -23,7 +23,7 @@ local UI_CONFIG = {
         SIDEBAR_W = 78, TAB_H = 42, TAB_ICON = 18, TAB_SHOW_LABEL = false,
         CARD_HEADER = 34, CARD_PAD_TOP = 10, CARD_PAD_BOT = 12, CARD_PAD_SIDE = 12,
         CARD_GAP = 8, TOGGLE_H = 38, TOGGLE_W = 50, TOGGLE_KNOB = 20,
-        DROPDOWN_H = 42, DROPDOWN_ITEM = 32, DROPDOWN_POPUP_W = 154, ACTION_H = 36,
+        DROPDOWN_H = 42, DROPDOWN_ITEM = 32, DROPDOWN_POPUP_W = 132, ACTION_H = 36,
         FONT_TITLE = 13, FONT_LABEL = 11, FONT_MUTED = 9, FONT_SMALL = 10,
         FONT_MED = 11, FONT_LARGE = 14,
         HEADER_H = 40, SEARCH_H = 30, NOTIF_W = 300, NOTIF_H = 52, OPEN_BTN = 52,
@@ -33,7 +33,7 @@ local UI_CONFIG = {
         SIDEBAR_W = 152, TAB_H = 46, TAB_ICON = 17, TAB_SHOW_LABEL = true,
         CARD_HEADER = 36, CARD_PAD_TOP = 12, CARD_PAD_BOT = 14, CARD_PAD_SIDE = 16,
         CARD_GAP = 9, TOGGLE_H = 34, TOGGLE_W = 48, TOGGLE_KNOB = 18,
-        DROPDOWN_H = 38, DROPDOWN_ITEM = 30, DROPDOWN_POPUP_W = 180, ACTION_H = 34,
+        DROPDOWN_H = 38, DROPDOWN_ITEM = 30, DROPDOWN_POPUP_W = 150, ACTION_H = 34,
         FONT_TITLE = 12, FONT_LABEL = 12, FONT_MUTED = 10, FONT_SMALL = 10,
         FONT_MED = 12, FONT_LARGE = 15,
         HEADER_H = 52, SEARCH_H = 34, NOTIF_W = 380, NOTIF_H = 52, OPEN_BTN = 56,
@@ -527,28 +527,20 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     selectedLbl.Parent = container
     registerTheme(selectedLbl, "Text", "TextColor3")
 
+    -- Clean double-chevron control: no square button behind it.
+    -- The actual option panel lives in its own compact popover below.
     local arrow = Instance.new("TextLabel")
-    arrow.Size = UDim2.fromOffset(IS_MOBILE and 28 or 30, IS_MOBILE and 28 or 30)
-    arrow.Position = UDim2.new(1, -(IS_MOBILE and 34 or 36), 0.5, -(IS_MOBILE and 14 or 15))
-    arrow.BackgroundColor3 = C.Surface2
-    arrow.Text = "⌄"
+    arrow.Size = UDim2.fromOffset(IS_MOBILE and 24 or 26, IS_MOBILE and 30 or 32)
+    arrow.Position = UDim2.new(1, -(IS_MOBILE and 10 or 12), 0.5, -(IS_MOBILE and 15 or 16))
+    arrow.BackgroundTransparency = 1
+    arrow.Text = "⌃\n⌄"
     arrow.TextColor3 = C.Accent2
     arrow.Font = Enum.Font.GothamBold
-    arrow.TextSize = IS_MOBILE and 16 or 17
+    arrow.TextSize = IS_MOBILE and 10 or 11
+    arrow.TextYAlignment = Enum.TextYAlignment.Center
     arrow.ZIndex = 4
     arrow.Parent = container
-    registerTheme(arrow, "Surface2", "BackgroundColor3")
     registerTheme(arrow, "Accent2", "TextColor3")
-
-    local arrowCorner = Instance.new("UICorner")
-    arrowCorner.CornerRadius = UDim.new(0, 9)
-    arrowCorner.Parent = arrow
-    local arrowStroke = Instance.new("UIStroke")
-    arrowStroke.Color = C.Accent
-    arrowStroke.Thickness = 1
-    arrowStroke.Transparency = 0.45
-    arrowStroke.Parent = arrow
-    registerTheme(arrowStroke, "Accent", "Color")
 
     local listFrame = Instance.new("ScrollingFrame")
     local popupWidth = CFG.DROPDOWN_POPUP_W
@@ -637,11 +629,15 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
 
     local function closeList()
         isOpen = false
-        arrow.Text = "⌄"
+        arrow.Text = "⌃\n⌄"
         local w = listFrame.Size.X.Offset
+        if listShadow then listShadow.Visible = true end
         TweenService:Create(listFrame, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.fromOffset(w, 0)}):Play()
         task.delay(0.2, function()
-            if not isOpen then listFrame.Visible = false end
+            if not isOpen then
+                listFrame.Visible = false
+                if listShadow then listShadow.Visible = false end
+            end
         end)
         if _G.VRILZ_DropdownCloseOverlay then
             _G.VRILZ_DropdownCloseOverlay.Visible = false
@@ -656,10 +652,11 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
 
         isOpen = true
         listFrame.Visible = true
-        arrow.Text = "⌃"
+        if listShadow then listShadow.Visible = true end
+        arrow.Text = "⌃\n⌄"
 
         -- Compact popover: jangan selebar field/window.
-        local width = math.min(CFG.DROPDOWN_POPUP_W, math.max(140, container.AbsoluteSize.X - 12))
+        local width = math.min(CFG.DROPDOWN_POPUP_W, math.max(118, math.floor(container.AbsoluteSize.X * 0.46)))
         listFrame.Size = UDim2.fromOffset(width, 0)
 
         local containerAbsX = container.AbsolutePosition.X
@@ -766,7 +763,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     registerTheme(container, "Surface3", "BackgroundColor3")
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
+    corner.CornerRadius = UDim.new(0, 10)
     corner.Parent = container
 
     local stroke = Instance.new("UIStroke")
@@ -789,16 +786,19 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     selectedLbl.Parent = container
     registerTheme(selectedLbl, "Text", "TextColor3")
 
+    -- Same compact chevron control for multi-select dropdowns.
     local arrow = Instance.new("TextLabel")
-    arrow.Size = UDim2.fromOffset(30, CFG.DROPDOWN_H)
-    arrow.Position = UDim2.new(1, -34, 0, 0)
+    arrow.Size = UDim2.fromOffset(IS_MOBILE and 24 or 26, IS_MOBILE and 30 or 32)
+    arrow.Position = UDim2.new(1, -(IS_MOBILE and 10 or 12), 0.5, -(IS_MOBILE and 15 or 16))
     arrow.BackgroundTransparency = 1
-    arrow.Text = "⌄"
-    arrow.TextColor3 = C.Accent
-    arrow.TextSize = IS_MOBILE and 17 or 18
+    arrow.Text = "⌃\n⌄"
+    arrow.TextColor3 = C.Accent2
+    arrow.Font = Enum.Font.GothamBold
+    arrow.TextSize = IS_MOBILE and 10 or 11
+    arrow.TextYAlignment = Enum.TextYAlignment.Center
     arrow.ZIndex = 4
     arrow.Parent = container
-    registerTheme(arrow, "Accent", "TextColor3")
+    registerTheme(arrow, "Accent2", "TextColor3")
 
     local listFrame = Instance.new("ScrollingFrame")
     local popupWidth = CFG.DROPDOWN_POPUP_W
@@ -901,11 +901,15 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
 
     local function closeList()
         isOpen = false
-        arrow.Text = "⌄"
+        arrow.Text = "⌃\n⌄"
         local w = listFrame.Size.X.Offset
+        if listShadow then listShadow.Visible = true end
         TweenService:Create(listFrame, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.fromOffset(w, 0)}):Play()
         task.delay(0.2, function()
-            if not isOpen then listFrame.Visible = false end
+            if not isOpen then
+                listFrame.Visible = false
+                if listShadow then listShadow.Visible = false end
+            end
         end)
         if _G.VRILZ_DropdownCloseOverlay then
             _G.VRILZ_DropdownCloseOverlay.Visible = false
@@ -920,10 +924,11 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
 
         isOpen = true
         listFrame.Visible = true
-        arrow.Text = "⌃"
+        if listShadow then listShadow.Visible = true end
+        arrow.Text = "⌃\n⌄"
 
         -- Compact popover: jangan selebar field/window.
-        local width = math.min(CFG.DROPDOWN_POPUP_W, math.max(140, container.AbsoluteSize.X - 12))
+        local width = math.min(CFG.DROPDOWN_POPUP_W, math.max(118, math.floor(container.AbsoluteSize.X * 0.46)))
         listFrame.Size = UDim2.fromOffset(width, 0)
 
         local containerAbsX = container.AbsolutePosition.X
@@ -1266,8 +1271,8 @@ local function buildMainWindow(parent)
     logoCorner.Parent = logo
 
     local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(0, 300, 0, 20)
-    title.Position = UDim2.fromOffset(IS_MOBILE and 48 or 58, IS_MOBILE and 8 or 10)
+    title.Size = UDim2.new(0, IS_MOBILE and 70 or 400, 0, 20)
+    title.Position = UDim2.fromOffset(IS_MOBILE and 48 or 58, IS_MOBILE and 7 or 10)
     title.BackgroundTransparency = 1
     title.Text = "VRILZHUB"
     title.TextColor3 = C.Text
@@ -1279,8 +1284,8 @@ local function buildMainWindow(parent)
     registerTheme(title, "Text", "TextColor3")
 
     local subtitle = Instance.new("TextLabel")
-    subtitle.Size = UDim2.new(0, 300, 0, 14)
-    subtitle.Position = UDim2.fromOffset(IS_MOBILE and 48 or 58, IS_MOBILE and 26 or 28)
+    subtitle.Size = UDim2.new(0, IS_MOBILE and 70 or 400, 0, 14)
+    subtitle.Position = UDim2.fromOffset(IS_MOBILE and 48 or 58, IS_MOBILE and 24 or 28)
     subtitle.BackgroundTransparency = 1
     subtitle.Text = "Ride a Pet · v5.5"
     subtitle.TextColor3 = C.Muted
@@ -1294,8 +1299,12 @@ local function buildMainWindow(parent)
     -- PLAYER PROFILE CHIP
     local profile = Instance.new("Frame")
     profile.Name = "PlayerProfile"
-    profile.Size = UDim2.fromOffset(IS_MOBILE and 126 or 168, IS_MOBILE and 34 or 38)
-    profile.Position = UDim2.new(1, -(IS_MOBILE and 166 or 250), 0.5, -(IS_MOBILE and 17 or 19))
+    local profileW = IS_MOBILE and 122 or 190
+    local profileH = IS_MOBILE and 36 or 40
+    profile.Size = UDim2.fromOffset(profileW, profileH)
+    -- Right-side controls use fixed gaps so the avatar/name never collides with minimize/close.
+    local profileRight = IS_MOBILE and 80 or 88
+    profile.Position = UDim2.new(1, -profileRight, 0.5, -profileH / 2)
     profile.BackgroundColor3 = C.Surface2
     profile.BorderSizePixel = 0
     profile.ZIndex = 12
@@ -1312,8 +1321,9 @@ local function buildMainWindow(parent)
     registerTheme(profileStroke, "Accent", "Color")
 
     local profileAvatar = Instance.new("ImageLabel")
-    profileAvatar.Size = UDim2.fromOffset(IS_MOBILE and 27 or 31, IS_MOBILE and 27 or 31)
-    profileAvatar.Position = UDim2.fromOffset(4, IS_MOBILE and 3.5 or 3.5)
+    local profileAvatarSize = IS_MOBILE and 28 or 32
+    profileAvatar.Size = UDim2.fromOffset(profileAvatarSize, profileAvatarSize)
+    profileAvatar.Position = UDim2.fromOffset(5, (profileH - profileAvatarSize) / 2)
     profileAvatar.BackgroundColor3 = C.Surface3
     profileAvatar.BorderSizePixel = 0
     profileAvatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"
@@ -1329,8 +1339,8 @@ local function buildMainWindow(parent)
     registerTheme(profileAvatarStroke, "Accent2", "Color")
 
     local profileName = Instance.new("TextLabel")
-    profileName.Size = UDim2.new(1, -(IS_MOBILE and 60 or 68), 0, 16)
-    profileName.Position = UDim2.fromOffset(IS_MOBILE and 37 or 43, 4)
+    profileName.Size = UDim2.new(1, -(IS_MOBILE and 62 or 72), 0, 16)
+    profileName.Position = UDim2.fromOffset(IS_MOBILE and 39 or 45, 5)
     profileName.BackgroundTransparency = 1
     profileName.Text = LocalPlayer.DisplayName
     profileName.TextColor3 = C.Text
@@ -1343,8 +1353,8 @@ local function buildMainWindow(parent)
     registerTheme(profileName, "Text", "TextColor3")
 
     local profileUser = Instance.new("TextLabel")
-    profileUser.Size = UDim2.new(1, -(IS_MOBILE and 60 or 68), 0, 12)
-    profileUser.Position = UDim2.fromOffset(IS_MOBILE and 37 or 43, 20)
+    profileUser.Size = UDim2.new(1, -(IS_MOBILE and 62 or 72), 0, 12)
+    profileUser.Position = UDim2.fromOffset(IS_MOBILE and 39 or 45, 22)
     profileUser.BackgroundTransparency = 1
     profileUser.Text = "@" .. LocalPlayer.Name
     profileUser.TextColor3 = C.Muted
@@ -1358,7 +1368,7 @@ local function buildMainWindow(parent)
 
     local online = Instance.new("Frame")
     online.Size = UDim2.fromOffset(7, 7)
-    online.Position = UDim2.new(1, -12, 0, IS_MOBILE and 6 or 7)
+    online.Position = UDim2.new(1, -9, 0, IS_MOBILE and 7 or 8)
     online.BackgroundColor3 = C.Success
     online.BorderSizePixel = 0
     online.ZIndex = 14
@@ -1369,13 +1379,16 @@ local function buildMainWindow(parent)
     registerTheme(online, "Success", "BackgroundColor3")
 
     local minBtn = Instance.new("TextButton")
-    minBtn.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
-    minBtn.Position = UDim2.new(1, -(IS_MOBILE and 66 or 78), 0.5, -(IS_MOBILE and 14 or 16))
+    local controlSize = IS_MOBILE and 30 or 34
+    local controlGap = IS_MOBILE and 8 or 9
+    local edgePad = IS_MOBILE and 10 or 12
+    minBtn.Size = UDim2.fromOffset(controlSize, controlSize)
+    minBtn.Position = UDim2.new(1, -(edgePad + controlSize + controlGap), 0.5, -controlSize / 2)
     minBtn.BackgroundColor3 = C.Surface3
     minBtn.Text = "−"
     minBtn.TextColor3 = C.Text
     minBtn.Font = Enum.Font.GothamBold
-    minBtn.TextSize = IS_MOBILE and 18 or 20
+    minBtn.TextSize = IS_MOBILE and 17 or 19
     minBtn.BorderSizePixel = 0
     minBtn.ZIndex = 11
     minBtn.Parent = header
@@ -1387,13 +1400,13 @@ local function buildMainWindow(parent)
     minCorner.Parent = minBtn
 
     local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
-    closeBtn.Position = UDim2.new(1, -(IS_MOBILE and 34 or 40), 0.5, -(IS_MOBILE and 14 or 16))
+    closeBtn.Size = UDim2.fromOffset(controlSize, controlSize)
+    closeBtn.Position = UDim2.new(1, -edgePad - controlSize, 0.5, -controlSize / 2)
     closeBtn.BackgroundColor3 = C.Surface3
     closeBtn.Text = "×"
     closeBtn.TextColor3 = C.Text
     closeBtn.Font = Enum.Font.GothamBold
-    closeBtn.TextSize = IS_MOBILE and 20 or 22
+    closeBtn.TextSize = IS_MOBILE and 19 or 21
     closeBtn.BorderSizePixel = 0
     closeBtn.ZIndex = 11
     closeBtn.Parent = header
@@ -1406,11 +1419,29 @@ local function buildMainWindow(parent)
 
     -- BODY
     local body = Instance.new("Frame")
-    body.Size = UDim2.new(1, -20, 1, -(CFG.HEADER_H + 20))
-    body.Position = UDim2.new(0, 10, 0, CFG.HEADER_H + 10)
+    local bodyInset = IS_MOBILE and 9 or 12
+    body.Size = UDim2.new(1, -(bodyInset * 2), 1, -(CFG.HEADER_H + bodyInset + 8))
+    body.Position = UDim2.new(0, bodyInset, 0, CFG.HEADER_H + 8)
     body.BackgroundTransparency = 1
     body.ZIndex = 2
     body.Parent = main
+
+    local bodyOutline = Instance.new("Frame")
+    bodyOutline.Name = "BodyOutline"
+    bodyOutline.Size = UDim2.fromScale(1, 1)
+    bodyOutline.BackgroundTransparency = 1
+    bodyOutline.BorderSizePixel = 0
+    bodyOutline.ZIndex = 1
+    bodyOutline.Parent = body
+    local bodyOutlineCorner = Instance.new("UICorner")
+    bodyOutlineCorner.CornerRadius = UDim.new(0, 14)
+    bodyOutlineCorner.Parent = bodyOutline
+    local bodyOutlineStroke = Instance.new("UIStroke")
+    bodyOutlineStroke.Color = C.Accent
+    bodyOutlineStroke.Thickness = 1
+    bodyOutlineStroke.Transparency = 0.84
+    bodyOutlineStroke.Parent = bodyOutline
+    registerTheme(bodyOutlineStroke, "Accent", "Color")
 
     local sidebarW = CFG.SIDEBAR_W
     -- SIDEBAR CONTAINER
@@ -1482,8 +1513,9 @@ local function buildMainWindow(parent)
     sidebarPad.Parent = sidebarScroll
 
     local pageHolder = Instance.new("ScrollingFrame")
-    pageHolder.Size = UDim2.new(1, -(sidebarW + 10), 1, 0)
-    pageHolder.Position = UDim2.new(0, sidebarW + 10, 0, 0)
+    local bodyGap = IS_MOBILE and 9 or 12
+    pageHolder.Size = UDim2.new(1, -(sidebarW + bodyGap), 1, 0)
+    pageHolder.Position = UDim2.new(0, sidebarW + bodyGap, 0, 0)
     pageHolder.BackgroundTransparency = 1
     pageHolder.BorderSizePixel = 0
     pageHolder.ScrollBarThickness = 4
