@@ -527,21 +527,38 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     selectedLbl.Parent = container
     registerTheme(selectedLbl, "Text", "TextColor3")
 
-    -- CHEVRON ONLY: no square/box behind the dropdown icon.
-    local arrow = Instance.new("TextLabel")
-    arrow.Size = UDim2.fromOffset(IS_MOBILE and 22 or 24, IS_MOBILE and 22 or 24)
-    arrow.Position = UDim2.new(1, -(IS_MOBILE and 28 or 30), 0.5, -(IS_MOBILE and 11 or 12))
+    -- Real chevron: draw the two strokes instead of using a glyph.
+    -- This guarantees the icon can never render as a square/tofu character.
+    local arrow = Instance.new("Frame")
+    arrow.Name = "DropdownChevron"
+    arrow.Size = UDim2.fromOffset(IS_MOBILE and 20 or 22, IS_MOBILE and 16 or 18)
+    arrow.Position = UDim2.new(1, -(IS_MOBILE and 27 or 29), 0.5, -(IS_MOBILE and 8 or 9))
     arrow.BackgroundTransparency = 1
     arrow.BorderSizePixel = 0
-    arrow.Text = "⌄"
-    arrow.TextColor3 = C.Accent2
-    arrow.Font = Enum.Font.GothamBold
-    arrow.TextSize = IS_MOBILE and 17 or 18
-    arrow.TextXAlignment = Enum.TextXAlignment.Center
-    arrow.TextYAlignment = Enum.TextYAlignment.Center
     arrow.ZIndex = 4
     arrow.Parent = container
-    registerTheme(arrow, "Accent2", "TextColor3")
+
+    local chevronL = Instance.new("Frame")
+    chevronL.Name = "Left"
+    chevronL.Size = UDim2.fromOffset(IS_MOBILE and 8 or 9, 2)
+    chevronL.Position = UDim2.new(0.5, -(IS_MOBILE and 7 or 8), 0.5, -1)
+    chevronL.BackgroundColor3 = C.Accent2
+    chevronL.BorderSizePixel = 0
+    chevronL.Rotation = 45
+    chevronL.ZIndex = 5
+    chevronL.Parent = arrow
+    registerTheme(chevronL, "Accent2", "BackgroundColor3")
+
+    local chevronR = Instance.new("Frame")
+    chevronR.Name = "Right"
+    chevronR.Size = UDim2.fromOffset(IS_MOBILE and 8 or 9, 2)
+    chevronR.Position = UDim2.new(0.5, 1, 0.5, -1)
+    chevronR.BackgroundColor3 = C.Accent2
+    chevronR.BorderSizePixel = 0
+    chevronR.Rotation = -45
+    chevronR.ZIndex = 5
+    chevronR.Parent = arrow
+    registerTheme(chevronR, "Accent2", "BackgroundColor3")
 
     local listFrame = Instance.new("ScrollingFrame")
     local popupWidth = CFG.DROPDOWN_POPUP_W
@@ -630,7 +647,8 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
 
     local function closeList()
         isOpen = false
-        arrow.Text = "⌄"
+        chevronL.Rotation = 45
+        chevronR.Rotation = -45
         local w = listFrame.Size.X.Offset
         TweenService:Create(listFrame, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.fromOffset(w, 0)}):Play()
         task.delay(0.2, function()
@@ -649,7 +667,8 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
 
         isOpen = true
         listFrame.Visible = true
-        arrow.Text = "⌃"
+        chevronL.Rotation = -45
+        chevronR.Rotation = 45
 
         -- Compact popover: jangan selebar field/window.
         local width = math.min(CFG.DROPDOWN_POPUP_W, math.max(140, container.AbsoluteSize.X - 12))
@@ -1285,18 +1304,17 @@ local function buildMainWindow(parent)
     registerTheme(subtitle, "Muted", "TextColor3")
 
     -- PLAYER PROFILE CHIP
-    -- Keep avatar/name safely inside the header with a consistent gap from
-    -- minimize and close on both mobile and PC.
-    local headerActionGap = IS_MOBILE and 10 or 12
-    local headerCloseW = IS_MOBILE and 28 or 32
-    local headerMinW = IS_MOBILE and 28 or 32
-    local headerCloseRight = IS_MOBILE and 6 or 8
-    local headerMinLeft = -(headerCloseRight + headerCloseW + headerActionGap)
-    local profileRight = headerMinLeft - headerActionGap
-
     local profile = Instance.new("Frame")
     profile.Name = "PlayerProfile"
-    profile.Size = UDim2.fromOffset(IS_MOBILE and 120 or 160, IS_MOBILE and 34 or 38)
+    local headerGap = IS_MOBILE and 10 or 14
+    local closeW = IS_MOBILE and 28 or 32
+    local minW = IS_MOBILE and 28 or 32
+    local closeRight = IS_MOBILE and 8 or 10
+    local closeLeft = -(closeRight + closeW)
+    local minLeft = closeLeft - headerGap - minW
+    local profileRight = minLeft - headerGap
+
+    profile.Size = UDim2.fromOffset(IS_MOBILE and 126 or 168, IS_MOBILE and 34 or 38)
     profile.AnchorPoint = Vector2.new(1, 0.5)
     profile.Position = UDim2.new(1, profileRight, 0.5, 0)
     profile.BackgroundColor3 = C.Surface2
@@ -1360,15 +1378,15 @@ local function buildMainWindow(parent)
     registerTheme(profileUser, "Muted", "TextColor3")
 
     local minBtn = Instance.new("TextButton")
-    minBtn.Size = UDim2.fromOffset(headerMinW, IS_MOBILE and 28 or 32)
-    minBtn.Position = UDim2.new(1, headerMinLeft, 0.5, -(IS_MOBILE and 14 or 16))
+    minBtn.Size = UDim2.fromOffset(minW, IS_MOBILE and 28 or 32)
+    minBtn.Position = UDim2.new(1, minLeft, 0.5, -(IS_MOBILE and 14 or 16))
     minBtn.BackgroundColor3 = C.Surface3
     minBtn.Text = "−"
     minBtn.TextColor3 = C.Text
     minBtn.Font = Enum.Font.GothamBold
     minBtn.TextSize = IS_MOBILE and 18 or 20
     minBtn.BorderSizePixel = 0
-    minBtn.ZIndex = 11
+    minBtn.ZIndex = 14
     minBtn.Parent = header
     registerTheme(minBtn, "Surface3", "BackgroundColor3")
     registerTheme(minBtn, "Text", "TextColor3")
@@ -1378,15 +1396,15 @@ local function buildMainWindow(parent)
     minCorner.Parent = minBtn
 
     local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.fromOffset(headerCloseW, IS_MOBILE and 28 or 32)
-    closeBtn.Position = UDim2.new(1, -(headerCloseRight + headerCloseW), 0.5, -(IS_MOBILE and 14 or 16))
+    closeBtn.Size = UDim2.fromOffset(closeW, IS_MOBILE and 28 or 32)
+    closeBtn.Position = UDim2.new(1, closeLeft, 0.5, -(IS_MOBILE and 14 or 16))
     closeBtn.BackgroundColor3 = C.Surface3
     closeBtn.Text = "×"
     closeBtn.TextColor3 = C.Text
     closeBtn.Font = Enum.Font.GothamBold
     closeBtn.TextSize = IS_MOBILE and 20 or 22
     closeBtn.BorderSizePixel = 0
-    closeBtn.ZIndex = 11
+    closeBtn.ZIndex = 14
     closeBtn.Parent = header
     registerTheme(closeBtn, "Surface3", "BackgroundColor3")
     registerTheme(closeBtn, "Text", "TextColor3")
