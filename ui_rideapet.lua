@@ -1,5 +1,5 @@
 -- ============================================================
--- VRILZHUB UI — RIDE A PET v1.4 (AUTO-DETECT PC & MOBILE)
+-- VRILZHUB UI — RIDE A PET v5.5 (AUTO-DETECT PC & MOBILE)
 -- PC: 800x580 | Mobile: 88% x 78% viewport
 -- ============================================================
 
@@ -1315,7 +1315,7 @@ local function buildMainWindow(parent)
     subtitle.Size = UDim2.new(0, 300, 0, 14)
     subtitle.Position = UDim2.fromOffset(IS_MOBILE and 48 or 58, IS_MOBILE and 26 or 28)
     subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Ride a Pet · v1.4"
+    subtitle.Text = "Ride a Pet · v5.5"
     subtitle.TextColor3 = C.Muted
     subtitle.Font = Enum.Font.GothamSemibold
     subtitle.TextSize = IS_MOBILE and 9 or 10
@@ -1690,10 +1690,10 @@ local function buildMainWindow(parent)
         fc.Parent = flash
 
         task.spawn(function()
-            tween(flash, {BackgroundTransparency = 1}, 0.10)
+            TweenService:Create(flash, TweenInfo.new(0.10), {BackgroundTransparency = 1}):Play()
             for _, child in ipairs(holder:GetChildren()) do
                 if child:IsA("Frame") and child ~= flash then
-                    tween(child, {BackgroundTransparency = 1}, 0.16)
+                    TweenService:Create(child, TweenInfo.new(0.16), {BackgroundTransparency = 1}):Play()
                 end
             end
             task.wait(0.18)
@@ -2003,7 +2003,7 @@ local function buildMainWindow(parent)
     local updateCard, updateContent = makeCard(infoPage, "📢 INFORMASI UPDATE", 2)
 
     local infoLines = {
-        "Version        : 1.4",
+        "Version        : 5.5",
         "Last Update    : 29 Sept 2026",
         "Status         : Online ✅",
         "Changelog      : Speed, Auto Farm",
@@ -2398,7 +2398,7 @@ local function buildMainWindow(parent)
                         meta.Size = UDim2.new(1, -(IS_MOBILE and 60 or 68), 0, 16)
                         meta.Position = UDim2.fromOffset(IS_MOBILE and 54 or 60, IS_MOBILE and 28 or 30)
                         meta.BackgroundTransparency = 1
-                        meta.Text = "PREDIKSI BERIKUTNYA  •  45% Chance"
+                        meta.Text = "PREDIKSI BERIKUTNYA  •  3D PREVIEW"
                         meta.TextColor3 = C.Muted
                         meta.Font = Enum.Font.GothamSemibold
                         meta.TextSize = CFG.FONT_MUTED
@@ -2533,7 +2533,7 @@ local function buildMainWindow(parent)
     local ipNote = Instance.new("TextLabel")
     ipNote.Size = UDim2.new(1, 0, 0, 14)
     ipNote.BackgroundTransparency = 1
-    ipNote.Text = "Ambil Tanpa Hold Instan"
+    ipNote.Text = "Ambil egg otomatis tanpa prompt"
     ipNote.TextColor3 = C.Muted
     ipNote.Font = Enum.Font.GothamSemibold
     ipNote.TextSize = CFG.FONT_MUTED
@@ -2561,7 +2561,7 @@ local function buildMainWindow(parent)
     local notifTitle = Instance.new("TextLabel")
     notifTitle.Size = UDim2.new(1, 0, 0, 16)
     notifTitle.BackgroundTransparency = 1
-    notifTitle.Text = "Pilih Notif Yang Bagus:"
+    notifTitle.Text = "Notif cuma buat rarity:"
     notifTitle.TextColor3 = C.Muted
     notifTitle.Font = Enum.Font.GothamSemibold
     notifTitle.TextSize = CFG.FONT_MUTED
