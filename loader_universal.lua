@@ -1,5 +1,5 @@
 -- ============================================================
--- VRILZHUB LOADER — RIDE A PET
+-- VRILZHUB LOADER — RIDE A PET v2
 -- Repo: vrilz-bot-exploit/vrilzhub
 -- ============================================================
 
@@ -21,6 +21,56 @@ if game.PlaceId ~= CONFIG.GameId then
 end
 
 print("[VRILZHUB] Loading...")
+
+-- ============================================================
+-- ⭐ BUAT SHARED GLOBAL (BIAR UI & FEATURES SHARE TABLE YANG SAMA)
+-- ============================================================
+local env = getgenv and getgenv() or _G
+
+env.Shared = {
+    -- Auto
+    AutoSteal_Enabled = false,
+    AutoMutation_Enabled = false,
+    AutoReturn_Enabled = false,
+    AutoFarm_Enabled = false,
+    AutoHatch_Enabled = false,
+    AutoRidePet_Enabled = false,
+    AutoEquipBest_Enabled = false,
+
+    -- ESP
+    ESP_Eggs_Enabled = false,
+    ESP_EggName_Enabled = false,
+    ESP_EggLuck_Enabled = false,
+    ESP_Pets_Enabled = false,
+    ESP_PetName_Enabled = false,
+    ESP_PetCash_Enabled = false,
+    ESP_PetSpeed_Enabled = false,
+
+    -- Speed
+    Speed_Enabled = false,
+    Speed_Value = 100,
+
+    -- Misc
+    InstantPickup_Enabled = false,
+    SelectedEgg = "Cherub",
+    RarityNotifThreshold = "Legendary",
+    SelectedRarities = {
+        ["None"] = true,
+        ["Common"] = false,
+        ["Uncommon"] = false,
+        ["Rare"] = false,
+        ["Epic"] = false,
+        ["Legendary"] = false,
+        ["Mythic"] = false,
+        ["Divine"] = false,
+        ["Ethereal"] = false,
+        ["Secret"] = false,
+    },
+
+    -- State
+    EggsInMap = {},
+    EggPredictions = {},
+}
 
 -- ============================================================
 -- LOADER
@@ -51,6 +101,7 @@ end
 print("[VRILZHUB] Loading features...")
 local Features = loadScript(CONFIG.FeaturesURL, "features")
 if not Features then return end
+env.Features = Features
 
 -- ============================================================
 -- LOAD UI
@@ -58,12 +109,15 @@ if not Features then return end
 print("[VRILZHUB] Loading UI...")
 local UI = loadScript(CONFIG.UIURL, "ui")
 if not UI then return end
+env.UI = UI
 
 -- ============================================================
--- INIT
+-- INIT — PAKE env.Shared yang SAMA
 -- ============================================================
-local Shared = {}
-Features.Init(Shared)
-UI.Init(Shared)
+Features.Init(env.Shared)
+UI.Init(env.Shared)
 
 print("[VRILZHUB] SUCCESS! Ride a Pet loaded.")
+print("[VRILZHUB] Shared table:", env.Shared)
+print("[VRILZHUB] Features:", env.Features)
+print("[VRILZHUB] UI:", env.UI)
