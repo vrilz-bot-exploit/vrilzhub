@@ -23,7 +23,7 @@ local UI_CONFIG = {
         SIDEBAR_W = 78, TAB_H = 42, TAB_ICON = 18, TAB_SHOW_LABEL = false,
         CARD_HEADER = 34, CARD_PAD_TOP = 10, CARD_PAD_BOT = 12, CARD_PAD_SIDE = 12,
         CARD_GAP = 8, TOGGLE_H = 38, TOGGLE_W = 50, TOGGLE_KNOB = 20,
-        DROPDOWN_H = 42, DROPDOWN_ITEM = 32, DROPDOWN_POPUP_W = 118, ACTION_H = 36,
+        DROPDOWN_H = 42, DROPDOWN_ITEM = 32, DROPDOWN_POPUP_W = 154, ACTION_H = 36,
         FONT_TITLE = 13, FONT_LABEL = 11, FONT_MUTED = 9, FONT_SMALL = 10,
         FONT_MED = 11, FONT_LARGE = 14,
         HEADER_H = 40, SEARCH_H = 30, NOTIF_W = 300, NOTIF_H = 52, OPEN_BTN = 52,
@@ -33,7 +33,7 @@ local UI_CONFIG = {
         SIDEBAR_W = 152, TAB_H = 46, TAB_ICON = 17, TAB_SHOW_LABEL = true,
         CARD_HEADER = 36, CARD_PAD_TOP = 12, CARD_PAD_BOT = 14, CARD_PAD_SIDE = 16,
         CARD_GAP = 9, TOGGLE_H = 34, TOGGLE_W = 48, TOGGLE_KNOB = 18,
-        DROPDOWN_H = 38, DROPDOWN_ITEM = 30, DROPDOWN_POPUP_W = 136, ACTION_H = 34,
+        DROPDOWN_H = 38, DROPDOWN_ITEM = 30, DROPDOWN_POPUP_W = 180, ACTION_H = 34,
         FONT_TITLE = 12, FONT_LABEL = 12, FONT_MUTED = 10, FONT_SMALL = 10,
         FONT_MED = 12, FONT_LARGE = 15,
         HEADER_H = 52, SEARCH_H = 34, NOTIF_W = 380, NOTIF_H = 52, OPEN_BTN = 56,
@@ -515,7 +515,7 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     registerTheme(stroke, "Accent", "Color")
 
     local selectedLbl = Instance.new("TextLabel")
-    selectedLbl.Size = UDim2.new(1, -(IS_MOBILE and 44 or 50), 1, 0)
+    selectedLbl.Size = UDim2.new(1, -44, 1, 0)
     selectedLbl.Position = UDim2.fromOffset(12, 0)
     selectedLbl.BackgroundTransparency = 1
     selectedLbl.Text = selectedValue
@@ -527,20 +527,28 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     selectedLbl.Parent = container
     registerTheme(selectedLbl, "Text", "TextColor3")
 
-    -- Minimal chevron: no square/button behind it. The dropdown field owns the surface;
-    -- the chevron stays visually separate like the reference UI.
     local arrow = Instance.new("TextLabel")
-    arrow.Size = UDim2.fromOffset(IS_MOBILE and 24 or 28, IS_MOBILE and 28 or 30)
-    arrow.Position = UDim2.new(1, -(IS_MOBILE and 10 or 12), 0.5, -(IS_MOBILE and 14 or 15))
-    arrow.BackgroundTransparency = 1
+    arrow.Size = UDim2.fromOffset(IS_MOBILE and 28 or 30, IS_MOBILE and 28 or 30)
+    arrow.Position = UDim2.new(1, -(IS_MOBILE and 34 or 36), 0.5, -(IS_MOBILE and 14 or 15))
+    arrow.BackgroundColor3 = C.Surface2
     arrow.Text = "⌄"
     arrow.TextColor3 = C.Accent2
     arrow.Font = Enum.Font.GothamBold
-    arrow.TextSize = IS_MOBILE and 18 or 19
-    arrow.TextXAlignment = Enum.TextXAlignment.Center
+    arrow.TextSize = IS_MOBILE and 16 or 17
     arrow.ZIndex = 4
     arrow.Parent = container
+    registerTheme(arrow, "Surface2", "BackgroundColor3")
     registerTheme(arrow, "Accent2", "TextColor3")
+
+    local arrowCorner = Instance.new("UICorner")
+    arrowCorner.CornerRadius = UDim.new(0, 9)
+    arrowCorner.Parent = arrow
+    local arrowStroke = Instance.new("UIStroke")
+    arrowStroke.Color = C.Accent
+    arrowStroke.Thickness = 1
+    arrowStroke.Transparency = 0.45
+    arrowStroke.Parent = arrow
+    registerTheme(arrowStroke, "Accent", "Color")
 
     local listFrame = Instance.new("ScrollingFrame")
     local popupWidth = CFG.DROPDOWN_POPUP_W
@@ -580,13 +588,13 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     listGradient.Parent = listFrame
 
     local listCorner = Instance.new("UICorner")
-    listCorner.CornerRadius = UDim.new(0, 12)
+    listCorner.CornerRadius = UDim.new(0, 10)
     listCorner.Parent = listFrame
 
     local listStroke = Instance.new("UIStroke")
     listStroke.Color = C.Accent
-    listStroke.Transparency = 0.28
-    listStroke.Thickness = 1.5
+    listStroke.Transparency = 0.2
+    listStroke.Thickness = 2
     listStroke.Parent = listFrame
     registerTheme(listStroke, "Accent", "Color")
 
@@ -650,63 +658,24 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
         listFrame.Visible = true
         arrow.Text = "⌃"
 
-        -- Compact popover: ukurannya kecil dan menempel tepat di bawah chevron,
-        -- bukan mengikuti lebar field.
-        local width = CFG.DROPDOWN_POPUP_W
+        -- Compact popover: jangan selebar field/window.
+        local width = math.min(CFG.DROPDOWN_POPUP_W, math.max(140, container.AbsoluteSize.X - 12))
         listFrame.Size = UDim2.fromOffset(width, 0)
 
-        local arrowAbs = arrow.AbsolutePosition
-        local arrowSize = arrow.AbsoluteSize
+        local containerAbsX = container.AbsolutePosition.X
         local containerAbsY = container.AbsolutePosition.Y
+        local containerAbsW = container.AbsoluteSize.X
         local containerAbsH = container.AbsoluteSize.Y
+        local viewport = workspace.CurrentCamera.ViewportSize
+        local screenW = viewport.X
+        local screenH = viewport.Y
+        local spaceBelow = screenH - (containerAbsY + containerAbsH + 8)
+        local realMaxH = math.min(maxH, math.max(spaceBelow, 90))
 
-        -- The popup lives on ScreenGui, so its position is in screen coordinates.
-        -- Clamp it to the actual MainWindow bounds, not the whole screen. This prevents
-        -- the dropdown from escaping to the left/right or appearing outside the window.
-        local mainWindow = anchorFrame:FindFirstAncestor("MainWindow")
-        local winX, winY, winW, winH
-        if mainWindow then
-            winX = mainWindow.AbsolutePosition.X
-            winY = mainWindow.AbsolutePosition.Y
-            winW = mainWindow.AbsoluteSize.X
-            winH = mainWindow.AbsoluteSize.Y
-        else
-            local viewport = workspace.CurrentCamera.ViewportSize
-            winX, winY, winW, winH = 0, 0, viewport.X, viewport.Y
-        end
-
-        local safe = IS_MOBILE and 8 or 12
-        local minX = winX + safe
-        local maxX = winX + winW - width - safe
-        local popupLeft = arrowAbs.X + (arrowSize.X * 0.5) - (width * 0.5)
-        if maxX >= minX then
-            popupLeft = math.clamp(popupLeft, minX, maxX)
-        else
-            popupLeft = winX + math.max(0, (winW - width) * 0.5)
-        end
-
-        local belowY = containerAbsY + containerAbsH + 6
-        local bottomLimit = winY + winH - safe
-        local availableBelow = bottomLimit - belowY
-        local desiredH = math.min(maxH, bottomLimit - belowY)
-
-        -- Keep the popup compact. If there isn't enough room below the field,
-        -- place the same compact card above it rather than letting it escape.
-        local openAbove = availableBelow < math.min(maxH, 72) and (containerAbsY - winY) > 72
-        local popupTop
-        local realMaxH
-        if openAbove then
-            realMaxH = math.min(maxH, containerAbsY - winY - 6 - safe)
-            realMaxH = math.max(40, realMaxH)
-            popupTop = containerAbsY - 6 - realMaxH
-        else
-            realMaxH = math.max(40, desiredH)
-            popupTop = belowY
-        end
-
-        -- Final vertical safety clamp inside the window.
-        popupTop = math.clamp(popupTop, winY + safe, winY + winH - safe - realMaxH)
-        listFrame.Position = UDim2.fromOffset(popupLeft, popupTop)
+        -- Tetap tepat di bawah dropdown, rata kanan dengan tombol <>.
+        local popupRight = math.min(screenW - 8, containerAbsX + containerAbsW)
+        local popupLeft = math.max(8, popupRight - width)
+        listFrame.Position = UDim2.fromOffset(popupLeft, containerAbsY + containerAbsH + 6)
 
         TweenService:Create(listFrame, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
             Size = UDim2.fromOffset(width, realMaxH)
@@ -808,7 +777,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     registerTheme(stroke, "Accent", "Color")
 
     local selectedLbl = Instance.new("TextLabel")
-    selectedLbl.Size = UDim2.new(1, -(IS_MOBILE and 44 or 50), 1, 0)
+    selectedLbl.Size = UDim2.new(1, -44, 1, 0)
     selectedLbl.Position = UDim2.fromOffset(12, 0)
     selectedLbl.BackgroundTransparency = 1
     selectedLbl.Text = "..."
@@ -854,7 +823,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     listGradient.Parent = listFrame
 
     local listCorner = Instance.new("UICorner")
-    listCorner.CornerRadius = UDim.new(0, 12)
+    listCorner.CornerRadius = UDim.new(0, 10)
     listCorner.Parent = listFrame
 
     local listStroke = Instance.new("UIStroke")
@@ -953,63 +922,24 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         listFrame.Visible = true
         arrow.Text = "⌃"
 
-        -- Compact popover: ukurannya kecil dan menempel tepat di bawah chevron,
-        -- bukan mengikuti lebar field.
-        local width = CFG.DROPDOWN_POPUP_W
+        -- Compact popover: jangan selebar field/window.
+        local width = math.min(CFG.DROPDOWN_POPUP_W, math.max(140, container.AbsoluteSize.X - 12))
         listFrame.Size = UDim2.fromOffset(width, 0)
 
-        local arrowAbs = arrow.AbsolutePosition
-        local arrowSize = arrow.AbsoluteSize
+        local containerAbsX = container.AbsolutePosition.X
         local containerAbsY = container.AbsolutePosition.Y
+        local containerAbsW = container.AbsoluteSize.X
         local containerAbsH = container.AbsoluteSize.Y
+        local viewport = workspace.CurrentCamera.ViewportSize
+        local screenW = viewport.X
+        local screenH = viewport.Y
+        local spaceBelow = screenH - (containerAbsY + containerAbsH + 8)
+        local realMaxH = math.min(maxH, math.max(spaceBelow, 90))
 
-        -- The popup lives on ScreenGui, so its position is in screen coordinates.
-        -- Clamp it to the actual MainWindow bounds, not the whole screen. This prevents
-        -- the dropdown from escaping to the left/right or appearing outside the window.
-        local mainWindow = anchorFrame:FindFirstAncestor("MainWindow")
-        local winX, winY, winW, winH
-        if mainWindow then
-            winX = mainWindow.AbsolutePosition.X
-            winY = mainWindow.AbsolutePosition.Y
-            winW = mainWindow.AbsoluteSize.X
-            winH = mainWindow.AbsoluteSize.Y
-        else
-            local viewport = workspace.CurrentCamera.ViewportSize
-            winX, winY, winW, winH = 0, 0, viewport.X, viewport.Y
-        end
-
-        local safe = IS_MOBILE and 8 or 12
-        local minX = winX + safe
-        local maxX = winX + winW - width - safe
-        local popupLeft = arrowAbs.X + (arrowSize.X * 0.5) - (width * 0.5)
-        if maxX >= minX then
-            popupLeft = math.clamp(popupLeft, minX, maxX)
-        else
-            popupLeft = winX + math.max(0, (winW - width) * 0.5)
-        end
-
-        local belowY = containerAbsY + containerAbsH + 6
-        local bottomLimit = winY + winH - safe
-        local availableBelow = bottomLimit - belowY
-        local desiredH = math.min(maxH, bottomLimit - belowY)
-
-        -- Keep the popup compact. If there isn't enough room below the field,
-        -- place the same compact card above it rather than letting it escape.
-        local openAbove = availableBelow < math.min(maxH, 72) and (containerAbsY - winY) > 72
-        local popupTop
-        local realMaxH
-        if openAbove then
-            realMaxH = math.min(maxH, containerAbsY - winY - 6 - safe)
-            realMaxH = math.max(40, realMaxH)
-            popupTop = containerAbsY - 6 - realMaxH
-        else
-            realMaxH = math.max(40, desiredH)
-            popupTop = belowY
-        end
-
-        -- Final vertical safety clamp inside the window.
-        popupTop = math.clamp(popupTop, winY + safe, winY + winH - safe - realMaxH)
-        listFrame.Position = UDim2.fromOffset(popupLeft, popupTop)
+        -- Tetap tepat di bawah dropdown, rata kanan dengan tombol <>.
+        local popupRight = math.min(screenW - 8, containerAbsX + containerAbsW)
+        local popupLeft = math.max(8, popupRight - width)
+        listFrame.Position = UDim2.fromOffset(popupLeft, containerAbsY + containerAbsH + 6)
 
         TweenService:Create(listFrame, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
             Size = UDim2.fromOffset(width, realMaxH)
@@ -1336,7 +1266,7 @@ local function buildMainWindow(parent)
     logoCorner.Parent = logo
 
     local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(0, IS_MOBILE and 92 or 220, 0, 20)
+    title.Size = UDim2.new(0, 300, 0, 20)
     title.Position = UDim2.fromOffset(IS_MOBILE and 48 or 58, IS_MOBILE and 8 or 10)
     title.BackgroundTransparency = 1
     title.Text = "VRILZHUB"
@@ -1349,7 +1279,7 @@ local function buildMainWindow(parent)
     registerTheme(title, "Text", "TextColor3")
 
     local subtitle = Instance.new("TextLabel")
-    subtitle.Size = UDim2.new(0, IS_MOBILE and 104 or 220, 0, 14)
+    subtitle.Size = UDim2.new(0, 300, 0, 14)
     subtitle.Position = UDim2.fromOffset(IS_MOBILE and 48 or 58, IS_MOBILE and 26 or 28)
     subtitle.BackgroundTransparency = 1
     subtitle.Text = "Ride a Pet · v5.5"
@@ -1364,20 +1294,8 @@ local function buildMainWindow(parent)
     -- PLAYER PROFILE CHIP
     local profile = Instance.new("Frame")
     profile.Name = "PlayerProfile"
-    local profileW = IS_MOBILE and 150 or 188
-    local profileH = IS_MOBILE and 36 or 40
-    local actionGap = IS_MOBILE and 10 or 12
-    local closeW = IS_MOBILE and 28 or 32
-    local minW = IS_MOBILE and 28 or 32
-    local closeRight = IS_MOBILE and 10 or 14
-    local closeLeft = -(closeRight + closeW)
-    local minLeft = closeLeft - actionGap - minW
-    local profileRight = minLeft - actionGap
-    profile.Size = UDim2.fromOffset(profileW, profileH)
-    profile.AnchorPoint = Vector2.new(1, 0.5)
-    -- Anchor the profile by its RIGHT edge. This keeps the avatar/name safely
-    -- inside the header and leaves a real gap before the minimize button.
-    profile.Position = UDim2.new(1, profileRight, 0.5, 0)
+    profile.Size = UDim2.fromOffset(IS_MOBILE and 126 or 168, IS_MOBILE and 34 or 38)
+    profile.Position = UDim2.new(1, -(IS_MOBILE and 166 or 250), 0.5, -(IS_MOBILE and 17 or 19))
     profile.BackgroundColor3 = C.Surface2
     profile.BorderSizePixel = 0
     profile.ZIndex = 12
@@ -1394,8 +1312,8 @@ local function buildMainWindow(parent)
     registerTheme(profileStroke, "Accent", "Color")
 
     local profileAvatar = Instance.new("ImageLabel")
-    profileAvatar.Size = UDim2.fromOffset(IS_MOBILE and 30 or 34, IS_MOBILE and 30 or 34)
-    profileAvatar.Position = UDim2.fromOffset(4, IS_MOBILE and 3 or 3)
+    profileAvatar.Size = UDim2.fromOffset(IS_MOBILE and 27 or 31, IS_MOBILE and 27 or 31)
+    profileAvatar.Position = UDim2.fromOffset(4, IS_MOBILE and 3.5 or 3.5)
     profileAvatar.BackgroundColor3 = C.Surface3
     profileAvatar.BorderSizePixel = 0
     profileAvatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"
@@ -1411,8 +1329,8 @@ local function buildMainWindow(parent)
     registerTheme(profileAvatarStroke, "Accent2", "Color")
 
     local profileName = Instance.new("TextLabel")
-    profileName.Size = UDim2.new(1, -(IS_MOBILE and 58 or 66), 0, 17)
-    profileName.Position = UDim2.fromOffset(IS_MOBILE and 40 or 44, 4)
+    profileName.Size = UDim2.new(1, -(IS_MOBILE and 60 or 68), 0, 16)
+    profileName.Position = UDim2.fromOffset(IS_MOBILE and 37 or 43, 4)
     profileName.BackgroundTransparency = 1
     profileName.Text = LocalPlayer.DisplayName
     profileName.TextColor3 = C.Text
@@ -1425,8 +1343,8 @@ local function buildMainWindow(parent)
     registerTheme(profileName, "Text", "TextColor3")
 
     local profileUser = Instance.new("TextLabel")
-    profileUser.Size = UDim2.new(1, -(IS_MOBILE and 58 or 66), 0, 12)
-    profileUser.Position = UDim2.fromOffset(IS_MOBILE and 40 or 44, 21)
+    profileUser.Size = UDim2.new(1, -(IS_MOBILE and 60 or 68), 0, 12)
+    profileUser.Position = UDim2.fromOffset(IS_MOBILE and 37 or 43, 20)
     profileUser.BackgroundTransparency = 1
     profileUser.Text = "@" .. LocalPlayer.Name
     profileUser.TextColor3 = C.Muted
@@ -1440,7 +1358,7 @@ local function buildMainWindow(parent)
 
     local online = Instance.new("Frame")
     online.Size = UDim2.fromOffset(7, 7)
-    online.Position = UDim2.new(1, -12, 0, IS_MOBILE and 7 or 8)
+    online.Position = UDim2.new(1, -12, 0, IS_MOBILE and 6 or 7)
     online.BackgroundColor3 = C.Success
     online.BorderSizePixel = 0
     online.ZIndex = 14
@@ -1451,8 +1369,8 @@ local function buildMainWindow(parent)
     registerTheme(online, "Success", "BackgroundColor3")
 
     local minBtn = Instance.new("TextButton")
-    minBtn.Size = UDim2.fromOffset(minW, IS_MOBILE and 28 or 32)
-    minBtn.Position = UDim2.new(1, minLeft, 0.5, -(IS_MOBILE and 14 or 16))
+    minBtn.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
+    minBtn.Position = UDim2.new(1, -(IS_MOBILE and 66 or 78), 0.5, -(IS_MOBILE and 14 or 16))
     minBtn.BackgroundColor3 = C.Surface3
     minBtn.Text = "−"
     minBtn.TextColor3 = C.Text
@@ -1469,8 +1387,8 @@ local function buildMainWindow(parent)
     minCorner.Parent = minBtn
 
     local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.fromOffset(closeW, IS_MOBILE and 28 or 32)
-    closeBtn.Position = UDim2.new(1, closeLeft, 0.5, -(IS_MOBILE and 14 or 16))
+    closeBtn.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
+    closeBtn.Position = UDim2.new(1, -(IS_MOBILE and 34 or 40), 0.5, -(IS_MOBILE and 14 or 16))
     closeBtn.BackgroundColor3 = C.Surface3
     closeBtn.Text = "×"
     closeBtn.TextColor3 = C.Text
