@@ -907,8 +907,8 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         if not opt then return end
         local on = sharedTable[item] == true
         opt.chk.Text = on and "✓" or "○"
-        opt.bg.BackgroundColor3 = on and ((itemColors and itemColors[item]) or C.Accent) or C.Surface3
-        opt.txt.TextColor3 = on and Color3.new(1, 1, 1) or ((itemColors and itemColors[item]) or C.Text)
+        opt.bg.BackgroundColor3 = on and C.Surface2 or C.Surface3
+        opt.txt.TextColor3 = C.Text
     end
 
     local function closeList()
@@ -995,7 +995,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         chk.Position = UDim2.fromOffset(8, 0)
         chk.BackgroundTransparency = 1
         chk.Text = sharedTable[item] and "✓" or "○"
-        chk.TextColor3 = (itemColors and itemColors[item]) or C.Accent
+        chk.TextColor3 = C.Accent
         chk.Font = Enum.Font.GothamBold
         chk.TextSize = 14
         chk.ZIndex = 2003
@@ -1006,7 +1006,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         txt.Position = UDim2.fromOffset(36, 0)
         txt.BackgroundTransparency = 1
         txt.Text = item
-        txt.TextColor3 = (itemColors and itemColors[item]) or C.Text
+        txt.TextColor3 = C.Text
         txt.Font = Enum.Font.GothamBold
         txt.TextSize = CFG.FONT_LABEL
         txt.TextXAlignment = Enum.TextXAlignment.Left
@@ -1014,8 +1014,8 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         txt.Parent = opt
 
         if sharedTable[item] then
-            opt.BackgroundColor3 = (itemColors and itemColors[item]) or C.Accent
-            txt.TextColor3 = Color3.new(1, 1, 1)
+            opt.BackgroundColor3 = C.Surface2
+            txt.TextColor3 = C.Text
         end
 
         optionButtons[item] = {bg = opt, chk = chk, txt = txt}
@@ -1966,6 +1966,121 @@ local function buildMainWindow(parent)
 
     registerTab("Info", "ℹ", "Info")
 
+    -- Lightweight 3D egg preview used only by the prediction/info cards.
+    -- It reads an existing rendered egg model when available and falls back to a simple 3D egg.
+    local function makeEggPreview(parent, eggName)
+        local viewport = Instance.new("ViewportFrame")
+        viewport.Name = "Egg3DPreview"
+        viewport.Size = UDim2.fromOffset(IS_MOBILE and 54 or 62, IS_MOBILE and 54 or 62)
+        viewport.BackgroundColor3 = C.Surface
+        viewport.BackgroundTransparency = 0.08
+        viewport.BorderSizePixel = 0
+        viewport.ZIndex = 5
+        viewport.Ambient = Color3.fromRGB(190, 200, 215)
+        viewport.LightColor = Color3.fromRGB(255, 255, 255)
+        viewport.LightDirection = Vector3.new(-1, -1, -1)
+        viewport.Parent = parent
+
+        local vc = Instance.new("UICorner")
+        vc.CornerRadius = UDim.new(0, 12)
+        vc.Parent = viewport
+
+        local vs = Instance.new("UIStroke")
+        vs.Color = C.Accent
+        vs.Thickness = 1
+        vs.Transparency = 0.35
+        vs.Parent = viewport
+        registerTheme(vs, "Accent", "Color")
+
+        local world = Instance.new("WorldModel")
+        world.Parent = viewport
+
+        local camera = Instance.new("Camera")
+        camera.FieldOfView = 38
+        camera.Parent = viewport
+        viewport.CurrentCamera = camera
+
+        local source
+        local rendered = Workspace:FindFirstChild("RenderedEggs")
+        if rendered then
+            source = rendered:FindFirstChild(eggName)
+        end
+        if not source then
+            local ok, descendants = pcall(function() return Workspace:GetDescendants() end)
+            if ok then
+                for _, obj in ipairs(descendants) do
+                    if obj:IsA("Model") and obj.Name == eggName then
+                        source = obj
+                        break
+                    end
+                end
+            end
+        end
+
+        local model
+        if source and source:IsA("Model") then
+            local ok, clone = pcall(function() return source:Clone() end)
+            if ok and clone then model = clone end
+        end
+
+        if not model then
+            model = Instance.new("Model")
+            model.Name = eggName .. "_Preview"
+            local egg = Instance.new("Part")
+            egg.Name = "Egg"
+            egg.Shape = Enum.PartType.Ball
+            egg.Size = Vector3.new(2.2, 2.6, 2.2)
+            egg.Material = Enum.Material.SmoothPlastic
+            egg.Color = C.Surface3
+            egg.Anchored = true
+            egg.CanCollide = false
+            egg.Parent = model
+        end
+
+        for _, obj in ipairs(model:GetDescendants()) do
+            if obj:IsA("BasePart") then
+                obj.Anchored = true
+                obj.CanCollide = false
+                obj.CanTouch = false
+                obj.CanQuery = false
+            elseif obj:IsA("Script") or obj:IsA("LocalScript") or obj:IsA("ModuleScript") then
+                obj:Destroy()
+            end
+        end
+        model.Parent = world
+
+        local okBounds, boundsCFrame, boundsSize = pcall(function()
+            return model:GetBoundingBox()
+        end)
+        if not okBounds or boundsSize.Magnitude <= 0 then
+            boundsCFrame = CFrame.new()
+            boundsSize = Vector3.new(2, 2, 2)
+        end
+
+        pcall(function()
+            model:PivotTo(CFrame.new(-boundsCFrame.Position) * model:GetPivot())
+        end)
+
+        local radius = math.max(boundsSize.X, boundsSize.Y, boundsSize.Z) * 0.72
+        local distance = math.max(4.5, radius / math.tan(math.rad(camera.FieldOfView / 2)))
+        camera.CFrame = CFrame.lookAt(Vector3.new(distance * 0.72, radius * 0.18, distance), Vector3.new(0, 0, 0))
+
+        task.spawn(function()
+            local angle = 0
+            while viewport.Parent do
+                local dt = RunService.RenderStepped:Wait()
+                angle += dt * 0.65
+                if model and model.Parent then
+                    pcall(function()
+                        model:PivotTo(CFrame.Angles(0, angle, 0))
+                    end)
+                end
+            end
+        end)
+
+        return viewport
+    end
+
     -- TAB PREDIKSI
     local predPage = createPage("Prediksi")
     pages.Prediksi = predPage
@@ -2040,27 +2155,56 @@ local function buildMainWindow(parent)
                     c.Parent = lbl
                 else
                     for i, eggName in ipairs(eggsInMap) do
-                        local lbl = Instance.new("TextLabel")
-                        lbl.Size = UDim2.new(1, 0, 0, IS_MOBILE and 26 or 28)
-                        lbl.BackgroundColor3 = C.Surface3
-                        lbl.BackgroundTransparency = 0.3
-                        lbl.Text = "   🥚  " .. eggName
-                        lbl.TextColor3 = C.Text
-                        lbl.Font = Enum.Font.GothamSemibold
-                        lbl.TextSize = CFG.FONT_LABEL
-                        lbl.TextXAlignment = Enum.TextXAlignment.Left
-                        lbl.LayoutOrder = i
-                        lbl.ZIndex = 4
-                        lbl.Parent = eggInMapList
-                        local c = Instance.new("UICorner")
-                        c.CornerRadius = UDim.new(0, 5)
-                        c.Parent = lbl
+                        local row = Instance.new("Frame")
+                        row.Name = "EggInfo"
+                        row.Size = UDim2.new(1, -4, 0, IS_MOBILE and 64 or 72)
+                        row.BackgroundColor3 = C.Surface3
+                        row.BackgroundTransparency = 0.08
+                        row.BorderSizePixel = 0
+                        row.LayoutOrder = i
+                        row.ZIndex = 4
+                        row.Parent = eggInMapList
+                        registerTheme(row, "Surface3", "BackgroundColor3")
 
-                        local s = Instance.new("UIStroke")
-                        s.Color = C.Success
-                        s.Thickness = 1
-                        s.Transparency = 0.5
-                        s.Parent = lbl
+                        local rc = Instance.new("UICorner")
+                        rc.CornerRadius = UDim.new(0, 10)
+                        rc.Parent = row
+                        local rs = Instance.new("UIStroke")
+                        rs.Color = C.Success
+                        rs.Thickness = 1
+                        rs.Transparency = 0.55
+                        rs.Parent = row
+                        registerTheme(rs, "Success", "Color")
+
+                        local preview = makeEggPreview(row, eggName)
+                        preview.Position = UDim2.fromOffset(6, IS_MOBILE and 5 or 5)
+
+                        local name = Instance.new("TextLabel")
+                        name.Size = UDim2.new(1, -(IS_MOBILE and 76 or 88), 0, 22)
+                        name.Position = UDim2.fromOffset(IS_MOBILE and 68 or 78, IS_MOBILE and 9 or 11)
+                        name.BackgroundTransparency = 1
+                        name.Text = eggName
+                        name.TextColor3 = C.Text
+                        name.Font = Enum.Font.GothamBold
+                        name.TextSize = CFG.FONT_LABEL + 1
+                        name.TextXAlignment = Enum.TextXAlignment.Left
+                        name.TextTruncate = Enum.TextTruncate.AtEnd
+                        name.ZIndex = 6
+                        name.Parent = row
+                        registerTheme(name, "Text", "TextColor3")
+
+                        local meta = Instance.new("TextLabel")
+                        meta.Size = UDim2.new(1, -(IS_MOBILE and 76 or 88), 0, 18)
+                        meta.Position = UDim2.fromOffset(IS_MOBILE and 68 or 78, IS_MOBILE and 33 or 37)
+                        meta.BackgroundTransparency = 1
+                        meta.Text = "EGG SPAWNED  •  LIVE"
+                        meta.TextColor3 = C.Muted
+                        meta.Font = Enum.Font.GothamSemibold
+                        meta.TextSize = CFG.FONT_MUTED
+                        meta.TextXAlignment = Enum.TextXAlignment.Left
+                        meta.ZIndex = 6
+                        meta.Parent = row
+                        registerTheme(meta, "Muted", "TextColor3")
                     end
                 end
             end
@@ -2090,27 +2234,56 @@ local function buildMainWindow(parent)
                     c.Parent = lbl
                 else
                     for i, eggName in ipairs(preds) do
-                        local lbl = Instance.new("TextLabel")
-                        lbl.Size = UDim2.new(1, 0, 0, IS_MOBILE and 26 or 28)
-                        lbl.BackgroundColor3 = C.Surface3
-                        lbl.BackgroundTransparency = 0.3
-                        lbl.Text = "   🎯  " .. eggName
-                        lbl.TextColor3 = C.Text
-                        lbl.Font = Enum.Font.GothamSemibold
-                        lbl.TextSize = CFG.FONT_LABEL
-                        lbl.TextXAlignment = Enum.TextXAlignment.Left
-                        lbl.LayoutOrder = i
-                        lbl.ZIndex = 4
-                        lbl.Parent = eggPredList
-                        local c = Instance.new("UICorner")
-                        c.CornerRadius = UDim.new(0, 5)
-                        c.Parent = lbl
+                        local row = Instance.new("Frame")
+                        row.Name = "EggPrediction"
+                        row.Size = UDim2.new(1, -4, 0, IS_MOBILE and 64 or 72)
+                        row.BackgroundColor3 = C.Surface3
+                        row.BackgroundTransparency = 0.08
+                        row.BorderSizePixel = 0
+                        row.LayoutOrder = i
+                        row.ZIndex = 4
+                        row.Parent = eggPredList
+                        registerTheme(row, "Surface3", "BackgroundColor3")
 
-                        local s = Instance.new("UIStroke")
-                        s.Color = C.Accent3
-                        s.Thickness = 1
-                        s.Transparency = 0.5
-                        s.Parent = lbl
+                        local rc = Instance.new("UICorner")
+                        rc.CornerRadius = UDim.new(0, 10)
+                        rc.Parent = row
+                        local rs = Instance.new("UIStroke")
+                        rs.Color = C.Accent2
+                        rs.Thickness = 1
+                        rs.Transparency = 0.5
+                        rs.Parent = row
+                        registerTheme(rs, "Accent2", "Color")
+
+                        local preview = makeEggPreview(row, eggName)
+                        preview.Position = UDim2.fromOffset(6, IS_MOBILE and 5 or 5)
+
+                        local name = Instance.new("TextLabel")
+                        name.Size = UDim2.new(1, -(IS_MOBILE and 76 or 88), 0, 22)
+                        name.Position = UDim2.fromOffset(IS_MOBILE and 68 or 78, IS_MOBILE and 9 or 11)
+                        name.BackgroundTransparency = 1
+                        name.Text = eggName
+                        name.TextColor3 = C.Text
+                        name.Font = Enum.Font.GothamBold
+                        name.TextSize = CFG.FONT_LABEL + 1
+                        name.TextXAlignment = Enum.TextXAlignment.Left
+                        name.TextTruncate = Enum.TextTruncate.AtEnd
+                        name.ZIndex = 6
+                        name.Parent = row
+                        registerTheme(name, "Text", "TextColor3")
+
+                        local meta = Instance.new("TextLabel")
+                        meta.Size = UDim2.new(1, -(IS_MOBILE and 76 or 88), 0, 18)
+                        meta.Position = UDim2.fromOffset(IS_MOBILE and 68 or 78, IS_MOBILE and 33 or 37)
+                        meta.BackgroundTransparency = 1
+                        meta.Text = "PREDIKSI BERIKUTNYA  •  3D PREVIEW"
+                        meta.TextColor3 = C.Muted
+                        meta.Font = Enum.Font.GothamSemibold
+                        meta.TextSize = CFG.FONT_MUTED
+                        meta.TextXAlignment = Enum.TextXAlignment.Left
+                        meta.ZIndex = 6
+                        meta.Parent = row
+                        registerTheme(meta, "Muted", "TextColor3")
                     end
                 end
             end
@@ -2261,7 +2434,7 @@ local function buildMainWindow(parent)
     rarTitle.LayoutOrder = 3
     rarTitle.Parent = farmContent
 
-    makeDropdownMulti(farmContent, RarityList, Shared.SelectedRarities, RarityColors, function(t) end)
+    makeDropdownMulti(farmContent, RarityList, Shared.SelectedRarities, nil, function(t) end)
 
     local notifTitle = Instance.new("TextLabel")
     notifTitle.Size = UDim2.new(1, 0, 0, 16)
