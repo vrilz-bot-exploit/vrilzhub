@@ -1574,7 +1574,7 @@ local function buildMainWindow(parent)
     openBtn.Size = UDim2.fromOffset(CFG.OPEN_BTN, CFG.OPEN_BTN)
     openBtn.Position = UDim2.fromOffset(20, 20)
     openBtn.BackgroundColor3 = C.Surface
-    openBtn.Text = "VH"
+    openBtn.Text = ""
     openBtn.TextColor3 = C.Accent
     openBtn.Font = Enum.Font.GothamBold
     openBtn.TextSize = IS_MOBILE and 14 or 16
@@ -1602,6 +1602,91 @@ local function buildMainWindow(parent)
     openStroke.Thickness = 2
     openStroke.Transparency = 0.3
     openStroke.Parent = openBtn
+
+    -- MINIMIZE ICON ONLY: lightweight faux-3D VH (no layout/feature changes)
+    local vhShadow = Instance.new("TextLabel")
+    vhShadow.Name = "VH3DShadow"
+    vhShadow.Size = UDim2.fromScale(1, 1)
+    vhShadow.Position = UDim2.fromOffset(2, 3)
+    vhShadow.BackgroundTransparency = 1
+    vhShadow.Text = "VH"
+    vhShadow.TextColor3 = Color3.fromRGB(0, 0, 0)
+    vhShadow.TextTransparency = 0.25
+    vhShadow.TextSize = IS_MOBILE and 14 or 16
+    vhShadow.Font = Enum.Font.GothamBlack
+    vhShadow.ZIndex = 401
+    vhShadow.Parent = openBtn
+
+    local vhDepth = Instance.new("TextLabel")
+    vhDepth.Name = "VH3DDepth"
+    vhDepth.Size = UDim2.fromScale(1, 1)
+    vhDepth.Position = UDim2.fromOffset(1, 1)
+    vhDepth.BackgroundTransparency = 1
+    vhDepth.Text = "VH"
+    vhDepth.TextColor3 = C.Accent
+    vhDepth.TextTransparency = 0.25
+    vhDepth.TextSize = IS_MOBILE and 14 or 16
+    vhDepth.Font = Enum.Font.GothamBlack
+    vhDepth.ZIndex = 402
+    vhDepth.Parent = openBtn
+    registerTheme(vhDepth, "Accent", "TextColor3")
+
+    local vhFace = Instance.new("TextLabel")
+    vhFace.Name = "VH3DFace"
+    vhFace.Size = UDim2.fromScale(1, 1)
+    vhFace.Position = UDim2.fromOffset(0, 0)
+    vhFace.BackgroundTransparency = 1
+    vhFace.Text = "VH"
+    vhFace.TextColor3 = C.Text
+    vhFace.TextSize = IS_MOBILE and 14 or 16
+    vhFace.Font = Enum.Font.GothamBlack
+    vhFace.TextStrokeColor3 = C.Accent
+    vhFace.TextStrokeTransparency = 0.15
+    vhFace.ZIndex = 403
+    vhFace.Parent = openBtn
+    registerTheme(vhFace, "Text", "TextColor3")
+
+    local function playMinimizeLightning()
+        -- Lightweight strike: only a few UI frames, then destroy.
+        local holder = Instance.new("Frame")
+        holder.Name = "MinimizeLightning"
+        holder.Size = UDim2.fromScale(1, 1)
+        holder.BackgroundTransparency = 1
+        holder.ClipsDescendants = true
+        holder.ZIndex = 410
+        holder.Parent = openBtn
+
+        local bolt = Instance.new("Frame")
+        bolt.AnchorPoint = Vector2.new(0.5, 0.5)
+        bolt.Size = UDim2.fromOffset(3, math.max(18, CFG.OPEN_BTN - 12))
+        bolt.Position = UDim2.fromScale(0.58, 0.5)
+        bolt.Rotation = 24
+        bolt.BackgroundColor3 = C.Accent
+        bolt.BorderSizePixel = 0
+        bolt.ZIndex = 411
+        bolt.Parent = holder
+        local bc = Instance.new("UICorner")
+        bc.CornerRadius = UDim.new(1, 0)
+        bc.Parent = bolt
+
+        local flash = Instance.new("Frame")
+        flash.Size = UDim2.fromScale(1, 1)
+        flash.BackgroundColor3 = C.Accent
+        flash.BackgroundTransparency = 0.82
+        flash.BorderSizePixel = 0
+        flash.ZIndex = 410
+        flash.Parent = holder
+        local fc = Instance.new("UICorner")
+        fc.CornerRadius = UDim.new(0, 16)
+        fc.Parent = flash
+
+        task.spawn(function()
+            tween(flash, {BackgroundTransparency = 1}, 0.10)
+            tween(bolt, {BackgroundTransparency = 1, Rotation = 8, Size = UDim2.fromOffset(2, math.max(10, CFG.OPEN_BTN - 24))}, 0.16)
+            task.wait(0.18)
+            if holder then holder:Destroy() end
+        end)
+    end
 
     local openDrag, openDS, openSP = false, nil, nil
     openBtn.InputBegan:Connect(function(i)
@@ -1639,6 +1724,7 @@ local function buildMainWindow(parent)
         task.delay(0.3, function()
             main.Visible = false
             openBtn.Visible = true
+            playMinimizeLightning()
         end)
     end)
 
