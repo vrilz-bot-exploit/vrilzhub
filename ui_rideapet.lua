@@ -58,16 +58,16 @@ local RarityList = {
     "Legendary", "Mythic", "Divine", "Ethereal", "Secret"
 }
 local RarityColors = {
-    None = Color3.fromRGB(100, 100, 100),
-    Common = Color3.fromRGB(180, 180, 180),
-    Uncommon = Color3.fromRGB(80, 200, 80),
-    Rare = Color3.fromRGB(80, 150, 255),
-    Epic = Color3.fromRGB(180, 80, 255),
-    Legendary = Color3.fromRGB(255, 200, 50),
-    Mythic = Color3.fromRGB(255, 80, 80),
-    Divine = Color3.fromRGB(255, 255, 150),
-    Ethereal = Color3.fromRGB(150, 255, 255),
-    Secret = Color3.fromRGB(200, 200, 200),
+    None = Color3.fromRGB(150, 150, 155),
+    Common = Color3.fromRGB(150, 150, 155),
+    Uncommon = Color3.fromRGB(150, 150, 155),
+    Rare = Color3.fromRGB(150, 150, 155),
+    Epic = Color3.fromRGB(150, 150, 155),
+    Legendary = Color3.fromRGB(150, 150, 155),
+    Mythic = Color3.fromRGB(150, 150, 155),
+    Divine = Color3.fromRGB(150, 150, 155),
+    Ethereal = Color3.fromRGB(150, 150, 155),
+    Secret = Color3.fromRGB(150, 150, 155),
 }
 
 -- ====== THEME ======
@@ -801,16 +801,35 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     selectedLbl.Parent = container
     registerTheme(selectedLbl, "Text", "TextColor3")
 
-    local arrow = Instance.new("TextLabel")
-    arrow.Size = UDim2.fromOffset(30, CFG.DROPDOWN_H)
-    arrow.Position = UDim2.new(1, -34, 0, 0)
+    -- Draw the rarity chevron from two small strokes so it never becomes a square/tofu glyph.
+    local arrow = Instance.new("Frame")
+    arrow.Name = "RarityChevron"
+    arrow.Size = UDim2.fromOffset(IS_MOBILE and 20 or 22, IS_MOBILE and 16 or 18)
+    arrow.Position = UDim2.new(1, -(IS_MOBILE and 27 or 29), 0.5, -(IS_MOBILE and 8 or 9))
     arrow.BackgroundTransparency = 1
-    arrow.Text = "⌄"
-    arrow.TextColor3 = C.Accent
-    arrow.TextSize = IS_MOBILE and 17 or 18
+    arrow.BorderSizePixel = 0
     arrow.ZIndex = 4
     arrow.Parent = container
-    registerTheme(arrow, "Accent", "TextColor3")
+
+    local arrowL = Instance.new("Frame")
+    arrowL.Size = UDim2.fromOffset(IS_MOBILE and 8 or 9, 2)
+    arrowL.Position = UDim2.new(0.5, -(IS_MOBILE and 7 or 8), 0.5, -1)
+    arrowL.BackgroundColor3 = C.Accent
+    arrowL.BorderSizePixel = 0
+    arrowL.Rotation = 45
+    arrowL.ZIndex = 5
+    arrowL.Parent = arrow
+    registerTheme(arrowL, "Accent", "BackgroundColor3")
+
+    local arrowR = Instance.new("Frame")
+    arrowR.Size = UDim2.fromOffset(IS_MOBILE and 8 or 9, 2)
+    arrowR.Position = UDim2.new(0.5, 1, 0.5, -1)
+    arrowR.BackgroundColor3 = C.Accent
+    arrowR.BorderSizePixel = 0
+    arrowR.Rotation = -45
+    arrowR.ZIndex = 5
+    arrowR.Parent = arrow
+    registerTheme(arrowR, "Accent", "BackgroundColor3")
 
     local listFrame = Instance.new("ScrollingFrame")
     local popupWidth = CFG.DROPDOWN_POPUP_W
@@ -913,7 +932,8 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
 
     local function closeList()
         isOpen = false
-        arrow.Text = "⌄"
+        arrowL.Rotation = 45
+        arrowR.Rotation = -45
         local w = listFrame.Size.X.Offset
         TweenService:Create(listFrame, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.fromOffset(w, 0)}):Play()
         task.delay(0.2, function()
@@ -932,7 +952,8 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
 
         isOpen = true
         listFrame.Visible = true
-        arrow.Text = "⌃"
+        arrowL.Rotation = -45
+        arrowR.Rotation = 45
 
         -- Compact popover: jangan selebar field/window.
         local width = math.min(CFG.DROPDOWN_POPUP_W, math.max(140, container.AbsoluteSize.X - 12))
@@ -1265,7 +1286,7 @@ local function buildMainWindow(parent)
     logo.Size = UDim2.fromOffset(IS_MOBILE and 30 or 36, IS_MOBILE and 30 or 36)
     logo.Position = UDim2.fromOffset(IS_MOBILE and 10 or 12, (CFG.HEADER_H - (IS_MOBILE and 30 or 36)) / 2)
     logo.BackgroundColor3 = C.Accent
-    logo.Text = "⚡"
+    logo.Text = "VH"
     logo.TextColor3 = Color3.new(1, 1, 1)
     logo.Font = Enum.Font.GothamBold
     logo.TextSize = IS_MOBILE and 16 or 20
@@ -1553,10 +1574,10 @@ local function buildMainWindow(parent)
     openBtn.Size = UDim2.fromOffset(CFG.OPEN_BTN, CFG.OPEN_BTN)
     openBtn.Position = UDim2.fromOffset(20, 20)
     openBtn.BackgroundColor3 = C.Surface
-    openBtn.Text = "⚡"
+    openBtn.Text = "VH"
     openBtn.TextColor3 = C.Accent
     openBtn.Font = Enum.Font.GothamBold
-    openBtn.TextSize = IS_MOBILE and 24 or 28
+    openBtn.TextSize = IS_MOBILE and 14 or 16
     openBtn.BorderSizePixel = 0
     openBtn.Visible = false
     openBtn.ZIndex = 400
@@ -1966,12 +1987,27 @@ local function buildMainWindow(parent)
 
     registerTab("Info", "ℹ", "Info")
 
+    -- Keep the Info tab independently scrollable all the way to the Discord copy button.
+    do
+        local infoLayout = infoPage:FindFirstChildOfClass("UIListLayout")
+        if infoLayout then
+            infoPage.AutomaticCanvasSize = Enum.AutomaticSize.None
+            infoPage.ScrollingDirection = Enum.ScrollingDirection.Y
+            infoPage.ScrollingEnabled = true
+            local function syncInfoCanvas()
+                infoPage.CanvasSize = UDim2.new(0, 0, 0, infoLayout.AbsoluteContentSize.Y + 50)
+            end
+            infoLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(syncInfoCanvas)
+            task.defer(syncInfoCanvas)
+        end
+    end
+
     -- Lightweight 3D egg preview used only by the prediction/info cards.
     -- It reads an existing rendered egg model when available and falls back to a simple 3D egg.
     local function makeEggPreview(parent, eggName)
         local viewport = Instance.new("ViewportFrame")
         viewport.Name = "Egg3DPreview"
-        viewport.Size = UDim2.fromOffset(IS_MOBILE and 54 or 62, IS_MOBILE and 54 or 62)
+        viewport.Size = UDim2.fromOffset(IS_MOBILE and 42 or 48, IS_MOBILE and 42 or 48)
         viewport.BackgroundColor3 = C.Surface
         viewport.BackgroundTransparency = 0.08
         viewport.BorderSizePixel = 0
@@ -2065,19 +2101,6 @@ local function buildMainWindow(parent)
         local distance = math.max(4.5, radius / math.tan(math.rad(camera.FieldOfView / 2)))
         camera.CFrame = CFrame.lookAt(Vector3.new(distance * 0.72, radius * 0.18, distance), Vector3.new(0, 0, 0))
 
-        task.spawn(function()
-            local angle = 0
-            while viewport.Parent do
-                local dt = RunService.RenderStepped:Wait()
-                angle += dt * 0.65
-                if model and model.Parent then
-                    pcall(function()
-                        model:PivotTo(CFrame.Angles(0, angle, 0))
-                    end)
-                end
-            end
-        end)
-
         return viewport
     end
 
@@ -2157,7 +2180,7 @@ local function buildMainWindow(parent)
                     for i, eggName in ipairs(eggsInMap) do
                         local row = Instance.new("Frame")
                         row.Name = "EggInfo"
-                        row.Size = UDim2.new(1, -4, 0, IS_MOBILE and 64 or 72)
+                        row.Size = UDim2.new(1, -4, 0, IS_MOBILE and 52 or 58)
                         row.BackgroundColor3 = C.Surface3
                         row.BackgroundTransparency = 0.08
                         row.BorderSizePixel = 0
@@ -2177,11 +2200,11 @@ local function buildMainWindow(parent)
                         registerTheme(rs, "Success", "Color")
 
                         local preview = makeEggPreview(row, eggName)
-                        preview.Position = UDim2.fromOffset(6, IS_MOBILE and 5 or 5)
+                        preview.Position = UDim2.fromOffset(5, IS_MOBILE and 5 or 5)
 
                         local name = Instance.new("TextLabel")
-                        name.Size = UDim2.new(1, -(IS_MOBILE and 76 or 88), 0, 22)
-                        name.Position = UDim2.fromOffset(IS_MOBILE and 68 or 78, IS_MOBILE and 9 or 11)
+                        name.Size = UDim2.new(1, -(IS_MOBILE and 60 or 68), 0, 20)
+                        name.Position = UDim2.fromOffset(IS_MOBILE and 54 or 60, IS_MOBILE and 7 or 9)
                         name.BackgroundTransparency = 1
                         name.Text = eggName
                         name.TextColor3 = C.Text
@@ -2194,8 +2217,8 @@ local function buildMainWindow(parent)
                         registerTheme(name, "Text", "TextColor3")
 
                         local meta = Instance.new("TextLabel")
-                        meta.Size = UDim2.new(1, -(IS_MOBILE and 76 or 88), 0, 18)
-                        meta.Position = UDim2.fromOffset(IS_MOBILE and 68 or 78, IS_MOBILE and 33 or 37)
+                        meta.Size = UDim2.new(1, -(IS_MOBILE and 60 or 68), 0, 16)
+                        meta.Position = UDim2.fromOffset(IS_MOBILE and 54 or 60, IS_MOBILE and 28 or 30)
                         meta.BackgroundTransparency = 1
                         meta.Text = "EGG SPAWNED  •  LIVE"
                         meta.TextColor3 = C.Muted
@@ -2236,7 +2259,7 @@ local function buildMainWindow(parent)
                     for i, eggName in ipairs(preds) do
                         local row = Instance.new("Frame")
                         row.Name = "EggPrediction"
-                        row.Size = UDim2.new(1, -4, 0, IS_MOBILE and 64 or 72)
+                        row.Size = UDim2.new(1, -4, 0, IS_MOBILE and 52 or 58)
                         row.BackgroundColor3 = C.Surface3
                         row.BackgroundTransparency = 0.08
                         row.BorderSizePixel = 0
@@ -2256,11 +2279,11 @@ local function buildMainWindow(parent)
                         registerTheme(rs, "Accent2", "Color")
 
                         local preview = makeEggPreview(row, eggName)
-                        preview.Position = UDim2.fromOffset(6, IS_MOBILE and 5 or 5)
+                        preview.Position = UDim2.fromOffset(5, IS_MOBILE and 5 or 5)
 
                         local name = Instance.new("TextLabel")
-                        name.Size = UDim2.new(1, -(IS_MOBILE and 76 or 88), 0, 22)
-                        name.Position = UDim2.fromOffset(IS_MOBILE and 68 or 78, IS_MOBILE and 9 or 11)
+                        name.Size = UDim2.new(1, -(IS_MOBILE and 60 or 68), 0, 20)
+                        name.Position = UDim2.fromOffset(IS_MOBILE and 54 or 60, IS_MOBILE and 7 or 9)
                         name.BackgroundTransparency = 1
                         name.Text = eggName
                         name.TextColor3 = C.Text
@@ -2273,8 +2296,8 @@ local function buildMainWindow(parent)
                         registerTheme(name, "Text", "TextColor3")
 
                         local meta = Instance.new("TextLabel")
-                        meta.Size = UDim2.new(1, -(IS_MOBILE and 76 or 88), 0, 18)
-                        meta.Position = UDim2.fromOffset(IS_MOBILE and 68 or 78, IS_MOBILE and 33 or 37)
+                        meta.Size = UDim2.new(1, -(IS_MOBILE and 60 or 68), 0, 16)
+                        meta.Position = UDim2.fromOffset(IS_MOBILE and 54 or 60, IS_MOBILE and 28 or 30)
                         meta.BackgroundTransparency = 1
                         meta.Text = "PREDIKSI BERIKUTNYA  •  3D PREVIEW"
                         meta.TextColor3 = C.Muted
@@ -3270,13 +3293,6 @@ local function buildLoadingScreen(parent)
             TweenService:Create(vGlow, TweenInfo.new(0.5), {TextTransparency = 0.1}):Play()
             task.wait(0.5)
             TweenService:Create(vGlow, TweenInfo.new(0.5), {TextTransparency = 0.4}):Play()
-        end
-    end)
-
-    task.spawn(function()
-        while loading.Parent do
-            task.wait(math.random(15, 40) / 10)
-            createLightning()
         end
     end)
 
