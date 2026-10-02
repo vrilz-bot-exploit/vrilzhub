@@ -2702,50 +2702,15 @@ local function buildMainWindow(parent)
     registerTab("Vulcanic", "🌋", "Vulcanic")
 
     -- ============================================================
-    -- TAB EGG MUTATION (FIXED) — Auto Steal + Auto Mutation + Rarity
+    -- TAB EGG MUTATION (BARU)
     -- ============================================================
     local mutPage = createPage("EggMutation")
     pages.EggMutation = mutPage
 
-    -- ===== CARD 1: AUTO STEAL + RARITY =====
-    local mutStealCard, mutStealContent = makeCard(mutPage, "🎯 AUTO STEAL", 1)
+    -- CARD 1: AUTO MUTATION
+    local mutCard, mutContent = makeCard(mutPage, "🔥 EGG MUTATION", 1)
 
-        makeToggle(mutStealContent, "Auto Steal (Rarity)", false, function(v)
-        Shared.MutationSteal_Enabled = v
-        if v then
-            notify("🎯 Mutation Steal aktif (by rarity)", "success")
-        else
-            notify("🎯 Mutation Steal nonaktif", "info")
-        end
-    end)
-
-    makeToggle(mutStealContent, "Auto Return ke Plot", false, function(v)
-        Shared.AutoReturn_Enabled = v
-    end)
-
-    -- Label rarity
-    local mutRarLabel = Instance.new("TextLabel")
-    mutRarLabel.Size = UDim2.new(1, 0, 0, 16)
-    mutRarLabel.BackgroundTransparency = 1
-    mutRarLabel.Text = "Rarity yang di-steal:"
-    mutRarLabel.TextColor3 = C.Muted
-    mutRarLabel.Font = Enum.Font.GothamSemibold
-    mutRarLabel.TextSize = CFG.FONT_MUTED
-    mutRarLabel.TextXAlignment = Enum.TextXAlignment.Left
-    mutRarLabel.LayoutOrder = 3
-    mutRarLabel.ZIndex = 3
-    mutRarLabel.Parent = mutStealContent
-    registerTheme(mutRarLabel, "Muted", "TextColor3")
-
-    -- Dropdown multi-select rarity (pake RarityList global)
-    makeDropdownMulti(mutStealContent, RarityList, Shared.SelectedRarities, nil, function(t)
-        -- auto-updated via sharedTable
-    end)
-
-    -- ===== CARD 2: AUTO MUTATION =====
-    local mutActionCard, mutActionContent = makeCard(mutPage, "🔥 AUTO MUTATION", 2)
-
-    makeToggle(mutActionContent, "Auto Mutation", false, function(v)
+    makeToggle(mutContent, "Auto Mutation", false, function(v)
         Shared.AutoMutation_Enabled = v
         if v then
             notify("🔥 Auto Mutation aktif", "success")
@@ -2754,7 +2719,7 @@ local function buildMainWindow(parent)
         end
     end)
 
-    makeToggle(mutActionContent, "Return ke Plot (setelah mut)", false, function(v)
+    makeToggle(mutContent, "Auto Return ke Plot", false, function(v)
         Shared.MutationReturn_Enabled = v
         if v then
             notify("🏠 Return to Plot aktif", "success")
@@ -2762,7 +2727,7 @@ local function buildMainWindow(parent)
     end)
 
     local mutNote = Instance.new("TextLabel")
-    mutNote.Size = UDim2.new(1, 0, 0, 46)
+    mutNote.Size = UDim2.new(1, 0, 0, 60)
     mutNote.BackgroundTransparency = 1
     mutNote.Text = "Auto drop egg ke volcano (VolcanoDip)\n→ tunggu egg balik (max 45 detik)\n→ balik ke plot"
     mutNote.TextColor3 = C.Muted
@@ -2773,14 +2738,14 @@ local function buildMainWindow(parent)
     mutNote.TextYAlignment = Enum.TextYAlignment.Top
     mutNote.LayoutOrder = 10
     mutNote.ZIndex = 3
-    mutNote.Parent = mutActionContent
+    mutNote.Parent = mutContent
     registerTheme(mutNote, "Muted", "TextColor3")
 
-    -- ===== CARD 3: STATUS MUTATION (LIVE) =====
-    local mutStatusCard, mutStatusContent = makeCard(mutPage, "📊 STATUS", 3)
+    -- CARD 2: INFO PANEL (state live)
+    local infoCard, infoContent = makeCard(mutPage, "📊 STATUS MUTATION", 2)
 
     local mutInfoLbl = Instance.new("TextLabel")
-    mutInfoLbl.Size = UDim2.new(1, 0, 0, 110)
+    mutInfoLbl.Size = UDim2.new(1, 0, 0, 90)
     mutInfoLbl.BackgroundColor3 = C.Surface3
     mutInfoLbl.BackgroundTransparency = 0.3
     mutInfoLbl.BorderSizePixel = 0
@@ -2792,7 +2757,7 @@ local function buildMainWindow(parent)
     mutInfoLbl.TextYAlignment = Enum.TextYAlignment.Top
     mutInfoLbl.LayoutOrder = 1
     mutInfoLbl.ZIndex = 3
-    mutInfoLbl.Parent = mutStatusContent
+    mutInfoLbl.Parent = infoContent
     registerTheme(mutInfoLbl, "Text", "TextColor3")
 
     local mutInfoCorner = Instance.new("UICorner")
@@ -2804,45 +2769,25 @@ local function buildMainWindow(parent)
     mutInfoPad.PaddingTop = UDim.new(0, 6)
     mutInfoPad.Parent = mutInfoLbl
 
-    -- Live update info tiap 0.5 detik
+    -- Auto update info tiap 0.5 detik
     task.spawn(function()
         while mutInfoLbl.Parent do
             task.wait(0.5)
             local lines = {}
-
-            -- Held egg
+            
             if Features and Features.isHoldingEgg then
-                local ok, holding, eggName = pcall(Features.isHoldingEgg)
-                if ok then
-                    table.insert(lines, "✋ Held: " .. (holding and ("YES " .. (eggName or "?")) or "no"))
-                else
-                    table.insert(lines, "✋ Held: --")
-                end
+                local holding, eggName = Features.isHoldingEgg()
+                table.insert(lines, "✋ Held: " .. (holding and ("YES " .. (eggName or "?")) or "no"))
             else
                 table.insert(lines, "✋ Held: --")
             end
 
-            -- Mutation state
             if Features and Features.getMutationState then
-                local ok, state = pcall(Features.getMutationState)
-                if ok and state then
-                    table.insert(lines, "🔒 Lock: " .. (state.EggLocked and "YES" or "no"))
-                    table.insert(lines, "⏸ Paused: " .. (state.StealPaused and "YES" or "no"))
-                    table.insert(lines, "▶ Running: " .. (state.Running and "YES" or "no"))
-                end
+                local state = Features.getMutationState()
+                table.insert(lines, "🔒 Lock: " .. (state.EggLocked and "YES" or "no"))
+                table.insert(lines, "⏸ Paused: " .. (state.StealPaused and "YES" or "no"))
+                table.insert(lines, "▶ Running: " .. (state.Running and "YES" or "no"))
             end
-
-            -- Auto Steal status
-            table.insert(lines, "🎯 Steal: " .. (Shared.AutoSteal_Enabled and "ON" or "OFF"))
-
-            -- Rarity count
-            local count = 0
-            if Shared.SelectedRarities then
-                for _, v in pairs(Shared.SelectedRarities) do
-                    if v then count = count + 1 end
-                end
-            end
-            table.insert(lines, "🎨 Rarity aktif: " .. count)
 
             mutInfoLbl.Text = table.concat(lines, "\n")
         end
@@ -3710,9 +3655,8 @@ function UI.Init(sharedState)
     Shared.RarityNotifThreshold = "Legendary"
     Shared.VolcanicHunt_Enabled = false
     Shared.VolcanicReturn_Enabled = false
-     Shared.AutoMutation_Enabled = false
+    Shared.AutoMutation_Enabled = false
     Shared.MutationReturn_Enabled = false
-    Shared.MutationSteal_Enabled = false
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "VRILZHUB_RideAPet"
     ScreenGui.ResetOnSpawn = false
