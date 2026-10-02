@@ -740,6 +740,12 @@ function Features.startAutoFarm()
                 continue
             end
 
+            -- ⭐ Skip kalau pegang egg
+            if Features.isHoldingEgg and Features.isHoldingEgg() then
+                task.wait(0.5)
+                continue
+            end
+
             local char = LocalPlayer.Character
             local myRoot = char and char:FindFirstChild("HumanoidRootPart")
             local hum = char and char:FindFirstChildOfClass("Humanoid")
@@ -748,38 +754,11 @@ function Features.startAutoFarm()
                 continue
             end
 
-            local rendered = Workspace:FindFirstChild("RenderedEggs")
-            if rendered then
-                local validKeys = {}
-                for _, egg in ipairs(rendered:GetChildren()) do
-                    if egg:IsA("Model") then
-                        validKeys[getEggKey(egg)] = true
-                    end
-                end
-                for key in pairs(NotifiedEggs) do
-                    if not validKeys[key] then NotifiedEggs[key] = nil end
-                end
-            end
-
+            -- ⭐ CARI EGG BY RARITY
             local best = getBestEggInMap()
-            if not best then
-                continue
-            end
+            if not best then continue end
 
             local egg = best.egg
-            local eggName = egg.Name
-            local eggRarity = best.rarity
-            local eggKey = getEggKey(egg)
-
-            if (RARITY_ORDER[eggRarity] or 1) >= getNotifThreshold() then
-                if not NotifiedEggs[eggKey] then
-                    NotifiedEggs[eggKey] = true
-                    if Shared.Notify then
-                        Shared.Notify("🎯 " .. eggName .. " (" .. eggRarity .. ")", "success")
-                    end
-                end
-            end
-
             local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
             if not eggPart then continue end
 
@@ -792,8 +771,7 @@ function Features.startAutoFarm()
             task.wait(0.1)
 
             local picked = false
-            local maxTries = 10
-            for i = 1, maxTries do
+            for i = 1, 10 do
                 if prompt and typeof(fireproximityprompt) == "function" then
                     pcall(fireproximityprompt, prompt)
                 end
@@ -819,7 +797,6 @@ function Features.startAutoFarm()
         end
     end)
 end
-
 -- ============================================================
 -- VOLCANIC HUNTER — Auto detect + travel + pickup + return
 -- ============================================================
