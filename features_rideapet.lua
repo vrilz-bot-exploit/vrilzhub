@@ -384,6 +384,93 @@ function Features.startAutoSteal()
 end
 
 -- ============================================================
+-- MUTATION STEAL — KHUSUS TAB EGG MUTATION (by RARITY)
+-- Gak nyentuh startAutoSteal yang asli
+-- ============================================================
+function Features.startMutationSteal()
+    task.spawn(function()
+        while task.wait(0.5) do
+            if not Shared.MutationSteal_Enabled then continue end
+
+            -- Skip kalau volcanic ada
+            if Features.hasVolcanicEgg and Features.hasVolcanicEgg() then
+                task.wait(1)
+                continue
+            end
+            -- Skip kalau mutation running
+            if Features.getMutationState and Features.getMutationState().Running then
+                task.wait(1)
+                continue
+            end
+
+            local char = LocalPlayer.Character
+            local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if not myRoot or not hum or hum.Health <= 0 then
+                task.wait(1)
+                continue
+            end
+
+            -- Skip kalau pegang egg
+            if Features.isHoldingEgg and Features.isHoldingEgg() then
+                task.wait(0.5)
+                continue
+            end
+
+            -- Skip kalau basket ada isi
+            local basket = LocalPlayer:FindFirstChild("Basket")
+            if basket and #basket:GetChildren() > 0 then
+                task.wait(0.5)
+                continue
+            end
+
+            -- ⭐ CARI EGG BY RARITY (pake SelectedRarities)
+            local best = getBestEggInMap()
+            if not best then
+                task.wait(0.5)
+                continue
+            end
+
+            local egg = best.egg
+            local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+            local prompt = egg:FindFirstChild("Pickup", true)
+            if not eggPart or not prompt then continue end
+
+            if prompt:IsA("ProximityPrompt") then
+                prompt.HoldDuration = 0
+            end
+
+            myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+            task.wait(0.1)
+
+            local picked = false
+            for i = 1, 15 do
+                if typeof(fireproximityprompt) == "function" then
+                    pcall(fireproximityprompt, prompt)
+                end
+                task.wait(0.25)
+
+                if not isEggStillInMap(egg) then
+                    picked = true
+                    break
+                end
+
+                if eggPart and eggPart.Parent then
+                    myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+                    task.wait(0.1)
+                end
+            end
+
+            if picked then
+                print("[MUTATION-STEAL] ✅ picked " .. egg.Name .. " (" .. best.rarity .. ")")
+            end
+
+            task.wait(0.3)
+        end
+    end)
+end
+
+-- ============================================================
 -- AUTO HATCH
 -- ============================================================
 function Features.startAutoHatch()
@@ -1258,6 +1345,7 @@ function Features.Init(sharedState)
     Features.startEggESP()
     Features.startPetESP()
     Features.startAutoSteal()
+        Features.startMutationSteal()
     Features.startAutoHatch()
     Features.startAutoRidePet()
     Features.startEggPrediction()
