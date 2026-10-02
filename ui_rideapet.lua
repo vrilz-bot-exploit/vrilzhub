@@ -2710,12 +2710,12 @@ local function buildMainWindow(parent)
     -- ===== CARD 1: AUTO STEAL + RARITY =====
     local mutStealCard, mutStealContent = makeCard(mutPage, "🎯 AUTO STEAL", 1)
 
-    makeToggle(mutStealContent, "Auto Steal", false, function(v)
-        Shared.AutoSteal_Enabled = v
+        makeToggle(mutStealContent, "Auto Steal (Rarity)", false, function(v)
+        Shared.MutationSteal_Enabled = v
         if v then
-            notify("🎯 Auto Steal aktif", "success")
+            notify("🎯 Mutation Steal aktif (by rarity)", "success")
         else
-            notify("🎯 Auto Steal nonaktif", "info")
+            notify("🎯 Mutation Steal nonaktif", "info")
         end
     end)
 
@@ -3712,6 +3712,7 @@ function UI.Init(sharedState)
     Shared.VolcanicReturn_Enabled = false
      Shared.AutoMutation_Enabled = false
     Shared.MutationReturn_Enabled = false
+    Shared.MutationSteal_Enabled = false
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "VRILZHUB_RideAPet"
     ScreenGui.ResetOnSpawn = false
