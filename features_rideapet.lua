@@ -1077,17 +1077,12 @@ local function isHoldingEggMutation()
     local displayEgg = wooden:FindFirstChild("DisplayEgg")
     if not displayEgg then return false end
 
-    -- Cek direct children (original)
     for _, c in ipairs(displayEgg:GetChildren()) do
-        if c:IsA("MeshPart") and not c.Name:lower():find("circle") then
-            return true, c.Name
-        end
-    end
-
-    -- Cek descendants (fallback — kalau MeshPart ke-nested)
-    for _, c in ipairs(displayEgg:GetDescendants()) do
-        if c:IsA("MeshPart") and not c.Name:lower():find("circle") then
-            return true, c.Name
+        if c:IsA("MeshPart") then
+            local n = c.Name:lower()
+            if n ~= "" and not n:find("circle") and not n:find("root") and not n:find("humanoid") then
+                return true, c.Name
+            end
         end
     end
 
@@ -1178,15 +1173,13 @@ local function runMutationOnce()
         return false
     end
 
-            print("[MUTATION] STEP 3 — tunggu egg balik")
+    print("[MUTATION] STEP 3 — tunggu egg balik")
     local retStart = os.clock()
-    local gotBack = false
-    while (os.clock() - retStart) < 3 do          -- ⬅️ MAX 3 DETIK
-        task.wait(0.1)                             -- ⬅️ cek tiap 0.1s (SUPER CEPET)
+    while (os.clock() - retStart) < 3 do
+        task.wait(0.1)
         if isHoldingEggMutation() then
-            gotBack = true
-            print(string.format("[MUTATION] egg BALIK @ %.1fs — LANGSUNG RETURN", os.clock() - retStart))
-            break                                  -- ⬅️ BREAK KELUAR LOOP
+            print(string.format("[MUTATION] egg BALIK @ %.1fs", os.clock() - retStart))
+            break
         end
     end
 
