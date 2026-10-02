@@ -1077,12 +1077,17 @@ local function isHoldingEggMutation()
     local displayEgg = wooden:FindFirstChild("DisplayEgg")
     if not displayEgg then return false end
 
+    -- Cek direct children (original)
     for _, c in ipairs(displayEgg:GetChildren()) do
-        if c:IsA("MeshPart") then
-            local n = c.Name:lower()
-            if n ~= "" and not n:find("circle") and not n:find("root") and not n:find("humanoid") then
-                return true, c.Name
-            end
+        if c:IsA("MeshPart") and not c.Name:lower():find("circle") then
+            return true, c.Name
+        end
+    end
+
+    -- Cek descendants (fallback — kalau MeshPart ke-nested)
+    for _, c in ipairs(displayEgg:GetDescendants()) do
+        if c:IsA("MeshPart") and not c.Name:lower():find("circle") then
+            return true, c.Name
         end
     end
 
@@ -1173,7 +1178,7 @@ local function runMutationOnce()
         return false
     end
 
-      print("[MUTATION] STEP 3 — tunggu egg balik (max " .. MUT_CONFIG.RETURN_TIMEOUT .. "s)")
+        print("[MUTATION] STEP 3 — tunggu egg balik (max " .. MUT_CONFIG.RETURN_TIMEOUT .. "s)")
     local retStart = os.clock()
     local gotBack = false
     while (os.clock() - retStart) < MUT_CONFIG.RETURN_TIMEOUT do
@@ -1186,7 +1191,19 @@ local function runMutationOnce()
         end
     end
     if not gotBack then
-        print("[MUTATION] TIMEOUT " .. MUT_CONFIG.RETURN_TIMEOUT .. "s")
+        print("[MUTATION] TIMEOUT " .. MUT_CONFIG.RETURN_TIMEOUT .. "s — egg gak balik")
+    end
+
+    if Shared.MutationReturn_Enabled then
+        task.wait(0.5)
+        local spawn = getMyPlotSpawn()
+        if spawn then
+            local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if myRoot then
+                myRoot.CFrame = spawn.CFrame + Vector3.new(0, 5, 0)
+                print("[MUTATION] Balik ke plot")
+            end
+        end
     end
 
     task.wait(2)
