@@ -344,20 +344,27 @@ function Features.startAutoSteal()
                 continue
             end
 
-            local eggName = Shared.SelectedEgg or "Cherub"
-            local egg = findEggByName(eggName)
-
-            if not egg then
-                local now = os.clock()
-                if now - lastNoEggNotif > 5 then
-                    lastNoEggNotif = now
-                    if Shared.Notify then
-                        Shared.Notify("Egg no spawn: " .. eggName, "warning")
-                    end
-                end
+            -- ⭐ CEK: lagi pegang egg? skip
+            if Features.isHoldingEgg and Features.isHoldingEgg() then
+                task.wait(0.5)
                 continue
             end
 
+            -- ⭐ CEK: basket ada isi? skip
+            local basket = LocalPlayer:FindFirstChild("Basket")
+            if basket and #basket:GetChildren() > 0 then
+                task.wait(0.5)
+                continue
+            end
+
+            -- ⭐ CARI EGG BY RARITY (BUKAN BY NAME)
+            local best = getBestEggInMap()
+            if not best then
+                task.wait(0.5)
+                continue
+            end
+
+            local egg = best.egg
             local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
             local prompt = egg:FindFirstChild("Pickup", true)
             if not eggPart or not prompt then continue end
@@ -370,12 +377,11 @@ function Features.startAutoSteal()
             task.wait(0.1)
 
             local picked = false
-            local maxTries = 10
-            for i = 1, maxTries do
+            for i = 1, 15 do
                 if typeof(fireproximityprompt) == "function" then
                     pcall(fireproximityprompt, prompt)
                 end
-                task.wait(0.3)
+                task.wait(0.25)
 
                 if not isEggStillInMap(egg) then
                     picked = true
@@ -388,18 +394,11 @@ function Features.startAutoSteal()
                 end
             end
 
-            if picked and Shared.AutoReturn_Enabled then
-                local spawnPart = getMyPlotSpawn()
-                if spawnPart then
-                    myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
-                else
-                    local spawn = Workspace:FindFirstChild("Spawn")
-                    if spawn then
-                        local spawnLoc = spawn:FindFirstChildWhichIsA("SpawnLocation", true)
-                        if spawnLoc then
-                            myRoot.CFrame = spawnLoc.CFrame + Vector3.new(0, 5, 0)
-                        end
-                    end
+            if picked then
+                print("[AUTOSTEAL] ✅ picked " .. egg.Name .. " (" .. best.rarity .. ")")
+                -- ⭐ LOCK — stop steal
+                if Shared.AutoMutation_Enabled then
+                    print("[AUTOSTEAL] 🔒 egg locked, mutation bakal handle")
                 end
             end
 
