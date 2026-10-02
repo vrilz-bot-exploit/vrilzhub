@@ -1173,25 +1173,20 @@ local function runMutationOnce()
         return false
     end
 
-    print("[MUTATION] STEP 3 — tunggu egg balik")
+      print("[MUTATION] STEP 3 — tunggu egg balik (max " .. MUT_CONFIG.RETURN_TIMEOUT .. "s)")
     local retStart = os.clock()
-    while (os.clock() - retStart) < 3 do
-        task.wait(0.1)
+    local gotBack = false
+    while (os.clock() - retStart) < MUT_CONFIG.RETURN_TIMEOUT do
+        task.wait(0.3)
         if isHoldingEggMutation() then
-            print(string.format("[MUTATION] egg BALIK @ %.1fs", os.clock() - retStart))
+            gotBack = true
+            local elapsed = os.clock() - retStart
+            print(string.format("[MUTATION] egg BALIK @ %.1fs", elapsed))
             break
         end
     end
-
-    if Shared.MutationReturn_Enabled then
-        local spawn = getMyPlotSpawn()
-        if spawn then
-            local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if myRoot then
-                myRoot.CFrame = spawn.CFrame + Vector3.new(0, 5, 0)
-                print("[MUTATION] Balik ke plot")
-            end
-        end
+    if not gotBack then
+        print("[MUTATION] TIMEOUT " .. MUT_CONFIG.RETURN_TIMEOUT .. "s")
     end
 
     task.wait(2)
