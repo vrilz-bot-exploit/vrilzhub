@@ -3710,7 +3710,7 @@ function UI.Init(sharedState)
     Shared.RarityNotifThreshold = "Legendary"
     Shared.VolcanicHunt_Enabled = false
     Shared.VolcanicReturn_Enabled = false
-    Shared.AutoMutation_Enabled = false
+     Shared.AutoMutation_Enabled = false
     Shared.MutationReturn_Enabled = false
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "VRILZHUB_RideAPet"
