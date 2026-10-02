@@ -2659,6 +2659,48 @@ local function buildMainWindow(parent)
         if fpsWin then fpsWin.Visible = v end
     end, "FPS Window")
 
+    -- TAB VOLCANIC (BARU)
+    local volcanicPage = createPage("Vulcanic")
+    pages.Vulcanic = volcanicPage
+
+    local volcanicHuntCard, volcanicHuntContent = makeCard(volcanicPage, "🌋 VOLCANIC HUNTER", 1)
+
+    makeToggle(volcanicHuntContent, "Auto Hunt Volcanic", false, function(v)
+        Shared.VolcanicHunt_Enabled = v
+        if v then
+            notify("🌋 Volcanic Hunt aktif", "success")
+        else
+            notify("🌋 Volcanic Hunt nonaktif", "info")
+        end
+    end)
+
+    makeToggle(volcanicHuntContent, "Auto Return ke Plot", false, function(v)
+        Shared.VolcanicReturn_Enabled = v
+        if v then
+            notify("🏠 Auto Return aktif", "success")
+        end
+    end)
+
+    makeToggle(volcanicHuntContent, "Instant Collect", false, function(v)
+        Shared.InstantPickup_Enabled = v
+    end)
+
+    local volcanicNote = Instance.new("TextLabel")
+    volcanicNote.Size = UDim2.new(1, 0, 0, 32)
+    volcanicNote.BackgroundTransparency = 1
+    volcanicNote.Text = "Auto detect egg volcanic spawn → travel → pickup → balik plot"
+    volcanicNote.TextColor3 = C.Muted
+    volcanicNote.Font = Enum.Font.GothamSemibold
+    volcanicNote.TextSize = CFG.FONT_MUTED
+    volcanicNote.TextWrapped = true
+    volcanicNote.TextXAlignment = Enum.TextXAlignment.Left
+    volcanicNote.LayoutOrder = 10
+    volcanicNote.ZIndex = 3
+    volcanicNote.Parent = volcanicHuntContent
+    registerTheme(volcanicNote, "Muted", "TextColor3")
+
+    registerTab("Vulcanic", "🌋", "Vulcanic")
+
     registerTab("Settings", "⚙", "Settings")
 
     pages.Info.Visible = true
@@ -3517,7 +3559,8 @@ function UI.Init(sharedState)
         ["Secret"] = false,
     }
     Shared.RarityNotifThreshold = "Legendary"
-
+    Shared.VolcanicHunt_Enabled = false
+    Shared.VolcanicReturn_Enabled = false
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "VRILZHUB_RideAPet"
     ScreenGui.ResetOnSpawn = false
