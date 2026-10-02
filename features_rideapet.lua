@@ -999,7 +999,7 @@ local MutationState = {
 
 local MUT_CONFIG = {
     DROP_TIMEOUT = 15,
-    RETURN_TIMEOUT = 45,
+    RETURN_TIMEOUT = 13,
     TP_ABOVE_TOP = 200,
 }
 
