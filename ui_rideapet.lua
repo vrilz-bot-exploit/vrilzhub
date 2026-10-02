@@ -2707,6 +2707,33 @@ local function buildMainWindow(parent)
     local mutPage = createPage("EggMutation")
     pages.EggMutation = mutPage
 
+    -- ===== CARD 0: AUTO STEAL (RARITY) =====
+    local mutStealCard, mutStealContent = makeCard(mutPage, "🎯 AUTO STEAL (RARITY)", 0)
+
+    makeToggle(mutStealContent, "Auto Steal by Rarity", false, function(v)
+        Shared.MutationSteal_Enabled = v
+        if v then
+            notify("🎯 Mutation Steal aktif (by rarity)", "success")
+        else
+            notify("🎯 Mutation Steal nonaktif", "info")
+        end
+    end)
+
+    local mutRarLabel = Instance.new("TextLabel")
+    mutRarLabel.Size = UDim2.new(1, 0, 0, 16)
+    mutRarLabel.BackgroundTransparency = 1
+    mutRarLabel.Text = "Pilih Rarity Egg:"
+    mutRarLabel.TextColor3 = C.Muted
+    mutRarLabel.Font = Enum.Font.GothamSemibold
+    mutRarLabel.TextSize = CFG.FONT_MUTED
+    mutRarLabel.TextXAlignment = Enum.TextXAlignment.Left
+    mutRarLabel.LayoutOrder = 3
+    mutRarLabel.ZIndex = 3
+    mutRarLabel.Parent = mutStealContent
+    registerTheme(mutRarLabel, "Muted", "TextColor3")
+
+    makeDropdownMulti(mutStealContent, RarityList, Shared.SelectedRarities, nil, function(t) end)
+
     -- CARD 1: AUTO MUTATION
     local mutCard, mutContent = makeCard(mutPage, "🔥 EGG MUTATION", 1)
 
