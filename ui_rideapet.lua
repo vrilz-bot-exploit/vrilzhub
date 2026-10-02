@@ -2701,16 +2701,16 @@ local function buildMainWindow(parent)
 
     registerTab("Vulcanic", "🌋", "Vulcanic")
 
-        -- ============================================================
-    -- TAB EGG MUTATION (BARU) — Auto Steal + Auto Mutation + Rarity
+    -- ============================================================
+    -- TAB EGG MUTATION (FIXED) — Auto Steal + Auto Mutation + Rarity
     -- ============================================================
     local mutPage = createPage("EggMutation")
     pages.EggMutation = mutPage
 
     -- ===== CARD 1: AUTO STEAL + RARITY =====
-    local stealCard, stealContent = makeCard(mutPage, "🎯 AUTO STEAL", 1)
+    local mutStealCard, mutStealContent = makeCard(mutPage, "🎯 AUTO STEAL", 1)
 
-    makeToggle(stealContent, "Auto Steal", false, function(v)
+    makeToggle(mutStealContent, "Auto Steal", false, function(v)
         Shared.AutoSteal_Enabled = v
         if v then
             notify("🎯 Auto Steal aktif", "success")
@@ -2719,34 +2719,33 @@ local function buildMainWindow(parent)
         end
     end)
 
-    makeToggle(stealContent, "Auto Return ke Plot", false, function(v)
+    makeToggle(mutStealContent, "Auto Return ke Plot", false, function(v)
         Shared.AutoReturn_Enabled = v
     end)
 
     -- Label rarity
-    local rarTitle = Instance.new("TextLabel")
-    rarTitle.Size = UDim2.new(1, 0, 0, 16)
-    rarTitle.BackgroundTransparency = 1
-    rarTitle.Text = "Rarity yang di-steal:"
-    rarTitle.TextColor3 = C.Muted
-    rarTitle.Font = Enum.Font.GothamSemibold
-    rarTitle.TextSize = CFG.FONT_MUTED
-    rarTitle.TextXAlignment = Enum.TextXAlignment.Left
-    rarTitle.LayoutOrder = 3
-    rarTitle.ZIndex = 3
-    rarTitle.Parent = stealContent
-    registerTheme(rarTitle, "Muted", "TextColor3")
+    local mutRarLabel = Instance.new("TextLabel")
+    mutRarLabel.Size = UDim2.new(1, 0, 0, 16)
+    mutRarLabel.BackgroundTransparency = 1
+    mutRarLabel.Text = "Rarity yang di-steal:"
+    mutRarLabel.TextColor3 = C.Muted
+    mutRarLabel.Font = Enum.Font.GothamSemibold
+    mutRarLabel.TextSize = CFG.FONT_MUTED
+    mutRarLabel.TextXAlignment = Enum.TextXAlignment.Left
+    mutRarLabel.LayoutOrder = 3
+    mutRarLabel.ZIndex = 3
+    mutRarLabel.Parent = mutStealContent
+    registerTheme(mutRarLabel, "Muted", "TextColor3")
 
-    -- Dropdown multi-select rarity
-    local RarityList = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Divine", "Ethereal", "Secret"}
-    makeDropdownMulti(stealContent, RarityList, Shared.SelectedRarities, nil, function(t)
-        -- t = Shared.SelectedRarities (auto-updated)
+    -- Dropdown multi-select rarity (pake RarityList global)
+    makeDropdownMulti(mutStealContent, RarityList, Shared.SelectedRarities, nil, function(t)
+        -- auto-updated via sharedTable
     end)
 
     -- ===== CARD 2: AUTO MUTATION =====
-    local mutCard, mutContent = makeCard(mutPage, "🔥 AUTO MUTATION", 2)
+    local mutActionCard, mutActionContent = makeCard(mutPage, "🔥 AUTO MUTATION", 2)
 
-    makeToggle(mutContent, "Auto Mutation", false, function(v)
+    makeToggle(mutActionContent, "Auto Mutation", false, function(v)
         Shared.AutoMutation_Enabled = v
         if v then
             notify("🔥 Auto Mutation aktif", "success")
@@ -2755,7 +2754,7 @@ local function buildMainWindow(parent)
         end
     end)
 
-    makeToggle(mutContent, "Return ke Plot (setelah mut)", false, function(v)
+    makeToggle(mutActionContent, "Return ke Plot (setelah mut)", false, function(v)
         Shared.MutationReturn_Enabled = v
         if v then
             notify("🏠 Return to Plot aktif", "success")
@@ -2774,11 +2773,11 @@ local function buildMainWindow(parent)
     mutNote.TextYAlignment = Enum.TextYAlignment.Top
     mutNote.LayoutOrder = 10
     mutNote.ZIndex = 3
-    mutNote.Parent = mutContent
+    mutNote.Parent = mutActionContent
     registerTheme(mutNote, "Muted", "TextColor3")
 
     -- ===== CARD 3: STATUS MUTATION (LIVE) =====
-    local mutInfoCard, mutInfoContent = makeCard(mutPage, "📊 STATUS", 3)
+    local mutStatusCard, mutStatusContent = makeCard(mutPage, "📊 STATUS", 3)
 
     local mutInfoLbl = Instance.new("TextLabel")
     mutInfoLbl.Size = UDim2.new(1, 0, 0, 110)
@@ -2793,7 +2792,7 @@ local function buildMainWindow(parent)
     mutInfoLbl.TextYAlignment = Enum.TextYAlignment.Top
     mutInfoLbl.LayoutOrder = 1
     mutInfoLbl.ZIndex = 3
-    mutInfoLbl.Parent = mutInfoContent
+    mutInfoLbl.Parent = mutStatusContent
     registerTheme(mutInfoLbl, "Text", "TextColor3")
 
     local mutInfoCorner = Instance.new("UICorner")
@@ -2805,7 +2804,7 @@ local function buildMainWindow(parent)
     mutInfoPad.PaddingTop = UDim.new(0, 6)
     mutInfoPad.Parent = mutInfoLbl
 
-    -- Live update info
+    -- Live update info tiap 0.5 detik
     task.spawn(function()
         while mutInfoLbl.Parent do
             task.wait(0.5)
@@ -2813,18 +2812,24 @@ local function buildMainWindow(parent)
 
             -- Held egg
             if Features and Features.isHoldingEgg then
-                local holding, eggName = Features.isHoldingEgg()
-                table.insert(lines, "✋ Held: " .. (holding and ("YES " .. (eggName or "?")) or "no"))
+                local ok, holding, eggName = pcall(Features.isHoldingEgg)
+                if ok then
+                    table.insert(lines, "✋ Held: " .. (holding and ("YES " .. (eggName or "?")) or "no"))
+                else
+                    table.insert(lines, "✋ Held: --")
+                end
             else
                 table.insert(lines, "✋ Held: --")
             end
 
             -- Mutation state
             if Features and Features.getMutationState then
-                local state = Features.getMutationState()
-                table.insert(lines, "🔒 Lock: " .. (state.EggLocked and "YES" or "no"))
-                table.insert(lines, "⏸ Paused: " .. (state.StealPaused and "YES" or "no"))
-                table.insert(lines, "▶ Running: " .. (state.Running and "YES" or "no"))
+                local ok, state = pcall(Features.getMutationState)
+                if ok and state then
+                    table.insert(lines, "🔒 Lock: " .. (state.EggLocked and "YES" or "no"))
+                    table.insert(lines, "⏸ Paused: " .. (state.StealPaused and "YES" or "no"))
+                    table.insert(lines, "▶ Running: " .. (state.Running and "YES" or "no"))
+                end
             end
 
             -- Auto Steal status
