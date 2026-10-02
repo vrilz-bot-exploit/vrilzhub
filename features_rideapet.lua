@@ -1191,7 +1191,6 @@ local function runMutationOnce()
     end
 
     if Shared.MutationReturn_Enabled then
-        task.wait(0.5)
         local spawn = getMyPlotSpawn()
         if spawn then
             local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
