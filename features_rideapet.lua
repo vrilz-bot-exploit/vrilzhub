@@ -384,93 +384,6 @@ function Features.startAutoSteal()
 end
 
 -- ============================================================
--- MUTATION STEAL — KHUSUS TAB EGG MUTATION (by RARITY)
--- Gak nyentuh startAutoSteal yang asli
--- ============================================================
-function Features.startMutationSteal()
-    task.spawn(function()
-        while task.wait(0.5) do
-            if not Shared.MutationSteal_Enabled then continue end
-
-            -- Skip kalau volcanic ada
-            if Features.hasVolcanicEgg and Features.hasVolcanicEgg() then
-                task.wait(1)
-                continue
-            end
-            -- Skip kalau mutation running
-            if Features.getMutationState and Features.getMutationState().Running then
-                task.wait(1)
-                continue
-            end
-
-            local char = LocalPlayer.Character
-            local myRoot = char and char:FindFirstChild("HumanoidRootPart")
-            local hum = char and char:FindFirstChildOfClass("Humanoid")
-            if not myRoot or not hum or hum.Health <= 0 then
-                task.wait(1)
-                continue
-            end
-
-            -- Skip kalau pegang egg
-            if Features.isHoldingEgg and Features.isHoldingEgg() then
-                task.wait(0.5)
-                continue
-            end
-
-            -- Skip kalau basket ada isi
-            local basket = LocalPlayer:FindFirstChild("Basket")
-            if basket and #basket:GetChildren() > 0 then
-                task.wait(0.5)
-                continue
-            end
-
-            -- ⭐ CARI EGG BY RARITY (pake SelectedRarities)
-            local best = getBestEggInMap()
-            if not best then
-                task.wait(0.5)
-                continue
-            end
-
-            local egg = best.egg
-            local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
-            local prompt = egg:FindFirstChild("Pickup", true)
-            if not eggPart or not prompt then continue end
-
-            if prompt:IsA("ProximityPrompt") then
-                prompt.HoldDuration = 0
-            end
-
-            myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
-            task.wait(0.1)
-
-            local picked = false
-            for i = 1, 15 do
-                if typeof(fireproximityprompt) == "function" then
-                    pcall(fireproximityprompt, prompt)
-                end
-                task.wait(0.25)
-
-                if not isEggStillInMap(egg) then
-                    picked = true
-                    break
-                end
-
-                if eggPart and eggPart.Parent then
-                    myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
-                    task.wait(0.1)
-                end
-            end
-
-            if picked then
-                print("[MUTATION-STEAL] ✅ picked " .. egg.Name .. " (" .. best.rarity .. ")")
-            end
-
-            task.wait(0.3)
-        end
-    end)
-end
-
--- ============================================================
 -- AUTO HATCH
 -- ============================================================
 function Features.startAutoHatch()
@@ -1074,8 +987,7 @@ function Features.startVolcanicHunt()
 end
 
 -- ============================================================
--- AUTO MUTATION — KHUSUS EGG MUTATION
--- Drop egg ke volcano, tunggu balik, return plot
+-- AUTO MUTATION — KHUSUS TAB EGG MUTATION
 -- ============================================================
 local MutationState = {
     Running = false,
@@ -1100,7 +1012,7 @@ task.spawn(function()
             local ok, result = pcall(require, netMod)
             if ok then
                 NetModule = result
-                print("[MUTATION] ✅ Net module loaded")
+                print("[MUTATION] Net module loaded")
             end
         end
     end
@@ -1200,27 +1112,12 @@ local function tpToSafe(pos)
     task.wait(0.3)
     local rootAfter = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if rootAfter and rootAfter.Position.Y < pos.Y - 50 then
-        print("[MUTATION] ⚠️ Kecebur! Retry TP...")
+        print("[MUTATION] Kecebur! Retry TP...")
         rootAfter.CFrame = CFrame.new(pos + Vector3.new(0, 50, 0))
         task.wait(0.3)
     end
     return true
 end
-
-task.spawn(function()
-    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
-    local gameR = remotes and remotes:FindFirstChild("Game")
-    local eggPickup = gameR and gameR:FindFirstChild("EggPickup")
-    if eggPickup then
-        eggPickup.OnClientEvent:Connect(function(...)
-            local args = {...}
-            if args[1] == "BasketFull" then
-                MutationState.BasketFull = true
-                print("[MUTATION] ⚠️ BASKET FULL!")
-            end
-        end)
-    end
-end)
 
 local function runMutationOnce()
     MutationState.Running = true
@@ -1232,7 +1129,7 @@ local function runMutationOnce()
         return false
     end
 
-    print("[MUTATION] 🎯 holding " .. (eggName or "?") .. ", starting")
+    print("[MUTATION] holding " .. (eggName or "?") .. ", starting")
 
     MutationState.StealPaused = true
     task.wait(1.5)
@@ -1258,13 +1155,13 @@ local function runMutationOnce()
         dropWaited = dropWaited + 0.5
         if not isHoldingEggMutation() then
             eggReleased = true
-            print("[MUTATION] ✅ egg LEPAS @ " .. dropWaited .. "s")
+            print("[MUTATION] egg LEPAS @ " .. dropWaited .. "s")
             break
         end
     end
 
     if not eggReleased then
-        print("[MUTATION] ⚠️ egg GAK LEPAS")
+        print("[MUTATION] egg GAK LEPAS")
         MutationState.Running = false
         MutationState.StealPaused = false
         MutationState.EggLocked = false
@@ -1277,7 +1174,7 @@ local function runMutationOnce()
         task.wait(1)
         retWaited = retWaited + 1
         if isHoldingEggMutation() then
-            print("[MUTATION] ✅ egg BALIK @ " .. retWaited .. "s")
+            print("[MUTATION] egg BALIK @ " .. retWaited .. "s")
             break
         end
         if retWaited % 5 == 0 then
@@ -1292,7 +1189,7 @@ local function runMutationOnce()
             local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
             if myRoot then
                 myRoot.CFrame = spawn.CFrame + Vector3.new(0, 5, 0)
-                print("[MUTATION] 🏠 Balik ke plot")
+                print("[MUTATION] Balik ke plot")
             end
         end
     end
@@ -1345,7 +1242,6 @@ function Features.Init(sharedState)
     Features.startEggESP()
     Features.startPetESP()
     Features.startAutoSteal()
-        Features.startMutationSteal()
     Features.startAutoHatch()
     Features.startAutoRidePet()
     Features.startEggPrediction()
