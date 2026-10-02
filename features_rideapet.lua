@@ -1,4 +1,1352 @@
---!nocheck
---!nolint
--- Obscura [fc27c5e9]
-local lI1IlIlI=(function() local _0xd251='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/' local lIll1lI1={} for _0xcab9=1,#(_0xd251) do lIll1lI1[string.sub(_0xd251,_0xcab9,_0xcab9)]=_0xcab9-1 end local _lllllIl={36,60,136,181,8,43,36,189,101,65,123} local _0xc89babe={} local _rbnydmunb_=41209 local _bsdgdqowb=173 return function(_0xf5457ce,_oyrn_ikbdz,I11IIIlIlIl) local _0xaffbad=_0xc89babe[I11IIIlIlIl] if _0xaffbad then return _0xaffbad end local _lIlllI1=bit32.bxor(_oyrn_ikbdz,_rbnydmunb_+I11IIIlIlIl*131) local _0xf8780=math.floor(_lIlllI1/256) local IlIllI1l=_lIlllI1-_0xf8780*256 local _0xb89c={} local __aftiuczf=1 local _jfncmzg=0 local _0x96581c1=0 for _icfxnsfwvc=1,#(_0xf5457ce) do local _0x45687=string.sub(_0xf5457ce,_icfxnsfwvc,_icfxnsfwvc) local _0x83c1f4d=lIll1lI1[_0x45687] if _0x83c1f4d then _jfncmzg=_jfncmzg*64+_0x83c1f4d _0x96581c1=_0x96581c1+6 if _0x96581c1>=8 then _0x96581c1=_0x96581c1-8 local _0x1ac64ca=math.floor(_jfncmzg/2^_0x96581c1) _jfncmzg=_jfncmzg-_0x1ac64ca*2^_0x96581c1 local _1II1111=((__aftiuczf+_0xf8780+I11IIIlIlIl)%#_lllllIl)+1 local _ty_swmozq=(_0xf8780+__aftiuczf*IlIllI1l+bit32.bxor(_lllllIl[_1II1111],_bsdgdqowb)+I11IIIlIlIl*17)%256 _0xb89c[__aftiuczf]=string.char(bit32.bxor(_0x1ac64ca,_ty_swmozq)) __aftiuczf=__aftiuczf+1 end end end local _0x71c41245=table.concat(_0xb89c) _0xc89babe[I11IIIlIlIl]=_0x71c41245 return _0x71c41245 end end)() local Ill1111l1lI1={[243]="cvqcWPpkJ05uw5Zmwq11jgkxlXX0znXG/5fdAgaaYPXM",[28]="/mObLuvwzlbs",[66]="bQ0GwBjIHyToMEBdeFc1oXW91kKZhSsMNfcOuxAP3Agc8NawVZdSiWRmLtsqFg7bCt1bv+E=",[259]="bOTBRF/Q",[268]="RcfzltjCZcvR7n8=",[79]="ECg1h+ul9K1zXSGePgdu61O4azZTS+Ow4HqLCnNaFzEplJeMXX85Azv2BQm2ZG80",[228]="vRWTVKyV",[15]="AeChGAa1",[260]="8iPld5jFdIZcmCE=",[300]="PI+LM6a2bsRy",[263]="tK9pt8bSWxfix9YHLvCPtp7k75QgLNHy",[45]="d6tU3fTIPSyjiZd2lmtp0Kw+bq/Koz5m",[13]="tlN+AkAWdYZX2Po=",[271]="9NYiILPOoTRIUUKu",[223]="E6q6ncOVbOk=",[323]="116LRuQX",[177]="lLFt69LGSvs=",[114]="/Hox",[184]="ww==",[197]="+VH6IB16KYgd0A==",[172]="aSxpRDVv",[229]="OzHLA9o=",[231]="RGZXgLA=",[24]="PY08w4DOXD2Lc93sVbK/e4cr7Qw=",[249]="cw==",[261]="QHcoadOiKg0=",[52]="pWiMqI9Pbq5dyGGmWaXwvy9B6kuPK4wl",[129]="NNWXs8OXeJdJMBhJcix9Ywf3obfnoP3A",[144]="S/X7QRwBY49pJsZM3sw/Ohlq/WttgnbI",[67]="BBHGAduOFIvLlM+O4h04iaxOqeuJ47RV",[98]="dyaof84=",[50]="dQ==",[131]="dh0YxSE=",[140]="2TNZ3v3k",[124]="V5kSuuKmDP93vm4Wf6Nsuw==",[92]="NC55dDhPvVMvQBVfTKm6Str7oquC",[164]="Ua2yTAyd9q8WQD9b0dY=",[186]="BQs=",[310]="BtQA+RQT2Rg=",[72]="cjpd9Dg=",[212]="BtECBr6chlw=",[162]="vQ03t8j3Z9E=",[27]="9b8K0GaznD5I",[225]="oD77aw==",[22]="yopk/fVwZQU=",[235]="mV6Ht3DhxwqSplRoBQ==",[97]="JdTAqseE0Lo=",[29]="",[103]="tR5sO8QQeR1iWQ==",[211]="6FCOVL932xjTSYb6ks59",[253]="QgNA",[213]="N7LzqlRj",[148]="3FGEcRk0",[267]="cvS/KSst3falDTt5345pATfKuKVCe1vV",[178]="A7XTXQ==",[254]="Aq+uKrm9fLxcF1Fp+Nly+s4=",[155]="lKYOuUIetDn2ElK/deN3ShpQuv0m8m1H3BcZxGnuLA==",[251]="FTB7cWWwyIqW",[110]="sWTT",[135]="60NpAA==",[30]="wWp9175a274=",[107]="Xm4/BCobXCY=",[244]="3m2dLzE3rlODCPJF9Dwfj90vixPVIA9s",[43]="h0XtzaetnEmNgrXoqhIowNL/56iMeA==",[49]="AWlK0vL9vYRPjNVeYmdH2M+F7bGSljw=",[210]="vDJK+jhb",[203]="CHdx3NUwTVT5HsXi",[94]="IS+FtRFe2e4R",[111]="4t4m+tFE",[292]="Hm/LkANYsiOdJJU=",[204]="0/eDp5A=",[133]="IKv7CrgXEym8pSU=",[106]="WTRBCdL2wWMxPubojbCXK0M=",[115]="zrrRh823",[321]="vgcHjaQw",[77]="U8UyTZqSH0lYoYZVr5U+VjKP8dHyYymol0t/Yv8=",[290]="WhOGvf18gS0=",[83]="LZcS9XRF/sGcEuc=",[61]="/vFPGQbE5aLxoA==",[136]="XhuLqRmf",[291]="dlT+k39S0hsY3q/v7V9Fx/h1xaghYWOR",[46]="0NxOgry+6eQMZejK206SeiuB7A==",[1]="schj8fsu",[10]="jGYEG7s7MuxO/do=",[221]="O61r6PZpZw66hXLIcS6glQ==",[198]="VlCogBlodPAioGo=",[4]="CeSuGpxG",[118]="Guez0bsp/A==",[195]="bPtQSjRjCO9HUfTHfOf6tRA=",[222]="4kacNmE=",[100]="AKI=",[51]="UUX77CITh7KVTxQWPnx42McmCke24Nj4",[258]="JXWAApZi3o0eImjgGH8EejqLBdwv6pjc",[308]="oEdlWfUi",[127]="a2Potl2clA19EifmwkN88xwJyeXb70JW",[325]="MNJSDtleMupEl83LzVVcx1IrtDbIneXX",[250]="cbK2fw==",[240]="/UhkU5FzXu8=",[167]="nbEhLeto",[16]="fwiWg3jbdSqssS4=",[156]="KHDLY9ZFjyiwk3aF+ZjFmPE6iFB+1lmd",[216]="xLj18iBcN2K6dUU=",[188]="rQPhzrvAgw==",[218]="FiS20qoh",[149]="qmGK",[109]="hRQ1kodO2cX7EYmBLyWX2mTlDspYuqxUI8zNmA==",[232]="uC2dwnEwH3nqLvkC3gFIHQ==",[176]="n+8aZYueFUEzOQ==",[25]="7b8FroY0P7LYSwsd",[313]="xA==",[242]="YhXhX82PSlPnQJ7VoFSbbxHXl2OBWGMs",[71]="Tru5J+XrTaFvVxxy9PTGcUwdCNL1l2mGngn905CyAw==",[159]="qNDrqnVZwPdq1sIVaWiazfVHKfopMrkd",[157]="LmLiWZ/ohs0A/Gt1nQUpxQCnUTLhe3+n",[76]="5TwSaNuKL3f0bdyE3KM+jA==",[160]="bUbzfE0q",[226]="1ckhLLergug+9w==",[2]="exJgt0Ts",[296]="MZlh",[78]="ndG/+9ib381aQnQqfTpRSw==",[122]="XA2JoRek47k=",[63]="Yuv73u5sKIR6vrpN/taA4mhZ7pgTHJMW",[18]="+M4Pi6dUlyRz",[315]="Nlkvs0lJ",[60]="+w==",[215]="REz1RFk=",[142]="7Y46pOsuSenlS4ASG19QN2CMEzdqLHxH",[143]="vJkLeCT9C48gh0U=",[202]="v4w9Uhs+6Lc=",[65]="rzwo9GmSTdM=",[257]="a/QlyCrha5lE7A==",[75]="Px2pt07tDNU=",[272]="37jsmlM=",[171]="Gtf+nDcHAZ4zBIqNLg==",[56]="SMJZG3tTq4YEg2klWOS5Eg==",[147]="AEjx",[99]="/dqMbmc=",[132]="17JHewI9",[38]="deRc",[150]="x0cl5g==",[86]="MC7O3/qq+KU69qIO",[301]="3JjAYv8YtTI=",[302]="49LsZEo0MWZW8fE4Cw10jH5w+obowzZT",[70]="zbJXeNBDhlq+W7/6gCJQsw==",[224]="Gfj6LscI0VfhjRB89+GIMTwaMx3mamQR",[165]="M+RAy4gc6A==",[269]="PHhcVIOK",[237]="ElACLimo79Y=",[154]="KFvtYpzITJwFegJtt1jO3w==",[307]="LSEO5RwMaFI=",[117]="4O/GaL+6KQkeqv6frJ1caHc=",[181]="sfziMvTO/0hkq0uWyeee8sAeNHAKObjx",[233]="bOTHBtEl1DvuAtZxxfxO8QnLfdY1njXR",[175]="S9XR",[87]="cvZAfrQ=",[102]="jbVs4Qbm",[318]="zKizUphYkkgEUUo=",[289]="ZfFeVfJAxIAT",[158]="4EoA5YU=",[161]="HTy62NMql0dcraQUBIO2vA==",[182]="Ovzsmo1bdjnW+MA=",[88]="no64mem0+eE=",[121]="rCQWv4taR/c=",[123]="A7K7ssNmhJXwAUACkX78/XZlJf4yCiJv",[320]="B9At6Xld0DUWqec=",[281]="rOU/8xsnYPcB4IBJ2vyFAw9Hifef0GWg",[205]="n2djBww=",[280]="dvCIkTQq+xk=",[26]="xAgN/gsDf67SVEovIkXAbixu8fBO",[245]="k4Na",[256]="RR1KWw==",[278]="+VIQXUHSuFGi",[270]="2H1hAry0aviUcPI=",[58]="ENcvtabHykguYI3FpNSvcIeVQObnh7Fm",[303]="ZGavh+vz",[113]="jRseOebwn9hp6Y1C9OM3jNZO1Ctkizyy",[141]="Z2MVPsJuk3vHmnU=",[20]="9/LdTA==",[120]="I1a3HhRfLHRF19dqvcJgeJlF/onE25Lz",[262]="jHbqovNUMU+3R/zotb9C8i8=",[130]="mCEfjA==",[42]="4w==",[279]="jAzrRxbfKgI=",[264]="SfH3mZ4/pN2nELWF",[31]="bZGvJWD2gus=",[44]="0w==",[11]="4bY6IJwc",[59]="45/T2vkyDN/vJooNEF9fDH2VHQ==",[137]="tjMM",[200]="DyOsFQzA1ZSbEa8+/mMBGLS2Bmci29be",[19]="XP2w9sI=",[252]="VqA7/dehAcJJ0T/NO5otbSuGPNku74eh",[14]="IPuFuJUUqLNbQBs=",[288]="/doI8bHz6b9jgUs=",[265]="7Gjr/rQ=",[53]="bHQIUZ93Z01lvdTx8I0gab25jxbff3l6XbzTjCS9ZtHqGhvyL3Q=",[74]="J3nnALIStQov",[192]="9ddzDvblZ4ipadxYguboYpsUYkXaNhgi",[17]="U9GWDeeb5MWPzng=",[241]="BFCpTYdds3jgBclnvOqBxA==",[319]="kBgTMt0BqM9yjqqtARBCxe2PkWKx+oHl",[275]="Oom2J34bRWI2nIHbaXnxOQ==",[276]="Pqfc/8azIWhNkl1REkMbcjWKgqk3ecdy",[274]="E34E8MrI2QoGNSnU6/l8sG6ckrIoN563",[34]="vj0aBA==",[145]="eES1vBsA",[8]="vLLKjMehEOPMMlo=",[297]="xVh5cNYG1/0zBA==",[80]="7PS2Wr92sG2npQ4KXJOolecPHWBHKzlmPgo2/A7yLw==",[108]="ujRu",[306]="mwcsdcP3",[5]="oYue06ER",[85]="qb7t",[183]="Jw==",[139]="/Wuc+HSBU5Inh9Y=",[39]="e4H8pkCNT/CZ1K/SBCep3zHWdiJldg+p",[101]="NUlHNlyKRDM=",[32]="x+RxdcY=",[286]="We+iA/FDI8w1COoGnku3mOI=",[36]="FTTMN073",[191]="",[220]="S3jLOuYcR0+F0yVX",[238]="trW3JPg=",[68]="GMXdQnUtNQ==",[35]="Ji8=",[190]="MX/gH4bpguk2",[105]="1r/IrxOUuVN+TBRdFntvuQwum/iB0ueS",[41]="6x3fTImoKH2HdP562J6ndSqc6HO4Da4=",[168]="JRXCbWhzzoJ3Kwaj03QY",[73]="NGryogLDfk78WyzjUQ==",[196]="WlanSDmtvA==",[82]="J1MUzmHcKOWZgmvuNuNQC5j57V2P757+",[312]="XjA=",[246]="CE8bSeVWmQ==",[62]="bSUYAn6Slu0GsgCgcG+8mvL7HVw3utC8",[199]="kJ7G7Q==",[230]="ZD1cCko1UV0CZX0=",[125]="mZwQrp8GBbi/RPYX8F7x",[189]="enfgORK77sA=",[166]="TxpN6Gvibak=",[309]="QVUwY2EM6RzcPuQ3A9YW",[91]="0Qw1vRjgC3xjywWH",[48]="6WkGkP9q6vOjSPlA4OludR6T20OlWRyI",[273]="w9JJKO+qWdk=",[266]="8JSw4JLW",[3]="AIBfUPMYq8S5X2o=",[152]="RTxnfidklyE=",[180]="Coy6S3U6",[96]="yNVkfucDApc=",[304]="eVUW/eiq+d4s+b/6LbmLlw==",[214]="V3ApmYFFNVYsSyl5",[293]="Lr0O6bPg",[277]="u0U8XxorHFs2/DU=",[234]="VUlU8Q0=",[239]="xqQeh0T1uy0Dvj0Nzw==",[93]="KvMwOjpDnS07",[299]="Gu0keDOQqBuTtXW5RA==",[247]="r9JKbZsTf0thyfk=",[134]="hxI1NL/2",[219]="pJMSaUQN",[7]="Gpg0jn3PvjWWdAg=",[163]="CL+CWqAq",[283]="/gsQe3A=",[174]="avlKI0nU1Fc=",[23]="rEFhUOANCopp",[322]="UuzUekXr7rkuKAg=",[201]="83VjEA7B/7ZifUrQuZYoPQ==",[236]="znRZ+9xi8+62",[209]="RYlGLXQ0YFo=",[95]="",[173]="0MuIy/yQSg==",[227]="JsUaObA2CV0=",[40]="Apx603OqZsskttOPMbcZ1zT9CahlGT+B",[89]="IKepSvT72jzF",[6]="pL4pIKjC83iqj6E=",[84]="2/djT3IT",[179]="o6t8lVU=",[12]="SMqJCuOK",[284]="F+X0AOE5",[187]="L0Q=",[116]="uhWzPnY0oMQq2BA=",[153]="OASzcGMxUhMfGKznxGBGRA==",[298]="9cPowwU=",[146]="sz6OSew5hSiYW7Y=",[9]="8T4WvsxO",[57]="DDaU38e5U18Vb0h6Pc4FDO6QlBxjJXZJ",[104]="jPqG9T7H",[295]="WUDRlYZ2QABhPpn2+XJyMNb2hOzUOVBO1JeAKkw=",[314]="H1Qy",[170]="clEXIPk=",[294]="pkemkRr9bfw=",[193]="Zee6tUx1NiEUos8=",[33]="dYfjIyo=",[282]="LboPA/szz7gmEY+H",[311]="2A5w32Nxp88p9/9Mnfts6przfJ8EJMlN",[90]="yr6fWC4HP4dRIOvLjqFMNjALpXg=",[255]="5XJ8MLummw==",[287]="pVaVGosV0VQ=",[128]="MXJDMEaGViBL",[81]="FNZPyeB3cvPuW6LQ2jTW/wFNibpNlfOD4pJn4cV/MgCHiX3TfQ==",[69]="wnhixtnwb64=",[55]="1ESNZ6wVoPxP3UtPwiCQWv9Wog6Z2P1z0iZie2+sc/v3",[37]="B5GK0l5/7SzNCVg=",[54]="S7PTNiG23PvXGmqKkwp7CZl+n+KEM8bid4TSAk4nC4+zBzqA09R5mX8=",[194]="QDZkHtogAq9qHw==",[151]="T1VeFiQ=",[47]="hQ==",[317]="pcDPXRjgiqx1l1Y=",[21]="japNQhU=",[217]="hB6h",[185]="ihIXdauOGV0N",[169]="UbuqN0xXp+0=",[119]="duE28A==",[316]="KItmxvlc",[126]="0sdMV93e",[64]="XgoqyDFY+kRLtw9J9g+i8g==",[248]="r+081O4E4w==",[285]="D+RW2r02B5SVHLy7Zt5j",[208]="wkPi9puANA==",[138]="vN9qGAE=",[206]="O7w=",[324]="Oe00DUVXDn1hOgo=",[207]="zA==",[112]="JgLcxpojazGt",[305]="YbHTM1Qru/U="} local _qfccpvmmyyu local _euzarnpyjk local _n_liieasgyzea local _lpfoosni do local _xxndyoymx=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27386,27387)],61863,bit32.bxor(27386,27387)) local _0xec489=_xxndyoymx end local _0x537d9 local _0x1194b local _0xc68f local _0x2da0872b if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27385,27387)],46906,bit32.bxor(27385,27387)) then local _II1lIlIll1=(math.floor(4015/5)) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27384,27387)],34775,bit32.bxor(27384,27387))) end local _0xb88de04e local _eawrsjte local llllll1Il1l111 do local _0x1131a1=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27391,27387)],33166,bit32.bxor(27391,27387)) local _nbaczxubbtl=_0x1131a1 end local _pilwmqmr_ynke local _1IlIl1l local _gxsmgyzqlzsqc if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27390,27387)],1155,bit32.bxor(27390,27387)) then local _0xe5f1b297=((37+(751))) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27389,27387)],20476,bit32.bxor(27389,27387))) end local _zbdttknksbcem if false then local _0x6d8d3=(bit32.bxor(76,209)) local _I1lll11l1lII=math.sin((math.floor(162/2))) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27388,27387)],51987,bit32.bxor(27388,27387))) end local _fsxkrryi local llI1I1l1I1I local _fwqzzjcwp local lllI1l1Ill11 local _0x4ebeffe local _0xaf069fca,_swdhqlvpnwpcb if false then local _0x78b09f7=(bit32.bxor(521,241)-200) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27379,27387)],35128,bit32.bxor(27379,27387))) end local _0x2c509 local _0xe3026 local l1I1lIIlIl11l local _0xce71d local IIlIIlllll1ll local _l1lIIll local _klejbzhd local IlI1II1l1 local _0xc81938ae local _0x3198e local _0x9bbb8c local Il1I1Il1l1 if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27378,27387)],29245,bit32.bxor(27378,27387)) then local _uphcyzqedkfn=(math.floor(3984/4)) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27377,27387)],58732,bit32.bxor(27377,27387))) end local _trprdlzv do local _fseriyp=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27376,27387)],12127,bit32.bxor(27376,27387)) local _0x173f95=_fseriyp end local l1lII1I11 local _l11lIlIIlI1I local lI1l1II111l1 if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27383,27387)],59276,bit32.bxor(27383,27387)) then local _1IlI1lIlIlIl=((951-59)-35) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27382,27387)],61031,bit32.bxor(27382,27387))) end local Il11l1lIII1l if (function() local _rs_wduc=(math.floor(420/5)) return _rs_wduc*_rs_wduc<0 end)() then local Il1l1lIl=(bit32.bxor(326,220)) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27381,27387)],52092,bit32.bxor(27381,27387))) do local _0xdae23384=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27380,27387)],12691,bit32.bxor(27380,27387)) local _0x4725188=_0xdae23384 end end local l1IlIlI11 local _0x00d78 local _dy_yyej if (function() local _uioie_lj=(math.floor(360/4)) return _uioie_lj*_uioie_lj<0 end)() then local l1ll1II111=(math.floor(5610/10)) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27371,27387)],29522,bit32.bxor(27371,27387))) end local _xzypzim local l1l1IlII1 local _0xde54 if (function() local _pgwhcnsusx=(math.floor(96/4)) return _pgwhcnsusx*_pgwhcnsusx<0 end)() then local _III11l11I1l1I=(math.floor(3360/5)) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27370,27387)],16957,bit32.bxor(27370,27387))) end local _0x0191ed=(bit32.bxor(31812,66)) while true do if _0x0191ed==((31992-21)-221) then _qfccpvmmyyu={} _0x0191ed=bit32.bxor(((5484-50)-273),(bit32.bxor(21185,33982))) elseif _0x0191ed==(bit32.bxor(24235,64859)) then _l1lIIll=function() local _bxdpgo_={Common=1,Uncommon=(bit32.bxor(242,240)),Rare=(math.floor(30/10)),Epic=(bit32.bxor(85,81)),Legendary=(bit32.bxor(129,132)),Mythic=(bit32.bxor(149,147)),Divine=((63-23)-33),Ethereal=(bit32.bxor(239,231)),Secret=(bit32.bxor(18,27))} return _bxdpgo_[_euzarnpyjk.RarityNotifThreshold or lI1IlIlI(Ill1111l1lI1[bit32.bxor(27369,27387)],19964,bit32.bxor(27369,27387))] or ((58-25)-28) end _0x0191ed=bit32.bxor((bit32.bxor(44183,140)-349),(bit32.bxor(196,533))) elseif _0x0191ed==(math.floor(525950/10)) then lI1l1II111l1=nil _0x0191ed=bit32.bxor(((16323+(361))),(math.floor(383810/10))) elseif _0x0191ed==((8889+(52166))) then return _qfccpvmmyyu elseif _0x0191ed==(bit32.bxor(46551,239)) then _qfccpvmmyyu.startPetESP=function() task.spawn(function() while task.wait(0.3) do if _euzarnpyjk.ESP_Pets_Enabled then local _wcqrgso=_0x537d9:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27368,27387)],59433,bit32.bxor(27368,27387))) if _wcqrgso then for _bczoej_cdbi,_0xfd511 in ipairs(_wcqrgso:GetChildren()) do local _0x2aa51d2=_0xfd511:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27375,27387)],13370,bit32.bxor(27375,27387))) if _0x2aa51d2 then for ll1IIll1lIIIll,_hmiykfclrhwf in ipairs(_0x2aa51d2:GetChildren()) do if _hmiykfclrhwf:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27374,27387)],62153,bit32.bxor(27374,27387))) and not _0xb88de04e[_hmiykfclrhwf] then local _ticdkokxdbwo=_hmiykfclrhwf:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27373,27387)],322,bit32.bxor(27373,27387)),true) if _ticdkokxdbwo then local _hrzibnkzqynpa=Instance.new(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27372,27387)],19439,bit32.bxor(27372,27387))) _hrzibnkzqynpa.Name=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27363,27387)],14034,bit32.bxor(27363,27387)) _hrzibnkzqynpa.FillColor=Color3.fromRGB(((230-77)-53),(math.floor(800/4)),(bit32.bxor(85,170))) _hrzibnkzqynpa.OutlineColor=Color3.new(1,1,1) _hrzibnkzqynpa.FillTransparency=0.5 _hrzibnkzqynpa.Adornee=_hmiykfclrhwf _hrzibnkzqynpa.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop _hrzibnkzqynpa.Parent=_hmiykfclrhwf local _0x34d0da1=Instance.new(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27362,27387)],10923,bit32.bxor(27362,27387))) _0x34d0da1.Name=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27361,27387)],58016,bit32.bxor(27361,27387)) _0x34d0da1.Size=UDim2.fromOffset((bit32.bxor(454,30)-292),(bit32.bxor(208,150))) _0x34d0da1.StudsOffset=Vector3.new(0,3.5,0) _0x34d0da1.AlwaysOnTop=true _0x34d0da1.MaxDistance=(math.floor(4000/8)) _0x34d0da1.Adornee=_ticdkokxdbwo _0x34d0da1.Parent=_ticdkokxdbwo local _ybhzdwnqf=Instance.new(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27360,27387)],3695,bit32.bxor(27360,27387))) _ybhzdwnqf.Name=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27367,27387)],64558,bit32.bxor(27367,27387)) _ybhzdwnqf.Size=UDim2.fromScale(1,1) _ybhzdwnqf.BackgroundTransparency=0.3 _ybhzdwnqf.BackgroundColor3=Color3.fromRGB((bit32.bxor(187,180)),(bit32.bxor(58,93)-88),(math.floor(200/10))) _ybhzdwnqf.TextColor3=Color3.fromRGB((bit32.bxor(396,157)-173),(bit32.bxor(50,250)),((428-41)-132)) _ybhzdwnqf.TextStrokeColor3=Color3.new(0,0,0) _ybhzdwnqf.TextStrokeTransparency=0.3 _ybhzdwnqf.Font=Enum.Font.GothamBold _ybhzdwnqf.TextSize=(math.floor(120/10)) _ybhzdwnqf.TextWrapped=true _ybhzdwnqf.Text=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27366,27387)],47105,bit32.bxor(27366,27387)) _ybhzdwnqf.Parent=_0x34d0da1 local IllI1ll111Il=Instance.new(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27365,27387)],14036,bit32.bxor(27365,27387))) IllI1ll111Il.CornerRadius=UDim.new(0,(bit32.bxor(244,242))) IllI1ll111Il.Parent=_ybhzdwnqf local lIIIII11II1=Instance.new(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27364,27387)],46667,bit32.bxor(27364,27387))) lIIIII11II1.Color=Color3.fromRGB(((26+(74))),(bit32.bxor(500,204)-112),(bit32.bxor(462,108)-163)) lIIIII11II1.Thickness=1 lIIIII11II1.Transparency=0.3 lIIIII11II1.Parent=_ybhzdwnqf _0xb88de04e[_hmiykfclrhwf]={hl=_hrzibnkzqynpa,bb=_0x34d0da1,lbl=_ybhzdwnqf,part=_ticdkokxdbwo} end end end end end end else for _0xd7a87742,_onontopepsri in pairs(_0xb88de04e) do if _onontopepsri.hl then _onontopepsri.hl:Destroy() end if _onontopepsri.bb then _onontopepsri.bb:Destroy() end _0xb88de04e[_0xd7a87742]=nil end end for _k_kktso,lll11l1l1l1l in pairs(_0xb88de04e) do if not _k_kktso.Parent then if lll11l1l1l1l.hl then lll11l1l1l1l.hl:Destroy() end if lll11l1l1l1l.bb then lll11l1l1l1l.bb:Destroy() end _0xb88de04e[_k_kktso]=nil elseif lll11l1l1l1l.lbl then local _rtghkpkjhrzs,IIl11ll1=_eawrsjte(_k_kktso) local IlI1ll111ll={} if _euzarnpyjk.ESP_PetName_Enabled then table.insert(IlI1ll111ll,lI1IlIlI(Ill1111l1lI1[bit32.bxor(27355,27387)],48698,bit32.bxor(27355,27387)).._k_kktso.Name) end if _euzarnpyjk.ESP_PetCash_Enabled then table.insert(IlI1ll111ll,lI1IlIlI(Ill1111l1lI1[bit32.bxor(27354,27387)],44211,bit32.bxor(27354,27387)).._rtghkpkjhrzs) end if _euzarnpyjk.ESP_PetSpeed_Enabled then table.insert(IlI1ll111ll,lI1IlIlI(Ill1111l1lI1[bit32.bxor(27353,27387)],32574,bit32.bxor(27353,27387))..IIl11ll1) end lll11l1l1l1l.lbl.Text=table.concat(IlI1ll111ll,lI1IlIlI(Ill1111l1lI1[bit32.bxor(27352,27387)],60479,bit32.bxor(27352,27387))) end end end end) end if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27359,27387)],44214,bit32.bxor(27359,27387)) then local _0x2d70=(bit32.bxor(802,247)-126) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27358,27387)],43837,bit32.bxor(27358,27387))) end _0x0191ed=bit32.bxor((bit32.bxor(33709,22362)),(math.floor(162944/8))) elseif _0x0191ed==(bit32.bxor(4403,65479)) then _0x3198e={Vector3.new(-4902.3,41396.1,-3751.4),Vector3.new(-4908.1,41365.0,-3742.9),Vector3.new(-4909.5,41357.4,-3740.8),Vector3.new(-4923.0,41299.5,-3719.6),Vector3.new(-4927.1,41293.3,-3712.6),Vector3.new(-4951.4,41287.6,-3669.6),Vector3.new(-4973.1,41283.3,-3643.8),Vector3.new(-4995.2,41285.0,-3620.6),Vector3.new(-5010.8,41279.5,-3597.9),Vector3.new(-5020.6,41275.2,-3582.6),Vector3.new(-5032.2,41272.9,-3564.8),Vector3.new(-5062.9,41262.1,-3542.1),Vector3.new(-5070.9,41262.3,-3537.0),Vector3.new(-5079.4,41265.2,-3533.3),Vector3.new(-5088.6,41240.3,-3525.3),Vector3.new(-5096.8,41228.7,-3520.1),Vector3.new(-5101.5,41197.4,-3514.3),Vector3.new(-5103.3,41165.1,-3511.6),Vector3.new(-5112.5,41164.5,-3551.9),Vector3.new(-5157.0,41159.7,-3588.1),Vector3.new(-5165.4,41158.0,-3594.1),Vector3.new(-5211.0,41150.0,-3569.9),Vector3.new(-5248.0,41147.5,-3580.6),Vector3.new(-5256.8,41143.1,-3581.9),Vector3.new(-5260.1,41122.3,-3580.1),Vector3.new(-5268.7,41062.3,-3575.5),Vector3.new(-5259.1,41050.3,-3586.2),Vector3.new(-5269.5,41047.7,-3640.0),Vector3.new(-5264.0,41042.3,-3655.1),Vector3.new(-5218.7,41023.5,-3659.7),Vector3.new(-5188.9,41037.1,-3635.5),Vector3.new(-5147.5,41037.4,-3589.8),Vector3.new(-5123.4,41037.2,-3550.7),Vector3.new(-5123.0,41033.8,-3503.2),Vector3.new(-5094.9,41037.6,-3486.6),Vector3.new(-5081.6,41035.8,-3474.5),Vector3.new(-5040.8,41048.6,-3433.1),Vector3.new(-4990.3,41050.6,-3391.9),Vector3.new(-4949.3,41057.1,-3400.0),Vector3.new(-4908.1,41036.5,-3439.7),Vector3.new(-4869.4,41000.1,-3474.8),Vector3.new(-4880.2,40975.6,-3528.0),Vector3.new(-4930.9,40973.3,-3563.7),Vector3.new(-4966.2,40960.4,-3610.8),Vector3.new(-5016.4,40943.8,-3648.2),Vector3.new(-5072.8,40929.0,-3667.8),Vector3.new(-5136.3,40922.9,-3656.4),Vector3.new(-5151.8,40914.2,-3681.0),Vector3.new(-5209.2,40907.2,-3677.5),Vector3.new(-5267.7,40907.3,-3651.2),Vector3.new(-5282.4,40908.9,-3632.6),Vector3.new(-5270.4,40907.1,-3619.5)} if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27357,27387)],38272,bit32.bxor(27357,27387)) then _0x0191ed=bit32.bxor(((54306+(1652))),(bit32.bxor(64301,158))) end elseif _0x0191ed==(math.floor(311260/5)) then if (function() local _dawsqwoerfb_t=(math.floor(370/10)) return _dawsqwoerfb_t*_dawsqwoerfb_t>=0 end)() then _0xde54=function() local IIIIl1I1,_0xde091734 local _knnbkhjhv local _Il1Ill1II local _0x32fcec local _0x35ad local IIll1lI1I11lI=(bit32.bxor(465,40271)) while true do if IIll1lI1I11lI==((40543-87)-362) then l1lII1I11.Running=true IIll1lI1I11lI=bit32.bxor((bit32.bxor(30931,227)),(bit32.bxor(21061,234))) elseif IIll1lI1I11lI==(bit32.bxor(36187,204)) then _knnbkhjhv=l1IlIlI11() IIll1lI1I11lI=(math.floor(419960/8)) elseif IIll1lI1I11lI==(bit32.bxor(13238,131)) then l1lII1I11.EggLocked=false IIll1lI1I11lI=bit32.bxor((math.floor(17776/8)),(bit32.bxor(40351,20033))) elseif IIll1lI1I11lI==((11296-63)-322) then IIIIl1I1,_0xde091734=_0x00d78() IIll1lI1I11lI=bit32.bxor((bit32.bxor(21162,246)-351),((52602-19)-250)) elseif IIll1lI1I11lI==(math.floor(128790/2)) then _Il1Ill1II=0 IIll1lI1I11lI=((6121+(29719))) elseif IIll1lI1I11lI==((11525+(3587))) then l1lII1I11.Running=false IIll1lI1I11lI=bit32.bxor(((2040+(353))),((3552-77)-405)) elseif IIll1lI1I11lI==(math.floor(105820/4)) then if not _0x32fcec then local _sckvzzblgoxe=(math.floor(485112/8)) while true do if _sckvzzblgoxe==(math.floor(485112/8)) then print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27356,27387)],28619,bit32.bxor(27356,27387))) _sckvzzblgoxe=(bit32.bxor(22601,161)) elseif _sckvzzblgoxe==(bit32.bxor(3673,162)) then l1lII1I11.StealPaused=false _sckvzzblgoxe=(bit32.bxor(6604,30386)) elseif _sckvzzblgoxe==(bit32.bxor(46597,29985)) then return false elseif _sckvzzblgoxe==((4465+(18295))) then l1lII1I11.Running=false _sckvzzblgoxe=bit32.bxor((bit32.bxor(40825,181)),(bit32.bxor(11268,48435))) elseif _sckvzzblgoxe==(math.floor(142710/5)) then l1lII1I11.EggLocked=false _sckvzzblgoxe=(bit32.bxor(50103,125)-166) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27347,27387)],19422,bit32.bxor(27347,27387))) end end end IIll1lI1I11lI=bit32.bxor((math.floor(102524/4)),(math.floor(394744/8))) elseif IIll1lI1I11lI==(math.floor(71890/5)) then _0x35ad=0 IIll1lI1I11lI=bit32.bxor((math.floor(412800/10)),(bit32.bxor(39524,249))) elseif IIll1lI1I11lI==((15839-97)-417) then while _0x35ad<_l11lIlIIlI1I.RETURN_TIMEOUT do local II1I111lI=(bit32.bxor(14473,224)-106) while true do if II1I111lI==(math.floor(28670/2)) then task.wait(1) II1I111lI=bit32.bxor(((23982+(6095))),(bit32.bxor(36572,216))) elseif II1I111lI==(math.floor(321885/5)) then _0x35ad=_0x35ad+1 II1I111lI=bit32.bxor((math.floor(103968/2)),((15074+(24108)))) elseif II1I111lI==(bit32.bxor(21125,155)) then if _0x00d78() then print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27346,27387)],36953,bit32.bxor(27346,27387)).._0x35ad..lI1IlIlI(Ill1111l1lI1[bit32.bxor(27345,27387)],25274,bit32.bxor(27345,27387))) break end II1I111lI=((6343+(31159))) elseif II1I111lI==((37826-12)-312) then if _0x35ad%(math.floor(25/5))==0 then print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27344,27387)],58579,bit32.bxor(27344,27387)).._0x35ad..lI1IlIlI(Ill1111l1lI1[bit32.bxor(27351,27387)],31330,bit32.bxor(27351,27387))) end break else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27350,27387)],40449,bit32.bxor(27350,27387))) end end end IIll1lI1I11lI=((15028-91)-235) elseif IIll1lI1I11lI==(math.floor(88904/2)) then while _Il1Ill1II<_l11lIlIIlI1I.DROP_TIMEOUT do local _dverwbggpfab=(math.floor(134888/4)) while true do if _dverwbggpfab==(bit32.bxor(33909,222)-241) then if os.clock() - l1lII1I11.LastFire>(math.floor(4/2)) then local _IIIIlll1Il local _0x2f17e58=(bit32.bxor(57081,197)) while true do if _0x2f17e58==(bit32.bxor(57223,238)-301) then _IIIIlll1Il=_dy_yyej() _0x2f17e58=bit32.bxor((bit32.bxor(12255,17)-388),(bit32.bxor(13272,2289))) elseif _0x2f17e58==(bit32.bxor(21237,43946)) then print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27349,27387)],19584,bit32.bxor(27349,27387)).._Il1Ill1II..lI1IlIlI(Ill1111l1lI1[bit32.bxor(27348,27387)],42467,bit32.bxor(27348,27387))) break elseif _0x2f17e58==(bit32.bxor(41992,226)-263) then l1lII1I11.LastFire=os.clock() _0x2f17e58=bit32.bxor((bit32.bxor(545,49024)),(bit32.bxor(17414,248))) elseif _0x2f17e58==((4706+(769))) then if not _IIIIlll1Il then _xzypzim() end _0x2f17e58=bit32.bxor((bit32.bxor(39710,215)-174),(bit32.bxor(14400,184))) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27339,27387)],52724,bit32.bxor(27339,27387))) end end end _dverwbggpfab=bit32.bxor((bit32.bxor(25891,58)),(bit32.bxor(63436,113)-256)) elseif _dverwbggpfab==(bit32.bxor(43131,110)) then _Il1Ill1II=_Il1Ill1II+0.5 _dverwbggpfab=bit32.bxor((bit32.bxor(40514,174)),(bit32.bxor(48962,95)-264)) elseif _dverwbggpfab==(bit32.bxor(37821,25)) then task.wait(0.5) _dverwbggpfab=bit32.bxor((math.floor(94535/5)),(bit32.bxor(5747,63421))) elseif _dverwbggpfab==(math.floor(16882/2)) then if not _0x00d78() then local _II111I1I11=((35856+(24966))) while true do if _II111I1I11==(bit32.bxor(3718,58128)) then _0x32fcec=true _II111I1I11=bit32.bxor((math.floor(139100/10)),(bit32.bxor(30758,10))) elseif _II111I1I11==(math.floor(519408/8)) then break elseif _II111I1I11==(bit32.bxor(19988,110)) then print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27338,27387)],63311,bit32.bxor(27338,27387)).._Il1Ill1II..lI1IlIlI(Ill1111l1lI1[bit32.bxor(27337,27387)],63056,bit32.bxor(27337,27387))) _II111I1I11=(bit32.bxor(64801,191)) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27336,27387)],1813,bit32.bxor(27336,27387))) end end end break else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27343,27387)],9262,bit32.bxor(27343,27387))) end end end IIll1lI1I11lI=(math.floor(264550/10)) elseif IIll1lI1I11lI==((48844-89)-498) then l1lII1I11.StealPaused=true IIll1lI1I11lI=bit32.bxor((bit32.bxor(24227,77)),(math.floor(73856/8))) elseif IIll1lI1I11lI==((30222+(11922))) then print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27342,27387)],20537,bit32.bxor(27342,27387))) IIll1lI1I11lI=(math.floor(143780/10)) elseif IIll1lI1I11lI==(bit32.bxor(35524,24)) then print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27341,27387)],58976,bit32.bxor(27341,27387))) IIll1lI1I11lI=bit32.bxor(((44873-46)-417),((22416-80)-79)) elseif IIll1lI1I11lI==((52778-80)-203) then print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27340,27387)],63193,bit32.bxor(27340,27387))) IIll1lI1I11lI=(bit32.bxor(27172,39)) elseif IIll1lI1I11lI==(math.floor(19280/4)) then l1lII1I11.LastFire=0 IIll1lI1I11lI=bit32.bxor((bit32.bxor(63589,110)-255),(bit32.bxor(23098,146))) elseif IIll1lI1I11lI==(math.floor(117616/8)) then if _euzarnpyjk.MutationReturn_Enabled then local _0x8f100 local _0x8c47148=(bit32.bxor(3325,181)) while true do if _0x8c47148==(bit32.bxor(1980,3060)) then task.wait(0.5) _0x8c47148=((20696+(21114))) elseif _0x8c47148==(bit32.bxor(6933,125)-66) then if _0x8f100 then local lIllIIlllIIIl=_0x1194b.Character and _0x1194b.Character:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27331,27387)],20530,bit32.bxor(27331,27387))) if lIllIIlllIIIl then lIllIIlllIIIl.CFrame=_0x8f100.CFrame+Vector3.new(0,(bit32.bxor(128,133)),0) print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27330,27387)],6247,bit32.bxor(27330,27387))) end end break elseif _0x8c47148==(math.floor(83620/2)) then _0x8f100=_pilwmqmr_ynke() _0x8c47148=bit32.bxor(((23440+(8466))),(bit32.bxor(26441,205))) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27329,27387)],47084,bit32.bxor(27329,27387))) end end end IIll1lI1I11lI=(math.floor(321424/8)) elseif IIll1lI1I11lI==((49661+(13596))) then print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27328,27387)],15885,bit32.bxor(27328,27387))..(_0xde091734 or lI1IlIlI(Ill1111l1lI1[bit32.bxor(27335,27387)],26084,bit32.bxor(27335,27387)))..lI1IlIlI(Ill1111l1lI1[bit32.bxor(27334,27387)],44663,bit32.bxor(27334,27387))) IIll1lI1I11lI=bit32.bxor((bit32.bxor(5652,36378)),(math.floor(93590/10))) elseif IIll1lI1I11lI==(bit32.bxor(40271,1)-190) then if not IIIIl1I1 then local l1l11I11Il1I=(math.floor(128912/2)) while true do if l1l11I11Il1I==(math.floor(515648/8)) then l1lII1I11.Running=false l1l11I11Il1I=bit32.bxor((bit32.bxor(34054,13001)),((19604+(6029)))) elseif l1l11I11Il1I==(math.floor(542540/10)) then l1lII1I11.EggLocked=false l1l11I11Il1I=bit32.bxor(((49389-89)-193),(math.floor(318856/8))) elseif l1l11I11Il1I==((359+(8955))) then return false else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27333,27387)],63394,bit32.bxor(27333,27387))) end end end IIll1lI1I11lI=bit32.bxor((bit32.bxor(51252,15172)),((1029+(100)))) elseif IIll1lI1I11lI==(math.floor(135695/5)) then l1l1IlII1(_knnbkhjhv) IIll1lI1I11lI=bit32.bxor((bit32.bxor(3621,19250)),(math.floor(216815/5))) elseif IIll1lI1I11lI==(bit32.bxor(39959,229)) then task.wait((bit32.bxor(411,112)-489)) IIll1lI1I11lI=bit32.bxor(((37029-28)-95),(math.floor(219050/5))) elseif IIll1lI1I11lI==(bit32.bxor(1090,127)-406) then l1lII1I11.StealPaused=false IIll1lI1I11lI=((10174+(2935))) elseif IIll1lI1I11lI==((31308+(4532))) then _0x32fcec=false IIll1lI1I11lI=(bit32.bxor(4924,82)-154) elseif IIll1lI1I11lI==(math.floor(484256/8)) then task.wait(((70-41)-27)) IIll1lI1I11lI=bit32.bxor((bit32.bxor(40785,146)),((1856+(3551)))) elseif IIll1lI1I11lI==(bit32.bxor(56074,122)) then return true elseif IIll1lI1I11lI==((3997+(27489))) then task.wait(1.5) IIll1lI1I11lI=bit32.bxor((bit32.bxor(45162,22577)),(bit32.bxor(26028,96))) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27332,27387)],8895,bit32.bxor(27332,27387))) end end end end _0x0191ed=bit32.bxor(((29855+(29893))),(bit32.bxor(48674,107))) local _bshgxarafbg=math.random((bit32.bxor(207,211)-14)) elseif _0x0191ed==(bit32.bxor(59641,201)) then _qfccpvmmyyu.startVolcanicHunt=function() task.spawn(function() while task.wait(1) do if not _euzarnpyjk.VolcanicHunt_Enabled then _0xc81938ae.Hunting=false continue end if _0xc81938ae.Hunting then continue end _0xc81938ae.Hunting=true task.spawn(function() while _euzarnpyjk.VolcanicHunt_Enabled do local _1lIl1II1IlI=_0x1194b.Character local _lltvtwqs=_1lIl1II1IlI and _1lIl1II1IlI:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27323,27387)],45420,bit32.bxor(27323,27387))) local _0xdafce950=_1lIl1II1IlI and _1lIl1II1IlI:FindFirstChildOfClass(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27322,27387)],49235,bit32.bxor(27322,27387))) if not _lltvtwqs or not _0xdafce950 or _0xdafce950.Health<=0 then task.wait(1) continue end local _0x62fbc13=_0x9bbb8c() if _0x62fbc13 then print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27321,27387)],28548,bit32.bxor(27321,27387))) if _euzarnpyjk.Notify then _euzarnpyjk.Notify(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27320,27387)],57595,bit32.bxor(27320,27387)),lI1IlIlI(Ill1111l1lI1[bit32.bxor(27327,27387)],25502,bit32.bxor(27327,27387))) end local _lII1Ill111l=_0x62fbc13:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27326,27387)],37197,bit32.bxor(27326,27387)),true) for _ppslyxpcmxv,_1111I1I11 in ipairs(_0x3198e) do if not _euzarnpyjk.VolcanicHunt_Enabled then break end if not _0x62fbc13.Parent then break end local _fgtphicoektf=_0x1194b.Character and _0x1194b.Character:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27325,27387)],24432,bit32.bxor(27325,27387))) if _fgtphicoektf and _lII1Ill111l then local ll1l11IIl1=(_lII1Ill111l.Position - _fgtphicoektf.Position).Magnitude if ll1l11IIl1<=(bit32.bxor(90,114)) then break end end if _fgtphicoektf then _fgtphicoektf.CFrame=CFrame.new(_1111I1I11+Vector3.new(0,(bit32.bxor(43,46)),0)) _fgtphicoektf.Velocity=Vector3.zero end task.wait(0.12) end if _0x62fbc13.Parent then local _llj_yua=_trprdlzv(_0x62fbc13) if _llj_yua then print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27324,27387)],16671,bit32.bxor(27324,27387))) if _euzarnpyjk.VolcanicReturn_Enabled then task.wait(0.4) local _evrvdsqnb=llllll1Il1l111() if _evrvdsqnb then local _1lllI1Il1I1=_evrvdsqnb:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27315,27387)],60398,bit32.bxor(27315,27387)),true) or _evrvdsqnb:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27314,27387)],61915,bit32.bxor(27314,27387)),true) or _evrvdsqnb:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27313,27387)],30,bit32.bxor(27313,27387)),true) or _evrvdsqnb:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27312,27387)],16689,bit32.bxor(27312,27387)),true) if _1lllI1Il1I1 then local _1IllI1l1I1I=_0x1194b.Character and _0x1194b.Character:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27319,27387)],5236,bit32.bxor(27319,27387))) if _1IllI1l1I1I then _1IllI1l1I1I.CFrame=_1lllI1Il1I1.CFrame+Vector3.new(0,(bit32.bxor(340,88)-263),0) print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27318,27387)],43927,bit32.bxor(27318,27387))) end end end end task.wait((bit32.bxor(506,142)-369)) end end else local _fycjpqnqlr=Il1I1Il1l1() if _fycjpqnqlr then local _0xf072acb=_0x1194b.Character and _0x1194b.Character:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27317,27387)],5080,bit32.bxor(27317,27387))) if _0xf072acb then local _0x1516a=(_fycjpqnqlr.Position - _0xf072acb.Position).Magnitude if _0x1516a>((81+(-31))) then _0xf072acb.CFrame=_fycjpqnqlr.CFrame+Vector3.new(0,((284-33)-246),0) print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27316,27387)],7727,bit32.bxor(27316,27387))) end end end end task.wait((bit32.bxor(38,36))) end _0xc81938ae.Hunting=false print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27307,27387)],60890,bit32.bxor(27307,27387))) end) end end) end _0x0191ed=((50130-29)-391) elseif _0x0191ed==(bit32.bxor(11472,19418)) then _qfccpvmmyyu.Init=function(_0x4f7e4) local _l11lI1Il11lIl=(bit32.bxor(33634,79)-39) while true do if _l11lI1Il11lIl==((9327+(24215))) then _euzarnpyjk=_0x4f7e4 _l11lI1Il11lIl=(bit32.bxor(56384,31)) elseif _l11lI1Il11lIl==(bit32.bxor(12696,105)-65) then _qfccpvmmyyu.startInstantPickup() _l11lI1Il11lIl=bit32.bxor((math.floor(129675/5)),(math.floor(228180/10))) elseif _l11lI1Il11lIl==(bit32.bxor(32314,153)-87) then _qfccpvmmyyu.startPetESP() _l11lI1Il11lIl=bit32.bxor((bit32.bxor(7974,15034)),((44833+(7140)))) elseif _l11lI1Il11lIl==(bit32.bxor(48697,20)) then _qfccpvmmyyu.startSpeed() _l11lI1Il11lIl=((11115+(1605))) elseif _l11lI1Il11lIl==(bit32.bxor(61118,39)) then _qfccpvmmyyu.startAutoSteal() _l11lI1Il11lIl=(math.floor(307448/8)) elseif _l11lI1Il11lIl==(math.floor(77466/2)) then _qfccpvmmyyu.startVolcanicHunt() _l11lI1Il11lIl=(bit32.bxor(7610,36075)) elseif _l11lI1Il11lIl==((43641+(12774))) then _qfccpvmmyyu.startEggESP() _l11lI1Il11lIl=bit32.bxor((bit32.bxor(25440,179)),(bit32.bxor(7662,113))) elseif _l11lI1Il11lIl==(bit32.bxor(29818,95)-183) then _qfccpvmmyyu.startEggPrediction() _l11lI1Il11lIl=bit32.bxor((bit32.bxor(47550,254)),((2132-35)-196)) elseif _l11lI1Il11lIl==(bit32.bxor(64336,195)) then _qfccpvmmyyu.startMutationSteal() _l11lI1Il11lIl=bit32.bxor((bit32.bxor(4719,205)),((1272+(92)))) elseif _l11lI1Il11lIl==((22134+(16297))) then _qfccpvmmyyu.startAutoHatch() _l11lI1Il11lIl=bit32.bxor((bit32.bxor(429,148)),(math.floor(50442/2))) elseif _l11lI1Il11lIl==(bit32.bxor(37121,198)-118) then _qfccpvmmyyu.startAutoMutation() _l11lI1Il11lIl=bit32.bxor((bit32.bxor(57023,215)-327),(bit32.bxor(9826,208))) elseif _l11lI1Il11lIl==(bit32.bxor(25506,30)) then _qfccpvmmyyu.startAutoRidePet() _l11lI1Il11lIl=bit32.bxor((bit32.bxor(2172,181)-407),(math.floor(119152/4))) elseif _l11lI1Il11lIl==(bit32.bxor(15571,190)) then _qfccpvmmyyu.startAutoFarm() _l11lI1Il11lIl=bit32.bxor((math.floor(103896/2)),(bit32.bxor(11842,29667))) elseif _l11lI1Il11lIl==(bit32.bxor(2857,7391)) then print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27306,27387)],44821,bit32.bxor(27306,27387))) break else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27305,27387)],2630,bit32.bxor(27305,27387))) end end end if (function() local _l1l1llII=(bit32.bxor(126,43)) return _l1l1llII*_l1l1llII<0 end)() then local II11ll1l=((951-86)-444) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27304,27387)],23311,bit32.bxor(27304,27387))) end if bit32.bxor((math.floor(136/2)),(bit32.bxor(233,173)))==0 then _0x0191ed=bit32.bxor(((10848+(3121))),((55927-7)-386)) do local IllII1Il=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27311,27387)],3786,bit32.bxor(27311,27387)) local _lxmtfbnox=IllII1Il end end elseif _0x0191ed==(math.floor(159880/5)) then if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27310,27387)],11365,bit32.bxor(27310,27387)) then _qfccpvmmyyu.startEggESP=function() task.spawn(function() while task.wait(0.3) do if _euzarnpyjk.ESP_Eggs_Enabled then local _hasrfyjnr=_0x537d9:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27309,27387)],42954,bit32.bxor(27309,27387))) if _hasrfyjnr then for _0x276c0bc,_0x0b036882 in ipairs(_hasrfyjnr:GetChildren()) do if _0x0b036882:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27308,27387)],53677,bit32.bxor(27308,27387))) and not _0x2da0872b[_0x0b036882] then local IIIl11II1ll=_0x0b036882:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27299,27387)],8488,bit32.bxor(27299,27387)),true) if IIIl11II1ll then local _lvctjzw=Instance.new(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27298,27387)],10743,bit32.bxor(27298,27387))) _lvctjzw.Name=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27297,27387)],61274,bit32.bxor(27297,27387)) _lvctjzw.FillColor=Color3.fromRGB((bit32.bxor(8,247)),(bit32.bxor(104,191)),0) _lvctjzw.OutlineColor=Color3.new(1,1,1) _lvctjzw.FillTransparency=0.5 _lvctjzw.Adornee=_0x0b036882 _lvctjzw.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop _lvctjzw.Parent=_0x0b036882 local _0x7e8f2=Instance.new(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27296,27387)],15739,bit32.bxor(27296,27387))) _0x7e8f2.Name=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27303,27387)],10794,bit32.bxor(27303,27387)) _0x7e8f2.Size=UDim2.fromOffset((math.floor(320/2)),((148+(-98)))) _0x7e8f2.StudsOffset=Vector3.new(0,((280-66)-211),0) _0x7e8f2.AlwaysOnTop=true _0x7e8f2.MaxDistance=(bit32.bxor(332,184)) _0x7e8f2.Adornee=IIIl11II1ll _0x7e8f2.Parent=IIIl11II1ll local _xvzk_qtdrfss=Instance.new(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27302,27387)],55221,bit32.bxor(27302,27387))) _xvzk_qtdrfss.Name=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27301,27387)],40700,bit32.bxor(27301,27387)) _xvzk_qtdrfss.Size=UDim2.fromScale(1,1) _xvzk_qtdrfss.BackgroundTransparency=0.3 _xvzk_qtdrfss.BackgroundColor3=Color3.fromRGB(((69+(-54))),(bit32.bxor(393,178)-300),(math.floor(200/10))) _xvzk_qtdrfss.TextColor3=Color3.fromRGB((math.floor(2040/8)),(bit32.bxor(132,83)),0) _xvzk_qtdrfss.TextStrokeColor3=Color3.new(0,0,0) _xvzk_qtdrfss.TextStrokeTransparency=0.3 _xvzk_qtdrfss.Font=Enum.Font.GothamBold _xvzk_qtdrfss.TextSize=((33+(-21))) _xvzk_qtdrfss.TextWrapped=true _xvzk_qtdrfss.Text=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27300,27387)],50959,bit32.bxor(27300,27387)) _xvzk_qtdrfss.Parent=_0x7e8f2 local _tzhkwyhzaaexi=Instance.new(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27291,27387)],28654,bit32.bxor(27291,27387))) _tzhkwyhzaaexi.CornerRadius=UDim.new(0,(bit32.bxor(180,178))) _tzhkwyhzaaexi.Parent=_xvzk_qtdrfss local __a_qxydwsix=Instance.new(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27290,27387)],735,bit32.bxor(27290,27387))) __a_qxydwsix.Color=Color3.fromRGB((math.floor(1020/4)),(bit32.bxor(74,157)),0) __a_qxydwsix.Thickness=1 __a_qxydwsix.Transparency=0.3 __a_qxydwsix.Parent=_xvzk_qtdrfss _0x2da0872b[_0x0b036882]={hl=_lvctjzw,bb=_0x7e8f2,lbl=_xvzk_qtdrfss,part=IIIl11II1ll} end end end end else for _dkrhybgxmwwxs,_0x2a94de1 in pairs(_0x2da0872b) do if _0x2a94de1.hl then _0x2a94de1.hl:Destroy() end if _0x2a94de1.bb then _0x2a94de1.bb:Destroy() end _0x2da0872b[_dkrhybgxmwwxs]=nil end end for _ovvdhzrnvo,_0xcd3630f in pairs(_0x2da0872b) do if not _ovvdhzrnvo.Parent then if _0xcd3630f.hl then _0xcd3630f.hl:Destroy() end if _0xcd3630f.bb then _0xcd3630f.bb:Destroy() end _0x2da0872b[_ovvdhzrnvo]=nil elseif _0xcd3630f.lbl then local _0xa5c23ee={} if _euzarnpyjk.ESP_EggName_Enabled then table.insert(_0xa5c23ee,lI1IlIlI(Ill1111l1lI1[bit32.bxor(27289,27387)],56398,bit32.bxor(27289,27387)).._ovvdhzrnvo.Name) end if _euzarnpyjk.ESP_EggLuck_Enabled then table.insert(_0xa5c23ee,lI1IlIlI(Ill1111l1lI1[bit32.bxor(27288,27387)],27799,bit32.bxor(27288,27387)).._0xc68f(_ovvdhzrnvo)) end _0xcd3630f.lbl.Text=table.concat(_0xa5c23ee,lI1IlIlI(Ill1111l1lI1[bit32.bxor(27295,27387)],37580,bit32.bxor(27295,27387))) end end end end) end end _0x0191ed=bit32.bxor((bit32.bxor(35747,167)),(bit32.bxor(8771,25057))) elseif _0x0191ed==(bit32.bxor(43117,134)) then _0x00d78=function() local _0x62b8620d local _fwmixnuu local _0x2deb0 local _0x4a22db5=(bit32.bxor(20810,238)-498) while true do if _0x4a22db5==(bit32.bxor(11101,25839)) then _0x62b8620d=_0x1194b.Character _0x4a22db5=((10931+(17504))) elseif _0x4a22db5==(bit32.bxor(58358,179)) then for _0x7bfe46b6,_frvcsudrweojl in ipairs(_0x2deb0:GetChildren()) do if _frvcsudrweojl:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27294,27387)],20623,bit32.bxor(27294,27387))) and not _frvcsudrweojl.Name:lower():find(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27293,27387)],31306,bit32.bxor(27293,27387))) then return true,_frvcsudrweojl.Name end end _0x4a22db5=(bit32.bxor(550,5916)) elseif _0x4a22db5==((19040-81)-16) then _0x2deb0=_fwmixnuu:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27292,27387)],1291,bit32.bxor(27292,27387))) _0x4a22db5=bit32.bxor((bit32.bxor(45470,1572)),(bit32.bxor(15191,27)-356)) elseif _0x4a22db5==(bit32.bxor(28572,143)) then if not _0x62b8620d then return false end _0x4a22db5=bit32.bxor((bit32.bxor(55003,72)),(math.floor(211430/5))) elseif _0x4a22db5==(bit32.bxor(23386,54640)) then if not _fwmixnuu then return false end _0x4a22db5=bit32.bxor((bit32.bxor(700,62)),(bit32.bxor(19766,113)-458)) elseif _0x4a22db5==((2703+(2731))) then return false elseif _0x4a22db5==(bit32.bxor(36571,137)) then if not _0x2deb0 then return false end _0x4a22db5=bit32.bxor((bit32.bxor(55543,92)),(bit32.bxor(15353,23))) elseif _0x4a22db5==(bit32.bxor(27831,7946)) then _fwmixnuu=_0x62b8620d:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27283,27387)],53750,bit32.bxor(27283,27387))) _0x4a22db5=bit32.bxor((math.floor(446440/10)),(bit32.bxor(6161,14431))) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27282,27387)],57449,bit32.bxor(27282,27387))) end end end _0x0191ed=(bit32.bxor(18657,241)) elseif _0x0191ed==(bit32.bxor(54827,190)-468) then if (function() local _11lIllIllI1=(bit32.bxor(127,112)) local _0xe035=((8+(5))) return _11lIllIllI1*_11lIllIllI1+_0xe035*_0xe035==(bit32.bxor(476,86)) end)() then task.spawn(function() local llI1l1lIl1l=game:GetService(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27281,27387)],24164,bit32.bxor(27281,27387))):FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27280,27387)],3475,bit32.bxor(27280,27387))) if llI1l1lIl1l then local lI1llI1I1IIII=llI1l1lIl1l:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27287,27387)],52120,bit32.bxor(27287,27387))) if lI1llI1I1IIII then local _0x9000,_0xb19073a6=pcall(require,lI1llI1I1IIII) if _0x9000 then lI1l1II111l1=_0xb19073a6 print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27286,27387)],32179,bit32.bxor(27286,27387))) end end end end) local I111l1l1I=math.ceil((bit32.bxor(158,209))) end if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27285,27387)],14696,bit32.bxor(27285,27387)) then _0x0191ed=bit32.bxor((bit32.bxor(62868,7)),(bit32.bxor(14050,238))) end elseif _0x0191ed==(math.floor(31828/2)) then _0x2da0872b={} _0x0191ed=bit32.bxor((bit32.bxor(12442,237)-355),((21905-60)-345)) elseif _0x0191ed==((26154-45)-465) then _0xce71d={} do local _lIII1IIIll1I=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27284,27387)],27819,bit32.bxor(27284,27387)) local IIll1Il11l1=_lIII1IIIll1I end if (function() local _qtwnkxg=(bit32.bxor(86,80)) local _cipartawe=((100+(-96))) return _qtwnkxg*_qtwnkxg+_cipartawe*_cipartawe==((363-92)-219) end)() then _0x0191ed=bit32.bxor((bit32.bxor(924,1377)),(bit32.bxor(15615,2))) end elseif _0x0191ed==((52896-79)-479) then if (function() local _plhsimmrc=(math.floor(155/5)) return _plhsimmrc*_plhsimmrc>=0 end)() then _qfccpvmmyyu.pickupPet=function() local _csztbdp local _0xae66fba=(bit32.bxor(39597,27)) while true do if _0xae66fba==(bit32.bxor(27778,63028)) then _csztbdp=lllI1l1Ill11(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27275,27387)],52776,bit32.bxor(27275,27387))) _0xae66fba=(bit32.bxor(33188,28)) elseif _0xae66fba==(bit32.bxor(17085,49925)) then if _csztbdp then _csztbdp:FireServer() return true end _0xae66fba=bit32.bxor((bit32.bxor(50900,189)),(bit32.bxor(19760,25))) elseif _0xae66fba==(bit32.bxor(36056,108)-372) then return false else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27274,27387)],48155,bit32.bxor(27274,27387))) end end end end if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27273,27387)],42712,bit32.bxor(27273,27387)) then _0x0191ed=(math.floor(145432/4)) end elseif _0x0191ed==(bit32.bxor(7999,17166)) then _fsxkrryi={} _0x0191ed=bit32.bxor((bit32.bxor(43033,179)),((52434-31)-272)) do local _0xeed99f0=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27272,27387)],55545,bit32.bxor(27272,27387)) local _bruzynwxfrvxc=_0xeed99f0 end if (function() local I1lllIl11llll=((82+(-67))) return I1lllIl11llll*I1lllIl11llll<0 end)() then local IllIIl1111=(math.floor(496/4)) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27279,27387)],57836,bit32.bxor(27279,27387))) local _0x9fead379=math.sin(((27+(-10)))) end elseif _0x0191ed==((1595+(20720))) then if (function() local _zayzfolmqoi_=(bit32.bxor(1,99)-79) return _zayzfolmqoi_*_zayzfolmqoi_>=0 end)() then lllI1l1Ill11=function(_0x34b2a94b) local _0xe1d9ea local _0x193f7 local lIl1l1ll1=(bit32.bxor(11538,230)) while true do if lIl1l1ll1==(math.floor(58820/5)) then _0xe1d9ea=game:GetService(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27278,27387)],22163,bit32.bxor(27278,27387))):FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27277,27387)],43266,bit32.bxor(27277,27387))) lIl1l1ll1=bit32.bxor((bit32.bxor(12962,208)-297),(math.floor(201035/5))) elseif lIl1l1ll1==(math.floor(234115/5)) then _0x193f7=_0xe1d9ea:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27276,27387)],42905,bit32.bxor(27276,27387))) lIl1l1ll1=bit32.bxor(((31445+(27842))),(bit32.bxor(40153,152)-180)) elseif lIl1l1ll1==((15372+(16398))) then if not _0x193f7 then return nil end lIl1l1ll1=bit32.bxor((math.floor(48476/2)),(bit32.bxor(25034,155))) elseif lIl1l1ll1==((16816-68)-365) then return _0x193f7:FindFirstChild(_0x34b2a94b) elseif lIl1l1ll1==(bit32.bxor(44205,14)-93) then if not _0xe1d9ea then return nil end lIl1l1ll1=(math.floor(234115/5)) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27267,27387)],26696,bit32.bxor(27267,27387))) end end end end local _ll1IIIIl1I=math.floor((math.floor(42/2))) _0x0191ed=bit32.bxor((bit32.bxor(17777,168)),((12+(10391)))) elseif _0x0191ed==(bit32.bxor(26675,49)) then _trprdlzv=function(_1IIl11l1) local _1I1III1l111l1 local _epzlocrv local _0xab610a local _0xc4e99f=((17937+(6847))) while true do if _0xc4e99f==(math.floor(123920/5)) then _1I1III1l111l1=_1IIl11l1:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27266,27387)],21129,bit32.bxor(27266,27387)),true) _0xc4e99f=bit32.bxor((bit32.bxor(20749,15657)),(math.floor(228024/8))) elseif _0xc4e99f==((57096+(559))) then for lI11lIlIIl1I1=1,(bit32.bxor(172,163)) do local _soketueqs=(math.floor(434060/10)) while true do if _soketueqs==((43507-31)-70) then if _epzlocrv and typeof(fireproximityprompt)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27265,27387)],16336,bit32.bxor(27265,27387)) then pcall(fireproximityprompt,_epzlocrv) end _soketueqs=bit32.bxor((math.floor(236460/4)),(bit32.bxor(57951,75))) elseif _soketueqs==(math.floor(89775/5)) then if not _1IIl11l1.Parent then return true end _soketueqs=bit32.bxor((bit32.bxor(45832,222)),(bit32.bxor(65253,25))) elseif _soketueqs==(math.floor(10232/8)) then task.wait(0.2) _soketueqs=bit32.bxor((bit32.bxor(26731,125)-183),((4695+(3877)))) elseif _soketueqs==(bit32.bxor(12784,31962)) then if _1I1III1l111l1 and _1I1III1l111l1.Parent then _0xab610a.CFrame=_1I1III1l111l1.CFrame+Vector3.new(0,((61+(-58))),0) task.wait(0.1) end break else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27264,27387)],57835,bit32.bxor(27264,27387))) end end end _0xc4e99f=bit32.bxor((bit32.bxor(26154,41)),((8927+(31412)))) elseif _0xc4e99f==(math.floor(123914/2)) then if not _0xab610a then return false end _0xc4e99f=bit32.bxor(((14789+(38212))),(bit32.bxor(4437,76))) elseif _0xc4e99f==(math.floor(322000/5)) then return false elseif _0xc4e99f==(bit32.bxor(41102,27)) then _0xab610a=_0x1194b.Character and _0x1194b.Character:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27271,27387)],37572,bit32.bxor(27271,27387))) _0xc4e99f=((46765+(15192))) elseif _0xc4e99f==(math.floor(26910/2)) then task.wait(0.1) _0xc4e99f=bit32.bxor((bit32.bxor(23726,42586)),((2016+(5091)))) elseif _0xc4e99f==(math.floor(454784/8)) then _0xab610a.CFrame=_1I1III1l111l1.CFrame+Vector3.new(0,((2+(1))),0) _0xc4e99f=bit32.bxor(((12564+(12303))),(math.floor(109660/5))) elseif _0xc4e99f==(bit32.bxor(12021,7540)) then if _epzlocrv and _epzlocrv:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27270,27387)],8093,bit32.bxor(27270,27387))) then _epzlocrv.HoldDuration=0 end _0xc4e99f=((41445-40)-296) elseif _0xc4e99f==(bit32.bxor(858,41)) then if not _1I1III1l111l1 then return false end _0xc4e99f=bit32.bxor((bit32.bxor(44381,188)-110),((9336+(4429)))) elseif _0xc4e99f==(math.floor(78188/2)) then _epzlocrv=_1IIl11l1:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27269,27387)],13322,bit32.bxor(27269,27387)),true) _0xc4e99f=bit32.bxor(((5230-12)-290),(bit32.bxor(8656,127)-238)) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27268,27387)],55811,bit32.bxor(27268,27387))) end end end _0x0191ed=bit32.bxor((bit32.bxor(40393,179)),(bit32.bxor(30140,246))) elseif _0x0191ed==(bit32.bxor(7885,29623)) then if bit32.bxor((math.floor(776/8)),(math.floor(776/8)))==0 then _qfccpvmmyyu.rideAlong=function() local _0xc39d60c local _0x3db0=((62030-58)-246) while true do if _0x3db0==(bit32.bxor(61829,155)) then _0xc39d60c=lllI1l1Ill11(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27259,27387)],16978,bit32.bxor(27259,27387))) _0x3db0=bit32.bxor((bit32.bxor(17209,14)),(bit32.bxor(45216,139))) elseif _0x3db0==(math.floor(260180/10)) then return false elseif _0x3db0==(bit32.bxor(26931,39471)) then if _0xc39d60c then _0xc39d60c:FireServer() return true end _0x3db0=bit32.bxor((bit32.bxor(29482,33)-135),((3622+(2304)))) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27258,27387)],58567,bit32.bxor(27258,27387))) end end end end _0x0191ed=bit32.bxor((bit32.bxor(27464,148)-359),(bit32.bxor(54674,2934))) elseif _0x0191ed==(bit32.bxor(35139,240)) then if _0x4ebeffe then local _1lIIIl1 local _kp_ymlrdellvu local _0x33f0=(math.floor(1386/2)) while true do if _0x33f0==((201+(492))) then _1lIIIl1=_0x4ebeffe:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27257,27387)],13056,bit32.bxor(27257,27387))) _0x33f0=((23131+(24703))) elseif _0x33f0==(bit32.bxor(63919,61)) then if _kp_ymlrdellvu then local _npkrwbag,_tkbiutfdk_yi=pcall(require,_kp_ymlrdellvu) if _npkrwbag and type(_tkbiutfdk_yi)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27256,27387)],46709,bit32.bxor(27256,27387)) then if (function() local _cdjsv_m=(bit32.bxor(254,240)) local _I1I1ll1=(bit32.bxor(469,109)-425) return _cdjsv_m*_cdjsv_m+_I1I1ll1*_I1I1ll1==((404+(17))) end)() then _swdhqlvpnwpcb=_tkbiutfdk_yi end if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27263,27387)],8414,bit32.bxor(27263,27387)) then local _0xdb1bd=(bit32.bxor(351,4)-331) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27262,27387)],24811,bit32.bxor(27262,27387))) end do local ll11I1llIll=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27261,27387)],6258,bit32.bxor(27261,27387)) local _0x121bd=ll11I1llIll end end end break elseif _0x33f0==(bit32.bxor(31723,43314)) then _kp_ymlrdellvu=_0x4ebeffe:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27260,27387)],15981,bit32.bxor(27260,27387))) do local _ecnofyxkhkf=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27251,27387)],15150,bit32.bxor(27251,27387)) local _0xed54=_ecnofyxkhkf end if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27250,27387)],23915,bit32.bxor(27250,27387)) then _0x33f0=bit32.bxor((bit32.bxor(44134,17923)),(bit32.bxor(4897,214))) end elseif _0x33f0==(bit32.bxor(47783,125)) then if _1lIIIl1 then local _lnwjwmaamo,_ybyibqa=pcall(require,_1lIIIl1) if _lnwjwmaamo and type(_ybyibqa)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27249,27387)],64254,bit32.bxor(27249,27387)) then if (function() local _cfjf__yyx=(bit32.bxor(137,135)) local _0x1b72=(bit32.bxor(76,75)) return _cfjf__yyx*_cfjf__yyx+_0x1b72*_0x1b72==(bit32.bxor(129,116)) end)() then _0xaf069fca=_ybyibqa end local _cbrcgsii=math.sqrt((bit32.bxor(30,39))) end if false then local _zfpptzyq=(bit32.bxor(5,37)) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27248,27387)],37087,bit32.bxor(27248,27387))) end local _0x1a9b0=math.abs(((77+(-29)))) end _0x33f0=bit32.bxor((bit32.bxor(48733,123)),(math.floor(223224/8))) if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27255,27387)],14182,bit32.bxor(27255,27387)) then local lllIl1IIIIl1ll=(math.floor(6168/8)) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27254,27387)],21575,bit32.bxor(27254,27387))) end else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27253,27387)],7556,bit32.bxor(27253,27387))) end if (function() local lIllI111=(bit32.bxor(304,27)-259) return lIllI111*lIllI111<0 end)() then local _0x0c25=((373+(139))) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27252,27387)],31623,bit32.bxor(27252,27387))) local _0x7a58=math.floor((bit32.bxor(26,65))) end end end if (bit32.bxor(227,230))*(math.floor(320/5))%(bit32.bxor(121,124))==0 then _0x0191ed=bit32.bxor(((32182+(917))),((55331-21)-435)) end elseif _0x0191ed==(bit32.bxor(25418,67)) then llI1I1l1I1I={} _0x0191ed=bit32.bxor((bit32.bxor(61998,202)),(math.floor(7000/5))) elseif _0x0191ed==(math.floor(68105/5)) then l1I1lIIlIl11l=function(_0x48f8178) local _tyvvfkv_ local Il1lIlI111I1=((4300+(5920))) while true do if Il1lIlI111I1==(bit32.bxor(963,9263)) then _tyvvfkv_=_0xe3026(_0x48f8178) Il1lIlI111I1=bit32.bxor((bit32.bxor(1905,3100)),((20914-5)-195)) elseif Il1lIlI111I1==((30008+(3732))) then return _euzarnpyjk.SelectedRarities[_tyvvfkv_]==true elseif Il1lIlI111I1==((21590+(1841))) then if not _euzarnpyjk.SelectedRarities then return false end Il1lIlI111I1=bit32.bxor((math.floor(488784/8)),(bit32.bxor(28067,121)-116)) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27243,27387)],15038,bit32.bxor(27243,27387))) end end end _0x0191ed=bit32.bxor((math.floor(104952/8)),(math.floor(45280/5))) elseif _0x0191ed==(bit32.bxor(13901,24925)) then if (bit32.bxor(100,99))*(bit32.bxor(153,110)-165)%(bit32.bxor(159,152))==0 then _0x2c509={Common=1,Uncommon=(math.floor(10/5)),Rare=(math.floor(15/5)),Epic=(math.floor(16/4)),Legendary=(bit32.bxor(28,25)),Mythic=(bit32.bxor(179,181)),Divine=((294-28)-259),Ethereal=((17+(-9))),Secret=(bit32.bxor(82,91))} end if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27242,27387)],12863,bit32.bxor(27242,27387)) then local l111lI1I11l11=((886-21)-160) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27241,27387)],11526,bit32.bxor(27241,27387))) end if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27240,27387)],6907,bit32.bxor(27240,27387)) then _0x0191ed=bit32.bxor(((19751+(1232))),(bit32.bxor(4261,42))) end do local _ehplglzye_pt=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27247,27387)],24860,bit32.bxor(27247,27387)) local lllI111lII=_ehplglzye_pt end elseif _0x0191ed==((58686-83)-105) then if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27246,27387)],33897,bit32.bxor(27246,27387)) then _qfccpvmmyyu.startAutoHatch=function() task.spawn(function() while task.wait(1) do if not _euzarnpyjk.AutoHatch_Enabled then continue end local _0x443ed8a=llllll1Il1l111() if not _0x443ed8a then continue end local _najmegczugt=_0x443ed8a:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27245,27387)],34336,bit32.bxor(27245,27387))) if not _najmegczugt then continue end for _jouobhibeay,_0x0ff52d0 in ipairs(_najmegczugt:GetChildren()) do local _0xc1b46b8=_0x0ff52d0:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27244,27387)],16253,bit32.bxor(27244,27387)),true) if _0xc1b46b8 and _0xc1b46b8.Enabled then if typeof(fireproximityprompt)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27235,27387)],24050,bit32.bxor(27235,27387)) then pcall(fireproximityprompt,_0xc1b46b8) end end end end end) end end if ((84+(-71)))*(math.floor(285/5))%((33+(-20)))==0 then _0x0191ed=bit32.bxor((bit32.bxor(14933,18023)),(bit32.bxor(16593,51))) local lll1IIllI=math.floor((bit32.bxor(269,82)-311)) end elseif _0x0191ed==(bit32.bxor(20904,179)) then l1l1IlII1=function(_riz_rapup) local _0x52a5ab1c local _0x29a1 local lIIl1l11lII1I1=(math.floor(206710/5)) while true do if lIIl1l11lII1I1==((13298+(28044))) then _0x52a5ab1c=_0x1194b.Character and _0x1194b.Character:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27234,27387)],269,bit32.bxor(27234,27387))) lIIl1l11lII1I1=bit32.bxor(((37628+(2786))),(bit32.bxor(53958,88))) elseif lIIl1l11lII1I1==(bit32.bxor(6441,49)) then _0x52a5ab1c.CFrame=CFrame.new(_riz_rapup) lIIl1l11lII1I1=bit32.bxor((bit32.bxor(14024,26476)),(bit32.bxor(972,220))) elseif lIIl1l11lII1I1==(math.floor(365864/8)) then _0x29a1=_0x1194b.Character and _0x1194b.Character:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27233,27387)],14860,bit32.bxor(27233,27387))) lIIl1l11lII1I1=((50671+(3250))) elseif lIIl1l11lII1I1==((15834+(4454))) then if not _0x52a5ab1c then return false end lIIl1l11lII1I1=bit32.bxor((bit32.bxor(3504,40752)),(math.floor(71472/2))) elseif lIIl1l11lII1I1==(math.floor(444808/8)) then return true elseif lIIl1l11lII1I1==(bit32.bxor(21174,2)) then task.wait(0.3) lIIl1l11lII1I1=bit32.bxor((bit32.bxor(53208,73)),(bit32.bxor(32442,209)-311)) elseif lIIl1l11lII1I1==(bit32.bxor(49717,4244)) then if _0x29a1 and _0x29a1.Position.Y<_riz_rapup.Y - (bit32.bxor(206,252)) then local _rja_qxgoed_sl=(bit32.bxor(14348,90)) while true do if _rja_qxgoed_sl==(bit32.bxor(14351,89)) then print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27232,27387)],11717,bit32.bxor(27232,27387))) _rja_qxgoed_sl=(bit32.bxor(40080,185)) elseif _rja_qxgoed_sl==((2182+(947))) then task.wait(0.3) break elseif _rja_qxgoed_sl==(bit32.bxor(40169,192)) then _0x29a1.CFrame=CFrame.new(_riz_rapup+Vector3.new(0,(math.floor(250/5)),0)) _rja_qxgoed_sl=(bit32.bxor(3238,92)-193) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27239,27387)],13070,bit32.bxor(27239,27387))) end end end lIIl1l11lII1I1=(math.floor(278005/5)) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27238,27387)],46749,bit32.bxor(27238,27387))) end end end _0x0191ed=bit32.bxor((bit32.bxor(13776,101)),(bit32.bxor(50933,108))) elseif _0x0191ed==(bit32.bxor(28469,148)-91) then _qfccpvmmyyu.getMutationState=function() return l1lII1I11 end _0x0191ed=bit32.bxor(((23003-45)-52),(bit32.bxor(64571,227)-287)) elseif _0x0191ed==(bit32.bxor(36646,203)-487) then _qfccpvmmyyu.hatchEgg=function() local _poyzcdjlkrh local _tcraqwmpq=(bit32.bxor(16616,146)-117) while true do if _tcraqwmpq==((16505-75)-41) then _poyzcdjlkrh=lllI1l1Ill11(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27237,27387)],62092,bit32.bxor(27237,27387))) _tcraqwmpq=bit32.bxor((math.floor(633260/10)),(bit32.bxor(5389,168))) elseif _tcraqwmpq==(bit32.bxor(15714,165)) then return false elseif _tcraqwmpq==((46639+(11468))) then if _poyzcdjlkrh then _poyzcdjlkrh:FireServer() return true end _tcraqwmpq=bit32.bxor((math.floor(350050/10)),(bit32.bxor(46649,178)-273)) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27236,27387)],43941,bit32.bxor(27236,27387))) end end end _0x0191ed=bit32.bxor(((40906+(3681))),(bit32.bxor(47846,237))) do local _xjpjr_dnfrykc=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27227,27387)],4442,bit32.bxor(27227,27387)) local _0x4e07a80b=_xjpjr_dnfrykc end elseif _0x0191ed==(bit32.bxor(548,24)) then _qfccpvmmyyu.startAutoSteal=function() task.spawn(function() while task.wait(0.5) do if not _euzarnpyjk.AutoSteal_Enabled then continue end local _0x317392b=_0x1194b.Character local _0xa7924=_0x317392b and _0x317392b:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27226,27387)],36189,bit32.bxor(27226,27387))) local _0x3d41871=_0x317392b and _0x317392b:FindFirstChildOfClass(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27225,27387)],16432,bit32.bxor(27225,27387))) if not _0xa7924 or not _0x3d41871 or _0x3d41871.Health<=0 then task.wait(1) continue end local l1llI1ll11=_euzarnpyjk.SelectedEgg or lI1IlIlI(Ill1111l1lI1[bit32.bxor(27224,27387)],40427,bit32.bxor(27224,27387)) local I1ll111l1lI=_1IlIl1l(l1llI1ll11) if not I1ll111l1lI then local _wevcrwbwre=os.clock() if _wevcrwbwre - _zbdttknksbcem>((58+(-53))) then _zbdttknksbcem=_wevcrwbwre if _euzarnpyjk.Notify then _euzarnpyjk.Notify(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27231,27387)],41958,bit32.bxor(27231,27387))..l1llI1ll11,lI1IlIlI(Ill1111l1lI1[bit32.bxor(27230,27387)],17377,bit32.bxor(27230,27387))) end end continue end local _llIIll1l=I1ll111l1lI:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27229,27387)],33616,bit32.bxor(27229,27387)),true) local _iquyjky=I1ll111l1lI:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27228,27387)],22553,bit32.bxor(27228,27387)),true) if not _llIIll1l or not _iquyjky then continue end if _iquyjky:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27219,27387)],9876,bit32.bxor(27219,27387))) then _iquyjky.HoldDuration=0 end _0xa7924.CFrame=_llIIll1l.CFrame+Vector3.new(0,(bit32.bxor(112,115)),0) task.wait(0.1) local l11llll1=false local _kligvvfuagczj=((106+(-96))) for _cpipzkk_=1,_kligvvfuagczj do if typeof(fireproximityprompt)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27218,27387)],40311,bit32.bxor(27218,27387)) then pcall(fireproximityprompt,_iquyjky) end task.wait(0.3) if not _gxsmgyzqlzsqc(I1ll111l1lI) then l11llll1=true break end if _llIIll1l and _llIIll1l.Parent then _0xa7924.CFrame=_llIIll1l.CFrame+Vector3.new(0,(math.floor(15/5)),0) task.wait(0.1) end end if l11llll1 and _euzarnpyjk.AutoReturn_Enabled then local _vpllzcrw=_pilwmqmr_ynke() if _vpllzcrw then _0xa7924.CFrame=_vpllzcrw.CFrame+Vector3.new(0,(math.floor(25/5)),0) else local _bqdcbejdarecc=_0x537d9:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27217,27387)],17338,bit32.bxor(27217,27387))) if _bqdcbejdarecc then local IlIIl111l=_bqdcbejdarecc:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27216,27387)],42513,bit32.bxor(27216,27387)),true) if IlIIl111l then _0xa7924.CFrame=IlIIl111l.CFrame+Vector3.new(0,(math.floor(25/5)),0) end end end end task.wait(0.3) end end) end do local _zcndogkpslb=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27223,27387)],43722,bit32.bxor(27223,27387)) local _nuvlaohjekrfj=_zcndogkpslb end _0x0191ed=bit32.bxor((math.floor(238000/5)),(bit32.bxor(23823,125))) local _0xb158e029=math.floor(((456-13)-399)) elseif _0x0191ed==((26821-17)-347) then l1IlIlI11=function() local _1lI1IlIIlIl local _0x27535247,_I11ll1lllI local _hwpdvhkwdpql local II111I1I1Ill=((53960+(4129))) while true do if II111I1I1Ill==(bit32.bxor(58085,12)) then _1lI1IlIIlIl=_0x537d9:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27222,27387)],57021,bit32.bxor(27222,27387))) II111I1I1Ill=(bit32.bxor(23122,181)) elseif II111I1I1Ill==(math.floor(513100/10)) then return Vector3.new(-5102.84,(math.floor(83400/2)),-3489.11) elseif II111I1I1Ill==((21963+(22483))) then _0x27535247,_I11ll1lllI=nil,0 II111I1I1Ill=bit32.bxor((math.floor(249016/4)),(bit32.bxor(30704,57642))) elseif II111I1I1Ill==(bit32.bxor(19451,169)) then if _0x27535247 then return _0x27535247.Position+Vector3.new(0,_l11lIlIIlI1I.TP_ABOVE_TOP,0) end II111I1I1Ill=((7276-64)-153) elseif II111I1I1Ill==((5270+(20830))) then for _apycpxx,_lll1lI1IIl11 in ipairs(_1lI1IlIIlIl:GetDescendants()) do if _lll1lI1IIl11:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27221,27387)],53994,bit32.bxor(27221,27387))) then local _0xcc8b904=_lll1lI1IIl11.Name:lower() if _0xcc8b904:find(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27220,27387)],14149,bit32.bxor(27220,27387))) or _0xcc8b904==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27211,27387)],24074,bit32.bxor(27211,27387)) then local _ugntoinkxo=_lll1lI1IIl11.Size.X*_lll1lI1IIl11.Size.Z if _ugntoinkxo>_I11ll1lllI then _0x27535247=_lll1lI1IIl11 _I11ll1lllI=_ugntoinkxo end end end end II111I1I1Ill=bit32.bxor((math.floor(202035/5)),((242+(54675)))) elseif II111I1I1Ill==((17459+(5812))) then if not _1lI1IlIIlIl then return Vector3.new(-5102.84,(bit32.bxor(14374,39618)),-3489.11) end II111I1I1Ill=bit32.bxor(((56438-31)-443),((6291+(24175)))) elseif II111I1I1Ill==(bit32.bxor(6968,171)) then _hwpdvhkwdpql=-math.huge II111I1I1Ill=bit32.bxor((math.floor(275135/5)),((21003-73)-95)) elseif II111I1I1Ill==(math.floor(250544/4)) then if _hwpdvhkwdpql>-math.huge then return Vector3.new(-5102.84,_hwpdvhkwdpql+_l11lIlIIlI1I.TP_ABOVE_TOP,-3489.11) end II111I1I1Ill=bit32.bxor((math.floor(194576/4)),(bit32.bxor(30419,185))) elseif II111I1I1Ill==(math.floor(173520/5)) then for IlIlIl11lll1I,_0x9bff0c in ipairs(_1lI1IlIIlIl:GetDescendants()) do if _0x9bff0c:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27210,27387)],27617,bit32.bxor(27210,27387))) then local _0xe7e191=_0x9bff0c.Name:lower() if _0xe7e191:find(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27209,27387)],7330,bit32.bxor(27209,27387))) or _0xe7e191:find(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27208,27387)],12507,bit32.bxor(27208,27387))) or _0xe7e191:find(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27215,27387)],23882,bit32.bxor(27215,27387))) then local llI11I1llll=_0x9bff0c.Position.Y+_0x9bff0c.Size.Y/(math.floor(20/10)) if llI11I1llll>_hwpdvhkwdpql then _hwpdvhkwdpql=llI11I1llll end end end end II111I1I1Ill=bit32.bxor((bit32.bxor(19121,236)),((49388-16)-491)) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27214,27387)],40063,bit32.bxor(27214,27387))) end end end _0x0191ed=bit32.bxor((math.floor(318176/8)),(bit32.bxor(13267,100))) elseif _0x0191ed==(math.floor(119806/2)) then _zbdttknksbcem=0 _0x0191ed=(bit32.bxor(477,993)) if false then local _jfditsl=(bit32.bxor(818,12)) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27213,27387)],2626,bit32.bxor(27213,27387))) end elseif _0x0191ed==(math.floor(333336/8)) then _qfccpvmmyyu.isHoldingEgg=function() return _0x00d78() end if ((95+(-90)))*(math.floor(295/5))%(math.floor(25/5))==0 then _0x0191ed=(bit32.bxor(37447,128)) end elseif _0x0191ed==(bit32.bxor(56780,152)) then _eawrsjte=function(_0xa6b086) local _0x64c820f,_l1I1llIllll local _0x3d517cfd local _fuuzrjya local lll1lllI=((619+(9672))) while true do if lll1lllI==(bit32.bxor(10458,233)) then _0x64c820f,_l1I1llIllll=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27212,27387)],25617,bit32.bxor(27212,27387)),lI1IlIlI(Ill1111l1lI1[bit32.bxor(27203,27387)],62700,bit32.bxor(27203,27387)) lll1lllI=bit32.bxor((bit32.bxor(31632,58)),(bit32.bxor(10284,27392))) elseif lll1lllI==(math.floor(87230/10)) then if _0x3d517cfd then for _0x9119dc6,_111lIl1111Il1 in ipairs(_0x3d517cfd:GetDescendants()) do if _111lIl1111Il1:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27202,27387)],161,bit32.bxor(27202,27387))) and _111lIl1111Il1.Text:find(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27201,27387)],89968,bit32.bxor(27201,27387))) and _111lIl1111Il1.Text:find(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27200,27387)],67285,bit32.bxor(27200,27387))) then _0x64c820f=_111lIl1111Il1.Text break end end end lll1lllI=bit32.bxor(((9515-56)-297),(math.floor(420270/10))) elseif lll1lllI==((2411+(12059))) then _0x3d517cfd=_0xa6b086:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27207,27387)],95592,bit32.bxor(27207,27387)),true) lll1lllI=bit32.bxor((bit32.bxor(61264,144)),(math.floor(210764/4))) elseif lll1lllI==(bit32.bxor(34617,216)) then _fuuzrjya=_0xa6b086:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27206,27387)],98885,bit32.bxor(27206,27387)),true) lll1lllI=bit32.bxor((bit32.bxor(6692,190)-309),((36260-20)-51)) elseif lll1lllI==((37993-26)-23) then if _fuuzrjya then for lIlI1llll1llII,_0x4918 in ipairs(_fuuzrjya:GetDescendants()) do if _0x4918:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27205,27387)],70392,bit32.bxor(27205,27387))) and _0x4918.Text~=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27204,27387)],78449,bit32.bxor(27204,27387)) then _l1I1llIllll=_0x4918.Text break end end end lll1lllI=bit32.bxor(((2529+(45447))),(math.floor(601320/10))) elseif lll1lllI==(math.floor(167008/8)) then return _0x64c820f,_l1I1llIllll else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27195,27387)],72392,bit32.bxor(27195,27387))) end end end _0x0191ed=((46943-93)-458) if false then local _kemunzp=(bit32.bxor(177,146)) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27194,27387)],74217,bit32.bxor(27194,27387))) end elseif _0x0191ed==(bit32.bxor(49958,185)) then Il11l1lIII1l=function() local _Ill11IIlIIIlI local _u_vksxhvbydh local _IIlIl1Il1II1=(bit32.bxor(44875,20516)) while true do if _IIlIl1Il1II1==(bit32.bxor(33556,31867)) then if lI1l1II111l1 then local _0x7e6c6016,ll11l1ll1II=pcall(function() return lI1l1II111l1:RemoteEvent(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27193,27387)],105908,bit32.bxor(27193,27387))) end) if _0x7e6c6016 and ll11l1ll1II then return ll11l1ll1II end end _IIlIl1Il1II1=bit32.bxor((bit32.bxor(12573,203)),(bit32.bxor(1671,27375))) elseif _IIlIl1Il1II1==(bit32.bxor(23938,60)) then _Ill11IIlIIIlI=game:GetService(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27192,27387)],74685,bit32.bxor(27192,27387))):FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27199,27387)],99382,bit32.bxor(27199,27387))) _IIlIl1Il1II1=((4448+(228))) elseif _IIlIl1Il1II1==(bit32.bxor(39185,218)-260) then return nil elseif _IIlIl1Il1II1==(bit32.bxor(37763,212)-200) then if _u_vksxhvbydh then local _0xb2bd6859=_u_vksxhvbydh:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27198,27387)],68717,bit32.bxor(27198,27387))) if _0xb2bd6859 and _0xb2bd6859:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27197,27387)],112342,bit32.bxor(27197,27387))) then return _0xb2bd6859 end end _IIlIl1Il1II1=bit32.bxor((bit32.bxor(50739,32)),((343+(23933)))) elseif _IIlIl1Il1II1==(math.floor(37408/8)) then _u_vksxhvbydh=_Ill11IIlIIIlI and _Ill11IIlIIIlI:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27196,27387)],127979,bit32.bxor(27196,27387))) _IIlIl1Il1II1=(math.floor(300152/8)) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27187,27387)],103472,bit32.bxor(27187,27387))) end end end _0x0191ed=(bit32.bxor(26554,227)) elseif _0x0191ed==(bit32.bxor(5291,169)) then if (function() local l1l11IllII1=((282-80)-184) local II1l1II1=(bit32.bxor(169,172)) return l1l11IllII1*l1l11IllII1+II1l1II1*II1l1II1==(bit32.bxor(139,470)) end)() then _qfccpvmmyyu.startAutoFarm=function() task.spawn(function() while task.wait(0.5) do if not _euzarnpyjk.AutoFarm_Enabled then continue end local l11lI11I1l1l=_0x1194b.Character local l1111lIIl=l11lI11I1l1l and l11lI11I1l1l:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27186,27387)],72847,bit32.bxor(27186,27387))) local _0x34860=l11lI11I1l1l and l11lI11I1l1l:FindFirstChildOfClass(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27185,27387)],90136,bit32.bxor(27185,27387))) if not l1111lIIl or not _0x34860 or _0x34860.Health<=0 then task.wait(1) continue end local ll11lllll11I=_0x537d9:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27184,27387)],68831,bit32.bxor(27184,27387))) if ll11lllll11I then local _rg_jrosve={} for _arxjmjpa,_azkr_yypv in ipairs(ll11lllll11I:GetChildren()) do if _azkr_yypv:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27191,27387)],130074,bit32.bxor(27191,27387))) then _rg_jrosve[IIlIIlllll1ll(_azkr_yypv)]=true end end for lIlIlIlI in pairs(_0xce71d) do if not _rg_jrosve[lIlIlIlI] then _0xce71d[lIlIlIlI]=nil end end end local _iiegir_zp=_klejbzhd() if not _iiegir_zp then continue end local _0x1b2d=_iiegir_zp.egg local _0xae342=_0x1b2d.Name local _Il1l1l1I1Il11=_iiegir_zp.rarity local IIIIlIlIl11I=IIlIIlllll1ll(_0x1b2d) if (_0x2c509[_Il1l1l1I1Il11] or 1)>=_l1lIIll() then if not _0xce71d[IIIIlIlIl11I] then _0xce71d[IIIIlIlIl11I]=true if _euzarnpyjk.Notify then _euzarnpyjk.Notify(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27190,27387)],129073,bit32.bxor(27190,27387)).._0xae342..lI1IlIlI(Ill1111l1lI1[bit32.bxor(27189,27387)],129260,bit32.bxor(27189,27387)).._Il1l1l1I1Il11..lI1IlIlI(Ill1111l1lI1[bit32.bxor(27188,27387)],122159,bit32.bxor(27188,27387)),lI1IlIlI(Ill1111l1lI1[bit32.bxor(27179,27387)],111368,bit32.bxor(27179,27387))) end end end local _eurihtvgrnx=_0x1b2d:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27178,27387)],124613,bit32.bxor(27178,27387)),true) if not _eurihtvgrnx then continue end local _qkqkylozs=_0x1b2d:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27177,27387)],98996,bit32.bxor(27177,27387)),true) if _qkqkylozs and _qkqkylozs:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27176,27387)],74821,bit32.bxor(27176,27387))) then _qkqkylozs.HoldDuration=0 end l1111lIIl.CFrame=_eurihtvgrnx.CFrame+Vector3.new(0,(math.floor(40/8)),0) task.wait(0.1) local _0x1b38316e=false local _bwr_aaaw=(math.floor(20/2)) for _rmvfihq_bkgqh=1,_bwr_aaaw do if _qkqkylozs and typeof(fireproximityprompt)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27183,27387)],100404,bit32.bxor(27183,27387)) then pcall(fireproximityprompt,_qkqkylozs) end task.wait(0.3) if not _gxsmgyzqlzsqc(_0x1b2d) then _0x1b38316e=true break end if _eurihtvgrnx and _eurihtvgrnx.Parent then l1111lIIl.CFrame=_eurihtvgrnx.CFrame+Vector3.new(0,(bit32.bxor(62,59)),0) task.wait(0.1) end end if _0x1b38316e and _euzarnpyjk.AutoReturn_Enabled then IlI1II1l1() task.wait(0.3) end task.wait(0.3) end end) end end if (function() local _0xee631=(bit32.bxor(89,73)) local _zea_mqteheiqp=(math.floor(44/4)) return _0xee631*_0xee631+_zea_mqteheiqp*_zea_mqteheiqp==(bit32.bxor(135,510)) end)() then _0x0191ed=bit32.bxor((bit32.bxor(53788,134)-45),((49797-79)-248)) end do local _0xab4a=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27182,27387)],116813,bit32.bxor(27182,27387)) local _0x07e18c=_0xab4a end elseif _0x0191ed==(bit32.bxor(48253,195)) then _qfccpvmmyyu.startEggPrediction=function() task.spawn(function() while task.wait(1) do local _plowcmnjdjum=_0x537d9:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27181,27387)],128340,bit32.bxor(27181,27387))) if not _plowcmnjdjum then continue end local l11lI11ll={} for _0xf1e11,_fvisitsaoxcf in ipairs(_plowcmnjdjum:GetChildren()) do if _fvisitsaoxcf:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27180,27387)],70515,bit32.bxor(27180,27387))) then table.insert(l11lI11ll,_fvisitsaoxcf.Name) end end for _agcgcusjmjyza,I11IllI1lIl11 in ipairs(l11lI11ll) do local _0x8f23f512=false for _mrzqeeuu,_11ll11I1lI in ipairs(llI1I1l1I1I) do if _11ll11I1lI==I11IllI1lIl11 then _0x8f23f512=true break end end if not _0x8f23f512 then table.insert(_fsxkrryi,{name=I11IllI1lIl11,time=os.time()}) if #_fsxkrryi>_fwqzzjcwp then table.remove(_fsxkrryi,1) end end end llI1I1l1I1I=l11lI11ll _euzarnpyjk.EggsInMap=l11lI11ll _euzarnpyjk.EggHistory=_fsxkrryi local _0x0158560={} for llIlI1Il1,_11lIll11II in ipairs(_fsxkrryi) do _0x0158560[_11lIll11II.name]=(_0x0158560[_11lIll11II.name] or 0)+1 end local lII1l1lII1IIlI={} for _0x9d04fa,_0x3a66c257 in pairs(_0x0158560) do table.insert(lII1l1lII1IIlI,{name=_0x9d04fa,count=_0x3a66c257}) end table.sort(lII1l1lII1IIlI,function(_qetmsagkx,_hfihyjohpaii) return _qetmsagkx.count>_hfihyjohpaii.count end) local _0x90c1ea19={} for _0xb34dc,I1lIlII1 in ipairs(lII1l1lII1IIlI) do local II1IIl1lll=false for _mjmkhrheeug,_IlIl1IIllIl in ipairs(l11lI11ll) do if _IlIl1IIllIl==I1lIlII1.name then II1IIl1lll=true break end end if not II1IIl1lll then table.insert(_0x90c1ea19,I1lIlII1.name) end if #_0x90c1ea19>=(math.floor(50/10)) then break end end _euzarnpyjk.EggPredictions=_0x90c1ea19 end end) end local lI1l111l11I1=math.random((bit32.bxor(235,171))) if (math.floor(6/2))*((218-44)-91)%(bit32.bxor(124,127))==0 then _0x0191ed=(bit32.bxor(22412,167)) end elseif _0x0191ed==(bit32.bxor(5217,242)-320) then _0xc81938ae={Enabled=false,Hunting=false} if false then local _fplusvtnccre=(math.floor(876/4)) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27171,27387)],113820,bit32.bxor(27171,27387))) end _0x0191ed=((61603-34)-397) elseif _0x0191ed==((17174-22)-392) then if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27170,27387)],123559,bit32.bxor(27170,27387)) then _0xe3026=function(_0xa1172f0) local _ytmshmzudbmy=_0xaf069fca[_0xa1172f0] return _ytmshmzudbmy and _ytmshmzudbmy.Rarity or lI1IlIlI(Ill1111l1lI1[bit32.bxor(27169,27387)],107396,bit32.bxor(27169,27387)) end end do local _murpgevpdwlnk=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27168,27387)],101533,bit32.bxor(27168,27387)) local l11lIIIIlIll=_murpgevpdwlnk end _0x0191ed=bit32.bxor((bit32.bxor(18155,6786)),(bit32.bxor(27193,38)-195)) local _0x18974=math.floor((math.floor(60/2))) elseif _0x0191ed==((20839-26)-304) then if (function() local _0x6327df=(bit32.bxor(97,110)) local _0x3c68d1=(math.floor(32/4)) return _0x6327df*_0x6327df+_0x3c68d1*_0x3c68d1==(bit32.bxor(530,189)-398) end)() then _qfccpvmmyyu.startSpeed=function() task.spawn(function() while task.wait(0.3) do if _euzarnpyjk.Speed_Enabled then _qfccpvmmyyu.setSpeed(_euzarnpyjk.Speed_Value or (bit32.bxor(303,223)-396)) end end end) end end local _lIl1llI1IIl1=math.random((bit32.bxor(229,214))) _0x0191ed=bit32.bxor((bit32.bxor(383,781)),(bit32.bxor(4026,247))) elseif _0x0191ed==(bit32.bxor(56473,102)-252) then if (math.floor(88/8))*1%(math.floor(22/2))==0 then _1IlIl1l=function(__kxqebp) local _0x0a70a local _ni_xwuywztjwm local _rcogptl,_0x72a28 local _jiy_zihq local _1ll1I1Ill1l=(math.floor(136310/10)) while true do if _1ll1I1Ill1l==((13855-3)-221) then _0x0a70a=_0x537d9:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27175,27387)],124812,bit32.bxor(27175,27387))) _1ll1I1Ill1l=bit32.bxor((math.floor(149856/4)),(math.floor(244488/8))) elseif _1ll1I1Ill1l==(math.floor(469448/8)) then if not _0x0a70a then return nil end _1ll1I1Ill1l=bit32.bxor(((130+(1898))),(math.floor(86600/2))) elseif _1ll1I1Ill1l==((13006+(39023))) then _rcogptl,_0x72a28=nil,math.huge _1ll1I1Ill1l=bit32.bxor((math.floor(85542/2)),((43608+(4721)))) elseif _1ll1I1Ill1l==(bit32.bxor(3166,120)) then if not _jiy_zihq then return nil end _1ll1I1Ill1l=bit32.bxor((bit32.bxor(6963,30263)),((38722-15)-154)) elseif _1ll1I1Ill1l==(math.floor(357952/8)) then _ni_xwuywztjwm=__kxqebp:lower() _1ll1I1Ill1l=bit32.bxor(((132+(25224))),((43558-43)-458)) elseif _1ll1I1Ill1l==((2280+(4850))) then _jiy_zihq=_0x1194b.Character and _0x1194b.Character:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27174,27387)],85355,bit32.bxor(27174,27387))) _1ll1I1Ill1l=(math.floor(12440/4)) elseif _1ll1I1Ill1l==(bit32.bxor(64349,192)) then for _0x3721fb6e,ll111IIl1 in ipairs(_0x0a70a:GetChildren()) do if ll111IIl1:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27173,27387)],83540,bit32.bxor(27173,27387))) then local IllII1lII=ll111IIl1.Name:lower() if IllII1lII==_ni_xwuywztjwm or IllII1lII:find(_ni_xwuywztjwm,1,true) then local _0x9186dc=ll111IIl1:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27172,27387)],104033,bit32.bxor(27172,27387)),true) if _0x9186dc then local _0x04b84bf=(_0x9186dc.Position - _jiy_zihq.Position).Magnitude if _0x04b84bf<_0x72a28 then _rcogptl,_0x72a28=ll111IIl1,_0x04b84bf end end end end end _1ll1I1Ill1l=((30977+(17127))) elseif _1ll1I1Ill1l==(math.floor(96208/2)) then return _rcogptl else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27163,27387)],129000,bit32.bxor(27163,27387))) end end end end _0x0191ed=bit32.bxor(((30659-56)-329),(math.floor(27172/4))) elseif _0x0191ed==(bit32.bxor(4373,11717)) then _qfccpvmmyyu.startAutoRidePet=function() task.spawn(function() while task.wait(1) do if not _euzarnpyjk.AutoRidePet_Enabled then continue end local IIl1II1I1Ill11=llllll1Il1l111() if not IIl1II1I1Ill11 then continue end local lI1ll1l1=IIl1II1I1Ill11:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27162,27387)],99997,bit32.bxor(27162,27387))) if not lI1ll1l1 then continue end for _kxlwmmilm,_0x76a5e in ipairs(lI1ll1l1:GetChildren()) do local _apbislixl=_0x76a5e:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27161,27387)],130958,bit32.bxor(27161,27387)),true) if _apbislixl and _apbislixl.Enabled then if typeof(fireproximityprompt)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27160,27387)],75713,bit32.bxor(27160,27387)) then pcall(fireproximityprompt,_apbislixl) end break end end end end) end if ((47+(-40)))*((184-99)-76)%(bit32.bxor(237,47)-187)==0 then _0x0191ed=bit32.bxor((bit32.bxor(62493,46)),(bit32.bxor(43183,173))) end do local _0xfa84=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27167,27387)],82478,bit32.bxor(27167,27387)) local IIlIl11lll=_0xfa84 end elseif _0x0191ed==((40229-46)-400) then llllll1Il1l111=function() local _0xdc0b939 local _0x417c86=(bit32.bxor(456,306)) while true do if _0x417c86==(bit32.bxor(323,115)-54) then _0xdc0b939=_0x537d9:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27166,27387)],79639,bit32.bxor(27166,27387))) _0x417c86=bit32.bxor(((19768-5)-157),((13327+(13134)))) elseif _0x417c86==(bit32.bxor(11625,31)-427) then if not _0xdc0b939 then return nil end _0x417c86=(bit32.bxor(48358,221)) elseif _0x417c86==(bit32.bxor(1439,5501)) then return nil elseif _0x417c86==(math.floor(96374/2)) then for _iiprpugo,_0xab282bf in ipairs(_0xdc0b939:GetChildren()) do local lIIl1Il1l1=_0xab282bf:GetAttribute(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27165,27387)],119454,bit32.bxor(27165,27387))) or _0xab282bf:GetAttribute(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27164,27387)],130315,bit32.bxor(27164,27387))) or _0xab282bf:GetAttribute(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27155,27387)],108148,bit32.bxor(27155,27387))) if lIIl1Il1l1==_0x1194b.UserId or lIIl1Il1l1==_0x1194b.Name then return _0xab282bf end end _0x417c86=bit32.bxor((bit32.bxor(21891,191)-484),((8480+(8858)))) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27154,27387)],127887,bit32.bxor(27154,27387))) end end end _0x0191ed=bit32.bxor((math.floor(54000/4)),(math.floor(445360/10))) elseif _0x0191ed==((38454+(9693))) then if (function() local __egobd_bnff=((82+(-66))) local _0xd9aba=((91+(-74))) return __egobd_bnff*__egobd_bnff+_0xd9aba*_0xd9aba==(bit32.bxor(676,133)) end)() then IlI1II1l1=function() local _1I1I1IlI1 local _0x93c97 local _0x39f8f local _1I1II1IlIIlI=((10563-52)-168) while true do if _1I1II1IlIIlI==((10408-35)-30) then if not _euzarnpyjk.AutoReturn_Enabled then return end _1I1II1IlIIlI=bit32.bxor((bit32.bxor(10056,140)),((26987-91)-233)) elseif _1I1II1IlIIlI==(bit32.bxor(52737,152)) then _0x39f8f=nil _1I1II1IlIIlI=(bit32.bxor(38812,248)-125) elseif _1I1II1IlIIlI==(bit32.bxor(38408,239)) then if _0x93c97 then _0x39f8f=_0x93c97:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27153,27387)],90110,bit32.bxor(27153,27387)),true) or _0x93c97:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27152,27387)],88557,bit32.bxor(27152,27387)),true) or _0x93c97:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27159,27387)],118588,bit32.bxor(27159,27387)),true) or _0x93c97:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27158,27387)],110349,bit32.bxor(27158,27387)),true) end _1I1II1IlIIlI=bit32.bxor((math.floor(90330/5)),(math.floor(195824/8))) elseif _1I1II1IlIIlI==(bit32.bxor(3986,5790)) then if not _0x39f8f then local _0x5a9d6=_0x537d9:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27157,27387)],77722,bit32.bxor(27157,27387))) if _0x5a9d6 then _0x39f8f=_0x5a9d6:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27156,27387)],66753,bit32.bxor(27156,27387)),true) or _0x5a9d6:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27147,27387)],129454,bit32.bxor(27147,27387)),true) end end _1I1II1IlIIlI=bit32.bxor((bit32.bxor(46416,174)),((28186-89)-219)) elseif _1I1II1IlIIlI==(math.floor(277880/5)) then if _0x39f8f then _1I1I1IlI1.CFrame=_0x39f8f.CFrame+Vector3.new(0,(bit32.bxor(69,64)),0) end break elseif _1I1II1IlIIlI==(bit32.bxor(20398,77)) then _1I1I1IlI1=_0x1194b.Character and _0x1194b.Character:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27146,27387)],119545,bit32.bxor(27146,27387))) _1I1II1IlIIlI=bit32.bxor((bit32.bxor(22748,44670)),(bit32.bxor(64969,130))) elseif _1I1II1IlIIlI==(math.floor(146020/4)) then _0x93c97=llllll1Il1l111() _1I1II1IlIIlI=bit32.bxor((math.floor(157484/4)),(bit32.bxor(22429,207))) elseif _1I1II1IlIIlI==(bit32.bxor(3336,165)-452) then if not _1I1I1IlI1 then return end _1I1II1IlIIlI=bit32.bxor((bit32.bxor(16550,233)),((51272+(1678)))) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27145,27387)],66974,bit32.bxor(27145,27387))) end end end end if (function() local _0x62ee8=(bit32.bxor(0,93)-73) local Ill111llIIl=(math.floor(45/5)) return _0x62ee8*_0x62ee8+Ill111llIIl*Ill111llIIl==(bit32.bxor(339,178)) end)() then _0x0191ed=bit32.bxor((math.floor(129150/5)),(bit32.bxor(28710,194))) end elseif _0x0191ed==(bit32.bxor(18549,101)) then _dy_yyej=function() local _0x6de26 local _kttoamzlh=(bit32.bxor(19941,121)) while true do if _kttoamzlh==(math.floor(99340/5)) then _0x6de26=Il11l1lIII1l() _kttoamzlh=((37397-93)-121) elseif _kttoamzlh==(math.floor(74366/2)) then if _0x6de26 then local _0xe533e5=pcall(function() _0x6de26:FireServer() end) if _0xe533e5 then print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27144,27387)],125145,bit32.bxor(27144,27387))) return true end end _kttoamzlh=bit32.bxor((math.floor(419992/8)),(math.floor(484520/10))) elseif _kttoamzlh==(math.floor(57518/2)) then return false else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27151,27387)],68216,bit32.bxor(27151,27387))) end end end _0x0191ed=bit32.bxor((bit32.bxor(18373,104)),(math.floor(127448/2))) elseif _0x0191ed==((6199+(9726))) then if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27150,27387)],118785,bit32.bxor(27150,27387)) then _n_liieasgyzea=game:GetService(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27149,27387)],108568,bit32.bxor(27149,27387))) end if bit32.bxor((bit32.bxor(236,109)),(math.floor(1032/8)))==0 then _0x0191ed=(bit32.bxor(49644,195)) end local _0xd8354ad=math.floor((bit32.bxor(705,237)-474)) if (function() local _gjunckphbkod=(bit32.bxor(398,154)-250) return _gjunckphbkod*_gjunckphbkod<0 end)() then local _cvlgolgjiq=((1399-70)-351) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27148,27387)],82097,bit32.bxor(27148,27387))) end local __vtf_h_smeu=math.sqrt((math.floor(198/2))) elseif _0x0191ed==(bit32.bxor(37835,11960)) then _0xc68f=function(_1I1Ill1) local lI1l11ll local _x_mjjpwgqrkx=(math.floor(74565/5)) while true do if _x_mjjpwgqrkx==((3116+(11797))) then lI1l11ll=_1I1Ill1:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27139,27387)],118776,bit32.bxor(27139,27387)),true) _x_mjjpwgqrkx=bit32.bxor((bit32.bxor(6457,213)),(bit32.bxor(18738,107)-397)) elseif _x_mjjpwgqrkx==((16054-73)-264) then return lI1IlIlI(Ill1111l1lI1[bit32.bxor(27138,27387)],117539,bit32.bxor(27138,27387)) elseif _x_mjjpwgqrkx==(math.floor(120480/5)) then if lI1l11ll then local _zxavbpdy=lI1l11ll:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27137,27387)],112224,bit32.bxor(27137,27387))) if _zxavbpdy and _zxavbpdy:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27136,27387)],94539,bit32.bxor(27136,27387))) then return _zxavbpdy.Text end end _x_mjjpwgqrkx=bit32.bxor((bit32.bxor(19312,90)),((30583-97)-199)) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27143,27387)],116032,bit32.bxor(27143,27387))) end end end if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27142,27387)],113739,bit32.bxor(27142,27387)) then _0x0191ed=(bit32.bxor(15980,70)) local _0x5ece79b=math.floor(((539-11)-451)) end elseif _0x0191ed==(math.floor(489610/10)) then if (function() local _ayaazyj=(bit32.bxor(205,197)) return _ayaazyj*_ayaazyj>=0 end)() then _xzypzim=function() local _0x108b0e local _111I1I11 local _1llIIlIl local _xaeduehhkyc=((53813-40)-40) while true do if _xaeduehhkyc==(bit32.bxor(54214,181)-398) then _0x108b0e=game:GetService(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27141,27387)],124020,bit32.bxor(27141,27387))):FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27140,27387)],70939,bit32.bxor(27140,27387))) _xaeduehhkyc=(bit32.bxor(31576,49891)) elseif _xaeduehhkyc==(bit32.bxor(54831,38)) then return pcall(function() _1llIIlIl:FireServer() end) elseif _xaeduehhkyc==(math.floor(380376/8)) then _111I1I11=_0x108b0e and _0x108b0e:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27643,27387)],107786,bit32.bxor(27643,27387))) _xaeduehhkyc=(bit32.bxor(58147,180)) elseif _xaeduehhkyc==(bit32.bxor(58283,60)) then if not _111I1I11 then return false end _xaeduehhkyc=bit32.bxor(((13308+(20846))),(math.floor(5160/8))) elseif _xaeduehhkyc==((4576-60)-343) then if not _1llIIlIl then return false end _xaeduehhkyc=(bit32.bxor(55026,251)) elseif _xaeduehhkyc==(math.floor(278392/8)) then _1llIIlIl=_111I1I11:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27642,27387)],110021,bit32.bxor(27642,27387))) _xaeduehhkyc=bit32.bxor((bit32.bxor(7885,150)-19),(math.floor(28712/8))) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27641,27387)],128854,bit32.bxor(27641,27387))) end end end local _0xd259=math.sqrt((bit32.bxor(167,140))) end if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27640,27387)],104965,bit32.bxor(27640,27387)) then local _II1I1l1Il1l1I=(bit32.bxor(728,103)-361) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27647,27387)],122054,bit32.bxor(27647,27387))) local _0xb193=math.random((bit32.bxor(86,11))) end local _0x55f8b=math.abs((math.floor(136/2))) _0x0191ed=(math.floor(83052/4)) elseif _0x0191ed==((25039+(26327))) then if (function() local III11I1II=(math.floor(290/10)) return III11I1II*III11I1II>=0 end)() then _0xb88de04e={} end _0x0191ed=bit32.bxor((bit32.bxor(20285,223)),(bit32.bxor(37468,234))) elseif _0x0191ed==((13195+(1653))) then if (function() local lllIl1lI1IlllI=(bit32.bxor(250,210)) return lllIl1lI1IlllI*lllIl1lI1IlllI>=0 end)() then IIlIIlllll1ll=function(_0x171c5123) local _kcbjhtehh local _0x0cb3 local _0xc03f=(bit32.bxor(23660,13143)) while true do if _0xc03f==(bit32.bxor(12591,24084)) then _kcbjhtehh=_0x171c5123:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27646,27387)],110853,bit32.bxor(27646,27387)),true) _0xc03f=bit32.bxor((bit32.bxor(60989,113)),((59007-81)-490)) elseif _0xc03f==(bit32.bxor(49049,177)) then return string.format(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27645,27387)],97220,bit32.bxor(27645,27387)),_0x171c5123.Name,_0x0cb3.X,_0x0cb3.Y,_0x0cb3.Z) elseif _0xc03f==(bit32.bxor(2652,84)) then if not _kcbjhtehh then return _0x171c5123.Name end _0xc03f=bit32.bxor((math.floor(101432/8)),((42412-54)-202)) elseif _0xc03f==(math.floor(152748/4)) then _0x0cb3=_kcbjhtehh.Position _0xc03f=bit32.bxor(((47600-33)-89),(bit32.bxor(1558,72))) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27644,27387)],74987,bit32.bxor(27644,27387))) end end end end _0x0191ed=bit32.bxor((math.floor(144310/10)),(bit32.bxor(39831,56))) elseif _0x0191ed==(bit32.bxor(8584,173)) then _0x9bbb8c=function() local _kzjo_o_cfdcvp local _0xdb946200=(bit32.bxor(8367,111)) while true do if _0xdb946200==(bit32.bxor(7850,15978)) then _kzjo_o_cfdcvp=_0x537d9:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27635,27387)],110944,bit32.bxor(27635,27387))) _0xdb946200=(bit32.bxor(49198,99)-194) elseif _0xdb946200==((27579+(35207))) then for _gq_e_mex,_0x52dcaee in ipairs(_kzjo_o_cfdcvp:GetChildren()) do if _0x52dcaee:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27634,27387)],128529,bit32.bxor(27634,27387))) and _0x52dcaee.Name:lower():find(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27633,27387)],75434,bit32.bxor(27633,27387)),1,true) then return _0x52dcaee end end _0xdb946200=bit32.bxor(((32547-28)-285),(math.floor(34538/2))) elseif _0xdb946200==(math.floor(490350/10)) then if not _kzjo_o_cfdcvp then return nil end _0xdb946200=(math.floor(313930/5)) elseif _0xdb946200==((9566+(6465))) then return nil else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27632,27387)],96455,bit32.bxor(27632,27387))) end end end if (function() local _kggh_mrbff=(math.floor(790/10)) return _kggh_mrbff*_kggh_mrbff<0 end)() then local _Ill11IlI1I=((158+(-100))) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27639,27387)],115960,bit32.bxor(27639,27387))) end if bit32.bxor((math.floor(948/4)),((381-89)-55))==0 then _0x0191ed=bit32.bxor((bit32.bxor(15193,251)-301),(bit32.bxor(23079,209)-423)) end do local _kshpqnyq=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27638,27387)],95145,bit32.bxor(27638,27387)) local _0x556a95=_kshpqnyq end if (function() local lIl1IIII1IIll=(math.floor(768/8)) return lIl1IIII1IIll*lIl1IIII1IIll<0 end)() then local _cgr_wyd=(math.floor(732/4)) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27637,27387)],68688,bit32.bxor(27637,27387))) local IIll1lII1I1I=math.abs((bit32.bxor(352,218)-425)) end elseif _0x0191ed==(bit32.bxor(26345,52870)) then if (math.floor(20/4))*((535-91)-423)%(bit32.bxor(285,221)-443)==0 then _klejbzhd=function() local Il1lllI1Il local IIIIl1lIlI1III local _dbxematalnpdw,_goqlohhrv local IllII11111ll11=((38512-38)-454) while true do if IllII11111ll11==(bit32.bxor(38075,63)) then Il1lllI1Il=_0x537d9:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27636,27387)],78499,bit32.bxor(27636,27387))) IllII11111ll11=bit32.bxor((bit32.bxor(36577,224)),(bit32.bxor(44594,117))) elseif IllII11111ll11==(bit32.bxor(21718,149)) then _dbxematalnpdw,_goqlohhrv=nil,0 IllII11111ll11=(math.floor(593690/10)) elseif IllII11111ll11==((55987+(3382))) then for IlI1IlIl11,_11llIllI1lI in ipairs(Il1lllI1Il:GetChildren()) do if _11llIllI1lI:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27627,27387)],117156,bit32.bxor(27627,27387))) and l1I1lIIlIl11l(_11llIllI1lI.Name) then local _dzznddiox local _w_g_uycjkd local __t_ixvwowmiqk local _dy_tfppvo=(bit32.bxor(57753,225)) while true do if _dy_tfppvo==(bit32.bxor(57903,181)-290) then _dzznddiox=_0xe3026(_11llIllI1lI.Name) _dy_tfppvo=((26428-26)-363) elseif _dy_tfppvo==((39966-33)-10) then if __t_ixvwowmiqk then local _0x16ac6=(__t_ixvwowmiqk.Position - IIIIl1lIlI1III.Position).Magnitude if _w_g_uycjkd>_goqlohhrv or (_w_g_uycjkd==_goqlohhrv and (not _dbxematalnpdw or _0x16ac6<_dbxematalnpdw.dist)) then _dbxematalnpdw={egg=_11llIllI1lI,dist=_0x16ac6,rarity=_dzznddiox,rank=_w_g_uycjkd} _goqlohhrv=_w_g_uycjkd end end break elseif _dy_tfppvo==((26232-20)-173) then _w_g_uycjkd=_0x2c509[_dzznddiox] or 1 _dy_tfppvo=bit32.bxor((math.floor(62332/2)),(math.floor(53750/10))) elseif _dy_tfppvo==(math.floor(111876/4)) then __t_ixvwowmiqk=_11llIllI1lI:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27626,27387)],75731,bit32.bxor(27626,27387)),true) _dy_tfppvo=bit32.bxor((bit32.bxor(58386,240)-377),(bit32.bxor(20532,10414))) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27625,27387)],89896,bit32.bxor(27625,27387))) end end end end IllII11111ll11=bit32.bxor((math.floor(359408/8)),((86+(7889)))) elseif IllII11111ll11==(math.floor(153535/5)) then IIIIl1lIlI1III=_0x1194b.Character and _0x1194b.Character:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27624,27387)],110437,bit32.bxor(27624,27387))) IllII11111ll11=bit32.bxor((bit32.bxor(43795,11)-153),(math.floor(98528/4))) elseif IllII11111ll11==(bit32.bxor(45071,149)-65) then return _dbxematalnpdw elseif IllII11111ll11==(bit32.bxor(39435,20556)) then if not IIIIl1lIlI1III then return nil end IllII11111ll11=bit32.bxor((bit32.bxor(43476,178)),(math.floor(324025/5))) elseif IllII11111ll11==((8395-81)-52) then if not Il1lllI1Il then return nil end IllII11111ll11=bit32.bxor((bit32.bxor(3005,20659)),(bit32.bxor(11419,102))) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27631,27387)],101508,bit32.bxor(27631,27387))) end end end end _0x0191ed=bit32.bxor((math.floor(294220/10)),(math.floor(264945/5))) if (function() local IIlIlllIIIl1I=(math.floor(200/8)) return IIlIlllIIIl1I*IIlIlllIIIl1I<0 end)() then local _pxvmvijll=(math.floor(832/4)) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27630,27387)],83585,bit32.bxor(27630,27387))) local _ufuyepdmv=math.sqrt((bit32.bxor(69,7))) end elseif _0x0191ed==(bit32.bxor(2953,26803)) then if (bit32.bxor(52,49))*((231-51)-112)%(bit32.bxor(98,18)-107)==0 then Il1I1Il1l1=function() local lllIIIl1l local _lIIlII1lI1 local _0xdfbf6c=((16366+(749))) while true do if _0xdfbf6c==(bit32.bxor(17111,12)) then lllIIIl1l=_0x537d9:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27629,27387)],124084,bit32.bxor(27629,27387))) _0xdfbf6c=bit32.bxor((bit32.bxor(38195,27407)),(math.floor(186808/8))) elseif _0xdfbf6c==(bit32.bxor(11352,106)) then return nil elseif _0xdfbf6c==(bit32.bxor(48754,73)-116) then if _lIIlII1lI1 and _lIIlII1lI1:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27628,27387)],67625,bit32.bxor(27628,27387))) then return _lIIlII1lI1 end _0xdfbf6c=(bit32.bxor(11396,182)) elseif _0xdfbf6c==((60074-97)-320) then _lIIlII1lI1=lllIIIl1l:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27619,27387)],87322,bit32.bxor(27619,27387))) _0xdfbf6c=bit32.bxor((bit32.bxor(44739,14)),(bit32.bxor(1571,5417))) elseif _0xdfbf6c==(bit32.bxor(6116,45807)) then if not lllIIIl1l then return nil end _0xdfbf6c=bit32.bxor(((52060-27)-32),(math.floor(87440/10))) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27618,27387)],130583,bit32.bxor(27618,27387))) end end end end _0x0191ed=(bit32.bxor(26742,116)) elseif _0x0191ed==(math.floor(13564/4)) then _qfccpvmmyyu.startInstantPickup=function() task.spawn(function() while task.wait(0.5) do if not _euzarnpyjk.InstantPickup_Enabled then continue end local _k_albsa=_0x537d9:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27617,27387)],102456,bit32.bxor(27617,27387))) if not _k_albsa then continue end for _0x2a895,_11lI1I1IIl in ipairs(_k_albsa:GetChildren()) do if _11lI1I1IIl:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27616,27387)],68567,bit32.bxor(27616,27387))) then local _0x63f025=_11lI1I1IIl:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27623,27387)],110700,bit32.bxor(27623,27387)),true) if _0x63f025 and _0x63f025:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27622,27387)],119215,bit32.bxor(27622,27387))) then if _0x63f025.HoldDuration>0 then _0x63f025.HoldDuration=0 end end end end end end) end _0x0191ed=bit32.bxor(((47255-80)-45),(math.floor(281870/5))) elseif _0x0191ed==(math.floor(51520/10)) then _0x4ebeffe=game:GetService(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27621,27387)],114630,bit32.bxor(27621,27387))):FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27620,27387)],70987,bit32.bxor(27620,27387))) if false then local Il1I1I1I=(bit32.bxor(995,90)) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27611,27387)],81504,bit32.bxor(27611,27387))) local _tdnmgcktigdq=math.abs((bit32.bxor(145,81)-182)) end _0x0191ed=bit32.bxor((bit32.bxor(12356,27391)),((25005-15)-419)) elseif _0x0191ed==(math.floor(198840/4)) then if bit32.bxor((math.floor(908/4)),(bit32.bxor(135,100)))==0 then l1lII1I11={Running=false,StealPaused=false,BasketFull=false,EggLocked=false,LastFire=0} end _0x0191ed=bit32.bxor((math.floor(79172/2)),(bit32.bxor(58573,60)-454)) elseif _0x0191ed==(bit32.bxor(54472,194)) then _0x537d9=game:GetService(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27610,27387)],124247,bit32.bxor(27610,27387))) _0x0191ed=bit32.bxor(((2183+(1313))),((454+(7282)))) elseif _0x0191ed==(bit32.bxor(4127,64)) then _qfccpvmmyyu.setSpeed=function(_l1IIIll1I) local _kujbytzrgel local _l1I1ll1I1lII local _l11II1ll11ll=((27780+(2005))) while true do if _l11II1ll11ll==((3582+(26203))) then _kujbytzrgel=_0x1194b.Character _l11II1ll11ll=bit32.bxor(((36134+(3033))),(bit32.bxor(51805,98))) elseif _l11II1ll11ll==((21354-53)-117) then _l1I1ll1I1lII=_kujbytzrgel and _kujbytzrgel:FindFirstChildOfClass(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27609,27387)],85906,bit32.bxor(27609,27387))) _l11II1ll11ll=bit32.bxor(((611+(2324))),(bit32.bxor(38603,186)-63)) elseif _l11II1ll11ll==(math.floor(161044/4)) then if _l1I1ll1I1lII then _l1I1ll1I1lII.WalkSpeed=_l1IIIll1I end break else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27608,27387)],79377,bit32.bxor(27608,27387))) end end end _0x0191ed=bit32.bxor((bit32.bxor(19560,78)-168),(bit32.bxor(6998,53))) local _hbegovnfrl=math.floor((math.floor(820/10))) if (function() local _lI1IllI=((152-19)-66) return _lI1IllI*_lI1IllI<0 end)() then local _bxvcnknfbhhg=(math.floor(2415/5)) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27615,27387)],105424,bit32.bxor(27615,27387))) end elseif _0x0191ed==(bit32.bxor(610,1826)) then _0xaf069fca,_swdhqlvpnwpcb={},{} do local _0xbd8ced5=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27614,27387)],105087,bit32.bxor(27614,27387)) local _euajqol=_0xbd8ced5 end _0x0191ed=bit32.bxor((math.floor(254130/5)),(bit32.bxor(20649,168)-200)) elseif _0x0191ed==(bit32.bxor(22293,56)) then _qfccpvmmyyu.startAutoMutation=function() task.spawn(function() while task.wait(1) do if not _euzarnpyjk.AutoMutation_Enabled then l1lII1I11.Running=false continue end if l1lII1I11.Running then continue end local _II11lII1I1l1=_0x1194b.Character and _0x1194b.Character:FindFirstChildOfClass(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27613,27387)],79610,bit32.bxor(27613,27387))) if not _II11lII1I1l1 or _II11lII1I1l1.Health<=0 then task.wait(1) continue end if _0x00d78() then print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27612,27387)],81853,bit32.bxor(27612,27387))) pcall(_0xde54) task.wait((math.floor(20/10))) end end end) end _0x0191ed=(bit32.bxor(28865,210)-205) elseif _0x0191ed==(math.floor(197820/4)) then if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27603,27387)],105976,bit32.bxor(27603,27387)) then _lpfoosni=game:GetService(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27602,27387)],99837,bit32.bxor(27602,27387))) end _0x0191ed=(bit32.bxor(54437,254)-81) elseif _0x0191ed==(bit32.bxor(49946,87)-247) then _euzarnpyjk=nil _0x0191ed=bit32.bxor(((52690-4)-343),(bit32.bxor(62164,150))) elseif _0x0191ed==(math.floor(156944/4)) then _pilwmqmr_ynke=function() local _1I1II1ll1Il local lllIIIIlI1l local _0x48c2f93=(bit32.bxor(57306,253)) while true do if _0x48c2f93==(bit32.bxor(57257,228)-38) then _1I1II1ll1Il=llllll1Il1l111() _0x48c2f93=bit32.bxor((bit32.bxor(12063,207)),(math.floor(204536/4))) elseif _0x48c2f93==(math.floor(130256/4)) then return lllIIIIlI1l elseif _0x48c2f93==(bit32.bxor(56395,127)) then lllIIIIlI1l=_1I1II1ll1Il:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27601,27387)],128084,bit32.bxor(27601,27387)),true) or _1I1II1ll1Il:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27600,27387)],112189,bit32.bxor(27600,27387)),true) or _1I1II1ll1Il:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27607,27387)],117248,bit32.bxor(27607,27387)),true) or _1I1II1ll1Il:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27606,27387)],94919,bit32.bxor(27606,27387)),true) _0x48c2f93=bit32.bxor((bit32.bxor(52088,186)),(math.floor(463260/10))) elseif _0x48c2f93==((59778-83)-193) then if not _1I1II1ll1Il then return nil end _0x48c2f93=bit32.bxor((bit32.bxor(2004,10981)),(bit32.bxor(61869,220)-108)) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27605,27387)],123280,bit32.bxor(27605,27387))) end end end do local IllIll111lll1=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27604,27387)],115467,bit32.bxor(27604,27387)) local l1Ill1ll1lI1=IllIll111lll1 end _0x0191ed=bit32.bxor((bit32.bxor(22973,104)),(bit32.bxor(34286,56))) elseif _0x0191ed==(bit32.bxor(63434,86)) then if (function() local _0x16be=(math.floor(80/5)) local I1lIllllI1=((119+(-100))) return _0x16be*_0x16be+I1lIllllI1*I1lIllllI1==((671-41)-13) end)() then _fwqzzjcwp=((17+(33))) end if bit32.bxor((bit32.bxor(92,44)),(bit32.bxor(90,42)))==0 then _0x0191ed=bit32.bxor((bit32.bxor(33954,125)-258),(math.floor(162270/10))) local __iexhvdivjd=math.sqrt((math.floor(600/10))) end elseif _0x0191ed==(bit32.bxor(37552,119)) then _qfccpvmmyyu.startMutationSteal=function() task.spawn(function() while task.wait(0.5) do if not _euzarnpyjk.MutationSteal_Enabled then continue end if _qfccpvmmyyu.hasVolcanicEgg and _qfccpvmmyyu.hasVolcanicEgg() then task.wait(1) continue end if _qfccpvmmyyu.getMutationState and _qfccpvmmyyu.getMutationState().Running then task.wait(1) continue end local _I1IllI1=_0x1194b.Character local llIllll11=_I1IllI1 and _I1IllI1:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27595,27387)],100030,bit32.bxor(27595,27387))) local _0x1d3516=_I1IllI1 and _I1IllI1:FindFirstChildOfClass(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27594,27387)],93451,bit32.bxor(27594,27387))) if not llIllll11 or not _0x1d3516 or _0x1d3516.Health<=0 then task.wait(1) continue end if _qfccpvmmyyu.isHoldingEgg and _qfccpvmmyyu.isHoldingEgg() then task.wait(0.5) continue end local _ihcsuo_rbc=_0x1194b:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27593,27387)],106330,bit32.bxor(27593,27387))) if _ihcsuo_rbc and #_ihcsuo_rbc:GetChildren()>0 then task.wait(0.5) continue end local IIIlI1I1lI1IIl=_klejbzhd() if not IIIlI1I1lI1IIl then task.wait(0.5) continue end local _0xbb46e12=IIIlI1I1lI1IIl.egg local _wflynggxxt=_0xbb46e12:FindFirstChildWhichIsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27592,27387)],122123,bit32.bxor(27592,27387)),true) local _0x5f4fc=_0xbb46e12:FindFirstChild(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27599,27387)],78558,bit32.bxor(27599,27387)),true) if not _wflynggxxt or not _0x5f4fc then continue end if _0x5f4fc:IsA(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27598,27387)],101677,bit32.bxor(27598,27387))) then _0x5f4fc.HoldDuration=0 end llIllll11.CFrame=_wflynggxxt.CFrame+Vector3.new(0,(bit32.bxor(6,5)),0) task.wait(0.1) local _jh_uzaz=false for _l1IIlIlII1=1,(math.floor(30/2)) do if typeof(fireproximityprompt)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27597,27387)],79778,bit32.bxor(27597,27387)) then pcall(fireproximityprompt,_0x5f4fc) end task.wait(0.25) if not _gxsmgyzqlzsqc(_0xbb46e12) then _jh_uzaz=true break end if _wflynggxxt and _wflynggxxt.Parent then llIllll11.CFrame=_wflynggxxt.CFrame+Vector3.new(0,(bit32.bxor(167,211)-113),0) task.wait(0.1) end end if _jh_uzaz then print(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27596,27387)],71873,bit32.bxor(27596,27387)).._0xbb46e12.Name..lI1IlIlI(Ill1111l1lI1[bit32.bxor(27587,27387)],113158,bit32.bxor(27587,27387))..IIIlI1I1lI1IIl.rarity..lI1IlIlI(Ill1111l1lI1[bit32.bxor(27586,27387)],114863,bit32.bxor(27586,27387))) end task.wait(0.3) end end) end _0x0191ed=(bit32.bxor(26548,190)) elseif _0x0191ed==((5441-23)-410) then _0x1194b=_n_liieasgyzea.LocalPlayer if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27585,27387)],125374,bit32.bxor(27585,27387)) then _0x0191ed=(math.floor(387992/8)) do local _irvkmzt=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27584,27387)],77391,bit32.bxor(27584,27387)) local _0x0383ccb4=_irvkmzt end end if type(nil)==lI1IlIlI(Ill1111l1lI1[bit32.bxor(27591,27387)],77224,bit32.bxor(27591,27387)) then local _1ll111llI1l11=((1046-67)-251) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27590,27387)],106599,bit32.bxor(27590,27387))) end elseif _0x0191ed==(bit32.bxor(46488,100)-363) then _qfccpvmmyyu.petDismount=function() local _lllIlIlIIl1I local _tlcstlqgtzr=(bit32.bxor(44907,197)) while true do if _tlcstlqgtzr==(math.floor(179896/4)) then _lllIlIlIIl1I=lllI1l1Ill11(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27589,27387)],67828,bit32.bxor(27589,27387))) _tlcstlqgtzr=bit32.bxor((bit32.bxor(43498,175)-80),(bit32.bxor(9284,57))) elseif _tlcstlqgtzr==(math.floor(28396/4)) then return false elseif _tlcstlqgtzr==(bit32.bxor(35879,175)) then if _lllIlIlIIl1I then _lllIlIlIIl1I:FireServer() return true end _tlcstlqgtzr=bit32.bxor((bit32.bxor(20799,67)),((18034+(1109)))) else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27588,27387)],99813,bit32.bxor(27588,27387))) end end end if (function() local ll1lll1l1III=(bit32.bxor(44,30)) return ll1lll1l1III*ll1lll1l1III<0 end)() then local _eccvcteieqiav=(math.floor(860/5)) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27579,27387)],100128,bit32.bxor(27579,27387))) end if bit32.bxor((bit32.bxor(71,78)),(bit32.bxor(176,185)))==0 then _0x0191ed=bit32.bxor((math.floor(94422/2)),(math.floor(148605/5))) end elseif _0x0191ed==((20523+(7328))) then _gxsmgyzqlzsqc=function(_0x2aca79e) if not _0x2aca79e or not _0x2aca79e.Parent then return false end return true end do local _0x97eeb=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27578,27387)],127699,bit32.bxor(27578,27387)) local _burni_vfplkf=_0x97eeb end if false then local llllll1IIllI=((412-19)-272) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27577,27387)],77262,bit32.bxor(27577,27387))) end local _IllIIl11lI1=math.floor((bit32.bxor(329,105)-272)) _0x0191ed=bit32.bxor((bit32.bxor(1604,48681)),(bit32.bxor(21155,12)-285)) elseif _0x0191ed==(bit32.bxor(22798,8327)) then _l11lIlIIlI1I={DROP_TIMEOUT=(bit32.bxor(247,210)-22),RETURN_TIMEOUT=((109+(-96))),TP_ABOVE_TOP=(math.floor(800/4))} _0x0191ed=(bit32.bxor(618,53017)) do local II1IIlI11=lI1IlIlI(Ill1111l1lI1[bit32.bxor(27576,27387)],105971,bit32.bxor(27576,27387)) local _0x7f8c=II1IIlI11 end if false then local _0xcd44b6=((835+(113))) error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27583,27387)],87786,bit32.bxor(27583,27387))) end else error(lI1IlIlI(Ill1111l1lI1[bit32.bxor(27582,27387)],100293,bit32.bxor(27582,27387))) local _ixbfhaviymi=math.sin((bit32.bxor(126,60))) end end
+-- ============================================================
+-- VRILZHUB FEATURES — RIDE A PET v3.2
+-- + Egg Prediction System + Notif Egg No Spawn
+-- + Speed + Instant Pickup (HoldDuration=0) + Auto Farm
+-- + Volcanic Hunter (auto detect + travel + pickup + return)
+-- ============================================================
+
+local Features = {}
+local Shared = nil
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+
+-- ============================================================
+-- GET EGG LUCK
+-- ============================================================
+local function getEggLuck(egg)
+    local luckGui = egg:FindFirstChild("EggLuck", true)
+    if luckGui then
+        local luckLabel = luckGui:FindFirstChild("Luck")
+        if luckLabel and luckLabel:IsA("TextLabel") then
+            return luckLabel.Text
+        end
+    end
+    return "?"
+end
+
+-- ============================================================
+-- EGG ESP
+-- ============================================================
+local EggESPTracked = {}
+
+function Features.startEggESP()
+    task.spawn(function()
+        while task.wait(0.3) do
+            if Shared.ESP_Eggs_Enabled then
+                local rendered = Workspace:FindFirstChild("RenderedEggs")
+                if rendered then
+                    for _, egg in ipairs(rendered:GetChildren()) do
+                        if egg:IsA("Model") and not EggESPTracked[egg] then
+                            local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+                            if eggPart then
+                                local hl = Instance.new("Highlight")
+                                hl.Name = "VRILZ_RideAPet_EggHL"
+                                hl.FillColor = Color3.fromRGB(255, 215, 0)
+                                hl.OutlineColor = Color3.new(1, 1, 1)
+                                hl.FillTransparency = 0.5
+                                hl.Adornee = egg
+                                hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                                hl.Parent = egg
+
+                                local bb = Instance.new("BillboardGui")
+                                bb.Name = "VRILZ_RideAPet_EggESP"
+                                bb.Size = UDim2.fromOffset(160, 50)
+                                bb.StudsOffset = Vector3.new(0, 3, 0)
+                                bb.AlwaysOnTop = true
+                                bb.MaxDistance = 500
+                                bb.Adornee = eggPart
+                                bb.Parent = eggPart
+
+                                local lbl = Instance.new("TextLabel")
+                                lbl.Name = "InfoLabel"
+                                lbl.Size = UDim2.fromScale(1, 1)
+                                lbl.BackgroundTransparency = 0.3
+                                lbl.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+                                lbl.TextColor3 = Color3.fromRGB(255, 215, 0)
+                                lbl.TextStrokeColor3 = Color3.new(0, 0, 0)
+                                lbl.TextStrokeTransparency = 0.3
+                                lbl.Font = Enum.Font.GothamBold
+                                lbl.TextSize = 12
+                                lbl.TextWrapped = true
+                                lbl.Text = ""
+                                lbl.Parent = bb
+
+                                local cnr = Instance.new("UICorner")
+                                cnr.CornerRadius = UDim.new(0, 6)
+                                cnr.Parent = lbl
+
+                                local str = Instance.new("UIStroke")
+                                str.Color = Color3.fromRGB(255, 215, 0)
+                                str.Thickness = 1
+                                str.Transparency = 0.3
+                                str.Parent = lbl
+
+                                EggESPTracked[egg] = {hl = hl, bb = bb, lbl = lbl, part = eggPart}
+                            end
+                        end
+                    end
+                end
+            else
+                for egg, data in pairs(EggESPTracked) do
+                    if data.hl then data.hl:Destroy() end
+                    if data.bb then data.bb:Destroy() end
+                    EggESPTracked[egg] = nil
+                end
+            end
+
+            for egg, data in pairs(EggESPTracked) do
+                if not egg.Parent then
+                    if data.hl then data.hl:Destroy() end
+                    if data.bb then data.bb:Destroy() end
+                    EggESPTracked[egg] = nil
+                elseif data.lbl then
+                    local parts = {}
+                    if Shared.ESP_EggName_Enabled then
+                        table.insert(parts, "🥚 " .. egg.Name)
+                    end
+                    if Shared.ESP_EggLuck_Enabled then
+                        table.insert(parts, "🍀 " .. getEggLuck(egg))
+                    end
+                    data.lbl.Text = table.concat(parts, "\n")
+                end
+            end
+        end
+    end)
+end
+
+-- ============================================================
+-- PET ESP
+-- ============================================================
+local PetESPTracked = {}
+
+local function getPetInfo(pet)
+    local cash, speed = "?", "?"
+    local cashGui = pet:FindFirstChild("PetCash", true)
+    if cashGui then
+        for _, desc in ipairs(cashGui:GetDescendants()) do
+            if desc:IsA("TextLabel") and desc.Text:find("%$") and desc.Text:find("/s") then
+                cash = desc.Text
+                break
+            end
+        end
+    end
+    local speedGui = pet:FindFirstChild("PetSpeed", true)
+    if speedGui then
+        for _, desc in ipairs(speedGui:GetDescendants()) do
+            if desc:IsA("TextLabel") and desc.Text ~= "" then
+                speed = desc.Text
+                break
+            end
+        end
+    end
+    return cash, speed
+end
+
+function Features.startPetESP()
+    task.spawn(function()
+        while task.wait(0.3) do
+            if Shared.ESP_Pets_Enabled then
+                local plots = Workspace:FindFirstChild("Plots")
+                if plots then
+                    for _, plot in ipairs(plots:GetChildren()) do
+                        local pets = plot:FindFirstChild("Pets")
+                        if pets then
+                            for _, pet in ipairs(pets:GetChildren()) do
+                                if pet:IsA("Model") and not PetESPTracked[pet] then
+                                    local petPart = pet:FindFirstChildWhichIsA("BasePart", true)
+                                    if petPart then
+                                        local hl = Instance.new("Highlight")
+                                        hl.Name = "VRILZ_RideAPet_PetHL"
+                                        hl.FillColor = Color3.fromRGB(100, 200, 255)
+                                        hl.OutlineColor = Color3.new(1, 1, 1)
+                                        hl.FillTransparency = 0.5
+                                        hl.Adornee = pet
+                                        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                                        hl.Parent = pet
+
+                                        local bb = Instance.new("BillboardGui")
+                                        bb.Name = "VRILZ_RideAPet_PetESP"
+                                        bb.Size = UDim2.fromOffset(180, 70)
+                                        bb.StudsOffset = Vector3.new(0, 3.5, 0)
+                                        bb.AlwaysOnTop = true
+                                        bb.MaxDistance = 500
+                                        bb.Adornee = petPart
+                                        bb.Parent = petPart
+
+                                        local lbl = Instance.new("TextLabel")
+                                        lbl.Name = "InfoLabel"
+                                        lbl.Size = UDim2.fromScale(1, 1)
+                                        lbl.BackgroundTransparency = 0.3
+                                        lbl.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+                                        lbl.TextColor3 = Color3.fromRGB(100, 200, 255)
+                                        lbl.TextStrokeColor3 = Color3.new(0, 0, 0)
+                                        lbl.TextStrokeTransparency = 0.3
+                                        lbl.Font = Enum.Font.GothamBold
+                                        lbl.TextSize = 12
+                                        lbl.TextWrapped = true
+                                        lbl.Text = ""
+                                        lbl.Parent = bb
+
+                                        local cnr = Instance.new("UICorner")
+                                        cnr.CornerRadius = UDim.new(0, 6)
+                                        cnr.Parent = lbl
+
+                                        local str = Instance.new("UIStroke")
+                                        str.Color = Color3.fromRGB(100, 200, 255)
+                                        str.Thickness = 1
+                                        str.Transparency = 0.3
+                                        str.Parent = lbl
+
+                                        PetESPTracked[pet] = {hl = hl, bb = bb, lbl = lbl, part = petPart}
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            else
+                for pet, data in pairs(PetESPTracked) do
+                    if data.hl then data.hl:Destroy() end
+                    if data.bb then data.bb:Destroy() end
+                    PetESPTracked[pet] = nil
+                end
+            end
+
+            for pet, data in pairs(PetESPTracked) do
+                if not pet.Parent then
+                    if data.hl then data.hl:Destroy() end
+                    if data.bb then data.bb:Destroy() end
+                    PetESPTracked[pet] = nil
+                elseif data.lbl then
+                    local cash, speed = getPetInfo(pet)
+                    local parts = {}
+                    if Shared.ESP_PetName_Enabled then
+                        table.insert(parts, "🐾 " .. pet.Name)
+                    end
+                    if Shared.ESP_PetCash_Enabled then
+                        table.insert(parts, "💰 " .. cash)
+                    end
+                    if Shared.ESP_PetSpeed_Enabled then
+                        table.insert(parts, "⚡ " .. speed)
+                    end
+                    data.lbl.Text = table.concat(parts, "\n")
+                end
+            end
+        end
+    end)
+end
+
+-- ============================================================
+-- GET MY PLOT
+-- ============================================================
+local function getMyPlot()
+    local plots = Workspace:FindFirstChild("Plots")
+    if not plots then return nil end
+    for _, plot in ipairs(plots:GetChildren()) do
+        local owner = plot:GetAttribute("OwnerUserId") or plot:GetAttribute("Owner") or plot:GetAttribute("NestsOwnerLoaded")
+        if owner == LocalPlayer.UserId or owner == LocalPlayer.Name then
+            return plot
+        end
+    end
+    return nil
+end
+
+local function getMyPlotSpawn()
+    local plot = getMyPlot()
+    if not plot then return nil end
+    local spawnPart = plot:FindFirstChild("Spawn", true)
+        or plot:FindFirstChildWhichIsA("SpawnLocation", true)
+        or plot:FindFirstChild("Baseplate", true)
+        or plot:FindFirstChildWhichIsA("BasePart", true)
+    return spawnPart
+end
+
+-- ============================================================
+-- FIND EGG BY NAME
+-- ============================================================
+local function findEggByName(eggName)
+    local rendered = Workspace:FindFirstChild("RenderedEggs")
+    if not rendered then return nil end
+
+    local targetName = eggName:lower()
+    local best, bestDist = nil, math.huge
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return nil end
+
+    for _, egg in ipairs(rendered:GetChildren()) do
+        if egg:IsA("Model") then
+            local name = egg.Name:lower()
+            if name == targetName or name:find(targetName, 1, true) then
+                local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+                if eggPart then
+                    local d = (eggPart.Position - myRoot.Position).Magnitude
+                    if d < bestDist then
+                        best, bestDist = egg, d
+                    end
+                end
+            end
+        end
+    end
+    return best
+end
+
+-- ============================================================
+-- CEK EGG MASIH DI MAP
+-- ============================================================
+local function isEggStillInMap(egg)
+    if not egg or not egg.Parent then return false end
+    return true
+end
+
+-- ============================================================
+-- AUTO STEAL + NOTIF "EGG NO SPAWN"
+-- ============================================================
+local lastNoEggNotif = 0
+
+function Features.startAutoSteal()
+    task.spawn(function()
+        while task.wait(0.5) do
+            if not Shared.AutoSteal_Enabled then continue end
+
+            local char = LocalPlayer.Character
+            local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if not myRoot or not hum or hum.Health <= 0 then
+                task.wait(1)
+                continue
+            end
+
+            local eggName = Shared.SelectedEgg or "Cherub"
+            local egg = findEggByName(eggName)
+
+            if not egg then
+                local now = os.clock()
+                if now - lastNoEggNotif > 5 then
+                    lastNoEggNotif = now
+                    if Shared.Notify then
+                        Shared.Notify("Egg no spawn: " .. eggName, "warning")
+                    end
+                end
+                continue
+            end
+
+            local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+            local prompt = egg:FindFirstChild("Pickup", true)
+            if not eggPart or not prompt then continue end
+
+            if prompt:IsA("ProximityPrompt") then
+                prompt.HoldDuration = 0
+            end
+
+            myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+            task.wait(0.1)
+
+            local picked = false
+            local maxTries = 10
+            for i = 1, maxTries do
+                if typeof(fireproximityprompt) == "function" then
+                    pcall(fireproximityprompt, prompt)
+                end
+                task.wait(0.3)
+
+                if not isEggStillInMap(egg) then
+                    picked = true
+                    break
+                end
+
+                if eggPart and eggPart.Parent then
+                    myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+                    task.wait(0.1)
+                end
+            end
+
+            if picked and Shared.AutoReturn_Enabled then
+                local spawnPart = getMyPlotSpawn()
+                if spawnPart then
+                    myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
+                else
+                    local spawn = Workspace:FindFirstChild("Spawn")
+                    if spawn then
+                        local spawnLoc = spawn:FindFirstChildWhichIsA("SpawnLocation", true)
+                        if spawnLoc then
+                            myRoot.CFrame = spawnLoc.CFrame + Vector3.new(0, 5, 0)
+                        end
+                    end
+                end
+            end
+
+            task.wait(0.3)
+        end
+    end)
+end
+
+-- ============================================================
+-- AUTO HATCH
+-- ============================================================
+function Features.startAutoHatch()
+    task.spawn(function()
+        while task.wait(1) do
+            if not Shared.AutoHatch_Enabled then continue end
+            local plot = getMyPlot()
+            if not plot then continue end
+            local eggs = plot:FindFirstChild("Eggs")
+            if not eggs then continue end
+            for _, egg in ipairs(eggs:GetChildren()) do
+                local prompt = egg:FindFirstChild("Hatch", true)
+                if prompt and prompt.Enabled then
+                    if typeof(fireproximityprompt) == "function" then
+                        pcall(fireproximityprompt, prompt)
+                    end
+                end
+            end
+        end
+    end)
+end
+
+-- ============================================================
+-- AUTO RIDE PET
+-- ============================================================
+function Features.startAutoRidePet()
+    task.spawn(function()
+        while task.wait(1) do
+            if not Shared.AutoRidePet_Enabled then continue end
+            local plot = getMyPlot()
+            if not plot then continue end
+            local pets = plot:FindFirstChild("Pets")
+            if not pets then continue end
+            for _, pet in ipairs(pets:GetChildren()) do
+                local prompt = pet:FindFirstChild("RidePrompt", true)
+                if prompt and prompt.Enabled then
+                    if typeof(fireproximityprompt) == "function" then
+                        pcall(fireproximityprompt, prompt)
+                    end
+                    break
+                end
+            end
+        end
+    end)
+end
+
+-- ============================================================
+-- EGG PREDICTION SYSTEM — SELALU JALAN
+-- ============================================================
+local EggHistory = {}
+local LastEggList = {}
+local MAX_HISTORY = 50
+
+function Features.startEggPrediction()
+    task.spawn(function()
+        while task.wait(1) do
+            local rendered = Workspace:FindFirstChild("RenderedEggs")
+            if not rendered then continue end
+
+            local currentEggs = {}
+            for _, egg in ipairs(rendered:GetChildren()) do
+                if egg:IsA("Model") then
+                    table.insert(currentEggs, egg.Name)
+                end
+            end
+
+            for _, eggName in ipairs(currentEggs) do
+                local found = false
+                for _, lastEgg in ipairs(LastEggList) do
+                    if lastEgg == eggName then
+                        found = true
+                        break
+                    end
+                end
+                if not found then
+                    table.insert(EggHistory, {
+                        name = eggName,
+                        time = os.time(),
+                    })
+                    if #EggHistory > MAX_HISTORY then
+                        table.remove(EggHistory, 1)
+                    end
+                end
+            end
+
+            LastEggList = currentEggs
+            Shared.EggsInMap = currentEggs
+            Shared.EggHistory = EggHistory
+
+            local eggCount = {}
+            for _, entry in ipairs(EggHistory) do
+                eggCount[entry.name] = (eggCount[entry.name] or 0) + 1
+            end
+
+            local sorted = {}
+            for name, count in pairs(eggCount) do
+                table.insert(sorted, {name = name, count = count})
+            end
+            table.sort(sorted, function(a, b) return a.count > b.count end)
+
+            local predictions = {}
+            for _, entry in ipairs(sorted) do
+                local alreadyInMap = false
+                for _, eggName in ipairs(currentEggs) do
+                    if eggName == entry.name then
+                        alreadyInMap = true
+                        break
+                    end
+                end
+                if not alreadyInMap then
+                    table.insert(predictions, entry.name)
+                end
+                if #predictions >= 5 then break end
+            end
+
+            Shared.EggPredictions = predictions
+        end
+    end)
+end
+
+-- ============================================================
+-- REMOTE ACTIONS
+-- ============================================================
+local function getRemote(name)
+    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+    if not remotes then return nil end
+    local gameRemotes = remotes:FindFirstChild("Game")
+    if not gameRemotes then return nil end
+    return gameRemotes:FindFirstChild(name)
+end
+
+function Features.rideAlong()
+    local remote = getRemote("RideAlong")
+    if remote then
+        remote:FireServer()
+        return true
+    end
+    return false
+end
+
+function Features.petDismount()
+    local remote = getRemote("PetDismount")
+    if remote then
+        remote:FireServer()
+        return true
+    end
+    return false
+end
+
+function Features.pickupPet()
+    local remote = getRemote("PickupPet")
+    if remote then
+        remote:FireServer()
+        return true
+    end
+    return false
+end
+
+function Features.hatchEgg()
+    local remote = getRemote("Hatch")
+    if remote then
+        remote:FireServer()
+        return true
+    end
+    return false
+end
+
+-- ============================================================
+-- GAMEDATA (EGGS + PETS)
+-- ============================================================
+local GameData = game:GetService("ReplicatedStorage"):FindFirstChild("GameData")
+local EggData, PetData = {}, {}
+
+if GameData then
+    local eggsMod = GameData:FindFirstChild("Eggs")
+    if eggsMod then
+        local ok, data = pcall(require, eggsMod)
+        if ok and type(data) == "table" then EggData = data end
+    end
+    local petsMod = GameData:FindFirstChild("Pets")
+    if petsMod then
+        local ok, data = pcall(require, petsMod)
+        if ok and type(data) == "table" then PetData = data end
+    end
+end
+
+local RARITY_ORDER = {
+    Common = 1, Uncommon = 2, Rare = 3, Epic = 4,
+    Legendary = 5, Mythic = 6, Divine = 7, Ethereal = 8, Secret = 9,
+}
+
+local function getEggRarity(eggName)
+    local info = EggData[eggName]
+    return info and info.Rarity or "Common"
+end
+
+local function isRaritySelected(eggName)
+    local rarity = getEggRarity(eggName)
+    if not Shared.SelectedRarities then return false end
+    return Shared.SelectedRarities[rarity] == true
+end
+
+-- ============================================================
+-- SPEED
+-- ============================================================
+function Features.setSpeed(v)
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if hum then hum.WalkSpeed = v end
+end
+
+function Features.startSpeed()
+    task.spawn(function()
+        while task.wait(0.3) do
+            if Shared.Speed_Enabled then
+                Features.setSpeed(Shared.Speed_Value or 100)
+            end
+        end
+    end)
+end
+
+-- ============================================================
+-- INSTANT PICKUP — HoldDuration = 0
+-- ============================================================
+function Features.startInstantPickup()
+    task.spawn(function()
+        while task.wait(0.5) do
+            if not Shared.InstantPickup_Enabled then continue end
+
+            local rendered = Workspace:FindFirstChild("RenderedEggs")
+            if not rendered then continue end
+
+            for _, egg in ipairs(rendered:GetChildren()) do
+                if egg:IsA("Model") then
+                    local prompt = egg:FindFirstChild("Pickup", true)
+                    if prompt and prompt:IsA("ProximityPrompt") then
+                        if prompt.HoldDuration > 0 then
+                            prompt.HoldDuration = 0
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end
+
+-- ============================================================
+-- AUTO FARM — TELEPORT → PICKUP → CEK → RETURN
+-- ============================================================
+local NotifiedEggs = {}
+
+local function getEggKey(egg)
+    local part = egg:FindFirstChildWhichIsA("BasePart", true)
+    if not part then return egg.Name end
+    local p = part.Position
+    return string.format("%s_%.0f_%.0f_%.0f", egg.Name, p.X, p.Y, p.Z)
+end
+
+local function getNotifThreshold()
+    local t = {
+        Common = 1, Uncommon = 2, Rare = 3, Epic = 4,
+        Legendary = 5, Mythic = 6, Divine = 7, Ethereal = 8, Secret = 9,
+    }
+    return t[Shared.RarityNotifThreshold or "Legendary"] or 5
+end
+
+local function getBestEggInMap()
+    local rendered = Workspace:FindFirstChild("RenderedEggs")
+    if not rendered then return nil end
+
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return nil end
+
+    local best, bestRank = nil, 0
+    for _, egg in ipairs(rendered:GetChildren()) do
+        if egg:IsA("Model") and isRaritySelected(egg.Name) then
+            local rarity = getEggRarity(egg.Name)
+            local rank = RARITY_ORDER[rarity] or 1
+            local part = egg:FindFirstChildWhichIsA("BasePart", true)
+            if part then
+                local d = (part.Position - myRoot.Position).Magnitude
+                if rank > bestRank or (rank == bestRank and (not best or d < best.dist)) then
+                    best = {egg = egg, dist = d, rarity = rarity, rank = rank}
+                    bestRank = rank
+                end
+            end
+        end
+    end
+    return best
+end
+
+local function returnToMyPlot()
+    if not Shared.AutoReturn_Enabled then return end
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return end
+
+    local plot = getMyPlot()
+    local spawnPart = nil
+    if plot then
+        spawnPart = plot:FindFirstChild("Spawn", true)
+            or plot:FindFirstChildWhichIsA("SpawnLocation", true)
+            or plot:FindFirstChild("Baseplate", true)
+            or plot:FindFirstChildWhichIsA("BasePart", true)
+    end
+    if not spawnPart then
+        local spawn = Workspace:FindFirstChild("Spawn")
+        if spawn then
+            spawnPart = spawn:FindFirstChildWhichIsA("SpawnLocation", true)
+                or spawn:FindFirstChildWhichIsA("BasePart", true)
+        end
+    end
+    if spawnPart then
+        myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
+    end
+end
+
+function Features.startAutoFarm()
+    task.spawn(function()
+        while task.wait(0.5) do
+            if not Shared.AutoFarm_Enabled then continue end
+
+            local char = LocalPlayer.Character
+            local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if not myRoot or not hum or hum.Health <= 0 then
+                task.wait(1)
+                continue
+            end
+
+            local rendered = Workspace:FindFirstChild("RenderedEggs")
+            if rendered then
+                local validKeys = {}
+                for _, egg in ipairs(rendered:GetChildren()) do
+                    if egg:IsA("Model") then
+                        validKeys[getEggKey(egg)] = true
+                    end
+                end
+                for key in pairs(NotifiedEggs) do
+                    if not validKeys[key] then NotifiedEggs[key] = nil end
+                end
+            end
+
+            local best = getBestEggInMap()
+            if not best then
+                continue
+            end
+
+            local egg = best.egg
+            local eggName = egg.Name
+            local eggRarity = best.rarity
+            local eggKey = getEggKey(egg)
+
+            if (RARITY_ORDER[eggRarity] or 1) >= getNotifThreshold() then
+                if not NotifiedEggs[eggKey] then
+                    NotifiedEggs[eggKey] = true
+                    if Shared.Notify then
+                        Shared.Notify("🎯 " .. eggName .. " (" .. eggRarity .. ")", "success")
+                    end
+                end
+            end
+
+            local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+            if not eggPart then continue end
+
+            local prompt = egg:FindFirstChild("Pickup", true)
+            if prompt and prompt:IsA("ProximityPrompt") then
+                prompt.HoldDuration = 0
+            end
+
+            myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 5, 0)
+            task.wait(0.1)
+
+            local picked = false
+            local maxTries = 10
+            for i = 1, maxTries do
+                if prompt and typeof(fireproximityprompt) == "function" then
+                    pcall(fireproximityprompt, prompt)
+                end
+                task.wait(0.3)
+
+                if not isEggStillInMap(egg) then
+                    picked = true
+                    break
+                end
+
+                if eggPart and eggPart.Parent then
+                    myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 5, 0)
+                    task.wait(0.1)
+                end
+            end
+
+            if picked and Shared.AutoReturn_Enabled then
+                returnToMyPlot()
+                task.wait(0.3)
+            end
+
+            task.wait(0.3)
+        end
+    end)
+end
+
+-- ============================================================
+-- VOLCANIC HUNTER — Auto detect + travel + pickup + return
+-- ============================================================
+local VolcanicState = {
+    Enabled = false,
+    Hunting = false,
+}
+
+-- Waypoint dari rekaman (52 titik)
+local VolcanicWaypoints = {
+    Vector3.new(-4902.3, 41396.1, -3751.4),
+    Vector3.new(-4908.1, 41365.0, -3742.9),
+    Vector3.new(-4909.5, 41357.4, -3740.8),
+    Vector3.new(-4923.0, 41299.5, -3719.6),
+    Vector3.new(-4927.1, 41293.3, -3712.6),
+    Vector3.new(-4951.4, 41287.6, -3669.6),
+    Vector3.new(-4973.1, 41283.3, -3643.8),
+    Vector3.new(-4995.2, 41285.0, -3620.6),
+    Vector3.new(-5010.8, 41279.5, -3597.9),
+    Vector3.new(-5020.6, 41275.2, -3582.6),
+    Vector3.new(-5032.2, 41272.9, -3564.8),
+    Vector3.new(-5062.9, 41262.1, -3542.1),
+    Vector3.new(-5070.9, 41262.3, -3537.0),
+    Vector3.new(-5079.4, 41265.2, -3533.3),
+    Vector3.new(-5088.6, 41240.3, -3525.3),
+    Vector3.new(-5096.8, 41228.7, -3520.1),
+    Vector3.new(-5101.5, 41197.4, -3514.3),
+    Vector3.new(-5103.3, 41165.1, -3511.6),
+    Vector3.new(-5112.5, 41164.5, -3551.9),
+    Vector3.new(-5157.0, 41159.7, -3588.1),
+    Vector3.new(-5165.4, 41158.0, -3594.1),
+    Vector3.new(-5211.0, 41150.0, -3569.9),
+    Vector3.new(-5248.0, 41147.5, -3580.6),
+    Vector3.new(-5256.8, 41143.1, -3581.9),
+    Vector3.new(-5260.1, 41122.3, -3580.1),
+    Vector3.new(-5268.7, 41062.3, -3575.5),
+    Vector3.new(-5259.1, 41050.3, -3586.2),
+    Vector3.new(-5269.5, 41047.7, -3640.0),
+    Vector3.new(-5264.0, 41042.3, -3655.1),
+    Vector3.new(-5218.7, 41023.5, -3659.7),
+    Vector3.new(-5188.9, 41037.1, -3635.5),
+    Vector3.new(-5147.5, 41037.4, -3589.8),
+    Vector3.new(-5123.4, 41037.2, -3550.7),
+    Vector3.new(-5123.0, 41033.8, -3503.2),
+    Vector3.new(-5094.9, 41037.6, -3486.6),
+    Vector3.new(-5081.6, 41035.8, -3474.5),
+    Vector3.new(-5040.8, 41048.6, -3433.1),
+    Vector3.new(-4990.3, 41050.6, -3391.9),
+    Vector3.new(-4949.3, 41057.1, -3400.0),
+    Vector3.new(-4908.1, 41036.5, -3439.7),
+    Vector3.new(-4869.4, 41000.1, -3474.8),
+    Vector3.new(-4880.2, 40975.6, -3528.0),
+    Vector3.new(-4930.9, 40973.3, -3563.7),
+    Vector3.new(-4966.2, 40960.4, -3610.8),
+    Vector3.new(-5016.4, 40943.8, -3648.2),
+    Vector3.new(-5072.8, 40929.0, -3667.8),
+    Vector3.new(-5136.3, 40922.9, -3656.4),
+    Vector3.new(-5151.8, 40914.2, -3681.0),
+    Vector3.new(-5209.2, 40907.2, -3677.5),
+    Vector3.new(-5267.7, 40907.3, -3651.2),
+    Vector3.new(-5282.4, 40908.9, -3632.6),
+    Vector3.new(-5270.4, 40907.1, -3619.5),
+}
+
+local function getVolcanicEgg()
+    local rendered = Workspace:FindFirstChild("RenderedEggs")
+    if not rendered then return nil end
+    for _, egg in ipairs(rendered:GetChildren()) do
+        if egg:IsA("Model") and egg.Name:lower():find("volcan", 1, true) then
+            return egg
+        end
+    end
+    return nil
+end
+
+local function getVolcanicSpawn()
+    local spawns = Workspace:FindFirstChild("EggSpawns")
+    if not spawns then return nil end
+    local v = spawns:FindFirstChild("Volcanic")
+    if v and v:IsA("BasePart") then return v end
+    return nil
+end
+
+local function volcanicPickup(egg)
+    local part = egg:FindFirstChildWhichIsA("BasePart", true)
+    if not part then return false end
+    local prompt = egg:FindFirstChild("Pickup", true)
+    if prompt and prompt:IsA("ProximityPrompt") then
+        prompt.HoldDuration = 0
+    end
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return false end
+    myRoot.CFrame = part.CFrame + Vector3.new(0, 3, 0)
+    task.wait(0.1)
+    for i = 1, 15 do
+        if prompt and typeof(fireproximityprompt) == "function" then
+            pcall(fireproximityprompt, prompt)
+        end
+        task.wait(0.2)
+        if not egg.Parent then return true end
+        if part and part.Parent then
+            myRoot.CFrame = part.CFrame + Vector3.new(0, 3, 0)
+            task.wait(0.1)
+        end
+    end
+    return false
+end
+
+function Features.startVolcanicHunt()
+    task.spawn(function()
+        while task.wait(1) do
+            if not Shared.VolcanicHunt_Enabled then
+                VolcanicState.Hunting = false
+                continue
+            end
+
+            if VolcanicState.Hunting then continue end
+            VolcanicState.Hunting = true
+
+            task.spawn(function()
+                while Shared.VolcanicHunt_Enabled do
+                    local char = LocalPlayer.Character
+                    local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+                    local hum = char and char:FindFirstChildOfClass("Humanoid")
+                    if not myRoot or not hum or hum.Health <= 0 then
+                        task.wait(1)
+                        continue
+                    end
+
+                    local egg = getVolcanicEgg()
+
+                    if egg then
+                        print("[VOLCANIC] ✅ Egg volcanic spawn! Travel & pickup...")
+                        if Shared.Notify then
+                            Shared.Notify("🌋 Volcanic Egg spawn!", "success")
+                        end
+
+                        local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+                        for i, wp in ipairs(VolcanicWaypoints) do
+                            if not Shared.VolcanicHunt_Enabled then break end
+                            if not egg.Parent then break end
+                            local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                            if curRoot and eggPart then
+                                local d = (eggPart.Position - curRoot.Position).Magnitude
+                                if d <= 40 then break end
+                            end
+                            if curRoot then
+                                curRoot.CFrame = CFrame.new(wp + Vector3.new(0, 5, 0))
+                                curRoot.Velocity = Vector3.zero
+                            end
+                            task.wait(0.12)
+                        end
+
+                        if egg.Parent then
+                            local picked = volcanicPickup(egg)
+                            if picked then
+                                print("[VOLCANIC] ✅ Pickup berhasil!")
+                                if Shared.VolcanicReturn_Enabled then
+                                    task.wait(0.4)
+                                    local plot = getMyPlot()
+                                    if plot then
+                                        local spawn = plot:FindFirstChild("Spawn", true)
+                                            or plot:FindFirstChildWhichIsA("SpawnLocation", true)
+                                            or plot:FindFirstChild("Baseplate", true)
+                                            or plot:FindFirstChildWhichIsA("BasePart", true)
+                                        if spawn then
+                                            local root2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                                            if root2 then
+                                                root2.CFrame = spawn.CFrame + Vector3.new(0, 5, 0)
+                                                print("[VOLCANIC] 🏠 Balik ke plot")
+                                            end
+                                        end
+                                    end
+                                end
+                                task.wait(3)
+                            end
+                        end
+                    else
+                        local spawnPart = getVolcanicSpawn()
+                        if spawnPart then
+                            local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                            if curRoot then
+                                local d = (spawnPart.Position - curRoot.Position).Magnitude
+                                if d > 50 then
+                                    curRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
+                                    print("[VOLCANIC] 🚀 Teleport ke spawn point volcanic")
+                                end
+                            end
+                        end
+                    end
+
+                    task.wait(2)
+                end
+
+                VolcanicState.Hunting = false
+                print("[VOLCANIC] ⏹️ Hunt berhenti")
+            end)
+        end
+    end)
+end
+
+-- ============================================================
+-- AUTO MUTATION — KHUSUS TAB EGG MUTATION
+-- ============================================================
+local MutationState = {
+    Running = false,
+    StealPaused = false,
+    BasketFull = false,
+    EggLocked = false,
+    LastFire = 0,
+}
+
+local MUT_CONFIG = {
+    DROP_TIMEOUT = 15,
+    RETURN_TIMEOUT = 3,
+    TP_ABOVE_TOP = 200,
+}
+
+local NetModule = nil
+task.spawn(function()
+    local packages = game:GetService("ReplicatedStorage"):FindFirstChild("packages")
+    if packages then
+        local netMod = packages:FindFirstChild("Net")
+        if netMod then
+            local ok, result = pcall(require, netMod)
+            if ok then
+                NetModule = result
+                print("[MUTATION] Net module loaded")
+            end
+        end
+    end
+end)
+
+local function getVolcanoDipRemote()
+    if NetModule then
+        local ok, remote = pcall(function() return NetModule:RemoteEvent("VolcanoDip") end)
+        if ok and remote then return remote end
+    end
+    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+    local gameR = remotes and remotes:FindFirstChild("Game")
+    if gameR then
+        local vd = gameR:FindFirstChild("VolcanoDip")
+        if vd and vd:IsA("RemoteEvent") then return vd end
+    end
+    return nil
+end
+
+local function findSafeVolcanoPos()
+    local volcano = Workspace:FindFirstChild("Volcano")
+    if not volcano then
+        return Vector3.new(-5102.84, 41700, -3489.11)
+    end
+    local bestTop, bestSize = nil, 0
+    for _, d in ipairs(volcano:GetDescendants()) do
+        if d:IsA("BasePart") then
+            local n = d.Name:lower()
+            if n:find("top") or n == "volcanotop" then
+                local size = d.Size.X * d.Size.Z
+                if size > bestSize then
+                    bestTop = d
+                    bestSize = size
+                end
+            end
+        end
+    end
+    if bestTop then
+        return bestTop.Position + Vector3.new(0, MUT_CONFIG.TP_ABOVE_TOP, 0)
+    end
+    local lavaTop = -math.huge
+    for _, d in ipairs(volcano:GetDescendants()) do
+        if d:IsA("BasePart") then
+            local n = d.Name:lower()
+            if n:find("lava") or n:find("magma") or n:find("volcan") then
+                local top = d.Position.Y + d.Size.Y / 2
+                if top > lavaTop then lavaTop = top end
+            end
+        end
+    end
+    if lavaTop > -math.huge then
+        return Vector3.new(-5102.84, lavaTop + MUT_CONFIG.TP_ABOVE_TOP, -3489.11)
+    end
+    return Vector3.new(-5102.84, 41700, -3489.11)
+end
+
+local function isHoldingEggMutation()
+    local char = LocalPlayer.Character
+    if not char then return false end
+    local wooden = char:FindFirstChild("Wooden")
+    if not wooden then return false end
+    local displayEgg = wooden:FindFirstChild("DisplayEgg")
+    if not displayEgg then return false end
+
+    -- Cek direct children (original)
+    for _, c in ipairs(displayEgg:GetChildren()) do
+        if c:IsA("MeshPart") and not c.Name:lower():find("circle") then
+            return true, c.Name
+        end
+    end
+
+    -- Cek descendants (fallback — kalau MeshPart ke-nested)
+    for _, c in ipairs(displayEgg:GetDescendants()) do
+        if c:IsA("MeshPart") and not c.Name:lower():find("circle") then
+            return true, c.Name
+        end
+    end
+
+    return false
+end
+
+local function fireVolcanoDip()
+    local remote = getVolcanoDipRemote()
+    if remote then
+        local ok = pcall(function() remote:FireServer() end)
+        if ok then
+            print("[MUTATION] Drop: VolcanoDip fired")
+            return true
+        end
+    end
+    return false
+end
+
+local function fireBasketDrop()
+    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+    local gameR = remotes and remotes:FindFirstChild("Game")
+    if not gameR then return false end
+    local bd = gameR:FindFirstChild("BasketDrop")
+    if not bd then return false end
+    return pcall(function() bd:FireServer() end)
+end
+
+local function tpToSafe(pos)
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return false end
+    myRoot.CFrame = CFrame.new(pos)
+    task.wait(0.3)
+    local rootAfter = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if rootAfter and rootAfter.Position.Y < pos.Y - 50 then
+        print("[MUTATION] Kecebur! Retry TP...")
+        rootAfter.CFrame = CFrame.new(pos + Vector3.new(0, 50, 0))
+        task.wait(0.3)
+    end
+    return true
+end
+
+local function runMutationOnce()
+    MutationState.Running = true
+
+    local holding, eggName = isHoldingEggMutation()
+    if not holding then
+        MutationState.Running = false
+        MutationState.EggLocked = false
+        return false
+    end
+
+    print("[MUTATION] holding " .. (eggName or "?") .. ", starting")
+
+    MutationState.StealPaused = true
+    task.wait(1.5)
+
+    local safePos = findSafeVolcanoPos()
+    print("[MUTATION] STEP 1 — TP ke lahar")
+    tpToSafe(safePos)
+    task.wait(2)
+
+    print("[MUTATION] STEP 2 — drop via VolcanoDip")
+    local dropWaited = 0
+    local eggReleased = false
+    MutationState.LastFire = 0
+
+    while dropWaited < MUT_CONFIG.DROP_TIMEOUT do
+        if os.clock() - MutationState.LastFire > 2 then
+            local ok = fireVolcanoDip()
+            if not ok then fireBasketDrop() end
+            MutationState.LastFire = os.clock()
+            print("[MUTATION] fired @ " .. dropWaited .. "s")
+        end
+        task.wait(0.5)
+        dropWaited = dropWaited + 0.5
+        if not isHoldingEggMutation() then
+            eggReleased = true
+            print("[MUTATION] egg LEPAS @ " .. dropWaited .. "s")
+            break
+        end
+    end
+
+    if not eggReleased then
+        print("[MUTATION] egg GAK LEPAS")
+        MutationState.Running = false
+        MutationState.StealPaused = false
+        MutationState.EggLocked = false
+        return false
+    end
+
+        print("[MUTATION] STEP 3 — tunggu egg balik (max " .. MUT_CONFIG.RETURN_TIMEOUT .. "s)")
+    local retStart = os.clock()
+    local gotBack = false
+    while (os.clock() - retStart) < MUT_CONFIG.RETURN_TIMEOUT do
+        task.wait(0.3)
+        if isHoldingEggMutation() then
+            gotBack = true
+            local elapsed = os.clock() - retStart
+            print(string.format("[MUTATION] egg BALIK @ %.1fs", elapsed))
+            break
+        end
+    end
+    if not gotBack then
+        print("[MUTATION] TIMEOUT " .. MUT_CONFIG.RETURN_TIMEOUT .. "s — egg gak balik")
+    end
+
+    if Shared.MutationReturn_Enabled then
+        task.wait(0.5)
+        local spawn = getMyPlotSpawn()
+        if spawn then
+            local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if myRoot then
+                myRoot.CFrame = spawn.CFrame + Vector3.new(0, 5, 0)
+                print("[MUTATION] Balik ke plot")
+            end
+        end
+    end
+
+    task.wait(2)
+    MutationState.Running = false
+    MutationState.StealPaused = false
+    MutationState.EggLocked = false
+    return true
+end
+
+function Features.startAutoMutation()
+    task.spawn(function()
+        while task.wait(1) do
+            if not Shared.AutoMutation_Enabled then
+                MutationState.Running = false
+                continue
+            end
+            if MutationState.Running then continue end
+
+            local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if not hum or hum.Health <= 0 then
+                task.wait(1)
+                continue
+            end
+
+            if isHoldingEggMutation() then
+                print("[MUTATION] egg held, starting")
+                pcall(runMutationOnce)
+                task.wait(2)
+            end
+        end
+    end)
+end
+
+function Features.getMutationState()
+    return MutationState
+end
+
+function Features.isHoldingEgg()
+    return isHoldingEggMutation()
+end
+
+-- ============================================================
+-- MUTATION STEAL — KHUSUS TAB EGG MUTATION (by RARITY)
+-- Gak nyentuh startAutoSteal yang asli
+-- ============================================================
+function Features.startMutationSteal()
+    task.spawn(function()
+        while task.wait(0.5) do
+            if not Shared.MutationSteal_Enabled then continue end
+
+            if Features.hasVolcanicEgg and Features.hasVolcanicEgg() then
+                task.wait(1)
+                continue
+            end
+            if Features.getMutationState and Features.getMutationState().Running then
+                task.wait(1)
+                continue
+            end
+
+            local char = LocalPlayer.Character
+            local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if not myRoot or not hum or hum.Health <= 0 then
+                task.wait(1)
+                continue
+            end
+
+            if Features.isHoldingEgg and Features.isHoldingEgg() then
+                task.wait(0.5)
+                continue
+            end
+
+            local basket = LocalPlayer:FindFirstChild("Basket")
+            if basket and #basket:GetChildren() > 0 then
+                task.wait(0.5)
+                continue
+            end
+
+            local best = getBestEggInMap()
+            if not best then
+                task.wait(0.5)
+                continue
+            end
+
+            local egg = best.egg
+            local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+            local prompt = egg:FindFirstChild("Pickup", true)
+            if not eggPart or not prompt then continue end
+
+            if prompt:IsA("ProximityPrompt") then
+                prompt.HoldDuration = 0
+            end
+
+            myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+            task.wait(0.1)
+
+            local picked = false
+            for i = 1, 15 do
+                if typeof(fireproximityprompt) == "function" then
+                    pcall(fireproximityprompt, prompt)
+                end
+                task.wait(0.25)
+
+                if not isEggStillInMap(egg) then
+                    picked = true
+                    break
+                end
+
+                if eggPart and eggPart.Parent then
+                    myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+                    task.wait(0.1)
+                end
+            end
+
+            if picked then
+                print("[MUTATION-STEAL] picked " .. egg.Name .. " (" .. best.rarity .. ")")
+            end
+
+            task.wait(0.3)
+        end
+    end)
+end
+
+-- ============================================================
+-- FEATURES.INIT
+-- ============================================================
+function Features.Init(sharedState)
+    Shared = sharedState
+
+    Features.startEggESP()
+    Features.startPetESP()
+    Features.startAutoSteal()
+    Features.startAutoHatch()
+    Features.startAutoRidePet()
+    Features.startEggPrediction()
+    Features.startSpeed()
+    Features.startInstantPickup()
+    Features.startAutoFarm()
+        Features.startVolcanicHunt()
+        Features.startAutoMutation()
+    Features.startMutationSteal()
+
+    print("[VRILZHUB] Ride a Pet Features loaded")
+end
+
+return Features
