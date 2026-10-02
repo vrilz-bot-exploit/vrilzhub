@@ -2701,6 +2701,100 @@ local function buildMainWindow(parent)
 
     registerTab("Vulcanic", "🌋", "Vulcanic")
 
+    -- ============================================================
+    -- TAB EGG MUTATION (BARU)
+    -- ============================================================
+    local mutPage = createPage("EggMutation")
+    pages.EggMutation = mutPage
+
+    -- CARD 1: AUTO MUTATION
+    local mutCard, mutContent = makeCard(mutPage, "🔥 EGG MUTATION", 1)
+
+    makeToggle(mutContent, "Auto Mutation", false, function(v)
+        Shared.AutoMutation_Enabled = v
+        if v then
+            notify("🔥 Auto Mutation aktif", "success")
+        else
+            notify("🔥 Auto Mutation nonaktif", "info")
+        end
+    end)
+
+    makeToggle(mutContent, "Auto Return ke Plot", false, function(v)
+        Shared.MutationReturn_Enabled = v
+        if v then
+            notify("🏠 Return to Plot aktif", "success")
+        end
+    end)
+
+    local mutNote = Instance.new("TextLabel")
+    mutNote.Size = UDim2.new(1, 0, 0, 60)
+    mutNote.BackgroundTransparency = 1
+    mutNote.Text = "Auto drop egg ke volcano (VolcanoDip)\n→ tunggu egg balik (max 45 detik)\n→ balik ke plot"
+    mutNote.TextColor3 = C.Muted
+    mutNote.Font = Enum.Font.GothamSemibold
+    mutNote.TextSize = CFG.FONT_MUTED
+    mutNote.TextWrapped = true
+    mutNote.TextXAlignment = Enum.TextXAlignment.Left
+    mutNote.TextYAlignment = Enum.TextYAlignment.Top
+    mutNote.LayoutOrder = 10
+    mutNote.ZIndex = 3
+    mutNote.Parent = mutContent
+    registerTheme(mutNote, "Muted", "TextColor3")
+
+    -- CARD 2: INFO PANEL (state live)
+    local infoCard, infoContent = makeCard(mutPage, "📊 STATUS MUTATION", 2)
+
+    local mutInfoLbl = Instance.new("TextLabel")
+    mutInfoLbl.Size = UDim2.new(1, 0, 0, 90)
+    mutInfoLbl.BackgroundColor3 = C.Surface3
+    mutInfoLbl.BackgroundTransparency = 0.3
+    mutInfoLbl.BorderSizePixel = 0
+    mutInfoLbl.Text = "Loading..."
+    mutInfoLbl.TextColor3 = C.Text
+    mutInfoLbl.Font = Enum.Font.Code
+    mutInfoLbl.TextSize = CFG.FONT_MUTED
+    mutInfoLbl.TextXAlignment = Enum.TextXAlignment.Left
+    mutInfoLbl.TextYAlignment = Enum.TextYAlignment.Top
+    mutInfoLbl.LayoutOrder = 1
+    mutInfoLbl.ZIndex = 3
+    mutInfoLbl.Parent = infoContent
+    registerTheme(mutInfoLbl, "Text", "TextColor3")
+
+    local mutInfoCorner = Instance.new("UICorner")
+    mutInfoCorner.CornerRadius = UDim.new(0, 6)
+    mutInfoCorner.Parent = mutInfoLbl
+
+    local mutInfoPad = Instance.new("UIPadding")
+    mutInfoPad.PaddingLeft = UDim.new(0, 8)
+    mutInfoPad.PaddingTop = UDim.new(0, 6)
+    mutInfoPad.Parent = mutInfoLbl
+
+    -- Auto update info tiap 0.5 detik
+    task.spawn(function()
+        while mutInfoLbl.Parent do
+            task.wait(0.5)
+            local lines = {}
+            
+            if Features and Features.isHoldingEgg then
+                local holding, eggName = Features.isHoldingEgg()
+                table.insert(lines, "✋ Held: " .. (holding and ("YES " .. (eggName or "?")) or "no"))
+            else
+                table.insert(lines, "✋ Held: --")
+            end
+
+            if Features and Features.getMutationState then
+                local state = Features.getMutationState()
+                table.insert(lines, "🔒 Lock: " .. (state.EggLocked and "YES" or "no"))
+                table.insert(lines, "⏸ Paused: " .. (state.StealPaused and "YES" or "no"))
+                table.insert(lines, "▶ Running: " .. (state.Running and "YES" or "no"))
+            end
+
+            mutInfoLbl.Text = table.concat(lines, "\n")
+        end
+    end)
+
+    registerTab("EggMutation", "🔥", "Egg Mutation")
+
     registerTab("Settings", "⚙", "Settings")
 
     pages.Info.Visible = true
@@ -3561,6 +3655,8 @@ function UI.Init(sharedState)
     Shared.RarityNotifThreshold = "Legendary"
     Shared.VolcanicHunt_Enabled = false
     Shared.VolcanicReturn_Enabled = false
+    Shared.AutoMutation_Enabled = false
+    Shared.MutationReturn_Enabled = false
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "VRILZHUB_RideAPet"
     ScreenGui.ResetOnSpawn = false
