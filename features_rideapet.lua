@@ -1335,6 +1335,5 @@ function Features.Init(sharedState)
     Features.startMutationSteal()
 
     print("[VRILZHUB] Ride a Pet Features loaded")
-end
 
 return Features
