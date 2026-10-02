@@ -987,6 +987,269 @@ function Features.startVolcanicHunt()
 end
 
 -- ============================================================
+-- AUTO MUTATION — KHUSUS EGG MUTATION
+-- Drop egg ke volcano, tunggu balik, return plot
+-- ============================================================
+local MutationState = {
+    Running = false,
+    StealPaused = false,
+    BasketFull = false,
+    EggLocked = false,
+    LastFire = 0,
+}
+
+local MUT_CONFIG = {
+    DROP_TIMEOUT = 15,
+    RETURN_TIMEOUT = 45,
+    TP_ABOVE_TOP = 200,
+}
+
+local NetModule = nil
+task.spawn(function()
+    local packages = game:GetService("ReplicatedStorage"):FindFirstChild("packages")
+    if packages then
+        local netMod = packages:FindFirstChild("Net")
+        if netMod then
+            local ok, result = pcall(require, netMod)
+            if ok then
+                NetModule = result
+                print("[MUTATION] ✅ Net module loaded")
+            end
+        end
+    end
+end)
+
+local function getVolcanoDipRemote()
+    if NetModule then
+        local ok, remote = pcall(function() return NetModule:RemoteEvent("VolcanoDip") end)
+        if ok and remote then return remote end
+    end
+    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+    local gameR = remotes and remotes:FindFirstChild("Game")
+    if gameR then
+        local vd = gameR:FindFirstChild("VolcanoDip")
+        if vd and vd:IsA("RemoteEvent") then return vd end
+    end
+    return nil
+end
+
+local function findSafeVolcanoPos()
+    local volcano = Workspace:FindFirstChild("Volcano")
+    if not volcano then
+        return Vector3.new(-5102.84, 41700, -3489.11)
+    end
+    local bestTop, bestSize = nil, 0
+    for _, d in ipairs(volcano:GetDescendants()) do
+        if d:IsA("BasePart") then
+            local n = d.Name:lower()
+            if n:find("top") or n == "volcanotop" then
+                local size = d.Size.X * d.Size.Z
+                if size > bestSize then
+                    bestTop = d
+                    bestSize = size
+                end
+            end
+        end
+    end
+    if bestTop then
+        return bestTop.Position + Vector3.new(0, MUT_CONFIG.TP_ABOVE_TOP, 0)
+    end
+    local lavaTop = -math.huge
+    for _, d in ipairs(volcano:GetDescendants()) do
+        if d:IsA("BasePart") then
+            local n = d.Name:lower()
+            if n:find("lava") or n:find("magma") or n:find("volcan") then
+                local top = d.Position.Y + d.Size.Y / 2
+                if top > lavaTop then lavaTop = top end
+            end
+        end
+    end
+    if lavaTop > -math.huge then
+        return Vector3.new(-5102.84, lavaTop + MUT_CONFIG.TP_ABOVE_TOP, -3489.11)
+    end
+    return Vector3.new(-5102.84, 41700, -3489.11)
+end
+
+local function isHoldingEggMutation()
+    local char = LocalPlayer.Character
+    if not char then return false end
+    local wooden = char:FindFirstChild("Wooden")
+    if not wooden then return false end
+    local displayEgg = wooden:FindFirstChild("DisplayEgg")
+    if not displayEgg then return false end
+    for _, c in ipairs(displayEgg:GetChildren()) do
+        if c:IsA("MeshPart") and not c.Name:lower():find("circle") then
+            return true, c.Name
+        end
+    end
+    return false
+end
+
+local function fireVolcanoDip()
+    local remote = getVolcanoDipRemote()
+    if remote then
+        local ok = pcall(function() remote:FireServer() end)
+        if ok then
+            print("[MUTATION] Drop: VolcanoDip fired")
+            return true
+        end
+    end
+    return false
+end
+
+local function fireBasketDrop()
+    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+    local gameR = remotes and remotes:FindFirstChild("Game")
+    if not gameR then return false end
+    local bd = gameR:FindFirstChild("BasketDrop")
+    if not bd then return false end
+    return pcall(function() bd:FireServer() end)
+end
+
+local function tpToSafe(pos)
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return false end
+    myRoot.CFrame = CFrame.new(pos)
+    task.wait(0.3)
+    local rootAfter = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if rootAfter and rootAfter.Position.Y < pos.Y - 50 then
+        print("[MUTATION] ⚠️ Kecebur! Retry TP...")
+        rootAfter.CFrame = CFrame.new(pos + Vector3.new(0, 50, 0))
+        task.wait(0.3)
+    end
+    return true
+end
+
+task.spawn(function()
+    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+    local gameR = remotes and remotes:FindFirstChild("Game")
+    local eggPickup = gameR and gameR:FindFirstChild("EggPickup")
+    if eggPickup then
+        eggPickup.OnClientEvent:Connect(function(...)
+            local args = {...}
+            if args[1] == "BasketFull" then
+                MutationState.BasketFull = true
+                print("[MUTATION] ⚠️ BASKET FULL!")
+            end
+        end)
+    end
+end)
+
+local function runMutationOnce()
+    MutationState.Running = true
+
+    local holding, eggName = isHoldingEggMutation()
+    if not holding then
+        MutationState.Running = false
+        MutationState.EggLocked = false
+        return false
+    end
+
+    print("[MUTATION] 🎯 holding " .. (eggName or "?") .. ", starting")
+
+    MutationState.StealPaused = true
+    task.wait(1.5)
+
+    local safePos = findSafeVolcanoPos()
+    print("[MUTATION] STEP 1 — TP ke lahar")
+    tpToSafe(safePos)
+    task.wait(2)
+
+    print("[MUTATION] STEP 2 — drop via VolcanoDip")
+    local dropWaited = 0
+    local eggReleased = false
+    MutationState.LastFire = 0
+
+    while dropWaited < MUT_CONFIG.DROP_TIMEOUT do
+        if os.clock() - MutationState.LastFire > 2 then
+            local ok = fireVolcanoDip()
+            if not ok then fireBasketDrop() end
+            MutationState.LastFire = os.clock()
+            print("[MUTATION] fired @ " .. dropWaited .. "s")
+        end
+        task.wait(0.5)
+        dropWaited = dropWaited + 0.5
+        if not isHoldingEggMutation() then
+            eggReleased = true
+            print("[MUTATION] ✅ egg LEPAS @ " .. dropWaited .. "s")
+            break
+        end
+    end
+
+    if not eggReleased then
+        print("[MUTATION] ⚠️ egg GAK LEPAS")
+        MutationState.Running = false
+        MutationState.StealPaused = false
+        MutationState.EggLocked = false
+        return false
+    end
+
+    print("[MUTATION] STEP 3 — tunggu egg balik")
+    local retWaited = 0
+    while retWaited < MUT_CONFIG.RETURN_TIMEOUT do
+        task.wait(1)
+        retWaited = retWaited + 1
+        if isHoldingEggMutation() then
+            print("[MUTATION] ✅ egg BALIK @ " .. retWaited .. "s")
+            break
+        end
+        if retWaited % 5 == 0 then
+            print("[MUTATION] waiting... " .. retWaited .. "s")
+        end
+    end
+
+    if Shared.MutationReturn_Enabled then
+        task.wait(0.5)
+        local spawn = getMyPlotSpawn()
+        if spawn then
+            local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if myRoot then
+                myRoot.CFrame = spawn.CFrame + Vector3.new(0, 5, 0)
+                print("[MUTATION] 🏠 Balik ke plot")
+            end
+        end
+    end
+
+    task.wait(2)
+    MutationState.Running = false
+    MutationState.StealPaused = false
+    MutationState.EggLocked = false
+    return true
+end
+
+function Features.startAutoMutation()
+    task.spawn(function()
+        while task.wait(1) do
+            if not Shared.AutoMutation_Enabled then
+                MutationState.Running = false
+                continue
+            end
+            if MutationState.Running then continue end
+
+            local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if not hum or hum.Health <= 0 then
+                task.wait(1)
+                continue
+            end
+
+            if isHoldingEggMutation() then
+                print("[MUTATION] egg held, starting")
+                pcall(runMutationOnce)
+                task.wait(2)
+            end
+        end
+    end)
+end
+
+function Features.getMutationState()
+    return MutationState
+end
+
+function Features.isHoldingEgg()
+    return isHoldingEggMutation()
+end
+
+-- ============================================================
 -- FEATURES.INIT
 -- ============================================================
 function Features.Init(sharedState)
@@ -1001,7 +1264,8 @@ function Features.Init(sharedState)
     Features.startSpeed()
     Features.startInstantPickup()
     Features.startAutoFarm()
-    Features.startVolcanicHunt()
+        Features.startVolcanicHunt()
+    Features.startAutoMutation()
 
     print("[VRILZHUB] Ride a Pet Features loaded")
 end
