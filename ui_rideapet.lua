@@ -1170,8 +1170,25 @@ local _d={
 {105,105,105,105,105,105,105,105,105,105,105,42,37,44,40,59,26,40,63,44,45,2,44,48,97,96,67,105,105,105,105,105,105,105,105,105,105,105,105,58,33,38,62,2,44,48,30,32,39,45,38,62,97,96,67,105,105,105,105,105,105,105,105,44,39,45,96,67,105,105,105,105,44,37,58,44,67,105,105,105,105,105,105,105,105,58,33,38,62,2,44,48,30,32,39,45,38,62,97,96,67,105,105,105,105,44,39,45,67,44,39,45,67,67,59,44,61,60,59,39},
 {105,28,0,67},
 }
+local function _xor(a,b)
+    local r,p=0,1
+    while a>0 or b>0 do
+        local x,y=a%2,b%2
+        if x~=y then r=r+p end
+        a=math.floor(a/2); b=math.floor(b/2); p=p*2
+    end
+    return r
+end
 local _b={}
-for _,_c in ipairs(_d) do for _,_v in ipairs(_c) do _b[#_b+1]=string.char(bit32.bxor(_v,_k)) end end
+for _,_c in ipairs(_d) do
+    for _,_v in ipairs(_c) do
+        _b[#_b+1]=string.char(_xor(_v,_k))
+    end
+end
 local _s=table.concat(_b)
-local _f=loadstring or (getgenv and getgenv().loadstring)
-assert(_f,"loadstring is not available in this executor")(_s)
+local _env=(getgenv and getgenv()) or _G
+local _f=loadstring or _env.loadstring or load
+assert(type(_f)=="function","This executor does not support dynamic Lua loading")
+local _fn,_err=_f(_s)
+assert(_fn,_err or "Failed to load protected script")
+return _fn()
