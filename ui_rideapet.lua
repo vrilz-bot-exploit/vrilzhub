@@ -2351,8 +2351,10 @@ local function buildMainWindow(parent)
     -- ============================================================
     -- BUILD LIVE CHAT PAGE
     -- ============================================================
-    local function buildLiveChatPage(pageHolder, createPage, makeCard, registerTab)
+       local function buildLiveChatPage(pageHolder, createPage, makeCard, registerTab)
+        print("[CHAT] buildLiveChatPage START")
         local page = createPage("LiveChat")
+        print("[CHAT] Page created, type:", typeof(page))
         local hasAvatars = CFG.CHAT_SHOW_AVATAR
         local avatarSize = CFG.CHAT_AVATAR
         local msgCounter = 0
@@ -2623,7 +2625,9 @@ local function buildMainWindow(parent)
         hint.Parent = optContent
         registerTheme(hint, "Muted", "TextColor3")
 
+               print("[CHAT] About to register tab")
         registerTab("LiveChat", "💬", "Live Chat")
+        print("[CHAT] Tab registered OK")
     end
 
     -- TAB PREDIKSI
