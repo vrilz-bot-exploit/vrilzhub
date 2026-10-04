@@ -938,124 +938,124 @@ function Features.startVolcanicHunt()
                             task.wait(0.12)
                         end
 
-if egg.Parent then
-    local picked = volcanicPickup(egg)
-    if picked then
-        print("[VOLCANIC] ✅ Pickup berhasil!")
+                        if egg.Parent then
+                            local picked = volcanicPickup(egg)
+                            if picked then
+                                print("[VOLCANIC] ✅ Pickup berhasil!")
 
-        -- ============================================
-        -- STEP 5: KELUAR GOA (REVERSE WAYPOINT)
-        -- ============================================
-        print("[VOLCANIC] 🚶 Keluar goa via waypoint reverse...")
-        for i = #VolcanicWaypoints, 1, -1 do
-            if not Shared.VolcanicHunt_Enabled then break end
-            local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if curRoot then
-                curRoot.CFrame = CFrame.new(VolcanicWaypoints[i] + Vector3.new(0, 5, 0))
-                curRoot.Velocity = Vector3.zero
-            end
-            task.wait(0.12)
-        end
-        print("[VOLCANIC] ✅ Keluar goa, di waypoint #1")
+                                -- ============================================
+                                -- CEK TOGGLE AUTO MUTATION
+                                -- ============================================
+                                if Shared.VolcanicMutation_Enabled then
+                                    -- ALUR LENGKAP: keluar goa → ke lava → drop → tunggu → return
+                                    print("[VOLCANIC] 🚶 Keluar goa via waypoint reverse...")
+                                    for i = #VolcanicWaypoints, 1, -1 do
+                                        if not Shared.VolcanicHunt_Enabled then break end
+                                        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                                        if curRoot then
+                                            curRoot.CFrame = CFrame.new(VolcanicWaypoints[i] + Vector3.new(0, 5, 0))
+                                            curRoot.Velocity = Vector3.zero
+                                        end
+                                        task.wait(0.12)
+                                    end
+                                    print("[VOLCANIC] ✅ Keluar goa, di waypoint #1")
 
-        -- ============================================
-        -- STEP 6: TELEPORT KE LAVA
-        -- ============================================
-        task.wait(0.5)
-        print("[VOLCANIC] 🔥 Teleport ke lava...")
-        local safePos = findSafeVolcanoPos()
-        if safePos then
-            local rootLava = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if rootLava then
-                rootLava.CFrame = CFrame.new(safePos)
-                rootLava.Velocity = Vector3.zero
-            end
-        end
-        task.wait(1.5)
+                                    -- Teleport ke lava
+                                    task.wait(0.5)
+                                    print("[VOLCANIC] 🔥 Teleport ke lava...")
+                                    local safePos = findSafeVolcanoPos()
+                                    if safePos then
+                                        local rootLava = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                                        if rootLava then
+                                            rootLava.CFrame = CFrame.new(safePos)
+                                            rootLava.Velocity = Vector3.zero
+                                        end
+                                    end
+                                    task.wait(1.5)
 
-        -- ============================================
-        -- STEP 7: DROP EGG VIA VOLCANODIP
-        -- ============================================
-        print("[VOLCANIC] 💧 Drop egg via VolcanoDip...")
-        local dropWaited = 0
-        local eggReleased = false
-        while dropWaited < 15 do
-            if not Shared.VolcanicHunt_Enabled then break end
-            fireVolcanoDip()
-            task.wait(1.5)
-            dropWaited = dropWaited + 1.5
-            if not isHoldingEggMutation() then
-                eggReleased = true
-                print("[VOLCANIC] 💧 Egg dropped @ " .. dropWaited .. "s")
-                break
-            end
-        end
+                                    -- Drop egg via VolcanoDip
+                                    print("[VOLCANIC] 💧 Drop egg via VolcanoDip...")
+                                    local dropWaited = 0
+                                    local eggReleased = false
+                                    while dropWaited < 15 do
+                                        if not Shared.VolcanicHunt_Enabled then break end
+                                        fireVolcanoDip()
+                                        task.wait(1.5)
+                                        dropWaited = dropWaited + 1.5
+                                        if not isHoldingEggMutation() then
+                                            eggReleased = true
+                                            print("[VOLCANIC] 💧 Egg dropped @ " .. dropWaited .. "s")
+                                            break
+                                        end
+                                    end
 
-        if not eggReleased then
-            print("[VOLCANIC] ⚠️ Egg gak lepas (timeout), tetep return")
-        end
+                                    if not eggReleased then
+                                        print("[VOLCANIC] ⚠️ Egg gak lepas (timeout), tetep return")
+                                    end
 
-        -- ============================================
-        -- STEP 8: TUNGGU EGG BALIK (MUTATION SELESAI)
-        -- ============================================
-        if eggReleased then
-            print("[VOLCANIC] ⏳ Nunggu egg balik...")
-            local waitStart = os.clock()
-            local eggBack = false
-            while os.clock() - waitStart < 20 do
-                if not Shared.VolcanicHunt_Enabled then break end
-                task.wait(1)
-                if isHoldingEggMutation() then
-                    eggBack = true
-                    print("[VOLCANIC] ✅ Egg balik! Mutation selesai!")
-                    if Shared.Notify then
-                        Shared.Notify("🔥 Mutation selesai!", "success")
-                    end
-                    break
-                end
-            end
-            if not eggBack then
-                print("[VOLCANIC] ⚠️ Egg gak balik (timeout), tetep return")
-            end
-        end
+                                    -- Tunggu egg balik
+                                    if eggReleased then
+                                        print("[VOLCANIC] ⏳ Nunggu egg balik...")
+                                        local waitStart = os.clock()
+                                        local eggBack = false
+                                        while os.clock() - waitStart < 20 do
+                                            if not Shared.VolcanicHunt_Enabled then break end
+                                            task.wait(1)
+                                            if isHoldingEggMutation() then
+                                                eggBack = true
+                                                print("[VOLCANIC] ✅ Egg balik! Mutation selesai!")
+                                                if Shared.Notify then
+                                                    Shared.Notify("🔥 Mutation selesai!", "success")
+                                                end
+                                                break
+                                            end
+                                        end
+                                        if not eggBack then
+                                            print("[VOLCANIC] ⚠️ Egg gak balik (timeout), tetep return")
+                                        end
+                                    end
+                                else
+                                    -- TOGGLE OFF: pickup → langsung return
+                                    print("[VOLCANIC] ⏭️ Auto Mutation OFF, langsung return")
+                                end
 
-        -- ============================================
-        -- STEP 9: RETURN KE PLOT (APAPUN KONDISI)
-        -- ============================================
-        if Shared.VolcanicReturn_Enabled then
-            task.wait(0.4)
-            print("[VOLCANIC] 🏠 Return ke plot")
-            local plot = getMyPlot()
-            if plot then
-                local spawn = plot:FindFirstChild("Spawn", true)
-                    or plot:FindFirstChildWhichIsA("SpawnLocation", true)
-                    or plot:FindFirstChild("Baseplate", true)
-                    or plot:FindFirstChildWhichIsA("BasePart", true)
-                if spawn then
-                    local root2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    if root2 then
-                        root2.CFrame = spawn.CFrame + Vector3.new(0, 5, 0)
-                        print("[VOLCANIC] 🏠 Balik ke plot")
-                    end
-                end
-            else
-                local spawnFallback = Workspace:FindFirstChild("Spawn")
-                if spawnFallback then
-                    local spawnLoc = spawnFallback:FindFirstChildWhichIsA("SpawnLocation", true)
-                    if spawnLoc then
-                        local root2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                        if root2 then
-                            root2.CFrame = spawnLoc.CFrame + Vector3.new(0, 5, 0)
-                            print("[VOLCANIC] 🏠 Balik ke plot (fallback)")
+                                -- ============================================
+                                -- RETURN KE PLOT (APAPUN KONDISI)
+                                -- ============================================
+                                if Shared.VolcanicReturn_Enabled then
+                                    task.wait(0.4)
+                                    print("[VOLCANIC] 🏠 Return ke plot")
+                                    local plot = getMyPlot()
+                                    if plot then
+                                        local spawn = plot:FindFirstChild("Spawn", true)
+                                            or plot:FindFirstChildWhichIsA("SpawnLocation", true)
+                                            or plot:FindFirstChild("Baseplate", true)
+                                            or plot:FindFirstChildWhichIsA("BasePart", true)
+                                        if spawn then
+                                            local root2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                                            if root2 then
+                                                root2.CFrame = spawn.CFrame + Vector3.new(0, 5, 0)
+                                                print("[VOLCANIC] 🏠 Balik ke plot")
+                                            end
+                                        end
+                                    else
+                                        local spawnFallback = Workspace:FindFirstChild("Spawn")
+                                        if spawnFallback then
+                                            local spawnLoc = spawnFallback:FindFirstChildWhichIsA("SpawnLocation", true)
+                                            if spawnLoc then
+                                                local root2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                                                if root2 then
+                                                    root2.CFrame = spawnLoc.CFrame + Vector3.new(0, 5, 0)
+                                                    print("[VOLCANIC] 🏠 Balik ke plot (fallback)")
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+
+                                task.wait(3)
+                            end
                         end
-                    end
-                end
-            end
-        end
-
-        task.wait(3)
-    end
-end
                     else
                         local spawnPart = getVolcanicSpawn()
                         if spawnPart then
