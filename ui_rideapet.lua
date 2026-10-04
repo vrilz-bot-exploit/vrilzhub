@@ -1955,7 +1955,7 @@ local function buildMainWindow(parent)
     local sessionLbl = Instance.new("TextLabel")
     sessionLbl.Size = UDim2.new(1, 0, 0, 20)
     sessionLbl.BackgroundTransparency = 1
-    sessionLbl.Text = "Sesi: 00:00"
+    sessionLbl.Text = "Session: 00:00"
     sessionLbl.TextColor3 = C.Accent2
     sessionLbl.Font = Enum.Font.GothamBold
     sessionLbl.TextSize = CFG.FONT_LABEL
@@ -1993,14 +1993,14 @@ local function buildMainWindow(parent)
     local function refreshKeyInfo()
         local keyType = tostring(Shared.KeyType or "UNKNOWN"):upper()
         local expiresAt = tonumber(Shared.KeyExpiresAt or 0) or 0
-        keyTypeLbl.Text = "Jenis Key: " .. keyType
+        keyTypeLbl.Text = "Key Type: " .. keyType
         if expiresAt > 0 then
             local secondsLeft = math.max(0, math.floor(expiresAt / 1000 - os.time()))
             local days = math.floor(secondsLeft / 86400)
             local hours = math.floor((secondsLeft % 86400) / 3600)
             local mins = math.floor((secondsLeft % 3600) / 60)
             local expiryText = os.date("%d/%m/%Y %H:%M:%S", math.floor(expiresAt / 1000))
-            keyExpiryLbl.Text = string.format("Expired: %s | Sisa: %dd %02dj %02dm", expiryText, days, hours, mins)
+            keyExpiryLbl.Text = string.format("Expired: %s | Remaining: %dd %02dj %02dm", expiryText, days, hours, mins)
             if secondsLeft <= 0 then
                 keyExpiryLbl.Text = "Expired: KEY EXPIRED"
                 keyExpiryLbl.TextColor3 = C.Error
@@ -2020,7 +2020,7 @@ local function buildMainWindow(parent)
             local elapsed = math.floor(os.clock() - sessionStart)
             local m = math.floor(elapsed / 60)
             local s = elapsed % 60
-            sessionLbl.Text = string.format("Sesi: %02d:%02d", m, s)
+            sessionLbl.Text = string.format("Session: %02d:%02d", m, s)
         end
     end)
 
@@ -2105,7 +2105,7 @@ local function buildMainWindow(parent)
 
     discordBtn.MouseButton1Click:Connect(function()
         pcall(function() setclipboard(DISCORD_LINK) end)
-        notify("✓ Discord link dicopy!", "success")
+        notify("✓ Discord link copied!", "success")
     end)
 
     registerTab("Info", "ℹ", "Info")
@@ -2288,7 +2288,7 @@ local function buildMainWindow(parent)
                     lbl.Size = UDim2.new(1, 0, 0, IS_MOBILE and 26 or 28)
                     lbl.BackgroundColor3 = C.Surface3
                     lbl.BackgroundTransparency = 0.5
-                    lbl.Text = "   Nggak ada egg di map"
+                    lbl.Text = "   No egg on map"
                     lbl.TextColor3 = C.Muted
                     lbl.Font = Enum.Font.GothamSemibold
                     lbl.TextSize = CFG.FONT_LABEL
@@ -2367,7 +2367,7 @@ local function buildMainWindow(parent)
                     lbl.Size = UDim2.new(1, 0, 0, IS_MOBILE and 26 or 28)
                     lbl.BackgroundColor3 = C.Surface3
                     lbl.BackgroundTransparency = 0.5
-                    lbl.Text = "   Menunggu data..."
+                    lbl.Text = "   Waiting for data..."
                     lbl.TextColor3 = C.Muted
                     lbl.Font = Enum.Font.GothamSemibold
                     lbl.TextSize = CFG.FONT_LABEL
@@ -2443,12 +2443,12 @@ local function buildMainWindow(parent)
     pages.Egg = eggPage
 
     local eggEspCard, eggEspContent = makeCard(eggPage, "EGG ESP", 1)
-    makeToggle(eggEspContent, "Aktifkan Egg ESP", false, function(v) Shared.ESP_Eggs_Enabled = v end)
-    makeToggle(eggEspContent, "Tampilkan Nama", false, function(v) Shared.ESP_EggName_Enabled = v end)
-    makeToggle(eggEspContent, "Tampilkan Luck", false, function(v) Shared.ESP_EggLuck_Enabled = v end)
+    makeToggle(eggEspContent, "Enable Egg ESP", false, function(v) Shared.ESP_Eggs_Enabled = v end)
+    makeToggle(eggEspContent, "Show Name", false, function(v) Shared.ESP_EggName_Enabled = v end)
+    makeToggle(eggEspContent, "Show Luck", false, function(v) Shared.ESP_EggLuck_Enabled = v end)
 
     local autoStealCard, autoStealContent = makeCard(eggPage, "AUTO STEAL", 2)
-    makeToggle(autoStealContent, "Aktifkan Auto Steal", false, function(v) Shared.AutoSteal_Enabled = v end)
+    makeToggle(autoStealContent, "Enable Auto Steal", false, function(v) Shared.AutoSteal_Enabled = v end)
     makeToggle(autoStealContent, "Auto Return to Plot", false, function(v) Shared.AutoReturn_Enabled = v end)
     makeToggle(autoStealContent, "Auto Hatch", false, function(v) Shared.AutoHatch_Enabled = v end)
 
@@ -2492,7 +2492,7 @@ local function buildMainWindow(parent)
     pages.Auto = autoPage
 
     local speedCard, speedContent = makeCard(autoPage, "SPEED", 1)
-    makeToggle(speedContent, "Aktifkan Speed", false, function(v) Shared.Speed_Enabled = v end)
+    makeToggle(speedContent, "Enable Speed", false, function(v) Shared.Speed_Enabled = v end)
 
     local speedLbl = Instance.new("TextLabel")
     speedLbl.Size = UDim2.new(1, 0, 0, 16)
@@ -2552,7 +2552,7 @@ local function buildMainWindow(parent)
     end)
 
     local ipCard, ipContent = makeCard(autoPage, "INSTANT PICKUP", 2)
-    makeToggle(ipContent, "Aktifkan Instant Pickup", false, function(v) Shared.InstantPickup_Enabled = v end)
+    makeToggle(ipContent, "Enable Instant Pickup", false, function(v) Shared.InstantPickup_Enabled = v end)
 
     local ipNote = Instance.new("TextLabel")
     ipNote.Size = UDim2.new(1, 0, 0, 14)
@@ -2585,7 +2585,7 @@ local function buildMainWindow(parent)
     local notifTitle = Instance.new("TextLabel")
     notifTitle.Size = UDim2.new(1, 0, 0, 16)
     notifTitle.BackgroundTransparency = 1
-    notifTitle.Text = "Notif cuma buat rarity:"
+    notifTitle.Text = "Notify only for rarity:"
     notifTitle.TextColor3 = C.Muted
     notifTitle.Font = Enum.Font.GothamSemibold
     notifTitle.TextSize = CFG.FONT_MUTED
@@ -2597,7 +2597,7 @@ local function buildMainWindow(parent)
         Shared.RarityNotifThreshold = v
     end)
 
-    local autoCard, autoContent = makeCard(autoPage, "AUTO LAINNYA", 4)
+    local autoCard, autoContent = makeCard(autoPage, "OTHER AUTO", 4)
     makeToggle(autoContent, "Auto Ride Pet", false, function(v) Shared.AutoRidePet_Enabled = v end)
     makeToggle(autoContent, "Auto Equip Best", false, function(v) Shared.AutoEquipBest_Enabled = v end)
 
@@ -2623,7 +2623,7 @@ local function buildMainWindow(parent)
    local themeList = {"Brutal", "Ice", "Fire", "Pink", "Green", "Blue"}
     makeDropdownGlobal(themeContent, themeList, CurrentTheme, function(v)
         applyTheme(v)
-        notify("Tema: " .. v, "success")
+        notify("Theme: " .. v, "success")
     end)
 
     local fpsCard, fpsContent = makeCard(setPage, "FPS BOOST", 2)
@@ -2660,9 +2660,9 @@ local function buildMainWindow(parent)
                     end
                 end
                 UI._fpsHiddenParts = hidden
-                notify("FPS Boost: " .. #hidden .. " part disembunyiin", "info")
+                notify("FPS Boost: " .. #hidden .. " Parts hidden", "info")
             end)
-            notify("FPS Boost aktif", "success")
+            notify("FPS Boost enabled", "success")
         else
             pcall(function() Lighting.GlobalShadows = true end)
             pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level10 end)
@@ -2675,7 +2675,7 @@ local function buildMainWindow(parent)
                 end
                 UI._fpsHiddenParts = nil
             end
-            notify("FPS Boost nonaktif", "info")
+            notify("FPS Boost disabled", "info")
         end
     end, "FPS Boost")
 
@@ -2692,25 +2692,25 @@ local volcanicHuntCard, volcanicHuntContent = makeCard(volcanicPage, "🌋 VOLCA
 makeToggle(volcanicHuntContent, "Auto Hunt Volcanic", false, function(v)
     Shared.VolcanicHunt_Enabled = v
     if v then
-        notify("🌋 Volcanic Hunt aktif", "success")
+        notify("🌋 Volcanic Hunt enabled", "success")
     else
-        notify("🌋 Volcanic Hunt nonaktif", "info")
+        notify("🌋 Volcanic Hunt disabled", "info")
     end
 end)
 
 makeToggle(volcanicHuntContent, "Auto Return to Plot", false, function(v)
     Shared.VolcanicReturn_Enabled = v
     if v then
-        notify("🏠 Auto Return aktif", "success")
+        notify("🏠 Auto Return enabled", "success")
     end
 end)
 
 makeToggle(volcanicHuntContent, "Auto Mutation in Lava", false, function(v)
     Shared.VolcanicMutation_Enabled = v
     if v then
-        notify("🔥 Auto Mutation aktif", "success")
+        notify("🔥 Auto Mutation enabled", "success")
     else
-        notify("🔥 Auto Mutation nonaktif", "info")
+        notify("🔥 Auto Mutation disabled", "info")
     end
 end)
 
@@ -2719,7 +2719,7 @@ makeToggle(volcanicHuntContent, "Instant Collect", false, function(v)
 end)
 
 local volcanicNote = Instance.new("TextLabel")
-volcanicNote.Size = UDim2.new(1, 0, 0, 48)
+volcanicNote.Size = UDim2.new(1, 0, 0, 96)
 volcanicNote.BackgroundTransparency = 1
 volcanicNote.Text = "⚠️ IMPORTANT: Turn OFF Auto Farm & Auto Steal first!\n\n✅ Then enable 'Auto Hunt Volcanic'\n✅ Enable 'Auto Return' to come back to base\n✅ Optional: Enable 'Auto Mutation' if you want mutation"
 volcanicNote.TextColor3 = C.Muted
@@ -2747,9 +2747,9 @@ registerTab("Vulcanic", "🌋", "Vulcanic")
     makeToggle(mutStealContent, "Auto Steal by Rarity", false, function(v)
         Shared.MutationSteal_Enabled = v
         if v then
-            notify("🎯 Mutation Steal aktif (by rarity)", "success")
+            notify("🎯 Mutation Steal enabled (by rarity)", "success")
         else
-            notify("🎯 Mutation Steal nonaktif", "info")
+            notify("🎯 Mutation Steal disabled", "info")
         end
     end)
 
@@ -2774,23 +2774,23 @@ registerTab("Vulcanic", "🌋", "Vulcanic")
     makeToggle(mutContent, "Auto Mutation", false, function(v)
         Shared.AutoMutation_Enabled = v
         if v then
-            notify("🔥 Auto Mutation aktif", "success")
+            notify("🔥 Auto Mutation enabled", "success")
         else
-            notify("🔥 Auto Mutation nonaktif", "info")
+            notify("🔥 Auto Mutation disabled", "info")
         end
     end)
 
     makeToggle(mutContent, "Auto Return to Plot", false, function(v)
         Shared.MutationReturn_Enabled = v
         if v then
-            notify("🏠 Return to Plot aktif", "success")
+            notify("🏠 Return to Plot enabled", "success")
         end
     end)
 
     local mutNote = Instance.new("TextLabel")
     mutNote.Size = UDim2.new(1, 0, 0, 60)
     mutNote.BackgroundTransparency = 1
-    mutNote.Text = "Auto drop egg ke volcano (VolcanoDip)\n→ tunggu egg balik (max 45 detik)\n→ balik ke plot"
+    mutNote.Text = "Auto drop egg to volcano (VolcanoDip)\n→ wait egg return (max 45s)\n→ return to plot"
     mutNote.TextColor3 = C.Muted
     mutNote.Font = Enum.Font.GothamSemibold
     mutNote.TextSize = CFG.FONT_MUTED
@@ -2978,11 +2978,11 @@ end
 local function verifyKeyWithServer(key)
     key = tostring(key or ""):gsub("^%s+", ""):gsub("%s+$", ""):upper()
     if key == "" then
-        return false, "Masukkan key terlebih dahulu."
+        return false, "Please enter a key first."
     end
 
     if KEY_SYSTEM_URL:find("YOUR%-KEY%-SYSTEM") then
-        return false, "Set URL Key System terlebih dahulu."
+        return false, "Please set the Key System URL first."
     end
 
     local HttpService = game:GetService("HttpService")
@@ -3019,7 +3019,7 @@ local function verifyKeyWithServer(key)
     end)
 
     if not ok or not response then
-        return false, "Tidak dapat terhubung ke Key System."
+        return false, "Cannot connect to Key System."
     end
 
     local status = tonumber(response.StatusCode or response.Status or 0) or 0
@@ -3032,21 +3032,21 @@ local function verifyKeyWithServer(key)
         if data.success == true then
             return true, data.message or "Key valid.", data
         end
-        return false, data.message or "Key tidak valid.", data
+        return false, data.message or "Invalid key.", data
     end
 
     if status >= 200 and status < 300 then
-        return false, "Respons Key System tidak valid."
+        return false, "Invalid Key System response."
     end
 
-    return false, "Key tidak valid."
+    return false, "Invalid key."
 end
 
 -- Mengecek key yang SUDAH pernah diredeem tanpa membuat redeem kedua.
 local function verifySavedKeyWithServer(key)
     key = tostring(key or ""):gsub("^%s+", ""):gsub("%s+$", ""):upper()
     if key == "" then
-        return false, "Key tersimpan kosong."
+        return false, "Saved key is empty."
     end
 
     local HttpService = game:GetService("HttpService")
@@ -3083,7 +3083,7 @@ local function verifySavedKeyWithServer(key)
     end)
 
     if not ok or not response then
-        return false, "Tidak dapat memverifikasi key tersimpan."
+        return false, "Cannot verify saved key."
     end
 
     local status = tonumber(response.StatusCode or response.Status or 0) or 0
@@ -3094,16 +3094,16 @@ local function verifySavedKeyWithServer(key)
 
     if decodedOk and type(data) == "table" then
         if data.success == true then
-            return true, data.message or "Key masih aktif.", data
+            return true, data.message or "Key is still active.", data
         end
-        return false, data.message or "Key tidak valid.", data
+        return false, data.message or "Invalid key.", data
     end
 
     if status >= 200 and status < 300 then
-        return false, "Respons Key System tidak valid."
+        return false, "Invalid Key System response."
     end
 
-    return false, "Key tidak valid."
+    return false, "Invalid key."
 end
 
 local function buildKeyWindow(parent, onSuccess)
