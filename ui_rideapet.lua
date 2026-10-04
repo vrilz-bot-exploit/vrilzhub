@@ -3246,7 +3246,7 @@ local function buildMainWindow(parent)
     local chatHint = Instance.new("TextLabel")
     chatHint.Size = UDim2.new(1, 0, 0, 16)
     chatHint.BackgroundTransparency = 1
-    chatHint.Text = "🌐 Global chat · semua user script"
+    chatHint.Text = "🌐 Global chat · all user vrilzhub"
     chatHint.TextColor3 = C.Muted
     chatHint.Font = Enum.Font.GothamSemibold
     chatHint.TextSize = CFG.FONT_MUTED
