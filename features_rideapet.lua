@@ -1,6 +1,6 @@
 -- ============================================================
--- VRILZHUB FEATURES — RIDE A PET v3.3
--- Auto Return: Drop 100 studs → Pickup ulang → TP base
+-- VRILZHUB FEATURES — RIDE A PET v3.4
+-- Auto Return: Drop 100 → Pickup ulang (WAJIB) → TP base
 -- ============================================================
 
 local Features = {}
@@ -618,7 +618,7 @@ function Features.startInstantPickup()
 end
 
 -- ============================================================
--- AUTO FARM — TELEPORT → PICKUP → CEK → RETURN
+-- AUTO FARM
 -- ============================================================
 local NotifiedEggs = {}
 
@@ -663,7 +663,7 @@ local function getBestEggInMap()
 end
 
 -- ============================================================
--- RETURN — DROP 100 → PICKUP ULANG → TP BASE
+-- AUTO RETURN (FIX) — DROP 100 → PICKUP ULANG → TP BASE
 -- ============================================================
 local ReturnCfg = {
     DropDistanceFromPlot = 100,
@@ -671,13 +671,13 @@ local ReturnCfg = {
     DropWait = 0.3,
     DropSpamCount = 3,
     DropSpamInterval = 0.05,
-    PostDropVerifyWait = 0.3,
+    PostDropVerifyWait = 0.4,
     RePickupWait = 0.4,
-    RePickupMaxTries = 40,
+    RePickupMaxTries = 50,
     RePickupScanRadius = 150,
     RePickupTPHeight = 3,
-    RePickupRetryWait = 0.1,
-    RePickupRetryRadii = { 150, 250, 400 },
+    RePickupRetryWait = 0.08,
+    RePickupRetryRadii = { 150, 250, 400, 600 },
     BaseTPHeight = 5,
 }
 
@@ -718,29 +718,49 @@ local function getDropRemoteLocal()
         or gameR:FindFirstChild("Drop")
 end
 
+-- ═══════════════════════════════════════════════════════════
+-- PICKUP ULANG: WAJIB egg yang di-drop ATAU egg terdekat di dropPos
+-- ═══════════════════════════════════════════════════════════
 local function rePickupSameEgg(myRoot, dropPos, targetEggName, radius)
-    if not dropPos or not targetEggName then return false, "no target", 0 end
+    if not dropPos then return false, "no dropPos", 0 end
     task.wait(ReturnCfg.RePickupWait)
 
     local tries = 0
     while tries < ReturnCfg.RePickupMaxTries do
         tries = tries + 1
 
-        if isHoldingEggLocal() then
-            local _, hn = isHoldingEggLocal()
-            return true, tostring(hn), tries
+        -- AUTO-CHECK 1: udah holding = sukses
+        local holding, heldName = isHoldingEggLocal()
+        if holding then
+            return true, tostring(heldName), tries
         end
 
         local rendered = Workspace:FindFirstChild("RenderedEggs")
-        local targetEgg = nil
-        local targetDist = math.huge
+        if not rendered then
+            task.wait(ReturnCfg.RePickupRetryWait)
+            continue
+        end
 
-        if rendered then
-            for _, egg in ipairs(rendered:GetChildren()) do
-                if egg:IsA("Model") and egg.Name == targetEggName then
-                    local part = egg:FindFirstChildWhichIsA("BasePart", true)
-                    if part then
-                        local d = (part.Position - dropPos).Magnitude
+        -- Scan semua egg di radius dropPos
+        local targetEgg = nil          -- prioritas: nama sama
+        local targetDist = math.huge
+        local closestEgg = nil         -- fallback: terdekat
+        local closestDist = math.huge
+
+        for _, egg in ipairs(rendered:GetChildren()) do
+            if egg:IsA("Model") then
+                local part = egg:FindFirstChildWhichIsA("BasePart", true)
+                if part then
+                    local d = (part.Position - dropPos).Magnitude
+
+                    -- Egg terdekat (apapun) di radius
+                    if d <= radius and d < closestDist then
+                        closestEgg = egg
+                        closestDist = d
+                    end
+
+                    -- Egg dengan nama SAMA
+                    if targetEggName and egg.Name == targetEggName then
                         if d <= radius and d < targetDist then
                             targetEgg = egg
                             targetDist = d
@@ -750,35 +770,45 @@ local function rePickupSameEgg(myRoot, dropPos, targetEggName, radius)
             end
         end
 
-        if targetEgg then
-            local eggPart = targetEgg:FindFirstChildWhichIsA("BasePart", true)
-            local prompt = targetEgg:FindFirstChild("Pickup", true)
-                or targetEgg:FindFirstChild("Collect", true)
-                or targetEgg:FindFirstChildWhichIsA("ProximityPrompt", true)
+        -- Prioritaskan egg nama sama; kalo gak ada, pakai yang terdekat
+        local pickEgg = targetEgg or closestEgg
+        local pickDist = targetEgg and targetDist or closestDist
+
+        if pickEgg then
+            local eggPart = pickEgg:FindFirstChildWhichIsA("BasePart", true)
+            local prompt = pickEgg:FindFirstChild("Pickup", true)
+                or pickEgg:FindFirstChild("Collect", true)
+                or pickEgg:FindFirstChildWhichIsA("ProximityPrompt", true)
 
             if eggPart and prompt then
                 if prompt:IsA("ProximityPrompt") then
                     prompt.HoldDuration = 0
                 end
 
+                -- TP INSTANT ke egg
                 myRoot.CFrame = CFrame.lookAt(
                     eggPart.Position + Vector3.new(0, ReturnCfg.RePickupTPHeight, 0),
                     eggPart.Position)
                 myRoot.Velocity = Vector3.zero
                 myRoot.AssemblyLinearVelocity = Vector3.zero
 
+                task.wait(0.05)
+
+                -- Fire prompt
                 if typeof(fireproximityprompt) == "function" then
                     pcall(fireproximityprompt, prompt)
                 end
 
-                task.wait(0.05)
+                task.wait(0.08)
 
+                -- AUTO-CHECK 2: verify holding
                 local h, hn = isHoldingEggLocal()
                 if h then
                     return true, tostring(hn), tries
                 end
 
-                if not targetEgg.Parent then
+                -- AUTO-CHECK 3: egg ilang dari map
+                if not pickEgg.Parent then
                     task.wait(0.15)
                     local h2, hn2 = isHoldingEggLocal()
                     if h2 then return true, tostring(hn2), tries end
@@ -805,70 +835,83 @@ local function returnToMyPlot()
     if holding and heldEggName then
         -- STEP 1: TP 100 studs dari base
         local plotCenter = getMyPlotCenterPos()
-        if plotCenter then
-            local dir = (myRoot.Position - plotCenter)
-            dir = Vector3.new(dir.X, 0, dir.Z)
-            if dir.Magnitude < 1 then
-                local ang = math.random() * math.pi * 2
-                dir = Vector3.new(math.cos(ang), 0, math.sin(ang))
-            else
-                dir = dir.Unit
-            end
+        if not plotCenter then return end
 
-            local dropPos = Vector3.new(
-                plotCenter.X + dir.X * ReturnCfg.DropDistanceFromPlot,
-                plotCenter.Y + ReturnCfg.DropHeight,
-                plotCenter.Z + dir.Z * ReturnCfg.DropDistanceFromPlot
-            )
-
-            myRoot.CFrame = CFrame.new(dropPos)
-            myRoot.Velocity = Vector3.zero
-            myRoot.AssemblyLinearVelocity = Vector3.zero
-            task.wait(ReturnCfg.DropWait)
-
-            -- STEP 2: Drop egg
-            local dropRemote = getDropRemoteLocal()
-            if dropRemote then
-                for i = 1, ReturnCfg.DropSpamCount do
-                    pcall(function() dropRemote:FireServer() end)
-                    task.wait(ReturnCfg.DropSpamInterval)
-                end
-            end
-
-            for _, d in ipairs(char:GetDescendants()) do
-                if d:IsA("ProximityPrompt") and d.Name:lower():find("drop") then
-                    d.HoldDuration = 0
-                    if typeof(fireproximityprompt) == "function" then
-                        pcall(fireproximityprompt, d)
-                    end
-                end
-            end
-
-            task.wait(ReturnCfg.PostDropVerifyWait)
-
-            -- STEP 3: Pickup ULANG (wajib sama)
-            local reOk, reName, reTries = rePickupSameEgg(myRoot, dropPos, heldEggName, ReturnCfg.RePickupScanRadius)
-
-            if not reOk then
-                for i, radius in ipairs(ReturnCfg.RePickupRetryRadii) do
-                    if reOk then break end
-                    print("[RETURN] Retry #" .. i .. " (radius " .. radius .. ")")
-                    task.wait(0.3)
-                    reOk, reName, reTries = rePickupSameEgg(myRoot, dropPos, heldEggName, radius)
-                end
-            end
-
-            if not reOk then
-                print("[RETURN] Pickup ulang gagal — skip TP base")
-                return
-            end
-
-            print("[RETURN] Re-pickup OK: " .. tostring(reName))
+        local dir = (myRoot.Position - plotCenter)
+        dir = Vector3.new(dir.X, 0, dir.Z)
+        if dir.Magnitude < 1 then
+            local ang = math.random() * math.pi * 2
+            dir = Vector3.new(math.cos(ang), 0, math.sin(ang))
+        else
+            dir = dir.Unit
         end
+
+        local dropPos = Vector3.new(
+            plotCenter.X + dir.X * ReturnCfg.DropDistanceFromPlot,
+            plotCenter.Y + ReturnCfg.DropHeight,
+            plotCenter.Z + dir.Z * ReturnCfg.DropDistanceFromPlot
+        )
+
+        myRoot.CFrame = CFrame.new(dropPos)
+        myRoot.Velocity = Vector3.zero
+        myRoot.AssemblyLinearVelocity = Vector3.zero
+        task.wait(ReturnCfg.DropWait)
+
+        -- STEP 2: Drop egg
+        local dropRemote = getDropRemoteLocal()
+        if dropRemote then
+            for i = 1, ReturnCfg.DropSpamCount do
+                pcall(function() dropRemote:FireServer() end)
+                task.wait(ReturnCfg.DropSpamInterval)
+            end
+        end
+
+        for _, d in ipairs(char:GetDescendants()) do
+            if d:IsA("ProximityPrompt") and d.Name:lower():find("drop") then
+                d.HoldDuration = 0
+                if typeof(fireproximityprompt) == "function" then
+                    pcall(fireproximityprompt, d)
+                end
+            end
+        end
+
+        task.wait(ReturnCfg.PostDropVerifyWait)
+
+        -- AUTO-CHECK: kalo masih holding, spam drop lagi
+        if isHoldingEggLocal() then
+            for i = 1, 5 do
+                if dropRemote then
+                    pcall(function() dropRemote:FireServer() end)
+                end
+                task.wait(0.1)
+                if not isHoldingEggLocal() then break end
+            end
+        end
+
+        -- STEP 3: Pickup ULANG (wajib — prioritas nama sama, fallback terdekat)
+        local reOk, reName, reTries = rePickupSameEgg(myRoot, dropPos, heldEggName, ReturnCfg.RePickupScanRadius)
+
+        if not reOk then
+            for i, radius in ipairs(ReturnCfg.RePickupRetryRadii) do
+                if reOk then break end
+                task.wait(0.4)
+                reOk, reName, reTries = rePickupSameEgg(myRoot, dropPos, heldEggName, radius)
+            end
+        end
+
+        -- ═══ AUTO-CHECK FINAL: WAJIB HOLDING SEBELUM TP BASE ═══
+        if not reOk or not isHoldingEggLocal() then
+            print("[RETURN] Pickup ulang gagal — skip TP base")
+            return  -- jangan TP base
+        end
+
+        print("[RETURN] Pickup ulang OK: " .. tostring(reName))
     end
 
     -- STEP 4: TP base (cuma kalo holding)
-    if not isHoldingEggLocal() then return end
+    if not isHoldingEggLocal() then
+        return
+    end
 
     local spawnPart = getMyPlotSpawn()
     if not spawnPart then
@@ -976,14 +1019,13 @@ function Features.startAutoFarm()
 end
 
 -- ============================================================
--- VOLCANIC HUNTER — Auto detect + travel + pickup + return
+-- VOLCANIC HUNTER
 -- ============================================================
 local VolcanicState = {
     Enabled = false,
     Hunting = false,
 }
 
--- Waypoint dari rekaman (52 titik)
 local VolcanicWaypoints = {
     Vector3.new(-4902.3, 41396.1, -3751.4),
     Vector3.new(-4908.1, 41365.0, -3742.9),
@@ -1238,7 +1280,7 @@ function Features.startVolcanicHunt()
 end
 
 -- ============================================================
--- AUTO MUTATION — KHUSUS TAB EGG MUTATION
+-- AUTO MUTATION
 -- ============================================================
 local MutationState = {
     Running = false,
@@ -1581,7 +1623,7 @@ function Features.Init(sharedState)
         Features.startAutoMutation()
     Features.startMutationSteal()
 
-    print("[VRILZHUB] Ride a Pet Features v3.3 loaded")
+    print("[VRILZHUB] Ride a Pet Features v3.4 loaded")
 end
 
 return Features
