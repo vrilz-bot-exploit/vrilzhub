@@ -1198,11 +1198,12 @@ end
 -- ============================================================
 -- LIVE CHAT CLIENT (global via Cloudflare Worker + D1)
 -- ============================================================
-local ChatClient = {
+_G.VRILZ_ChatClient = _G.VRILZ_ChatClient or {
     listeners = {},
     lastTs = 0,
     polling = false,
 }
+local ChatClient = _G.VRILZ_ChatClient
 
 local function getChatHttpRequest()
     return (syn and syn.request)
