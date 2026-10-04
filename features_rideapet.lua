@@ -1,4 +1,1434 @@
---!nocheck
---!nolint
--- Obscura [fc6d9418]
-local v0001={}local v0002=nil local Players=game:GetService("Players")local RunService=game:GetService("RunService")local Workspace=game:GetService("Workspace")local LocalPlayer=Players.LocalPlayer local function getEggLuck(egg)local v0005=egg:FindFirstChild("EggLuck",true)if v0005 then local v0006=v0005:FindFirstChild("Luck")if v0006 and v0006:IsA("TextLabel")then return v0006.Text end end return"?"end local v0007={}function v0001.startEggESP()task.spawn(function()while task.wait(0.3)do if v0002.ESP_Eggs_Enabled then local v0086=Workspace:FindFirstChild("RenderedEggs")if v0086 then for _,egg in ipairs(v0086:GetChildren())do if egg:IsA("Model")and not v0007[egg]then local v00c8=egg:FindFirstChildWhichIsA("BasePart",true)if v00c8 then local hl=Instance.new("Highlight")hl.Name="VRILZ_RideAPet_EggHL"hl.FillColor=Color3.fromRGB(255,215,0)hl.OutlineColor=Color3.new(1,1,1)hl.FillTransparency=0.5 hl.Adornee=egg hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop hl.Parent=egg local bb=Instance.new("BillboardGui")bb.Name="VRILZ_RideAPet_EggESP"bb.Size=UDim2.fromOffset(160,50)bb.StudsOffset=Vector3.new(0,3,0)bb.AlwaysOnTop=true bb.MaxDistance=500 bb.Adornee=v00c8 bb.Parent=v00c8 local lbl=Instance.new("TextLabel")lbl.Name="InfoLabel"lbl.Size=UDim2.fromScale(1,1)lbl.BackgroundTransparency=0.3 lbl.BackgroundColor3=Color3.fromRGB(15,15,20)lbl.TextColor3=Color3.fromRGB(255,215,0)lbl.TextStrokeColor3=Color3.new(0,0,0)lbl.TextStrokeTransparency=0.3 lbl.Font=Enum.Font.GothamBold lbl.TextSize=12 lbl.TextWrapped=true lbl.Text=""lbl.Parent=bb local v001c=Instance.new("UICorner")v001c.CornerRadius=UDim.new(0,6)v001c.Parent=lbl local v001d=Instance.new("UIStroke")v001d.Color=Color3.fromRGB(255,215,0)v001d.Thickness=1 v001d.Transparency=0.3 v001d.Parent=lbl v0007[egg]={hl=hl,bb=bb,lbl=lbl,v008a=v00c8}end end end end else for egg,data in pairs(v0007)do if data.hl then data.hl:Destroy()end if data.bb then data.bb:Destroy()end v0007[egg]=nil end end for egg,data in pairs(v0007)do if not egg.Parent then if data.hl then data.hl:Destroy()end if data.bb then data.bb:Destroy()end v0007[egg]=nil elseif data.lbl then local v001f={}if v0002.ESP_EggName_Enabled then table.insert(v001f,"🥚 "..egg.Name)end if v0002.ESP_EggLuck_Enabled then table.insert(v001f,"🍀 "..getEggLuck(egg))end data.lbl.Text=table.concat(v001f,"\n")end end end end)end local v0010={}local function getPetInfo(v0011)local v001e,v0013="?","?"local v0014=v0011:FindFirstChild("PetCash",true)if v0014 then for _,desc in ipairs(v0014:GetDescendants())do if desc:IsA("TextLabel")and desc.Text:find("%$")and desc.Text:find("/s")then v001e=desc.Text break end end end local v0015=v0011:FindFirstChild("PetSpeed",true)if v0015 then for _,desc in ipairs(v0015:GetDescendants())do if desc:IsA("TextLabel")and desc.Text~=""then v0013=desc.Text break end end end return v001e,v0013 end function v0001.startPetESP()task.spawn(function()while task.wait(0.3)do if v0002.ESP_Pets_Enabled then local v0020=Workspace:FindFirstChild("Plots")if v0020 then for _,v0095 in ipairs(v0020:GetChildren())do local v003f=v0095:FindFirstChild("Pets")if v003f then for _,v0011 in ipairs(v003f:GetChildren())do if v0011:IsA("Model")and not v0010[v0011]then local v0018=v0011:FindFirstChildWhichIsA("BasePart",true)if v0018 then local hl=Instance.new("Highlight")hl.Name="VRILZ_RideAPet_PetHL"hl.FillColor=Color3.fromRGB(100,200,255)hl.OutlineColor=Color3.new(1,1,1)hl.FillTransparency=0.5 hl.Adornee=v0011 hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop hl.Parent=v0011 local bb=Instance.new("BillboardGui")bb.Name="VRILZ_RideAPet_PetESP"bb.Size=UDim2.fromOffset(180,70)bb.StudsOffset=Vector3.new(0,3.5,0)bb.AlwaysOnTop=true bb.MaxDistance=500 bb.Adornee=v0018 bb.Parent=v0018 local lbl=Instance.new("TextLabel")lbl.Name="InfoLabel"lbl.Size=UDim2.fromScale(1,1)lbl.BackgroundTransparency=0.3 lbl.BackgroundColor3=Color3.fromRGB(15,15,20)lbl.TextColor3=Color3.fromRGB(100,200,255)lbl.TextStrokeColor3=Color3.new(0,0,0)lbl.TextStrokeTransparency=0.3 lbl.Font=Enum.Font.GothamBold lbl.TextSize=12 lbl.TextWrapped=true lbl.Text=""lbl.Parent=bb local v001c=Instance.new("UICorner")v001c.CornerRadius=UDim.new(0,6)v001c.Parent=lbl local v001d=Instance.new("UIStroke")v001d.Color=Color3.fromRGB(100,200,255)v001d.Thickness=1 v001d.Transparency=0.3 v001d.Parent=lbl v0010[v0011]={hl=hl,bb=bb,lbl=lbl,v008a=v0018}end end end end end end else for v0011,data in pairs(v0010)do if data.hl then data.hl:Destroy()end if data.bb then data.bb:Destroy()end v0010[v0011]=nil end end for v0011,data in pairs(v0010)do if not v0011.Parent then if data.hl then data.hl:Destroy()end if data.bb then data.bb:Destroy()end v0010[v0011]=nil elseif data.lbl then local v001e,v0013=getPetInfo(v0011)local v001f={}if v0002.ESP_PetName_Enabled then table.insert(v001f,"🐾 "..v0011.Name)end if v0002.ESP_PetCash_Enabled then table.insert(v001f,"💰 "..v001e)end if v0002.ESP_PetSpeed_Enabled then table.insert(v001f,"⚡ "..v0013)end data.lbl.Text=table.concat(v001f,"\n")end end end end)end local function getMyPlot()local v0020=Workspace:FindFirstChild("Plots")if not v0020 then return nil end for _,v0095 in ipairs(v0020:GetChildren())do local v0021=v0095:GetAttribute("OwnerUserId")or v0095:GetAttribute("Owner")or v0095:GetAttribute("NestsOwnerLoaded")if v0021==LocalPlayer.UserId or v0021==LocalPlayer.Name then return v0095 end end return nil end local function getMyPlotSpawn()local v0095=getMyPlot()if not v0095 then return nil end local v0098=v0095:FindFirstChild("Spawn",true)or v0095:FindFirstChildWhichIsA("SpawnLocation",true)or v0095:FindFirstChild("Baseplate",true)or v0095:FindFirstChildWhichIsA("BasePart",true)return v0098 end local function findEggByName(v007d)local v0086=Workspace:FindFirstChild("RenderedEggs")if not v0086 then return nil end local v0026=v007d:lower()local v00c6,bestDist=nil,math.huge local v00c3=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")if not v00c3 then return nil end for _,egg in ipairs(v0086:GetChildren())do if egg:IsA("Model")then local name=egg.Name:lower()if name==v0026 or name:find(v0026,1,true)then local v00c8=egg:FindFirstChildWhichIsA("BasePart",true)if v00c8 then local v009a=(v00c8.Position-v00c3.Position).Magnitude if v009a<bestDist then v00c6,bestDist=egg,v009a end end end end end return v00c6 end local function isEggStillInMap(egg)if not egg or not egg.Parent then return false end return true end local v002d=0 function v0001.startAutoSteal()task.spawn(function()while task.wait(0.5)do if not v0002.AutoSteal_Enabled then continue end local v00c2=LocalPlayer.Character local v00c3=v00c2 and v00c2:FindFirstChild("HumanoidRootPart")local v00c4=v00c2 and v00c2:FindFirstChildOfClass("Humanoid")if not v00c3 or not v00c4 or v00c4.Health<=0 then task.wait(1)continue end local v007d=v0002.SelectedEgg or"Cherub"local egg=findEggByName(v007d)if not egg then local v0033=os.clock()if v0033-v002d>5 then v002d=v0033 if v0002.Notify then v0002.Notify("Egg no spawn: "..v007d,"warning")end end continue end local v00c8=egg:FindFirstChildWhichIsA("BasePart",true)local v00c9=egg:FindFirstChild("Pickup",true)if not v00c8 or not v00c9 then continue end if v00c9:IsA("ProximityPrompt")then v00c9.HoldDuration=0 end v00c3.CFrame=v00c8.CFrame+Vector3.new(0,3,0)task.wait(0.1)local v00ca=false local v0083=10 for i=1,v0083 do if typeof(fireproximityprompt)=="function"then pcall(fireproximityprompt,v00c9)end task.wait(0.3)if not isEggStillInMap(egg)then v00ca=true break end if v00c8 and v00c8.Parent then v00c3.CFrame=v00c8.CFrame+Vector3.new(0,3,0)task.wait(0.1)end end if v00ca and v0002.AutoReturn_Enabled then local v0098=getMyPlotSpawn()if v0098 then v00c3.CFrame=v0098.CFrame+Vector3.new(0,5,0)else local spawn=Workspace:FindFirstChild("Spawn")if spawn then local v003a=spawn:FindFirstChildWhichIsA("SpawnLocation",true)if v003a then v00c3.CFrame=v003a.CFrame+Vector3.new(0,5,0)end end end end task.wait(0.3)end end)end function v0001.startAutoHatch()task.spawn(function()while task.wait(1)do if not v0002.AutoHatch_Enabled then continue end local v0095=getMyPlot()if not v0095 then continue end local v003c=v0095:FindFirstChild("Eggs")if not v003c then continue end for _,egg in ipairs(v003c:GetChildren())do local v00c9=egg:FindFirstChild("Hatch",true)if v00c9 and v00c9.Enabled then if typeof(fireproximityprompt)=="function"then pcall(fireproximityprompt,v00c9)end end end end end)end function v0001.startAutoRidePet()task.spawn(function()while task.wait(1)do if not v0002.AutoRidePet_Enabled then continue end local v0095=getMyPlot()if not v0095 then continue end local v003f=v0095:FindFirstChild("Pets")if not v003f then continue end for _,v0011 in ipairs(v003f:GetChildren())do local v00c9=v0011:FindFirstChild("RidePrompt",true)if v00c9 and v00c9.Enabled then if typeof(fireproximityprompt)=="function"then pcall(fireproximityprompt,v00c9)end break end end end end)end local EggHistory={}local v0042={}local v0043=50 function v0001.startEggPrediction()task.spawn(function()while task.wait(1)do local v0086=Workspace:FindFirstChild("RenderedEggs")if not v0086 then continue end local v0045={}for _,egg in ipairs(v0086:GetChildren())do if egg:IsA("Model")then table.insert(v0045,egg.Name)end end for _,v007d in ipairs(v0045)do local v0046=false for _,lastEgg in ipairs(v0042)do if lastEgg==v007d then v0046=true break end end if not v0046 then table.insert(EggHistory,{name=v007d,time=os.time(),})if#EggHistory>v0043 then table.remove(EggHistory,1)end end end v0042=v0045 v0002.EggsInMap=v0045 v0002.EggHistory=EggHistory local v0047={}for _,entry in ipairs(EggHistory)do v0047[entry.name]=(v0047[entry.name]or 0)+1 end local v0048={}for name,count in pairs(v0047)do table.insert(v0048,{name=name,count=count})end table.sort(v0048,function(v0049,v004a)return v0049.count>v004a.count end)local v004b={}for _,entry in ipairs(v0048)do local v004c=false for _,v007d in ipairs(v0045)do if v007d==entry.name then v004c=true break end end if not v004c then table.insert(v004b,entry.name)end if#v004b>=5 then break end end v0002.EggPredictions=v004b end end)end local function getRemote(name)local v00b2=game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")if not v00b2 then return nil end local v004f=v00b2:FindFirstChild("Game")if not v004f then return nil end return v004f:FindFirstChild(name)end function v0001.rideAlong()local v00b0=getRemote("RideAlong")if v00b0 then v00b0:FireServer()return true end return false end function v0001.petDismount()local v00b0=getRemote("PetDismount")if v00b0 then v00b0:FireServer()return true end return false end function v0001.pickupPet()local v00b0=getRemote("PickupPet")if v00b0 then v00b0:FireServer()return true end return false end function v0001.hatchEgg()local v00b0=getRemote("Hatch")if v00b0 then v00b0:FireServer()return true end return false end local v0054=game:GetService("ReplicatedStorage"):FindFirstChild("GameData")local v0055,PetData={},{}if v0054 then local v0056=v0054:FindFirstChild("Eggs")if v0056 then local v00bd,data=pcall(require,v0056)if v00bd and type(data)=="table"then v0055=data end end local v0058=v0054:FindFirstChild("Pets")if v0058 then local v00bd,data=pcall(require,v0058)if v00bd and type(data)=="table"then PetData=data end end end local v005a={Common=1,v006a=2,Rare=3,Epic=4,Legendary=5,Mythic=6,Divine=7,Ethereal=8,Secret=9,}local function getEggRarity(v007d)local v005c=v0055[v007d]return v005c and v005c.Rarity or"Common"end local function isRaritySelected(v007d)local rarity=getEggRarity(v007d)if not v0002.SelectedRarities then return false end return v0002.SelectedRarities[rarity]==true end function v0001.setSpeed(v0088)local v00c2=LocalPlayer.Character local v00c4=v00c2 and v00c2:FindFirstChildOfClass("Humanoid")if v00c4 then v00c4.WalkSpeed=v0088 end end function v0001.startSpeed()task.spawn(function()while task.wait(0.3)do if v0002.Speed_Enabled then v0001.setSpeed(v0002.Speed_Value or 100)end end end)end function v0001.startInstantPickup()task.spawn(function()while task.wait(0.5)do if not v0002.InstantPickup_Enabled then continue end local v0086=Workspace:FindFirstChild("RenderedEggs")if not v0086 then continue end for _,egg in ipairs(v0086:GetChildren())do if egg:IsA("Model")then local v00c9=egg:FindFirstChild("Pickup",true)if v00c9 and v00c9:IsA("ProximityPrompt")then if v00c9.HoldDuration>0 then v00c9.HoldDuration=0 end end end end end end)end local v0065={}local function getEggKey(egg)local v008a=egg:FindFirstChildWhichIsA("BasePart",true)if not v008a then return egg.Name end local v0068=v008a.Position return string.format("%s_%.0f_%.0f_%.0f",egg.Name,v0068.X,v0068.Y,v0068.Z)end local function getNotifThreshold()local v0069={Common=1,v006a=2,Rare=3,Epic=4,Legendary=5,Mythic=6,Divine=7,Ethereal=8,Secret=9,}return v0069[v0002.RarityNotifThreshold or"Legendary"]or 5 end local function getBestEggInMap()local v0086=Workspace:FindFirstChild("RenderedEggs")if not v0086 then return nil end local v00c3=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")if not v00c3 then return nil end local v00c6,bestRank=nil,0 for _,egg in ipairs(v0086:GetChildren())do if egg:IsA("Model")and isRaritySelected(egg.Name)then local rarity=getEggRarity(egg.Name)local v006f=v005a[rarity]or 1 local v008a=egg:FindFirstChildWhichIsA("BasePart",true)if v008a then local v009a=(v008a.Position-v00c3.Position).Magnitude if v006f>bestRank or(v006f==bestRank and(not v00c6 or v009a<v00c6.dist))then v00c6={egg=egg,dist=v009a,rarity=rarity,v006f=v006f}bestRank=v006f end end end end return v00c6 end local function returnToMyPlot()if not v0002.AutoReturn_Enabled then return end local v00c3=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")if not v00c3 then return end local v0095=getMyPlot()local v0098=nil if v0095 then v0098=v0095:FindFirstChild("Spawn",true)or v0095:FindFirstChildWhichIsA("SpawnLocation",true)or v0095:FindFirstChild("Baseplate",true)or v0095:FindFirstChildWhichIsA("BasePart",true)end if not v0098 then local spawn=Workspace:FindFirstChild("Spawn")if spawn then v0098=spawn:FindFirstChildWhichIsA("SpawnLocation",true)or spawn:FindFirstChildWhichIsA("BasePart",true)end end if v0098 then v00c3.CFrame=v0098.CFrame+Vector3.new(0,5,0)end end function v0001.startAutoFarm()task.spawn(function()while task.wait(0.5)do if not v0002.AutoFarm_Enabled then continue end local v00c2=LocalPlayer.Character local v00c3=v00c2 and v00c2:FindFirstChild("HumanoidRootPart")local v00c4=v00c2 and v00c2:FindFirstChildOfClass("Humanoid")if not v00c3 or not v00c4 or v00c4.Health<=0 then task.wait(1)continue end local v0086=Workspace:FindFirstChild("RenderedEggs")if v0086 then local v007a={}for _,egg in ipairs(v0086:GetChildren())do if egg:IsA("Model")then v007a[getEggKey(egg)]=true end end for key in pairs(v0065)do if not v007a[key]then v0065[key]=nil end end end local v00c6=getBestEggInMap()if not v00c6 then continue end local egg=v00c6.egg local v007d=egg.Name local v007e=v00c6.rarity local v007f=getEggKey(egg)if(v005a[v007e]or 1)>=getNotifThreshold()then if not v0065[v007f]then v0065[v007f]=true if v0002.Notify then v0002.Notify("🎯 "..v007d.." ("..v007e..")","success")end end end local v00c8=egg:FindFirstChildWhichIsA("BasePart",true)if not v00c8 then continue end local v00c9=egg:FindFirstChild("Pickup",true)if v00c9 and v00c9:IsA("ProximityPrompt")then v00c9.HoldDuration=0 end v00c3.CFrame=v00c8.CFrame+Vector3.new(0,5,0)task.wait(0.1)local v00ca=false local v0083=10 for i=1,v0083 do if v00c9 and typeof(fireproximityprompt)=="function"then pcall(fireproximityprompt,v00c9)end task.wait(0.3)if not isEggStillInMap(egg)then v00ca=true break end if v00c8 and v00c8.Parent then v00c3.CFrame=v00c8.CFrame+Vector3.new(0,5,0)task.wait(0.1)end end if v00ca and v0002.AutoReturn_Enabled then returnToMyPlot()task.wait(0.3)end task.wait(0.3)end end)end local v0084={Enabled=false,Hunting=false,}local v0085={Vector3.new(-4902.3,41396.1,-3751.4),Vector3.new(-4908.1,41365.0,-3742.9),Vector3.new(-4909.5,41357.4,-3740.8),Vector3.new(-4923.0,41299.5,-3719.6),Vector3.new(-4927.1,41293.3,-3712.6),Vector3.new(-4951.4,41287.6,-3669.6),Vector3.new(-4973.1,41283.3,-3643.8),Vector3.new(-4995.2,41285.0,-3620.6),Vector3.new(-5010.8,41279.5,-3597.9),Vector3.new(-5020.6,41275.2,-3582.6),Vector3.new(-5032.2,41272.9,-3564.8),Vector3.new(-5062.9,41262.1,-3542.1),Vector3.new(-5070.9,41262.3,-3537.0),Vector3.new(-5079.4,41265.2,-3533.3),Vector3.new(-5088.6,41240.3,-3525.3),Vector3.new(-5096.8,41228.7,-3520.1),Vector3.new(-5101.5,41197.4,-3514.3),Vector3.new(-5103.3,41165.1,-3511.6),Vector3.new(-5112.5,41164.5,-3551.9),Vector3.new(-5157.0,41159.7,-3588.1),Vector3.new(-5165.4,41158.0,-3594.1),Vector3.new(-5211.0,41150.0,-3569.9),Vector3.new(-5248.0,41147.5,-3580.6),Vector3.new(-5256.8,41143.1,-3581.9),Vector3.new(-5260.1,41122.3,-3580.1),Vector3.new(-5268.7,41062.3,-3575.5),Vector3.new(-5259.1,41050.3,-3586.2),Vector3.new(-5269.5,41047.7,-3640.0),Vector3.new(-5264.0,41042.3,-3655.1),Vector3.new(-5218.7,41023.5,-3659.7),Vector3.new(-5188.9,41037.1,-3635.5),Vector3.new(-5147.5,41037.4,-3589.8),Vector3.new(-5123.4,41037.2,-3550.7),Vector3.new(-5123.0,41033.8,-3503.2),Vector3.new(-5094.9,41037.6,-3486.6),Vector3.new(-5081.6,41035.8,-3474.5),Vector3.new(-5040.8,41048.6,-3433.1),Vector3.new(-4990.3,41050.6,-3391.9),Vector3.new(-4949.3,41057.1,-3400.0),Vector3.new(-4908.1,41036.5,-3439.7),Vector3.new(-4869.4,41000.1,-3474.8),Vector3.new(-4880.2,40975.6,-3528.0),Vector3.new(-4930.9,40973.3,-3563.7),Vector3.new(-4966.2,40960.4,-3610.8),Vector3.new(-5016.4,40943.8,-3648.2),Vector3.new(-5072.8,40929.0,-3667.8),Vector3.new(-5136.3,40922.9,-3656.4),Vector3.new(-5151.8,40914.2,-3681.0),Vector3.new(-5209.2,40907.2,-3677.5),Vector3.new(-5267.7,40907.3,-3651.2),Vector3.new(-5282.4,40908.9,-3632.6),Vector3.new(-5270.4,40907.1,-3619.5),}local function getVolcanicEgg()local v0086=Workspace:FindFirstChild("RenderedEggs")if not v0086 then return nil end for _,egg in ipairs(v0086:GetChildren())do if egg:IsA("Model")and egg.Name:lower():find("volcan",1,true)then return egg end end return nil end local function getVolcanicSpawn()local v0087=Workspace:FindFirstChild("EggSpawns")if not v0087 then return nil end local v0088=v0087:FindFirstChild("Volcanic")if v0088 and v0088:IsA("BasePart")then return v0088 end return nil end local function volcanicPickup(egg)local v008a=egg:FindFirstChildWhichIsA("BasePart",true)if not v008a then return false end local v00c9=egg:FindFirstChild("Pickup",true)if v00c9 and v00c9:IsA("ProximityPrompt")then v00c9.HoldDuration=0 end local v00c3=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")if not v00c3 then return false end v00c3.CFrame=v008a.CFrame+Vector3.new(0,3,0)task.wait(0.1)for i=1,15 do if v00c9 and typeof(fireproximityprompt)=="function"then pcall(fireproximityprompt,v00c9)end task.wait(0.2)if not egg.Parent then return true end if v008a and v008a.Parent then v00c3.CFrame=v008a.CFrame+Vector3.new(0,3,0)task.wait(0.1)end end return false end function v0001.startVolcanicHunt()task.spawn(function()while task.wait(1)do if not v0002.VolcanicHunt_Enabled then v0084.Hunting=false continue end if v0084.Hunting then continue end v0084.Hunting=true task.spawn(function()while v0002.VolcanicHunt_Enabled do local v00c2=LocalPlayer.Character local v00c3=v00c2 and v00c2:FindFirstChild("HumanoidRootPart")local v00c4=v00c2 and v00c2:FindFirstChildOfClass("Humanoid")if not v00c3 or not v00c4 or v00c4.Health<=0 then task.wait(1)continue end local egg=getVolcanicEgg()if egg then print("[VOLCANIC] ✅ Egg volcanic spawn! Travel & pickup...")if v0002.Notify then v0002.Notify("🌋 Volcanic Egg spawn!","success")end local v00c8=egg:FindFirstChildWhichIsA("BasePart",true)for i,wp in ipairs(v0085)do if not v0002.VolcanicHunt_Enabled then break end if not egg.Parent then break end local v0099=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")if v0099 and v00c8 then local v009a=(v00c8.Position-v0099.Position).Magnitude if v009a<=40 then break end end if v0099 then v0099.CFrame=CFrame.new(wp+Vector3.new(0,5,0))v0099.Velocity=Vector3.zero end task.wait(0.12)end if egg.Parent then local v00ca=volcanicPickup(egg)if v00ca then print("[VOLCANIC] ✅ Pickup berhasil!")if v0002.VolcanicReturn_Enabled then task.wait(0.4)local v0095=getMyPlot()if v0095 then local spawn=v0095:FindFirstChild("Spawn",true)or v0095:FindFirstChildWhichIsA("SpawnLocation",true)or v0095:FindFirstChild("Baseplate",true)or v0095:FindFirstChildWhichIsA("BasePart",true)if spawn then local v0097=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")if v0097 then v0097.CFrame=spawn.CFrame+Vector3.new(0,5,0)print("[VOLCANIC] 🏠 Balik ke plot")end end end end task.wait(3)end end else local v0098=getVolcanicSpawn()if v0098 then local v0099=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")if v0099 then local v009a=(v0098.Position-v0099.Position).Magnitude if v009a>50 then v0099.CFrame=v0098.CFrame+Vector3.new(0,5,0)print("[VOLCANIC] 🚀 Teleport ke spawn point volcanic")end end end end task.wait(2)end v0084.Hunting=false print("[VOLCANIC] ⏹️ Hunt berhenti")end)end end)end local v009b={Running=false,StealPaused=false,BasketFull=false,EggLocked=false,LastFire=0,}local v009c={DROP_TIMEOUT=15,RETURN_TIMEOUT=13,TP_ABOVE_TOP=200,}local v009d=nil task.spawn(function()local v009e=game:GetService("ReplicatedStorage"):FindFirstChild("packages")if v009e then local v009f=v009e:FindFirstChild("Net")if v009f then local v00bd,result=pcall(require,v009f)if v00bd then v009d=result print("[MUTATION] Net module loaded")end end end end)local function getVolcanoDipRemote()if v009d then local v00bd,v00b0=pcall(function()return v009d:RemoteEvent("VolcanoDip")end)if v00bd and v00b0 then return v00b0 end end local v00b2=game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")local v00b3=v00b2 and v00b2:FindFirstChild("Game")if v00b3 then local v00a5=v00b3:FindFirstChild("VolcanoDip")if v00a5 and v00a5:IsA("RemoteEvent")then return v00a5 end end return nil end local function findSafeVolcanoPos()local v00a6=Workspace:FindFirstChild("Volcano")if not v00a6 then return Vector3.new(-5102.84,41700,-3489.11)end local v00a7,bestSize=nil,0 for _,v009a in ipairs(v00a6:GetDescendants())do if v009a:IsA("BasePart")then local v00ab=v009a.Name:lower()if v00ab:find("top")or v00ab=="volcanotop"then local v00a9=v009a.Size.X*v009a.Size.Z if v00a9>bestSize then v00a7=v009a bestSize=v00a9 end end end end if v00a7 then return v00a7.Position+Vector3.new(0,v009c.TP_ABOVE_TOP,0)end local v00aa=-math.huge for _,v009a in ipairs(v00a6:GetDescendants())do if v009a:IsA("BasePart")then local v00ab=v009a.Name:lower()if v00ab:find("lava")or v00ab:find("magma")or v00ab:find("volcan")then local v00ac=v009a.Position.Y+v009a.Size.Y/2 if v00ac>v00aa then v00aa=v00ac end end end end if v00aa>-math.huge then return Vector3.new(-5102.84,v00aa+v009c.TP_ABOVE_TOP,-3489.11)end return Vector3.new(-5102.84,41700,-3489.11)end local function isHoldingEggMutation()local v00c2=LocalPlayer.Character if not v00c2 then return false end local v00ae=v00c2:FindFirstChild("Wooden")if not v00ae then return false end local v00af=v00ae:FindFirstChild("DisplayEgg")if not v00af then return false end for _,c in ipairs(v00af:GetChildren())do if c:IsA("MeshPart")and not c.Name:lower():find("circle")then return true,c.Name end end return false end local function fireVolcanoDip()local v00b0=getVolcanoDipRemote()if v00b0 then local v00bd=pcall(function()v00b0:FireServer()end)if v00bd then print("[MUTATION] Drop: VolcanoDip fired")return true end end return false end local function fireBasketDrop()local v00b2=game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")local v00b3=v00b2 and v00b2:FindFirstChild("Game")if not v00b3 then return false end local v00b4=v00b3:FindFirstChild("BasketDrop")if not v00b4 then return false end return pcall(function()v00b4:FireServer()end)end local function tpToSafe(v00b5)local v00c3=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")if not v00c3 then return false end v00c3.CFrame=CFrame.new(v00b5)task.wait(0.3)local v00b7=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")if v00b7 and v00b7.Position.Y<v00b5.Y-50 then print("[MUTATION] Kecebur! Retry TP...")v00b7.CFrame=CFrame.new(v00b5+Vector3.new(0,50,0))task.wait(0.3)end return true end local function runMutationOnce()v009b.Running=true local v00b8,v007d=isHoldingEggMutation()if not v00b8 then v009b.Running=false v009b.EggLocked=false return false end print("[MUTATION] holding "..(v007d or"?")..", starting")v009b.StealPaused=true task.wait(1.5)local v00ba=findSafeVolcanoPos()print("[MUTATION] STEP 1 — TP ke lahar")tpToSafe(v00ba)task.wait(2)print("[MUTATION] STEP 2 — drop via VolcanoDip")local v00bb=0 local v00bc=false v009b.LastFire=0 while v00bb<v009c.DROP_TIMEOUT do if os.clock()-v009b.LastFire>2 then local v00bd=fireVolcanoDip()if not v00bd then fireBasketDrop()end v009b.LastFire=os.clock()print("[MUTATION] fired @ "..v00bb.."s")end task.wait(0.5)v00bb=v00bb+0.5 if not isHoldingEggMutation()then v00bc=true print("[MUTATION] egg LEPAS @ "..v00bb.."s")break end end if not v00bc then print("[MUTATION] egg GAK LEPAS")v009b.Running=false v009b.StealPaused=false v009b.EggLocked=false return false end print("[MUTATION] STEP 3 — tunggu egg balik")local v00be=0 while v00be<v009c.RETURN_TIMEOUT do task.wait(1)v00be=v00be+1 if isHoldingEggMutation()then print("[MUTATION] egg BALIK @ "..v00be.."s")break end if v00be%5==0 then print("[MUTATION] waiting... "..v00be.."s")end end if v0002.MutationReturn_Enabled then task.wait(0.5)local spawn=getMyPlotSpawn()if spawn then local v00c3=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")if v00c3 then v00c3.CFrame=spawn.CFrame+Vector3.new(0,5,0)print("[MUTATION] Balik ke plot")end end end task.wait(2)v009b.Running=false v009b.StealPaused=false v009b.EggLocked=false return true end function v0001.startAutoMutation()task.spawn(function()while task.wait(1)do if not v0002.AutoMutation_Enabled then v009b.Running=false continue end if v009b.Running then continue end local v00c4=LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")if not v00c4 or v00c4.Health<=0 then task.wait(1)continue end if isHoldingEggMutation()then print("[MUTATION] egg held, starting")pcall(runMutationOnce)task.wait(2)end end end)end function v0001.getMutationState()return v009b end function v0001.isHoldingEgg()return isHoldingEggMutation()end function v0001.startMutationSteal()task.spawn(function()while task.wait(0.5)do if not v0002.MutationSteal_Enabled then continue end if v0001.hasVolcanicEgg and v0001.hasVolcanicEgg()then task.wait(1)continue end if v0001.getMutationState and v0001.getMutationState().Running then task.wait(1)continue end local v00c2=LocalPlayer.Character local v00c3=v00c2 and v00c2:FindFirstChild("HumanoidRootPart")local v00c4=v00c2 and v00c2:FindFirstChildOfClass("Humanoid")if not v00c3 or not v00c4 or v00c4.Health<=0 then task.wait(1)continue end if v0001.isHoldingEgg and v0001.isHoldingEgg()then task.wait(0.5)continue end local v00c5=LocalPlayer:FindFirstChild("Basket")if v00c5 and#v00c5:GetChildren()>0 then task.wait(0.5)continue end local v00c6=getBestEggInMap()if not v00c6 then task.wait(0.5)continue end local egg=v00c6.egg local v00c8=egg:FindFirstChildWhichIsA("BasePart",true)local v00c9=egg:FindFirstChild("Pickup",true)if not v00c8 or not v00c9 then continue end if v00c9:IsA("ProximityPrompt")then v00c9.HoldDuration=0 end v00c3.CFrame=v00c8.CFrame+Vector3.new(0,3,0)task.wait(0.1)local v00ca=false for i=1,15 do if typeof(fireproximityprompt)=="function"then pcall(fireproximityprompt,v00c9)end task.wait(0.25)if not isEggStillInMap(egg)then v00ca=true break end if v00c8 and v00c8.Parent then v00c3.CFrame=v00c8.CFrame+Vector3.new(0,3,0)task.wait(0.1)end end if v00ca then print("[MUTATION-STEAL] picked "..egg.Name.." ("..v00c6.rarity..")")end task.wait(0.3)end end)end function v0001.Init(v00cb)v0002=v00cb v0001.startEggESP()v0001.startPetESP()v0001.startAutoSteal()v0001.startAutoHatch()v0001.startAutoRidePet()v0001.startEggPrediction()v0001.startSpeed()v0001.startInstantPickup()v0001.startAutoFarm()v0001.startVolcanicHunt()v0001.startAutoMutation()v0001.startMutationSteal()print("[VRILZHUB] Ride a Pet Features loaded")end return v0001
+-- ============================================================
+-- VRILZHUB FEATURES — RIDE A PET v3.2
+-- + Egg Prediction System + Notif Egg No Spawn
+-- + Speed + Instant Pickup (HoldDuration=0) + Auto Farm
+-- + Volcanic Hunter (auto detect + travel + pickup + return)
+-- ============================================================
+
+local Features = {}
+local Shared = nil
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+
+-- ============================================================
+-- GET EGG LUCK
+-- ============================================================
+local function getEggLuck(egg)
+    local luckGui = egg:FindFirstChild("EggLuck", true)
+    if luckGui then
+        local luckLabel = luckGui:FindFirstChild("Luck")
+        if luckLabel and luckLabel:IsA("TextLabel") then
+            return luckLabel.Text
+        end
+    end
+    return "?"
+end
+
+-- ============================================================
+-- EGG ESP
+-- ============================================================
+local EggESPTracked = {}
+
+function Features.startEggESP()
+    task.spawn(function()
+        while task.wait(0.3) do
+            if Shared.ESP_Eggs_Enabled then
+                local rendered = Workspace:FindFirstChild("RenderedEggs")
+                if rendered then
+                    for _, egg in ipairs(rendered:GetChildren()) do
+                        if egg:IsA("Model") and not EggESPTracked[egg] then
+                            local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+                            if eggPart then
+                                local hl = Instance.new("Highlight")
+                                hl.Name = "VRILZ_RideAPet_EggHL"
+                                hl.FillColor = Color3.fromRGB(255, 215, 0)
+                                hl.OutlineColor = Color3.new(1, 1, 1)
+                                hl.FillTransparency = 0.5
+                                hl.Adornee = egg
+                                hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                                hl.Parent = egg
+
+                                local bb = Instance.new("BillboardGui")
+                                bb.Name = "VRILZ_RideAPet_EggESP"
+                                bb.Size = UDim2.fromOffset(160, 50)
+                                bb.StudsOffset = Vector3.new(0, 3, 0)
+                                bb.AlwaysOnTop = true
+                                bb.MaxDistance = 500
+                                bb.Adornee = eggPart
+                                bb.Parent = eggPart
+
+                                local lbl = Instance.new("TextLabel")
+                                lbl.Name = "InfoLabel"
+                                lbl.Size = UDim2.fromScale(1, 1)
+                                lbl.BackgroundTransparency = 0.3
+                                lbl.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+                                lbl.TextColor3 = Color3.fromRGB(255, 215, 0)
+                                lbl.TextStrokeColor3 = Color3.new(0, 0, 0)
+                                lbl.TextStrokeTransparency = 0.3
+                                lbl.Font = Enum.Font.GothamBold
+                                lbl.TextSize = 12
+                                lbl.TextWrapped = true
+                                lbl.Text = ""
+                                lbl.Parent = bb
+
+                                local cnr = Instance.new("UICorner")
+                                cnr.CornerRadius = UDim.new(0, 6)
+                                cnr.Parent = lbl
+
+                                local str = Instance.new("UIStroke")
+                                str.Color = Color3.fromRGB(255, 215, 0)
+                                str.Thickness = 1
+                                str.Transparency = 0.3
+                                str.Parent = lbl
+
+                                EggESPTracked[egg] = {hl = hl, bb = bb, lbl = lbl, part = eggPart}
+                            end
+                        end
+                    end
+                end
+            else
+                for egg, data in pairs(EggESPTracked) do
+                    if data.hl then data.hl:Destroy() end
+                    if data.bb then data.bb:Destroy() end
+                    EggESPTracked[egg] = nil
+                end
+            end
+
+            for egg, data in pairs(EggESPTracked) do
+                if not egg.Parent then
+                    if data.hl then data.hl:Destroy() end
+                    if data.bb then data.bb:Destroy() end
+                    EggESPTracked[egg] = nil
+                elseif data.lbl then
+                    local parts = {}
+                    if Shared.ESP_EggName_Enabled then
+                        table.insert(parts, "🥚 " .. egg.Name)
+                    end
+                    if Shared.ESP_EggLuck_Enabled then
+                        table.insert(parts, "🍀 " .. getEggLuck(egg))
+                    end
+                    data.lbl.Text = table.concat(parts, "\n")
+                end
+            end
+        end
+    end)
+end
+
+-- ============================================================
+-- PET ESP
+-- ============================================================
+local PetESPTracked = {}
+
+local function getPetInfo(pet)
+    local cash, speed = "?", "?"
+    local cashGui = pet:FindFirstChild("PetCash", true)
+    if cashGui then
+        for _, desc in ipairs(cashGui:GetDescendants()) do
+            if desc:IsA("TextLabel") and desc.Text:find("%$") and desc.Text:find("/s") then
+                cash = desc.Text
+                break
+            end
+        end
+    end
+    local speedGui = pet:FindFirstChild("PetSpeed", true)
+    if speedGui then
+        for _, desc in ipairs(speedGui:GetDescendants()) do
+            if desc:IsA("TextLabel") and desc.Text ~= "" then
+                speed = desc.Text
+                break
+            end
+        end
+    end
+    return cash, speed
+end
+
+function Features.startPetESP()
+    task.spawn(function()
+        while task.wait(0.3) do
+            if Shared.ESP_Pets_Enabled then
+                local plots = Workspace:FindFirstChild("Plots")
+                if plots then
+                    for _, plot in ipairs(plots:GetChildren()) do
+                        local pets = plot:FindFirstChild("Pets")
+                        if pets then
+                            for _, pet in ipairs(pets:GetChildren()) do
+                                if pet:IsA("Model") and not PetESPTracked[pet] then
+                                    local petPart = pet:FindFirstChildWhichIsA("BasePart", true)
+                                    if petPart then
+                                        local hl = Instance.new("Highlight")
+                                        hl.Name = "VRILZ_RideAPet_PetHL"
+                                        hl.FillColor = Color3.fromRGB(100, 200, 255)
+                                        hl.OutlineColor = Color3.new(1, 1, 1)
+                                        hl.FillTransparency = 0.5
+                                        hl.Adornee = pet
+                                        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                                        hl.Parent = pet
+
+                                        local bb = Instance.new("BillboardGui")
+                                        bb.Name = "VRILZ_RideAPet_PetESP"
+                                        bb.Size = UDim2.fromOffset(180, 70)
+                                        bb.StudsOffset = Vector3.new(0, 3.5, 0)
+                                        bb.AlwaysOnTop = true
+                                        bb.MaxDistance = 500
+                                        bb.Adornee = petPart
+                                        bb.Parent = petPart
+
+                                        local lbl = Instance.new("TextLabel")
+                                        lbl.Name = "InfoLabel"
+                                        lbl.Size = UDim2.fromScale(1, 1)
+                                        lbl.BackgroundTransparency = 0.3
+                                        lbl.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+                                        lbl.TextColor3 = Color3.fromRGB(100, 200, 255)
+                                        lbl.TextStrokeColor3 = Color3.new(0, 0, 0)
+                                        lbl.TextStrokeTransparency = 0.3
+                                        lbl.Font = Enum.Font.GothamBold
+                                        lbl.TextSize = 12
+                                        lbl.TextWrapped = true
+                                        lbl.Text = ""
+                                        lbl.Parent = bb
+
+                                        local cnr = Instance.new("UICorner")
+                                        cnr.CornerRadius = UDim.new(0, 6)
+                                        cnr.Parent = lbl
+
+                                        local str = Instance.new("UIStroke")
+                                        str.Color = Color3.fromRGB(100, 200, 255)
+                                        str.Thickness = 1
+                                        str.Transparency = 0.3
+                                        str.Parent = lbl
+
+                                        PetESPTracked[pet] = {hl = hl, bb = bb, lbl = lbl, part = petPart}
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            else
+                for pet, data in pairs(PetESPTracked) do
+                    if data.hl then data.hl:Destroy() end
+                    if data.bb then data.bb:Destroy() end
+                    PetESPTracked[pet] = nil
+                end
+            end
+
+            for pet, data in pairs(PetESPTracked) do
+                if not pet.Parent then
+                    if data.hl then data.hl:Destroy() end
+                    if data.bb then data.bb:Destroy() end
+                    PetESPTracked[pet] = nil
+                elseif data.lbl then
+                    local cash, speed = getPetInfo(pet)
+                    local parts = {}
+                    if Shared.ESP_PetName_Enabled then
+                        table.insert(parts, "🐾 " .. pet.Name)
+                    end
+                    if Shared.ESP_PetCash_Enabled then
+                        table.insert(parts, "💰 " .. cash)
+                    end
+                    if Shared.ESP_PetSpeed_Enabled then
+                        table.insert(parts, "⚡ " .. speed)
+                    end
+                    data.lbl.Text = table.concat(parts, "\n")
+                end
+            end
+        end
+    end)
+end
+
+-- ============================================================
+-- GET MY PLOT
+-- ============================================================
+local function getMyPlot()
+    local plots = Workspace:FindFirstChild("Plots")
+    if not plots then return nil end
+    for _, plot in ipairs(plots:GetChildren()) do
+        local owner = plot:GetAttribute("OwnerUserId") or plot:GetAttribute("Owner") or plot:GetAttribute("NestsOwnerLoaded")
+        if owner == LocalPlayer.UserId or owner == LocalPlayer.Name then
+            return plot
+        end
+    end
+    return nil
+end
+
+local function getMyPlotSpawn()
+    local plot = getMyPlot()
+    if not plot then return nil end
+    local spawnPart = plot:FindFirstChild("Spawn", true)
+        or plot:FindFirstChildWhichIsA("SpawnLocation", true)
+        or plot:FindFirstChild("Baseplate", true)
+        or plot:FindFirstChildWhichIsA("BasePart", true)
+    return spawnPart
+end
+
+-- ============================================================
+-- FIND EGG BY NAME
+-- ============================================================
+local function findEggByName(eggName)
+    local rendered = Workspace:FindFirstChild("RenderedEggs")
+    if not rendered then return nil end
+
+    local targetName = eggName:lower()
+    local best, bestDist = nil, math.huge
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return nil end
+
+    for _, egg in ipairs(rendered:GetChildren()) do
+        if egg:IsA("Model") then
+            local name = egg.Name:lower()
+            if name == targetName or name:find(targetName, 1, true) then
+                local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+                if eggPart then
+                    local d = (eggPart.Position - myRoot.Position).Magnitude
+                    if d < bestDist then
+                        best, bestDist = egg, d
+                    end
+                end
+            end
+        end
+    end
+    return best
+end
+
+-- ============================================================
+-- CEK EGG MASIH DI MAP
+-- ============================================================
+local function isEggStillInMap(egg)
+    if not egg or not egg.Parent then return false end
+    return true
+end
+
+-- ============================================================
+-- AUTO STEAL + NOTIF "EGG NO SPAWN"
+-- ============================================================
+local lastNoEggNotif = 0
+
+function Features.startAutoSteal()
+    task.spawn(function()
+        while task.wait(0.5) do
+            if not Shared.AutoSteal_Enabled then continue end
+
+            local char = LocalPlayer.Character
+            local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if not myRoot or not hum or hum.Health <= 0 then
+                task.wait(1)
+                continue
+            end
+
+            local eggName = Shared.SelectedEgg or "Cherub"
+            local egg = findEggByName(eggName)
+
+            if not egg then
+                local now = os.clock()
+                if now - lastNoEggNotif > 5 then
+                    lastNoEggNotif = now
+                    if Shared.Notify then
+                        Shared.Notify("Egg no spawn: " .. eggName, "warning")
+                    end
+                end
+                continue
+            end
+
+            local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+            local prompt = egg:FindFirstChild("Pickup", true)
+            if not eggPart or not prompt then continue end
+
+            if prompt:IsA("ProximityPrompt") then
+                prompt.HoldDuration = 0
+            end
+
+            myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+            task.wait(0.1)
+
+            local picked = false
+            local maxTries = 10
+            for i = 1, maxTries do
+                if typeof(fireproximityprompt) == "function" then
+                    pcall(fireproximityprompt, prompt)
+                end
+                task.wait(0.3)
+
+                if not isEggStillInMap(egg) then
+                    picked = true
+                    break
+                end
+
+                if eggPart and eggPart.Parent then
+                    myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+                    task.wait(0.1)
+                end
+            end
+
+            if picked and Shared.AutoReturn_Enabled then
+                local spawnPart = getMyPlotSpawn()
+                if spawnPart then
+                    myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
+                else
+                    local spawn = Workspace:FindFirstChild("Spawn")
+                    if spawn then
+                        local spawnLoc = spawn:FindFirstChildWhichIsA("SpawnLocation", true)
+                        if spawnLoc then
+                            myRoot.CFrame = spawnLoc.CFrame + Vector3.new(0, 5, 0)
+                        end
+                    end
+                end
+            end
+
+            task.wait(0.3)
+        end
+    end)
+end
+
+-- ============================================================
+-- AUTO HATCH
+-- ============================================================
+function Features.startAutoHatch()
+    task.spawn(function()
+        while task.wait(1) do
+            if not Shared.AutoHatch_Enabled then continue end
+            local plot = getMyPlot()
+            if not plot then continue end
+            local eggs = plot:FindFirstChild("Eggs")
+            if not eggs then continue end
+            for _, egg in ipairs(eggs:GetChildren()) do
+                local prompt = egg:FindFirstChild("Hatch", true)
+                if prompt and prompt.Enabled then
+                    if typeof(fireproximityprompt) == "function" then
+                        pcall(fireproximityprompt, prompt)
+                    end
+                end
+            end
+        end
+    end)
+end
+
+-- ============================================================
+-- AUTO RIDE PET
+-- ============================================================
+function Features.startAutoRidePet()
+    task.spawn(function()
+        while task.wait(1) do
+            if not Shared.AutoRidePet_Enabled then continue end
+            local plot = getMyPlot()
+            if not plot then continue end
+            local pets = plot:FindFirstChild("Pets")
+            if not pets then continue end
+            for _, pet in ipairs(pets:GetChildren()) do
+                local prompt = pet:FindFirstChild("RidePrompt", true)
+                if prompt and prompt.Enabled then
+                    if typeof(fireproximityprompt) == "function" then
+                        pcall(fireproximityprompt, prompt)
+                    end
+                    break
+                end
+            end
+        end
+    end)
+end
+
+-- ============================================================
+-- EGG PREDICTION SYSTEM — SELALU JALAN
+-- ============================================================
+local EggHistory = {}
+local LastEggList = {}
+local MAX_HISTORY = 50
+
+function Features.startEggPrediction()
+    task.spawn(function()
+        while task.wait(1) do
+            local rendered = Workspace:FindFirstChild("RenderedEggs")
+            if not rendered then continue end
+
+            local currentEggs = {}
+            for _, egg in ipairs(rendered:GetChildren()) do
+                if egg:IsA("Model") then
+                    table.insert(currentEggs, egg.Name)
+                end
+            end
+
+            for _, eggName in ipairs(currentEggs) do
+                local found = false
+                for _, lastEgg in ipairs(LastEggList) do
+                    if lastEgg == eggName then
+                        found = true
+                        break
+                    end
+                end
+                if not found then
+                    table.insert(EggHistory, {
+                        name = eggName,
+                        time = os.time(),
+                    })
+                    if #EggHistory > MAX_HISTORY then
+                        table.remove(EggHistory, 1)
+                    end
+                end
+            end
+
+            LastEggList = currentEggs
+            Shared.EggsInMap = currentEggs
+            Shared.EggHistory = EggHistory
+
+            local eggCount = {}
+            for _, entry in ipairs(EggHistory) do
+                eggCount[entry.name] = (eggCount[entry.name] or 0) + 1
+            end
+
+            local sorted = {}
+            for name, count in pairs(eggCount) do
+                table.insert(sorted, {name = name, count = count})
+            end
+            table.sort(sorted, function(a, b) return a.count > b.count end)
+
+            local predictions = {}
+            for _, entry in ipairs(sorted) do
+                local alreadyInMap = false
+                for _, eggName in ipairs(currentEggs) do
+                    if eggName == entry.name then
+                        alreadyInMap = true
+                        break
+                    end
+                end
+                if not alreadyInMap then
+                    table.insert(predictions, entry.name)
+                end
+                if #predictions >= 5 then break end
+            end
+
+            Shared.EggPredictions = predictions
+        end
+    end)
+end
+
+-- ============================================================
+-- REMOTE ACTIONS
+-- ============================================================
+local function getRemote(name)
+    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+    if not remotes then return nil end
+    local gameRemotes = remotes:FindFirstChild("Game")
+    if not gameRemotes then return nil end
+    return gameRemotes:FindFirstChild(name)
+end
+
+function Features.rideAlong()
+    local remote = getRemote("RideAlong")
+    if remote then
+        remote:FireServer()
+        return true
+    end
+    return false
+end
+
+function Features.petDismount()
+    local remote = getRemote("PetDismount")
+    if remote then
+        remote:FireServer()
+        return true
+    end
+    return false
+end
+
+function Features.pickupPet()
+    local remote = getRemote("PickupPet")
+    if remote then
+        remote:FireServer()
+        return true
+    end
+    return false
+end
+
+function Features.hatchEgg()
+    local remote = getRemote("Hatch")
+    if remote then
+        remote:FireServer()
+        return true
+    end
+    return false
+end
+
+-- ============================================================
+-- GAMEDATA (EGGS + PETS)
+-- ============================================================
+local GameData = game:GetService("ReplicatedStorage"):FindFirstChild("GameData")
+local EggData, PetData = {}, {}
+
+if GameData then
+    local eggsMod = GameData:FindFirstChild("Eggs")
+    if eggsMod then
+        local ok, data = pcall(require, eggsMod)
+        if ok and type(data) == "table" then EggData = data end
+    end
+    local petsMod = GameData:FindFirstChild("Pets")
+    if petsMod then
+        local ok, data = pcall(require, petsMod)
+        if ok and type(data) == "table" then PetData = data end
+    end
+end
+
+local RARITY_ORDER = {
+    Common = 1, Uncommon = 2, Rare = 3, Epic = 4,
+    Legendary = 5, Mythic = 6, Divine = 7, Ethereal = 8, Secret = 9,
+}
+
+local function getEggRarity(eggName)
+    local info = EggData[eggName]
+    return info and info.Rarity or "Common"
+end
+
+local function isRaritySelected(eggName)
+    local rarity = getEggRarity(eggName)
+    if not Shared.SelectedRarities then return false end
+    return Shared.SelectedRarities[rarity] == true
+end
+
+-- ============================================================
+-- SPEED
+-- ============================================================
+function Features.setSpeed(v)
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if hum then hum.WalkSpeed = v end
+end
+
+function Features.startSpeed()
+    task.spawn(function()
+        while task.wait(0.3) do
+            if Shared.Speed_Enabled then
+                Features.setSpeed(Shared.Speed_Value or 100)
+            end
+        end
+    end)
+end
+
+-- ============================================================
+-- INSTANT PICKUP — HoldDuration = 0
+-- ============================================================
+function Features.startInstantPickup()
+    task.spawn(function()
+        while task.wait(0.5) do
+            if not Shared.InstantPickup_Enabled then continue end
+
+            local rendered = Workspace:FindFirstChild("RenderedEggs")
+            if not rendered then continue end
+
+            for _, egg in ipairs(rendered:GetChildren()) do
+                if egg:IsA("Model") then
+                    local prompt = egg:FindFirstChild("Pickup", true)
+                    if prompt and prompt:IsA("ProximityPrompt") then
+                        if prompt.HoldDuration > 0 then
+                            prompt.HoldDuration = 0
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end
+
+-- ============================================================
+-- AUTO FARM — TELEPORT → PICKUP → CEK → RETURN
+-- ============================================================
+local NotifiedEggs = {}
+
+local function getEggKey(egg)
+    local part = egg:FindFirstChildWhichIsA("BasePart", true)
+    if not part then return egg.Name end
+    local p = part.Position
+    return string.format("%s_%.0f_%.0f_%.0f", egg.Name, p.X, p.Y, p.Z)
+end
+
+local function getNotifThreshold()
+    local t = {
+        Common = 1, Uncommon = 2, Rare = 3, Epic = 4,
+        Legendary = 5, Mythic = 6, Divine = 7, Ethereal = 8, Secret = 9,
+    }
+    return t[Shared.RarityNotifThreshold or "Legendary"] or 5
+end
+
+local function getBestEggInMap()
+    local rendered = Workspace:FindFirstChild("RenderedEggs")
+    if not rendered then return nil end
+
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return nil end
+
+    local best, bestRank = nil, 0
+    for _, egg in ipairs(rendered:GetChildren()) do
+        if egg:IsA("Model") and isRaritySelected(egg.Name) then
+            local rarity = getEggRarity(egg.Name)
+            local rank = RARITY_ORDER[rarity] or 1
+            local part = egg:FindFirstChildWhichIsA("BasePart", true)
+            if part then
+                local d = (part.Position - myRoot.Position).Magnitude
+                if rank > bestRank or (rank == bestRank and (not best or d < best.dist)) then
+                    best = {egg = egg, dist = d, rarity = rarity, rank = rank}
+                    bestRank = rank
+                end
+            end
+        end
+    end
+    return best
+end
+
+local function returnToMyPlot()
+    if not Shared.AutoReturn_Enabled then return end
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return end
+
+    local plot = getMyPlot()
+    local spawnPart = nil
+    if plot then
+        spawnPart = plot:FindFirstChild("Spawn", true)
+            or plot:FindFirstChildWhichIsA("SpawnLocation", true)
+            or plot:FindFirstChild("Baseplate", true)
+            or plot:FindFirstChildWhichIsA("BasePart", true)
+    end
+    if not spawnPart then
+        local spawn = Workspace:FindFirstChild("Spawn")
+        if spawn then
+            spawnPart = spawn:FindFirstChildWhichIsA("SpawnLocation", true)
+                or spawn:FindFirstChildWhichIsA("BasePart", true)
+        end
+    end
+    if spawnPart then
+        myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
+    end
+end
+
+function Features.startAutoFarm()
+    task.spawn(function()
+        while task.wait(0.5) do
+            if not Shared.AutoFarm_Enabled then continue end
+
+            local char = LocalPlayer.Character
+            local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if not myRoot or not hum or hum.Health <= 0 then
+                task.wait(1)
+                continue
+            end
+
+            local rendered = Workspace:FindFirstChild("RenderedEggs")
+            if rendered then
+                local validKeys = {}
+                for _, egg in ipairs(rendered:GetChildren()) do
+                    if egg:IsA("Model") then
+                        validKeys[getEggKey(egg)] = true
+                    end
+                end
+                for key in pairs(NotifiedEggs) do
+                    if not validKeys[key] then NotifiedEggs[key] = nil end
+                end
+            end
+
+            local best = getBestEggInMap()
+            if not best then
+                continue
+            end
+
+            local egg = best.egg
+            local eggName = egg.Name
+            local eggRarity = best.rarity
+            local eggKey = getEggKey(egg)
+
+            if (RARITY_ORDER[eggRarity] or 1) >= getNotifThreshold() then
+                if not NotifiedEggs[eggKey] then
+                    NotifiedEggs[eggKey] = true
+                    if Shared.Notify then
+                        Shared.Notify("🎯 " .. eggName .. " (" .. eggRarity .. ")", "success")
+                    end
+                end
+            end
+
+            local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+            if not eggPart then continue end
+
+            local prompt = egg:FindFirstChild("Pickup", true)
+            if prompt and prompt:IsA("ProximityPrompt") then
+                prompt.HoldDuration = 0
+            end
+
+            myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 5, 0)
+            task.wait(0.1)
+
+            local picked = false
+            local maxTries = 10
+            for i = 1, maxTries do
+                if prompt and typeof(fireproximityprompt) == "function" then
+                    pcall(fireproximityprompt, prompt)
+                end
+                task.wait(0.3)
+
+                if not isEggStillInMap(egg) then
+                    picked = true
+                    break
+                end
+
+                if eggPart and eggPart.Parent then
+                    myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 5, 0)
+                    task.wait(0.1)
+                end
+            end
+
+            if picked and Shared.AutoReturn_Enabled then
+                returnToMyPlot()
+                task.wait(0.3)
+            end
+
+            task.wait(0.3)
+        end
+    end)
+end
+
+-- ============================================================
+-- VOLCANIC HUNTER — Auto detect + travel + pickup + return
+-- ============================================================
+local VolcanicState = {
+    Enabled = false,
+    Hunting = false,
+}
+
+-- Waypoint dari rekaman (52 titik)
+local VolcanicWaypoints = {
+    Vector3.new(-4902.3, 41396.1, -3751.4),
+    Vector3.new(-4908.1, 41365.0, -3742.9),
+    Vector3.new(-4909.5, 41357.4, -3740.8),
+    Vector3.new(-4923.0, 41299.5, -3719.6),
+    Vector3.new(-4927.1, 41293.3, -3712.6),
+    Vector3.new(-4951.4, 41287.6, -3669.6),
+    Vector3.new(-4973.1, 41283.3, -3643.8),
+    Vector3.new(-4995.2, 41285.0, -3620.6),
+    Vector3.new(-5010.8, 41279.5, -3597.9),
+    Vector3.new(-5020.6, 41275.2, -3582.6),
+    Vector3.new(-5032.2, 41272.9, -3564.8),
+    Vector3.new(-5062.9, 41262.1, -3542.1),
+    Vector3.new(-5070.9, 41262.3, -3537.0),
+    Vector3.new(-5079.4, 41265.2, -3533.3),
+    Vector3.new(-5088.6, 41240.3, -3525.3),
+    Vector3.new(-5096.8, 41228.7, -3520.1),
+    Vector3.new(-5101.5, 41197.4, -3514.3),
+    Vector3.new(-5103.3, 41165.1, -3511.6),
+    Vector3.new(-5112.5, 41164.5, -3551.9),
+    Vector3.new(-5157.0, 41159.7, -3588.1),
+    Vector3.new(-5165.4, 41158.0, -3594.1),
+    Vector3.new(-5211.0, 41150.0, -3569.9),
+    Vector3.new(-5248.0, 41147.5, -3580.6),
+    Vector3.new(-5256.8, 41143.1, -3581.9),
+    Vector3.new(-5260.1, 41122.3, -3580.1),
+    Vector3.new(-5268.7, 41062.3, -3575.5),
+    Vector3.new(-5259.1, 41050.3, -3586.2),
+    Vector3.new(-5269.5, 41047.7, -3640.0),
+    Vector3.new(-5264.0, 41042.3, -3655.1),
+    Vector3.new(-5218.7, 41023.5, -3659.7),
+    Vector3.new(-5188.9, 41037.1, -3635.5),
+    Vector3.new(-5147.5, 41037.4, -3589.8),
+    Vector3.new(-5123.4, 41037.2, -3550.7),
+    Vector3.new(-5123.0, 41033.8, -3503.2),
+    Vector3.new(-5094.9, 41037.6, -3486.6),
+    Vector3.new(-5081.6, 41035.8, -3474.5),
+    Vector3.new(-5040.8, 41048.6, -3433.1),
+    Vector3.new(-4990.3, 41050.6, -3391.9),
+    Vector3.new(-4949.3, 41057.1, -3400.0),
+    Vector3.new(-4908.1, 41036.5, -3439.7),
+    Vector3.new(-4869.4, 41000.1, -3474.8),
+    Vector3.new(-4880.2, 40975.6, -3528.0),
+    Vector3.new(-4930.9, 40973.3, -3563.7),
+    Vector3.new(-4966.2, 40960.4, -3610.8),
+    Vector3.new(-5016.4, 40943.8, -3648.2),
+    Vector3.new(-5072.8, 40929.0, -3667.8),
+    Vector3.new(-5136.3, 40922.9, -3656.4),
+    Vector3.new(-5151.8, 40914.2, -3681.0),
+    Vector3.new(-5209.2, 40907.2, -3677.5),
+    Vector3.new(-5267.7, 40907.3, -3651.2),
+    Vector3.new(-5282.4, 40908.9, -3632.6),
+    Vector3.new(-5270.4, 40907.1, -3619.5),
+}
+
+local function getVolcanicEgg()
+    local rendered = Workspace:FindFirstChild("RenderedEggs")
+    if not rendered then return nil end
+    for _, egg in ipairs(rendered:GetChildren()) do
+        if egg:IsA("Model") and egg.Name:lower():find("volcan", 1, true) then
+            return egg
+        end
+    end
+    return nil
+end
+
+local function getVolcanicSpawn()
+    local spawns = Workspace:FindFirstChild("EggSpawns")
+    if not spawns then return nil end
+    local v = spawns:FindFirstChild("Volcanic")
+    if v and v:IsA("BasePart") then return v end
+    return nil
+end
+
+local function volcanicPickup(egg)
+    local part = egg:FindFirstChildWhichIsA("BasePart", true)
+    if not part then return false end
+    local prompt = egg:FindFirstChild("Pickup", true)
+    if prompt and prompt:IsA("ProximityPrompt") then
+        prompt.HoldDuration = 0
+    end
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return false end
+    myRoot.CFrame = part.CFrame + Vector3.new(0, 3, 0)
+    task.wait(0.1)
+    for i = 1, 15 do
+        if prompt and typeof(fireproximityprompt) == "function" then
+            pcall(fireproximityprompt, prompt)
+        end
+        task.wait(0.2)
+        if not egg.Parent then return true end
+        if part and part.Parent then
+            myRoot.CFrame = part.CFrame + Vector3.new(0, 3, 0)
+            task.wait(0.1)
+        end
+    end
+    return false
+end
+
+function Features.startVolcanicHunt()
+    task.spawn(function()
+        while task.wait(1) do
+            if not Shared.VolcanicHunt_Enabled then
+                VolcanicState.Hunting = false
+                continue
+            end
+
+            if VolcanicState.Hunting then continue end
+            VolcanicState.Hunting = true
+
+            task.spawn(function()
+                while Shared.VolcanicHunt_Enabled do
+                    local char = LocalPlayer.Character
+                    local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+                    local hum = char and char:FindFirstChildOfClass("Humanoid")
+                    if not myRoot or not hum or hum.Health <= 0 then
+                        task.wait(1)
+                        continue
+                    end
+
+                    local egg = getVolcanicEgg()
+
+                    if egg then
+                        print("[VOLCANIC] ✅ Egg volcanic spawn! Travel & pickup...")
+                        if Shared.Notify then
+                            Shared.Notify("🌋 Volcanic Egg spawn!", "success")
+                        end
+
+                        local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+                        for i, wp in ipairs(VolcanicWaypoints) do
+                            if not Shared.VolcanicHunt_Enabled then break end
+                            if not egg.Parent then break end
+                            local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                            if curRoot and eggPart then
+                                local d = (eggPart.Position - curRoot.Position).Magnitude
+                                if d <= 40 then break end
+                            end
+                            if curRoot then
+                                curRoot.CFrame = CFrame.new(wp + Vector3.new(0, 5, 0))
+                                curRoot.Velocity = Vector3.zero
+                            end
+                            task.wait(0.12)
+                        end
+
+if egg.Parent then
+    local picked = volcanicPickup(egg)
+    if picked then
+        print("[VOLCANIC] ✅ Pickup berhasil!")
+
+        -- ============================================
+        -- STEP 5: KELUAR GOA (REVERSE WAYPOINT)
+        -- ============================================
+        print("[VOLCANIC] 🚶 Keluar goa via waypoint reverse...")
+        for i = #VolcanicWaypoints, 1, -1 do
+            if not Shared.VolcanicHunt_Enabled then break end
+            local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if curRoot then
+                curRoot.CFrame = CFrame.new(VolcanicWaypoints[i] + Vector3.new(0, 5, 0))
+                curRoot.Velocity = Vector3.zero
+            end
+            task.wait(0.12)
+        end
+        print("[VOLCANIC] ✅ Keluar goa, di waypoint #1")
+
+        -- ============================================
+        -- STEP 6: TELEPORT KE LAVA
+        -- ============================================
+        task.wait(0.5)
+        print("[VOLCANIC] 🔥 Teleport ke lava...")
+        local safePos = findSafeVolcanoPos()
+        if safePos then
+            local rootLava = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if rootLava then
+                rootLava.CFrame = CFrame.new(safePos)
+                rootLava.Velocity = Vector3.zero
+            end
+        end
+        task.wait(1.5)
+
+        -- ============================================
+        -- STEP 7: DROP EGG VIA VOLCANODIP
+        -- ============================================
+        print("[VOLCANIC] 💧 Drop egg via VolcanoDip...")
+        local dropWaited = 0
+        local eggReleased = false
+        while dropWaited < 15 do
+            if not Shared.VolcanicHunt_Enabled then break end
+            fireVolcanoDip()
+            task.wait(1.5)
+            dropWaited = dropWaited + 1.5
+            if not isHoldingEggMutation() then
+                eggReleased = true
+                print("[VOLCANIC] 💧 Egg dropped @ " .. dropWaited .. "s")
+                break
+            end
+        end
+
+        if not eggReleased then
+            print("[VOLCANIC] ⚠️ Egg gak lepas (timeout), tetep return")
+        end
+
+        -- ============================================
+        -- STEP 8: TUNGGU EGG BALIK (MUTATION SELESAI)
+        -- ============================================
+        if eggReleased then
+            print("[VOLCANIC] ⏳ Nunggu egg balik...")
+            local waitStart = os.clock()
+            local eggBack = false
+            while os.clock() - waitStart < 20 do
+                if not Shared.VolcanicHunt_Enabled then break end
+                task.wait(1)
+                if isHoldingEggMutation() then
+                    eggBack = true
+                    print("[VOLCANIC] ✅ Egg balik! Mutation selesai!")
+                    if Shared.Notify then
+                        Shared.Notify("🔥 Mutation selesai!", "success")
+                    end
+                    break
+                end
+            end
+            if not eggBack then
+                print("[VOLCANIC] ⚠️ Egg gak balik (timeout), tetep return")
+            end
+        end
+
+        -- ============================================
+        -- STEP 9: RETURN KE PLOT (APAPUN KONDISI)
+        -- ============================================
+        if Shared.VolcanicReturn_Enabled then
+            task.wait(0.4)
+            print("[VOLCANIC] 🏠 Return ke plot")
+            local plot = getMyPlot()
+            if plot then
+                local spawn = plot:FindFirstChild("Spawn", true)
+                    or plot:FindFirstChildWhichIsA("SpawnLocation", true)
+                    or plot:FindFirstChild("Baseplate", true)
+                    or plot:FindFirstChildWhichIsA("BasePart", true)
+                if spawn then
+                    local root2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if root2 then
+                        root2.CFrame = spawn.CFrame + Vector3.new(0, 5, 0)
+                        print("[VOLCANIC] 🏠 Balik ke plot")
+                    end
+                end
+            else
+                local spawnFallback = Workspace:FindFirstChild("Spawn")
+                if spawnFallback then
+                    local spawnLoc = spawnFallback:FindFirstChildWhichIsA("SpawnLocation", true)
+                    if spawnLoc then
+                        local root2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                        if root2 then
+                            root2.CFrame = spawnLoc.CFrame + Vector3.new(0, 5, 0)
+                            print("[VOLCANIC] 🏠 Balik ke plot (fallback)")
+                        end
+                    end
+                end
+            end
+        end
+
+        task.wait(3)
+    end
+end
+                    else
+                        local spawnPart = getVolcanicSpawn()
+                        if spawnPart then
+                            local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                            if curRoot then
+                                local d = (spawnPart.Position - curRoot.Position).Magnitude
+                                if d > 50 then
+                                    curRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
+                                    print("[VOLCANIC] 🚀 Teleport ke spawn point volcanic")
+                                end
+                            end
+                        end
+                    end
+
+                    task.wait(2)
+                end
+
+                VolcanicState.Hunting = false
+                print("[VOLCANIC] ⏹️ Hunt berhenti")
+            end)
+        end
+    end)
+end
+
+-- ============================================================
+-- AUTO MUTATION — KHUSUS TAB EGG MUTATION
+-- ============================================================
+local MutationState = {
+    Running = false,
+    StealPaused = false,
+    BasketFull = false,
+    EggLocked = false,
+    LastFire = 0,
+}
+
+local MUT_CONFIG = {
+    DROP_TIMEOUT = 15,
+    RETURN_TIMEOUT = 13,
+    TP_ABOVE_TOP = 200,
+}
+
+local NetModule = nil
+task.spawn(function()
+    local packages = game:GetService("ReplicatedStorage"):FindFirstChild("packages")
+    if packages then
+        local netMod = packages:FindFirstChild("Net")
+        if netMod then
+            local ok, result = pcall(require, netMod)
+            if ok then
+                NetModule = result
+                print("[MUTATION] Net module loaded")
+            end
+        end
+    end
+end)
+
+local function getVolcanoDipRemote()
+    if NetModule then
+        local ok, remote = pcall(function() return NetModule:RemoteEvent("VolcanoDip") end)
+        if ok and remote then return remote end
+    end
+    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+    local gameR = remotes and remotes:FindFirstChild("Game")
+    if gameR then
+        local vd = gameR:FindFirstChild("VolcanoDip")
+        if vd and vd:IsA("RemoteEvent") then return vd end
+    end
+    return nil
+end
+
+local function findSafeVolcanoPos()
+    local volcano = Workspace:FindFirstChild("Volcano")
+    if not volcano then
+        return Vector3.new(-5102.84, 41700, -3489.11)
+    end
+    local bestTop, bestSize = nil, 0
+    for _, d in ipairs(volcano:GetDescendants()) do
+        if d:IsA("BasePart") then
+            local n = d.Name:lower()
+            if n:find("top") or n == "volcanotop" then
+                local size = d.Size.X * d.Size.Z
+                if size > bestSize then
+                    bestTop = d
+                    bestSize = size
+                end
+            end
+        end
+    end
+    if bestTop then
+        return bestTop.Position + Vector3.new(0, MUT_CONFIG.TP_ABOVE_TOP, 0)
+    end
+    local lavaTop = -math.huge
+    for _, d in ipairs(volcano:GetDescendants()) do
+        if d:IsA("BasePart") then
+            local n = d.Name:lower()
+            if n:find("lava") or n:find("magma") or n:find("volcan") then
+                local top = d.Position.Y + d.Size.Y / 2
+                if top > lavaTop then lavaTop = top end
+            end
+        end
+    end
+    if lavaTop > -math.huge then
+        return Vector3.new(-5102.84, lavaTop + MUT_CONFIG.TP_ABOVE_TOP, -3489.11)
+    end
+    return Vector3.new(-5102.84, 41700, -3489.11)
+end
+
+local function isHoldingEggMutation()
+    local char = LocalPlayer.Character
+    if not char then return false end
+    local wooden = char:FindFirstChild("Wooden")
+    if not wooden then return false end
+    local displayEgg = wooden:FindFirstChild("DisplayEgg")
+    if not displayEgg then return false end
+    for _, c in ipairs(displayEgg:GetChildren()) do
+        if c:IsA("MeshPart") and not c.Name:lower():find("circle") then
+            return true, c.Name
+        end
+    end
+    return false
+end
+
+local function fireVolcanoDip()
+    local remote = getVolcanoDipRemote()
+    if remote then
+        local ok = pcall(function() remote:FireServer() end)
+        if ok then
+            print("[MUTATION] Drop: VolcanoDip fired")
+            return true
+        end
+    end
+    return false
+end
+
+local function fireBasketDrop()
+    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+    local gameR = remotes and remotes:FindFirstChild("Game")
+    if not gameR then return false end
+    local bd = gameR:FindFirstChild("BasketDrop")
+    if not bd then return false end
+    return pcall(function() bd:FireServer() end)
+end
+
+local function tpToSafe(pos)
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return false end
+    myRoot.CFrame = CFrame.new(pos)
+    task.wait(0.3)
+    local rootAfter = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if rootAfter and rootAfter.Position.Y < pos.Y - 50 then
+        print("[MUTATION] Kecebur! Retry TP...")
+        rootAfter.CFrame = CFrame.new(pos + Vector3.new(0, 50, 0))
+        task.wait(0.3)
+    end
+    return true
+end
+
+local function runMutationOnce()
+    MutationState.Running = true
+
+    local holding, eggName = isHoldingEggMutation()
+    if not holding then
+        MutationState.Running = false
+        MutationState.EggLocked = false
+        return false
+    end
+
+    print("[MUTATION] holding " .. (eggName or "?") .. ", starting")
+
+    MutationState.StealPaused = true
+    task.wait(1.5)
+
+    local safePos = findSafeVolcanoPos()
+    print("[MUTATION] STEP 1 — TP ke lahar")
+    tpToSafe(safePos)
+    task.wait(2)
+
+    print("[MUTATION] STEP 2 — drop via VolcanoDip")
+    local dropWaited = 0
+    local eggReleased = false
+    MutationState.LastFire = 0
+
+    while dropWaited < MUT_CONFIG.DROP_TIMEOUT do
+        if os.clock() - MutationState.LastFire > 2 then
+            local ok = fireVolcanoDip()
+            if not ok then fireBasketDrop() end
+            MutationState.LastFire = os.clock()
+            print("[MUTATION] fired @ " .. dropWaited .. "s")
+        end
+        task.wait(0.5)
+        dropWaited = dropWaited + 0.5
+        if not isHoldingEggMutation() then
+            eggReleased = true
+            print("[MUTATION] egg LEPAS @ " .. dropWaited .. "s")
+            break
+        end
+    end
+
+    if not eggReleased then
+        print("[MUTATION] egg GAK LEPAS")
+        MutationState.Running = false
+        MutationState.StealPaused = false
+        MutationState.EggLocked = false
+        return false
+    end
+
+    print("[MUTATION] STEP 3 — tunggu egg balik")
+    local retWaited = 0
+    while retWaited < MUT_CONFIG.RETURN_TIMEOUT do
+        task.wait(1)
+        retWaited = retWaited + 1
+        if isHoldingEggMutation() then
+            print("[MUTATION] egg BALIK @ " .. retWaited .. "s")
+            break
+        end
+        if retWaited % 5 == 0 then
+            print("[MUTATION] waiting... " .. retWaited .. "s")
+        end
+    end
+
+    if Shared.MutationReturn_Enabled then
+        task.wait(0.5)
+        local spawn = getMyPlotSpawn()
+        if spawn then
+            local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if myRoot then
+                myRoot.CFrame = spawn.CFrame + Vector3.new(0, 5, 0)
+                print("[MUTATION] Balik ke plot")
+            end
+        end
+    end
+
+    task.wait(2)
+    MutationState.Running = false
+    MutationState.StealPaused = false
+    MutationState.EggLocked = false
+    return true
+end
+
+function Features.startAutoMutation()
+    task.spawn(function()
+        while task.wait(1) do
+            if not Shared.AutoMutation_Enabled then
+                MutationState.Running = false
+                continue
+            end
+            if MutationState.Running then continue end
+
+            local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if not hum or hum.Health <= 0 then
+                task.wait(1)
+                continue
+            end
+
+            if isHoldingEggMutation() then
+                print("[MUTATION] egg held, starting")
+                pcall(runMutationOnce)
+                task.wait(2)
+            end
+        end
+    end)
+end
+
+function Features.getMutationState()
+    return MutationState
+end
+
+function Features.isHoldingEgg()
+    return isHoldingEggMutation()
+end
+
+-- ============================================================
+-- MUTATION STEAL — KHUSUS TAB EGG MUTATION (by RARITY)
+-- Gak nyentuh startAutoSteal yang asli
+-- ============================================================
+function Features.startMutationSteal()
+    task.spawn(function()
+        while task.wait(0.5) do
+            if not Shared.MutationSteal_Enabled then continue end
+
+            if Features.hasVolcanicEgg and Features.hasVolcanicEgg() then
+                task.wait(1)
+                continue
+            end
+            if Features.getMutationState and Features.getMutationState().Running then
+                task.wait(1)
+                continue
+            end
+
+            local char = LocalPlayer.Character
+            local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if not myRoot or not hum or hum.Health <= 0 then
+                task.wait(1)
+                continue
+            end
+
+            if Features.isHoldingEgg and Features.isHoldingEgg() then
+                task.wait(0.5)
+                continue
+            end
+
+            local basket = LocalPlayer:FindFirstChild("Basket")
+            if basket and #basket:GetChildren() > 0 then
+                task.wait(0.5)
+                continue
+            end
+
+            local best = getBestEggInMap()
+            if not best then
+                task.wait(0.5)
+                continue
+            end
+
+            local egg = best.egg
+            local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+            local prompt = egg:FindFirstChild("Pickup", true)
+            if not eggPart or not prompt then continue end
+
+            if prompt:IsA("ProximityPrompt") then
+                prompt.HoldDuration = 0
+            end
+
+            myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+            task.wait(0.1)
+
+            local picked = false
+            for i = 1, 15 do
+                if typeof(fireproximityprompt) == "function" then
+                    pcall(fireproximityprompt, prompt)
+                end
+                task.wait(0.25)
+
+                if not isEggStillInMap(egg) then
+                    picked = true
+                    break
+                end
+
+                if eggPart and eggPart.Parent then
+                    myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+                    task.wait(0.1)
+                end
+            end
+
+            if picked then
+                print("[MUTATION-STEAL] picked " .. egg.Name .. " (" .. best.rarity .. ")")
+            end
+
+            task.wait(0.3)
+        end
+    end)
+end
+
+-- ============================================================
+-- FEATURES.INIT
+-- ============================================================
+function Features.Init(sharedState)
+    Shared = sharedState
+
+    Features.startEggESP()
+    Features.startPetESP()
+    Features.startAutoSteal()
+    Features.startAutoHatch()
+    Features.startAutoRidePet()
+    Features.startEggPrediction()
+    Features.startSpeed()
+    Features.startInstantPickup()
+    Features.startAutoFarm()
+        Features.startVolcanicHunt()
+        Features.startAutoMutation()
+    Features.startMutationSteal()
+
+    print("[VRILZHUB] Ride a Pet Features loaded")
+end
+
+return Features
