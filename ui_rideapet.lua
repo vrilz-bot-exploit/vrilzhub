@@ -2622,8 +2622,14 @@ local function buildMainWindow(parent)
         sc.CornerRadius = UDim.new(0, 8)
         sc.Parent = sendBtn
 
-        -- ===== RENDER MESSAGE =====
+                -- ===== RENDER MESSAGE (AVATAR + OWNER TAG) =====
         local msgCounter = 0
+        
+        -- ⚠️ GANTI ANGKA INI DENGAN USERID LU
+        local OWNER_IDS = {
+            [5126297278] = true,   -- akun lu
+        }
+        
         local function scrollBottom()
             task.defer(function()
                 listFrame.CanvasPosition = Vector2.new(0, listFrame.AbsoluteCanvasSize.Y)
@@ -2634,46 +2640,138 @@ local function buildMainWindow(parent)
             if emptyLbl.Parent then emptyLbl:Destroy() end
 
             local isMe = (msg.userId == LocalPlayer.UserId)
+            local isOwner = (OWNER_IDS[msg.userId] == true)
+            
+            -- Avatar selalu muncul (PC & HP, beda ukuran)
+            local avatarSize = isMob and 26 or 34
+            local avatarGap = isMob and 6 or 10
+
             local row = Instance.new("Frame")
             row.Size = UDim2.new(1, 0, 0, 0)
             row.AutomaticSize = Enum.AutomaticSize.Y
-            row.BackgroundColor3 = isMe and C.Surface3 or C.Surface
+            row.BackgroundColor3 = isOwner and Color3.fromRGB(45, 20, 10) or (isMe and C.Surface3 or C.Surface)
             row.BackgroundTransparency = 0.3
             row.BorderSizePixel = 0
             msgCounter = msgCounter + 1
             row.LayoutOrder = msgCounter
             row.ZIndex = 607
             row.Parent = listFrame
-            registerTheme(row, isMe and "Surface3" or "Surface", "BackgroundColor3")
 
             local rc = Instance.new("UICorner")
             rc.CornerRadius = UDim.new(0, 10)
             rc.Parent = row
 
+            -- Kalo owner, kasih stroke emas
+            if isOwner then
+                local ownerStroke = Instance.new("UIStroke")
+                ownerStroke.Color = Color3.fromRGB(255, 200, 50)
+                ownerStroke.Thickness = 1.5
+                ownerStroke.Transparency = 0.2
+                ownerStroke.Parent = row
+            end
+
             local rp = Instance.new("UIPadding")
             rp.PaddingTop = UDim.new(0, 8)
             rp.PaddingBottom = UDim.new(0, 8)
-            rp.PaddingLeft = UDim.new(0, 10)
-            rp.PaddingRight = UDim.new(0, 10)
+            rp.PaddingLeft = UDim.new(0, isMob and 8 or 10)
+            rp.PaddingRight = UDim.new(0, isMob and 8 or 10)
             rp.Parent = row
 
-            -- Header name + time
-            local hdr = Instance.new("TextLabel")
-            hdr.Size = UDim2.new(1, 0, 0, 16)
+            -- ===== AVATAR =====
+            local avContainer = Instance.new("Frame")
+            avContainer.Size = UDim2.fromOffset(avatarSize, avatarSize)
+            avContainer.Position = UDim2.fromOffset(0, 0)
+            avContainer.BackgroundColor3 = C.Surface2
+            avContainer.BorderSizePixel = 0
+            avContainer.ZIndex = 608
+            avContainer.Parent = row
+            
+            local avCorner = Instance.new("UICorner")
+            avCorner.CornerRadius = UDim.new(1, 0)
+            avCorner.Parent = avContainer
+
+            local avImg = Instance.new("ImageLabel")
+            avImg.Size = UDim2.fromScale(1, 1)
+            avImg.BackgroundTransparency = 1
+            avImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. tostring(msg.userId) .. "&w=100&h=100"
+            avImg.ZIndex = 609
+            avImg.Parent = avContainer
+            
+            local avImgCorner = Instance.new("UICorner")
+            avImgCorner.CornerRadius = UDim.new(1, 0)
+            avImgCorner.Parent = avImg
+
+            local avStroke = Instance.new("UIStroke")
+            avStroke.Thickness = 1.5
+            avStroke.Transparency = 0.2
+            avStroke.Parent = avContainer
+            if isOwner then
+                avStroke.Color = Color3.fromRGB(255, 200, 50)
+            else
+                avStroke.Color = isMe and C.Accent2 or C.Accent
+            end
+
+            -- ===== HEADER (name + OWNER badge + time) =====
+            local hdr = Instance.new("Frame")
+            hdr.Size = UDim2.new(1, -(avatarSize + avatarGap), 0, isMob and 16 or 18)
+            hdr.Position = UDim2.fromOffset(avatarSize + avatarGap, 0)
             hdr.BackgroundTransparency = 1
-            hdr.Text = (isMe and "You" or msg.displayName) .. "  ·  " .. msg.time
-            hdr.TextColor3 = isMe and C.Accent2 or C.Accent
-            hdr.Font = Enum.Font.GothamBold
-            hdr.TextSize = 11
-            hdr.TextXAlignment = Enum.TextXAlignment.Left
             hdr.ZIndex = 608
             hdr.Parent = row
 
-            -- Body
+            local nameLbl = Instance.new("TextLabel")
+            nameLbl.Size = UDim2.new(0, 0, 1, 0)
+            nameLbl.AutomaticSize = Enum.AutomaticSize.X
+            nameLbl.BackgroundTransparency = 1
+            nameLbl.Text = (isMe and "You" or msg.displayName)
+            nameLbl.TextColor3 = isOwner and Color3.fromRGB(255, 200, 50) or (isMe and C.Accent2 or C.Accent)
+            nameLbl.Font = Enum.Font.GothamBold
+            nameLbl.TextSize = isMob and 10 or 11
+            nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+            nameLbl.ZIndex = 609
+            nameLbl.Parent = hdr
+
+            if isOwner then
+                local ownerBadge = Instance.new("Frame")
+                ownerBadge.Size = UDim2.fromOffset(isMob and 48 or 54, isMob and 14 or 16)
+                ownerBadge.Position = UDim2.fromOffset(60, 1)
+                ownerBadge.BackgroundColor3 = Color3.fromRGB(255, 200, 50)
+                ownerBadge.BorderSizePixel = 0
+                ownerBadge.ZIndex = 610
+                ownerBadge.Parent = hdr
+
+                local obCorner = Instance.new("UICorner")
+                obCorner.CornerRadius = UDim.new(0, 4)
+                obCorner.Parent = ownerBadge
+
+                local obLbl = Instance.new("TextLabel")
+                obLbl.Size = UDim2.fromScale(1, 1)
+                obLbl.BackgroundTransparency = 1
+                obLbl.Text = "👑 OWNER"
+                obLbl.TextColor3 = Color3.fromRGB(30, 20, 0)
+                obLbl.Font = Enum.Font.GothamBold
+                obLbl.TextSize = isMob and 8 or 9
+                obLbl.ZIndex = 611
+                obLbl.Parent = ownerBadge
+            end
+
+            local timeLbl = Instance.new("TextLabel")
+            timeLbl.Size = UDim2.fromOffset(50, 16)
+            timeLbl.Position = UDim2.new(1, -50, 0, 1)
+            timeLbl.BackgroundTransparency = 1
+            timeLbl.Text = msg.time
+            timeLbl.TextColor3 = C.Muted
+            timeLbl.Font = Enum.Font.GothamSemibold
+            timeLbl.TextSize = isMob and 9 or 10
+            timeLbl.TextXAlignment = Enum.TextXAlignment.Right
+            timeLbl.ZIndex = 609
+            timeLbl.Parent = hdr
+
+            -- ===== BODY =====
             local bodyLbl = Instance.new("TextLabel")
-            bodyLbl.Size = UDim2.new(1, 0, 0, 0)
+            bodyLbl.Size = UDim2.new(1, -(avatarSize + avatarGap), 0, 0)
             bodyLbl.AutomaticSize = Enum.AutomaticSize.Y
-            bodyLbl.Position = UDim2.fromOffset(0, 18)
+            bodyLbl.Position = UDim2.fromOffset(avatarSize + avatarGap, isMob and 18 or 20)
             bodyLbl.BackgroundTransparency = 1
             bodyLbl.Text = msg.text
             bodyLbl.TextColor3 = C.Text
