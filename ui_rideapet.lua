@@ -1954,9 +1954,12 @@ local function buildMainWindow(parent)
             navs[id] = {btn = btn, ic = ic, lbl = nil}
         end
 
-        local function switchTo()
+              local function switchTo()
             for n, p in pairs(pages) do
-                if p then p.Visible = (n == id) end
+                if p then p.Visible = false end
+            end
+            if pages[id] then
+                pages[id].Visible = true
             end
             for n, x in pairs(navs) do
                 if n == id then
@@ -4132,8 +4135,18 @@ function UI.Init(sharedState)
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.Parent = game:GetService("CoreGui")
 
-    setupNotifHolder(ScreenGui)
+        setupNotifHolder(ScreenGui)
     setupDropdownLayer(ScreenGui)
+
+    -- Auto-start chat polling (biar selalu nyambung)
+    task.spawn(function()
+        task.wait(2)
+        pcall(function()
+            if _G.VRILZ_ChatClient and _G.VRILZ_ChatClient.start then
+                _G.VRILZ_ChatClient.start()
+            end
+        end)
+    end)
 
     local function startLoading()
         buildLoadingScreen(ScreenGui)
