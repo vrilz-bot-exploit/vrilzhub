@@ -96,6 +96,30 @@ local Themes = {
         Accent2 = Color3.fromRGB(255, 200, 50), Accent3 = Color3.fromRGB(255, 50, 80),
         Success = Color3.fromRGB(50, 255, 150), Error = Color3.fromRGB(255, 50, 80),
     },
+    Pink = {
+        BG = Color3.fromRGB(20, 5, 15), Surface = Color3.fromRGB(35, 10, 25),
+        Surface2 = Color3.fromRGB(50, 15, 35), Surface3 = Color3.fromRGB(65, 20, 45),
+        Stroke = Color3.fromRGB(255, 105, 180), Text = Color3.fromRGB(255, 240, 250),
+        Muted = Color3.fromRGB(230, 170, 210), Accent = Color3.fromRGB(255, 105, 180),
+        Accent2 = Color3.fromRGB(255, 182, 220), Accent3 = Color3.fromRGB(255, 220, 245),
+        Success = Color3.fromRGB(50, 255, 150), Error = Color3.fromRGB(255, 50, 80),
+    },
+    Green = {
+        BG = Color3.fromRGB(5, 20, 10), Surface = Color3.fromRGB(10, 35, 20),
+        Surface2 = Color3.fromRGB(15, 50, 30), Surface3 = Color3.fromRGB(20, 65, 40),
+        Stroke = Color3.fromRGB(50, 255, 120), Text = Color3.fromRGB(240, 255, 245),
+        Muted = Color3.fromRGB(170, 230, 190), Accent = Color3.fromRGB(50, 255, 120),
+        Accent2 = Color3.fromRGB(150, 255, 180), Accent3 = Color3.fromRGB(200, 255, 220),
+        Success = Color3.fromRGB(50, 255, 150), Error = Color3.fromRGB(255, 50, 80),
+    },
+    Blue = {
+        BG = Color3.fromRGB(5, 10, 25), Surface = Color3.fromRGB(10, 20, 45),
+        Surface2 = Color3.fromRGB(15, 30, 65), Surface3 = Color3.fromRGB(20, 40, 85),
+        Stroke = Color3.fromRGB(50, 150, 255), Text = Color3.fromRGB(240, 245, 255),
+        Muted = Color3.fromRGB(170, 200, 240), Accent = Color3.fromRGB(50, 150, 255),
+        Accent2 = Color3.fromRGB(150, 200, 255), Accent3 = Color3.fromRGB(220, 235, 255),
+        Success = Color3.fromRGB(50, 255, 150), Error = Color3.fromRGB(255, 50, 80),
+    },
 }
 
 local CurrentTheme = "Brutal"
@@ -2596,7 +2620,7 @@ local function buildMainWindow(parent)
     themeLbl.ZIndex = 3
     themeLbl.Parent = themeContent
 
-    local themeList = {"Brutal", "Ice", "Fire"}
+   local themeList = {"Brutal", "Ice", "Fire", "Pink", "Green", "Blue"}
     makeDropdownGlobal(themeContent, themeList, CurrentTheme, function(v)
         applyTheme(v)
         notify("Tema: " .. v, "success")
