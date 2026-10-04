@@ -2348,135 +2348,249 @@ local function buildMainWindow(parent)
         return viewport
     end
 
+        -- ============================================================
+    -- BUILD LIVE CHAT WINDOW (TERPISAH)
     -- ============================================================
-    -- BUILD LIVE CHAT PAGE (HARDCODE)
-    -- ============================================================
-    local function buildLiveChatPage(pageHolder, createPage, makeCard, registerTab)
-        print("[CHAT] buildLiveChatPage START")
+    local function buildLiveChatWindow(screenGui)
+        print("[CHAT] buildLiveChatWindow START")
 
-        local page = createPage("LiveChat")
-        local msgCounter = 0
+        local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
+        local isMob = IS_MOBILE
 
-        -- Header card (manual, bukan makeCard)
+        local winW = isMob and math.floor(viewport.X * 0.92) or math.min(520, math.floor(viewport.X * 0.55))
+        local winH = isMob and math.floor(viewport.Y * 0.7) or 520
+
+        -- ===== WINDOW UTAMA =====
+        local win = Instance.new("Frame")
+        win.Name = "LiveChatWindow"
+        win.AnchorPoint = Vector2.new(0.5, 0.5)
+        win.Position = UDim2.fromScale(0.5, 0.5)
+        win.Size = UDim2.fromOffset(winW, winH)
+        win.BackgroundColor3 = C.BG
+        win.BorderSizePixel = 0
+        win.Visible = false
+        win.ZIndex = 600
+        win.Parent = screenGui
+        registerTheme(win, "BG", "BackgroundColor3")
+
+        -- Shadow
+        local shadow = Instance.new("Frame")
+        shadow.Size = UDim2.new(1, 20, 1, 20)
+        shadow.Position = UDim2.fromOffset(-10, -10)
+        shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        shadow.BackgroundTransparency = 0.5
+        shadow.BorderSizePixel = 0
+        shadow.ZIndex = 599
+        shadow.Parent = win
+        local shadowCorner = Instance.new("UICorner")
+        shadowCorner.CornerRadius = UDim.new(0, 20)
+        shadowCorner.Parent = shadow
+
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 16)
+        corner.Parent = win
+
+        local stroke = Instance.new("UIStroke")
+        stroke.Color = C.Accent
+        stroke.Thickness = 2.2
+        stroke.Transparency = 0.15
+        stroke.Parent = win
+        registerTheme(stroke, "Accent", "Color")
+
+        local gradient = Instance.new("UIGradient")
+        gradient.Rotation = 90
+        gradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 23, 28)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 9, 12)),
+        })
+        gradient.Parent = win
+
+        -- ===== HEADER =====
+        local headerH = 42
         local header = Instance.new("Frame")
-        header.Size = UDim2.new(1, 0, 0, 36)
-        header.BackgroundColor3 = C.Surface2
+        header.Size = UDim2.new(1, 0, 0, headerH)
+        header.BackgroundColor3 = C.Surface
         header.BorderSizePixel = 0
-        header.LayoutOrder = 1
-        header.Parent = page
-        registerTheme(header, "Surface2", "BackgroundColor3")
-        
+        header.ZIndex = 610
+        header.Parent = win
+        registerTheme(header, "Surface", "BackgroundColor3")
+
         local headerCorner = Instance.new("UICorner")
-        headerCorner.CornerRadius = UDim.new(0, 13)
+        headerCorner.CornerRadius = UDim.new(0, 16)
         headerCorner.Parent = header
-        
-        local headerStroke = Instance.new("UIStroke")
-        headerStroke.Color = C.Accent
-        headerStroke.Thickness = 1.6
-        headerStroke.Transparency = 0.22
-        headerStroke.Parent = header
-        registerTheme(headerStroke, "Accent", "Color")
-        
+
+        local headerFix = Instance.new("Frame")
+        headerFix.Size = UDim2.new(1, 0, 0, 16)
+        headerFix.Position = UDim2.new(0, 0, 1, -16)
+        headerFix.BackgroundColor3 = C.Surface
+        headerFix.BorderSizePixel = 0
+        headerFix.ZIndex = 610
+        headerFix.Parent = header
+
+        local headerGlow = Instance.new("Frame")
+        headerGlow.Size = UDim2.new(1, -20, 0, 2)
+        headerGlow.Position = UDim2.new(0, 10, 1, -2)
+        headerGlow.BackgroundColor3 = C.Accent
+        headerGlow.BackgroundTransparency = 0.15
+        headerGlow.BorderSizePixel = 0
+        headerGlow.ZIndex = 612
+        headerGlow.Parent = header
+        local hgc = Instance.new("UICorner")
+        hgc.CornerRadius = UDim.new(1, 0)
+        hgc.Parent = headerGlow
+        registerTheme(headerGlow, "Accent", "BackgroundColor3")
+
         local dot = Instance.new("Frame")
-        dot.Size = UDim2.fromOffset(8, 8)
-        dot.Position = UDim2.new(0, 12, 0.5, -4)
+        dot.Size = UDim2.fromOffset(10, 10)
+        dot.Position = UDim2.new(0, 12, 0.5, -5)
         dot.BackgroundColor3 = C.Accent
         dot.BorderSizePixel = 0
+        dot.ZIndex = 613
         dot.Parent = header
         local dotCorner = Instance.new("UICorner")
         dotCorner.CornerRadius = UDim.new(1, 0)
         dotCorner.Parent = dot
         registerTheme(dot, "Accent", "BackgroundColor3")
-        
-        local headerTitle = Instance.new("TextLabel")
-        headerTitle.Size = UDim2.new(1, -30, 1, 0)
-        headerTitle.Position = UDim2.fromOffset(26, 0)
-        headerTitle.BackgroundTransparency = 1
-        headerTitle.Text = "💬 LIVE CHAT (GLOBAL)"
-        headerTitle.TextColor3 = C.Text
-        headerTitle.Font = Enum.Font.GothamBold
-        headerTitle.TextSize = CFG.FONT_TITLE
-        headerTitle.TextXAlignment = Enum.TextXAlignment.Left
-        headerTitle.Parent = header
-        registerTheme(headerTitle, "Text", "TextColor3")
-        
-        -- Panel chat (fixed size, gak auto-size)
-        local panel = Instance.new("Frame")
-        panel.Size = UDim2.new(1, 0, 0, CFG.CHAT_PANEL_H)
-        panel.BackgroundTransparency = 1
-        panel.LayoutOrder = 2
-        panel.Parent = page
-        
-        -- List frame
+
+        local titleLbl = Instance.new("TextLabel")
+        titleLbl.Size = UDim2.new(1, -100, 1, 0)
+        titleLbl.Position = UDim2.fromOffset(30, 0)
+        titleLbl.BackgroundTransparency = 1
+        titleLbl.Text = "💬 LIVE CHAT (GLOBAL)"
+        titleLbl.TextColor3 = C.Text
+        titleLbl.Font = Enum.Font.GothamBold
+        titleLbl.TextSize = isMob and 12 or 13
+        titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+        titleLbl.ZIndex = 613
+        titleLbl.Parent = header
+        registerTheme(titleLbl, "Text", "TextColor3")
+
+        local closeBtn = Instance.new("TextButton")
+        closeBtn.Size = UDim2.fromOffset(28, 28)
+        closeBtn.Position = UDim2.new(1, -36, 0.5, -14)
+        closeBtn.BackgroundColor3 = C.Surface3
+        closeBtn.Text = "×"
+        closeBtn.TextColor3 = C.Text
+        closeBtn.Font = Enum.Font.GothamBold
+        closeBtn.TextSize = 18
+        closeBtn.BorderSizePixel = 0
+        closeBtn.ZIndex = 613
+        closeBtn.Parent = header
+        registerTheme(closeBtn, "Surface3", "BackgroundColor3")
+        registerTheme(closeBtn, "Text", "TextColor3")
+        local closeCorner = Instance.new("UICorner")
+        closeCorner.CornerRadius = UDim.new(1, 0)
+        closeCorner.Parent = closeBtn
+
+        closeBtn.MouseButton1Click:Connect(function()
+            win.Visible = false
+        end)
+
+        -- Drag window via header
+        local dragging, dragStart, startPos = false, nil, nil
+        header.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                dragStart = input.Position
+                startPos = win.Position
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                local delta = input.Position - dragStart
+                win.Position = UDim2.new(
+                    startPos.X.Scale, startPos.X.Offset + delta.X,
+                    startPos.Y.Scale, startPos.Y.Offset + delta.Y
+                )
+            end
+        end)
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = false
+            end
+        end)
+
+        -- ===== BODY =====
+        local body = Instance.new("Frame")
+        body.Size = UDim2.new(1, -20, 1, -(headerH + 16))
+        body.Position = UDim2.new(0, 10, 0, headerH + 8)
+        body.BackgroundTransparency = 1
+        body.ZIndex = 605
+        body.Parent = win
+
+        -- List
         local listFrame = Instance.new("ScrollingFrame")
-        listFrame.Size = UDim2.new(1, 0, 1, -(CFG.CHAT_INPUT_H + 10))
-        listFrame.Position = UDim2.fromOffset(0, 0)
-        listFrame.BackgroundColor3 = C.Surface3
-        listFrame.BackgroundTransparency = 0.35
+        listFrame.Size = UDim2.new(1, 0, 1, -50)
+        listFrame.Position = UDim2.new(0, 0, 0, 0)
+        listFrame.BackgroundColor3 = C.Surface2
+        listFrame.BackgroundTransparency = 0.4
         listFrame.BorderSizePixel = 0
-        listFrame.ScrollBarThickness = 3
+        listFrame.ScrollBarThickness = 4
         listFrame.ScrollBarImageColor3 = C.Accent
         listFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
         listFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
-        listFrame.Parent = panel
-        registerTheme(listFrame, "Surface3", "BackgroundColor3")
-        
-        local listCorner = Instance.new("UICorner")
-        listCorner.CornerRadius = UDim.new(0, 10)
-        listCorner.Parent = listFrame
-        
-        local listStroke = Instance.new("UIStroke")
-        listStroke.Color = C.Accent
-        listStroke.Thickness = 1
-        listStroke.Transparency = 0.65
-        listStroke.Parent = listFrame
-        registerTheme(listStroke, "Accent", "Color")
-        
-        local listPad = Instance.new("UIPadding")
-        listPad.PaddingTop = UDim.new(0, 6)
-        listPad.PaddingBottom = UDim.new(0, 6)
-        listPad.PaddingLeft = UDim.new(0, 6)
-        listPad.PaddingRight = UDim.new(0, 6)
-        listPad.Parent = listFrame
-        
-        local listLayout = Instance.new("UIListLayout")
-        listLayout.Padding = UDim.new(0, 4)
-        listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        listLayout.Parent = listFrame
-        
+        listFrame.ZIndex = 606
+        listFrame.Parent = body
+        registerTheme(listFrame, "Surface2", "BackgroundColor3")
+
+        local lc = Instance.new("UICorner")
+        lc.CornerRadius = UDim.new(0, 12)
+        lc.Parent = listFrame
+
+        local ls = Instance.new("UIStroke")
+        ls.Color = C.Accent
+        ls.Thickness = 1
+        ls.Transparency = 0.65
+        ls.Parent = listFrame
+        registerTheme(ls, "Accent", "Color")
+
+        local lp = Instance.new("UIPadding")
+        lp.PaddingTop = UDim.new(0, 8)
+        lp.PaddingBottom = UDim.new(0, 8)
+        lp.PaddingLeft = UDim.new(0, 8)
+        lp.PaddingRight = UDim.new(0, 8)
+        lp.Parent = listFrame
+
+        local ll = Instance.new("UIListLayout")
+        ll.Padding = UDim.new(0, 6)
+        ll.SortOrder = Enum.SortOrder.LayoutOrder
+        ll.Parent = listFrame
+
         local emptyLbl = Instance.new("TextLabel")
-        emptyLbl.Size = UDim2.new(1, 0, 0, 30)
+        emptyLbl.Size = UDim2.new(1, 0, 0, 40)
         emptyLbl.BackgroundTransparency = 1
         emptyLbl.Text = "No messages yet... say hi! 👋"
         emptyLbl.TextColor3 = C.Muted
         emptyLbl.Font = Enum.Font.GothamSemibold
         emptyLbl.TextSize = CFG.FONT_LABEL
+        emptyLbl.ZIndex = 607
         emptyLbl.Parent = listFrame
         registerTheme(emptyLbl, "Muted", "TextColor3")
-        
+
         -- Input
         local inputBg = Instance.new("Frame")
-        inputBg.Size = UDim2.new(1, 0, 0, CFG.CHAT_INPUT_H)
-        inputBg.Position = UDim2.new(0, 0, 1, -CFG.CHAT_INPUT_H)
+        inputBg.Size = UDim2.new(1, 0, 0, 42)
+        inputBg.Position = UDim2.new(0, 0, 1, -42)
         inputBg.BackgroundColor3 = C.Surface3
         inputBg.BorderSizePixel = 0
-        inputBg.Parent = panel
+        inputBg.ZIndex = 606
+        inputBg.Parent = body
         registerTheme(inputBg, "Surface3", "BackgroundColor3")
-        
-        local inputCorner = Instance.new("UICorner")
-        inputCorner.CornerRadius = UDim.new(0, 8)
-        inputCorner.Parent = inputBg
-        
-        local inputStroke = Instance.new("UIStroke")
-        inputStroke.Color = C.Accent
-        inputStroke.Thickness = 1
-        inputStroke.Transparency = 0.5
-        inputStroke.Parent = inputBg
-        registerTheme(inputStroke, "Accent", "Color")
-        
+
+        local ic = Instance.new("UICorner")
+        ic.CornerRadius = UDim.new(0, 10)
+        ic.Parent = inputBg
+
+        local is = Instance.new("UIStroke")
+        is.Color = C.Accent
+        is.Thickness = 1
+        is.Transparency = 0.5
+        is.Parent = inputBg
+        registerTheme(is, "Accent", "Color")
+
         local box = Instance.new("TextBox")
-        box.Size = UDim2.new(1, -(CFG.CHAT_SEND_W + 14), 1, 0)
-        box.Position = UDim2.fromOffset(10, 0)
+        box.Size = UDim2.new(1, -76, 1, 0)
+        box.Position = UDim2.fromOffset(12, 0)
         box.BackgroundTransparency = 1
         box.Text = ""
         box.PlaceholderText = "Type message..."
@@ -2486,98 +2600,104 @@ local function buildMainWindow(parent)
         box.TextSize = CFG.FONT_LABEL
         box.TextXAlignment = Enum.TextXAlignment.Left
         box.ClearTextOnFocus = false
+        box.ZIndex = 607
         box.Parent = inputBg
         registerTheme(box, "Text", "TextColor3")
-        
+
         local sendBtn = Instance.new("TextButton")
-        sendBtn.Size = UDim2.fromOffset(CFG.CHAT_SEND_W, CFG.CHAT_INPUT_H - 10)
-        sendBtn.Position = UDim2.new(1, -(CFG.CHAT_SEND_W + 5), 0, 5)
+        sendBtn.Size = UDim2.fromOffset(60, 32)
+        sendBtn.Position = UDim2.new(1, -68, 0.5, -16)
         sendBtn.BackgroundColor3 = C.Accent
-        sendBtn.Text = IS_MOBILE and "▶" or "SEND"
+        sendBtn.Text = isMob and "▶" or "SEND"
         sendBtn.TextColor3 = Color3.new(1, 1, 1)
         sendBtn.Font = Enum.Font.GothamBold
-        sendBtn.TextSize = IS_MOBILE and 14 or 11
+        sendBtn.TextSize = isMob and 14 or 11
         sendBtn.AutoButtonColor = false
+        sendBtn.BorderSizePixel = 0
+        sendBtn.ZIndex = 607
         sendBtn.Parent = inputBg
         registerTheme(sendBtn, "Accent", "BackgroundColor3")
-        
-        local sendCorner = Instance.new("UICorner")
-        sendCorner.CornerRadius = UDim.new(0, 6)
-        sendCorner.Parent = sendBtn
-        
-        -- Render message
-        local function scrollToBottom()
+
+        local sc = Instance.new("UICorner")
+        sc.CornerRadius = UDim.new(0, 8)
+        sc.Parent = sendBtn
+
+        -- ===== RENDER MESSAGE =====
+        local msgCounter = 0
+        local function scrollBottom()
             task.defer(function()
-                if listFrame then
-                    listFrame.CanvasPosition = Vector2.new(0, listFrame.AbsoluteCanvasSize.Y)
-                end
+                listFrame.CanvasPosition = Vector2.new(0, listFrame.AbsoluteCanvasSize.Y)
             end)
         end
-        
+
         local function renderMessage(msg)
             if emptyLbl.Parent then emptyLbl:Destroy() end
-            
+
             local isMe = (msg.userId == LocalPlayer.UserId)
             local row = Instance.new("Frame")
             row.Size = UDim2.new(1, 0, 0, 0)
             row.AutomaticSize = Enum.AutomaticSize.Y
-            row.BackgroundColor3 = isMe and C.Surface2 or C.Surface
-            row.BackgroundTransparency = 0.35
+            row.BackgroundColor3 = isMe and C.Surface3 or C.Surface
+            row.BackgroundTransparency = 0.3
             row.BorderSizePixel = 0
             msgCounter = msgCounter + 1
             row.LayoutOrder = msgCounter
+            row.ZIndex = 607
             row.Parent = listFrame
-            registerTheme(row, isMe and "Surface2" or "Surface", "BackgroundColor3")
-            
-            local rowCorner = Instance.new("UICorner")
-            rowCorner.CornerRadius = UDim.new(0, 8)
-            rowCorner.Parent = row
-            
-            local rowPad = Instance.new("UIPadding")
-            rowPad.PaddingTop = UDim.new(0, 6)
-            rowPad.PaddingBottom = UDim.new(0, 6)
-            rowPad.PaddingLeft = UDim.new(0, 8)
-            rowPad.PaddingRight = UDim.new(0, 8)
-            rowPad.Parent = row
-            
-            local header2 = Instance.new("TextLabel")
-            header2.Size = UDim2.new(1, 0, 0, CFG.CHAT_NAME_FONT + 4)
-            header2.BackgroundTransparency = 1
-            header2.Text = (isMe and "You" or msg.displayName) .. "  ·  " .. msg.time
-            header2.TextColor3 = isMe and C.Accent2 or C.Accent
-            header2.Font = Enum.Font.GothamBold
-            header2.TextSize = CFG.CHAT_NAME_FONT
-            header2.TextXAlignment = Enum.TextXAlignment.Left
-            header2.Parent = row
-            
-            local body = Instance.new("TextLabel")
-            body.Size = UDim2.new(1, 0, 0, 0)
-            body.AutomaticSize = Enum.AutomaticSize.Y
-            body.Position = UDim2.fromOffset(0, CFG.CHAT_NAME_FONT + 6)
-            body.BackgroundTransparency = 1
-            body.Text = msg.text
-            body.TextColor3 = C.Text
-            body.Font = Enum.Font.GothamSemibold
-            body.TextSize = CFG.CHAT_FONT
-            body.TextWrapped = true
-            body.TextXAlignment = Enum.TextXAlignment.Left
-            body.TextYAlignment = Enum.TextYAlignment.Top
-            body.Parent = row
-            registerTheme(body, "Text", "TextColor3")
-            
-            scrollToBottom()
+            registerTheme(row, isMe and "Surface3" or "Surface", "BackgroundColor3")
+
+            local rc = Instance.new("UICorner")
+            rc.CornerRadius = UDim.new(0, 10)
+            rc.Parent = row
+
+            local rp = Instance.new("UIPadding")
+            rp.PaddingTop = UDim.new(0, 8)
+            rp.PaddingBottom = UDim.new(0, 8)
+            rp.PaddingLeft = UDim.new(0, 10)
+            rp.PaddingRight = UDim.new(0, 10)
+            rp.Parent = row
+
+            -- Header name + time
+            local hdr = Instance.new("TextLabel")
+            hdr.Size = UDim2.new(1, 0, 0, 16)
+            hdr.BackgroundTransparency = 1
+            hdr.Text = (isMe and "You" or msg.displayName) .. "  ·  " .. msg.time
+            hdr.TextColor3 = isMe and C.Accent2 or C.Accent
+            hdr.Font = Enum.Font.GothamBold
+            hdr.TextSize = 11
+            hdr.TextXAlignment = Enum.TextXAlignment.Left
+            hdr.ZIndex = 608
+            hdr.Parent = row
+
+            -- Body
+            local bodyLbl = Instance.new("TextLabel")
+            bodyLbl.Size = UDim2.new(1, 0, 0, 0)
+            bodyLbl.AutomaticSize = Enum.AutomaticSize.Y
+            bodyLbl.Position = UDim2.fromOffset(0, 18)
+            bodyLbl.BackgroundTransparency = 1
+            bodyLbl.Text = msg.text
+            bodyLbl.TextColor3 = C.Text
+            bodyLbl.Font = Enum.Font.GothamSemibold
+            bodyLbl.TextSize = CFG.CHAT_FONT
+            bodyLbl.TextWrapped = true
+            bodyLbl.TextXAlignment = Enum.TextXAlignment.Left
+            bodyLbl.TextYAlignment = Enum.TextYAlignment.Top
+            bodyLbl.ZIndex = 608
+            bodyLbl.Parent = row
+            registerTheme(bodyLbl, "Text", "TextColor3")
+
+            scrollBottom()
         end
-        
+
         -- Hydrate
-        for _, msg in ipairs(Shared.LiveChat_Messages) do
-            renderMessage(msg)
+        for _, m in ipairs(Shared.LiveChat_Messages) do
+            renderMessage(m)
         end
-        
+
         ChatClient.onMessage(function(msg)
             renderMessage(msg)
         end)
-        ChatClient.start()
-        
+
         -- Send
         local function doSend()
             local text = box.Text
@@ -2590,46 +2710,17 @@ local function buildMainWindow(parent)
                 else
                     notify("Chat: " .. tostring(err), "error")
                 end
-                sendBtn.Text = IS_MOBILE and "▶" or "SEND"
+                sendBtn.Text = isMob and "▶" or "SEND"
             end)
         end
-        
+
         sendBtn.MouseButton1Click:Connect(doSend)
         box.FocusLost:Connect(function(enter)
             if enter then doSend() end
         end)
-        
-        -- Clear button (manual)
-        local clearBtn = Instance.new("TextButton")
-        clearBtn.Size = UDim2.new(1, 0, 0, 32)
-        clearBtn.BackgroundColor3 = C.Surface3
-        clearBtn.Text = "🗑 CLEAR LOCAL VIEW"
-        clearBtn.TextColor3 = C.Text
-        clearBtn.Font = Enum.Font.GothamBold
-        clearBtn.TextSize = CFG.FONT_LABEL
-        clearBtn.AutoButtonColor = false
-        clearBtn.LayoutOrder = 3
-        clearBtn.Parent = page
-        registerTheme(clearBtn, "Surface3", "BackgroundColor3")
-        registerTheme(clearBtn, "Text", "TextColor3")
-        
-        local clearCorner = Instance.new("UICorner")
-        clearCorner.CornerRadius = UDim.new(0, 6)
-        clearCorner.Parent = clearBtn
-        
-        clearBtn.MouseButton1Click:Connect(function()
-            Shared.LiveChat_Messages = {}
-            for _, child in ipairs(listFrame:GetChildren()) do
-                if child:IsA("Frame") then child:Destroy() end
-            end
-            emptyLbl.Parent = listFrame
-            msgCounter = 0
-            notify("Chat cleared (local)", "info")
-        end)
-        
-        print("[CHAT] About to register tab")
-        registerTab("LiveChat", "💬", "Live Chat")
-        print("[CHAT] Tab registered OK")
+
+        print("[CHAT] buildLiveChatWindow OK")
+        return win
     end
 
     -- TAB PREDIKSI
@@ -3031,6 +3122,42 @@ local function buildMainWindow(parent)
         notify("Theme: " .. v, "success")
     end)
 
+    -- ===== LIVE CHAT TOGGLE =====
+    local chatToggleCard, chatToggleContent = makeCard(setPage, "💬 LIVE CHAT", 3)
+
+    -- Buat window-nya dulu (hidden)
+    local liveChatWin = buildLiveChatWindow(screenGui)
+
+    makeToggle(chatToggleContent, "Show Live Chat Window", false, function(v)
+        if liveChatWin then
+            liveChatWin.Visible = v
+            if v then
+                -- Auto-start polling pas dinyalain
+                pcall(function()
+                    if ChatClient and ChatClient.start then
+                        ChatClient.start()
+                    end
+                end)
+                notify("💬 Live Chat opened", "success")
+            else
+                notify("💬 Live Chat closed", "info")
+            end
+        end
+    end)
+
+    local chatHint = Instance.new("TextLabel")
+    chatHint.Size = UDim2.new(1, 0, 0, 16)
+    chatHint.BackgroundTransparency = 1
+    chatHint.Text = "🌐 Global chat · semua user script"
+    chatHint.TextColor3 = C.Muted
+    chatHint.Font = Enum.Font.GothamSemibold
+    chatHint.TextSize = CFG.FONT_MUTED
+    chatHint.TextXAlignment = Enum.TextXAlignment.Left
+    chatHint.LayoutOrder = 10
+    chatHint.Parent = chatToggleContent
+    registerTheme(chatHint, "Muted", "TextColor3")
+
+    
     local fpsCard, fpsContent = makeCard(setPage, "FPS BOOST", 2)
 
     local fpsWin = buildFPSWindow(screenGui)
@@ -3260,11 +3387,6 @@ registerTab("Vulcanic", "🌋", "Vulcanic")
     end)
 
         registerTab("EggMutation", "🔥", "Egg Mutation")
-
-    -- ============================================================
-    -- LIVE CHAT TAB
-    -- ============================================================
-    buildLiveChatPage(pageHolder, createPage, makeCard, registerTab)
 
     registerTab("Settings", "⚙", "Settings")
 
