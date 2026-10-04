@@ -1,5 +1,5 @@
 -- ============================================================
--- VRILZHUB UI — RIDE A PET v1.4 (AUTO-DETECT PC & MOBILE)
+-- VRILZHUB UI — RIDE A PET v1.6 (AUTO-DETECT PC & MOBILE)
 -- PC: 800x580 | Mobile: 88% x 78% viewport
 -- ============================================================
 
@@ -508,7 +508,7 @@ end
 
 local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     local isOpen = false
-    local selectedValue = default or items[1] or "Pilih..."
+    local selectedValue = default or items[1] or "Choose..."
 
     local container = Instance.new("Frame")
     container.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
@@ -935,13 +935,13 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
             if sharedTable[r] then table.insert(selected, r) end
         end
         if #selected == 0 then
-            selectedLbl.Text = "Pilih Rarity..."
+            selectedLbl.Text = "Select Rarity..."
         elseif #selected == 1 and selected[1] == "None" then
             selectedLbl.Text = "None"
         elseif #selected <= 2 then
             selectedLbl.Text = table.concat(selected, ", ")
         else
-            selectedLbl.Text = #selected .. " rarity dipilih"
+            selectedLbl.Text = #selected .. " rarity is selected"
         end
     end
 
@@ -1339,7 +1339,7 @@ local function buildMainWindow(parent)
     subtitle.Size = UDim2.new(0, 300, 0, 14)
     subtitle.Position = UDim2.fromOffset(IS_MOBILE and 48 or 58, IS_MOBILE and 26 or 28)
     subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Ride a Pet · v1.4"
+    subtitle.Text = "Ride a Pet · v1.6"
     subtitle.TextColor3 = C.Muted
     subtitle.Font = Enum.Font.GothamSemibold
     subtitle.TextSize = IS_MOBILE and 9 or 10
@@ -1885,7 +1885,7 @@ local function buildMainWindow(parent)
     local infoPage = createPage("Info")
     pages.Info = infoPage
 
-    local infoCard, infoContent = makeCard(infoPage, "INFORMASI CLIENT", 1)
+    local infoCard, infoContent = makeCard(infoPage, "CLIENT INFORMATION", 1)
 
     local avRow = Instance.new("Frame")
     avRow.Size = UDim2.new(1, 0, 0, IS_MOBILE and 60 or 70)
@@ -1968,7 +1968,7 @@ local function buildMainWindow(parent)
     local keyTypeLbl = Instance.new("TextLabel")
     keyTypeLbl.Size = UDim2.new(1, 0, 0, 20)
     keyTypeLbl.BackgroundTransparency = 1
-    keyTypeLbl.Text = "Jenis Key: " .. tostring(Shared.KeyType or "UNKNOWN")
+    keyTypeLbl.Text = "Key Type: " .. tostring(Shared.KeyType or "UNKNOWN")
     keyTypeLbl.TextColor3 = C.Text
     keyTypeLbl.Font = Enum.Font.GothamBold
     keyTypeLbl.TextSize = CFG.FONT_LABEL
@@ -2024,14 +2024,14 @@ local function buildMainWindow(parent)
         end
     end)
 
-    local updateCard, updateContent = makeCard(infoPage, "📢 INFORMASI UPDATE", 2)
+    local updateCard, updateContent = makeCard(infoPage, "📢 UPDATE INFORMATION", 2)
 
     local infoLines = {
-        "Version        : 1.4",
+        "Version        : 1.6",
         "Last Update    : 29 Sept 2026",
         "Status         : Online ✅",
-        "Changelog      : Speed, Auto Farm",
-        "                 Instant Pickup, Rarity",
+        "Changelog      : Speed, Auto Farm, Mutation",
+        "                 Instant Pickup, Rarity, Volcanic",
     }
     for i, line in ipairs(infoLines) do
         local lbl = Instance.new("TextLabel")
@@ -2089,7 +2089,7 @@ local function buildMainWindow(parent)
     local discordBtn = Instance.new("TextButton")
     discordBtn.Size = UDim2.new(1, 0, 0, 32)
     discordBtn.BackgroundColor3 = C.Accent
-    discordBtn.Text = "[ KLIK UNTUK JOIN ]"
+    discordBtn.Text = "[ CLICK TO JOIN ]"
     discordBtn.TextColor3 = Color3.new(1, 1, 1)
     discordBtn.Font = Enum.Font.GothamBold
     discordBtn.TextSize = CFG.FONT_LABEL
@@ -2231,7 +2231,7 @@ local function buildMainWindow(parent)
     local predPage = createPage("Prediksi")
     pages.Prediksi = predPage
 
-    local eggInMapCard, eggInMapContent = makeCard(predPage, "EGG SPAWN DI MAP", 1)
+    local eggInMapCard, eggInMapContent = makeCard(predPage, "EGG SPAWN ON MAP", 1)
 
     local eggInMapList = Instance.new("ScrollingFrame")
     eggInMapList.Size = UDim2.new(1, 0, 0, IS_MOBILE and 140 or 160)
@@ -2250,7 +2250,7 @@ local function buildMainWindow(parent)
     eggInMapLayout.SortOrder = Enum.SortOrder.LayoutOrder
     eggInMapLayout.Parent = eggInMapList
 
-    local eggPredCard, eggPredContent = makeCard(predPage, "PREDIKSI EGG BERIKUTNYA", 2)
+    local eggPredCard, eggPredContent = makeCard(predPage, "NEXT EGG PREDICTION", 2)
 
     local eggPredList = Instance.new("ScrollingFrame")
     eggPredList.Size = UDim2.new(1, 0, 0, IS_MOBILE and 140 or 160)
@@ -2422,7 +2422,7 @@ local function buildMainWindow(parent)
                         meta.Size = UDim2.new(1, -(IS_MOBILE and 60 or 68), 0, 16)
                         meta.Position = UDim2.fromOffset(IS_MOBILE and 54 or 60, IS_MOBILE and 28 or 30)
                         meta.BackgroundTransparency = 1
-                        meta.Text = "PREDIKSI BERIKUTNYA  •  39% CHANCE SPAWN"
+                        meta.Text = "NEXT PREDICTION  •  39% CHANCE SPAWN"
                         meta.TextColor3 = C.Muted
                         meta.Font = Enum.Font.GothamSemibold
                         meta.TextSize = CFG.FONT_MUTED
@@ -2449,13 +2449,13 @@ local function buildMainWindow(parent)
 
     local autoStealCard, autoStealContent = makeCard(eggPage, "AUTO STEAL", 2)
     makeToggle(autoStealContent, "Aktifkan Auto Steal", false, function(v) Shared.AutoSteal_Enabled = v end)
-    makeToggle(autoStealContent, "Auto Return ke Plot", false, function(v) Shared.AutoReturn_Enabled = v end)
+    makeToggle(autoStealContent, "Auto Return to Plot", false, function(v) Shared.AutoReturn_Enabled = v end)
     makeToggle(autoStealContent, "Auto Hatch", false, function(v) Shared.AutoHatch_Enabled = v end)
 
     local eggNameLbl = Instance.new("TextLabel")
     eggNameLbl.Size = UDim2.new(1, 0, 0, 16)
     eggNameLbl.BackgroundTransparency = 1
-    eggNameLbl.Text = "Pilih Egg:"
+    eggNameLbl.Text = "Select Eggs:"
     eggNameLbl.TextColor3 = C.Muted
     eggNameLbl.Font = Enum.Font.GothamSemibold
     eggNameLbl.TextSize = CFG.FONT_MUTED
@@ -2481,9 +2481,9 @@ local function buildMainWindow(parent)
 
     local petEspCard, petEspContent = makeCard(visualPage, "PET ESP", 2)
     makeToggle(petEspContent, "Pet ESP", false, function(v) Shared.ESP_Pets_Enabled = v end)
-    makeToggle(petEspContent, "Tampilkan Nama", false, function(v) Shared.ESP_PetName_Enabled = v end)
-    makeToggle(petEspContent, "Tampilkan Cash", false, function(v) Shared.ESP_PetCash_Enabled = v end)
-    makeToggle(petEspContent, "Tampilkan Speed", false, function(v) Shared.ESP_PetSpeed_Enabled = v end)
+    makeToggle(petEspContent, "Show Name", false, function(v) Shared.ESP_PetName_Enabled = v end)
+    makeToggle(petEspContent, "Show Cash", false, function(v) Shared.ESP_PetCash_Enabled = v end)
+    makeToggle(petEspContent, "Show Speed", false, function(v) Shared.ESP_PetSpeed_Enabled = v end)
 
     registerTab("Visual", "◆", "Visual")
 
@@ -2557,7 +2557,7 @@ local function buildMainWindow(parent)
     local ipNote = Instance.new("TextLabel")
     ipNote.Size = UDim2.new(1, 0, 0, 14)
     ipNote.BackgroundTransparency = 1
-    ipNote.Text = "Ambil Egg Instan"
+    ipNote.Text = "Take Instant Egg"
     ipNote.TextColor3 = C.Muted
     ipNote.Font = Enum.Font.GothamSemibold
     ipNote.TextSize = CFG.FONT_MUTED
@@ -2566,13 +2566,13 @@ local function buildMainWindow(parent)
     ipNote.Parent = ipContent
 
     local farmCard, farmContent = makeCard(autoPage, "AUTO FARM", 3)
-    makeToggle(farmContent, "Aktifkan Auto Farm", false, function(v) Shared.AutoFarm_Enabled = v end)
-    makeToggle(farmContent, "Auto Return ke Plot", false, function(v) Shared.AutoReturn_Enabled = v end)
+    makeToggle(farmContent, "Activate Auto Farm", false, function(v) Shared.AutoFarm_Enabled = v end)
+    makeToggle(farmContent, "Auto Return to Plot", false, function(v) Shared.AutoReturn_Enabled = v end)
 
     local rarTitle = Instance.new("TextLabel")
     rarTitle.Size = UDim2.new(1, 0, 0, 16)
     rarTitle.BackgroundTransparency = 1
-    rarTitle.Text = "Pilih Rarity Egg:"
+    rarTitle.Text = "Select Rarity Egg:"
     rarTitle.TextColor3 = C.Muted
     rarTitle.Font = Enum.Font.GothamSemibold
     rarTitle.TextSize = CFG.FONT_MUTED
@@ -2607,12 +2607,12 @@ local function buildMainWindow(parent)
     local setPage = createPage("Settings")
     pages.Settings = setPage
 
-    local themeCard, themeContent = makeCard(setPage, "TEMA", 1)
+    local themeCard, themeContent = makeCard(setPage, "THEME", 1)
 
     local themeLbl = Instance.new("TextLabel")
     themeLbl.Size = UDim2.new(1, 0, 0, 16)
     themeLbl.BackgroundTransparency = 1
-    themeLbl.Text = "Pilih Tema:"
+    themeLbl.Text = "Select Theme:"
     themeLbl.TextColor3 = C.Muted
     themeLbl.Font = Enum.Font.GothamSemibold
     themeLbl.TextSize = CFG.FONT_MUTED
@@ -2698,14 +2698,14 @@ makeToggle(volcanicHuntContent, "Auto Hunt Volcanic", false, function(v)
     end
 end)
 
-makeToggle(volcanicHuntContent, "Auto Return ke Plot", false, function(v)
+makeToggle(volcanicHuntContent, "Auto Return to Plot", false, function(v)
     Shared.VolcanicReturn_Enabled = v
     if v then
         notify("🏠 Auto Return aktif", "success")
     end
 end)
 
-makeToggle(volcanicHuntContent, "Auto Mutation di Lava", false, function(v)
+makeToggle(volcanicHuntContent, "Auto Mutation in Lava", false, function(v)
     Shared.VolcanicMutation_Enabled = v
     if v then
         notify("🔥 Auto Mutation aktif", "success")
@@ -2721,7 +2721,7 @@ end)
 local volcanicNote = Instance.new("TextLabel")
 volcanicNote.Size = UDim2.new(1, 0, 0, 48)
 volcanicNote.BackgroundTransparency = 1
-volcanicNote.Text = "Auto detect egg volcanic → masuk goa → pickup\n→ keluar goa → ke lava → mutation → return"
+volcanicNote.Text = "⚠️ IMPORTANT: Turn OFF Auto Farm & Auto Steal first!\n\n✅ Then enable 'Auto Hunt Volcanic'\n✅ Enable 'Auto Return' to come back to base\n✅ Optional: Enable 'Auto Mutation' if you want mutation"
 volcanicNote.TextColor3 = C.Muted
 volcanicNote.Font = Enum.Font.GothamSemibold
 volcanicNote.TextSize = CFG.FONT_MUTED
@@ -2756,7 +2756,7 @@ registerTab("Vulcanic", "🌋", "Vulcanic")
     local mutRarLabel = Instance.new("TextLabel")
     mutRarLabel.Size = UDim2.new(1, 0, 0, 16)
     mutRarLabel.BackgroundTransparency = 1
-    mutRarLabel.Text = "Pilih Rarity Egg:"
+    mutRarLabel.Text = "Select Rarity Egg:"
     mutRarLabel.TextColor3 = C.Muted
     mutRarLabel.Font = Enum.Font.GothamSemibold
     mutRarLabel.TextSize = CFG.FONT_MUTED
@@ -2780,7 +2780,7 @@ registerTab("Vulcanic", "🌋", "Vulcanic")
         end
     end)
 
-    makeToggle(mutContent, "Auto Return ke Plot", false, function(v)
+    makeToggle(mutContent, "Auto Return to Plot", false, function(v)
         Shared.MutationReturn_Enabled = v
         if v then
             notify("🏠 Return to Plot aktif", "success")
