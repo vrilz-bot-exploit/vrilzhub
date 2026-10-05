@@ -169,7 +169,7 @@ end
 
 
 -- ============================================================
--- TITLE SYSTEM — [VH COMMUNITY] / [👑 OWNER]
+-- TITLE SYSTEM — [VH COMMUNITY] / [👑 OWNER VH]
 -- ============================================================
 local OWNER_USERID = 5126297278
 local TITLE_GUI_NAME = "VRILZ_TitleTag"
