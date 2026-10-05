@@ -131,6 +131,22 @@ local Themes = {
         Accent2 = Color3.fromRGB(150, 200, 255), Accent3 = Color3.fromRGB(220, 235, 255),
         Success = Color3.fromRGB(50, 255, 150), Error = Color3.fromRGB(255, 50, 80),
     },
+        Mustard = {
+        BG = Color3.fromRGB(30, 25, 5), Surface = Color3.fromRGB(45, 38, 10),
+        Surface2 = Color3.fromRGB(60, 50, 15), Surface3 = Color3.fromRGB(75, 62, 20),
+        Stroke = Color3.fromRGB(230, 190, 50), Text = Color3.fromRGB(255, 250, 230),
+        Muted = Color3.fromRGB(200, 180, 130), Accent = Color3.fromRGB(230, 190, 50),
+        Accent2 = Color3.fromRGB(255, 220, 90), Accent3 = Color3.fromRGB(255, 240, 150),
+        Success = Color3.fromRGB(150, 230, 100), Error = Color3.fromRGB(255, 80, 80),
+    },
+    Olive = {
+        BG = Color3.fromRGB(20, 25, 10), Surface = Color3.fromRGB(35, 45, 20),
+        Surface2 = Color3.fromRGB(50, 65, 30), Surface3 = Color3.fromRGB(65, 80, 40),
+        Stroke = Color3.fromRGB(140, 170, 60), Text = Color3.fromRGB(245, 250, 235),
+        Muted = Color3.fromRGB(180, 200, 140), Accent = Color3.fromRGB(140, 170, 60),
+        Accent2 = Color3.fromRGB(180, 210, 90), Accent3 = Color3.fromRGB(210, 235, 140),
+        Success = Color3.fromRGB(100, 220, 120), Error = Color3.fromRGB(255, 80, 80),
+    },
 }
 
 local CurrentTheme = "Brutal"
@@ -1992,6 +2008,8 @@ local function buildMainWindow(parent)
         page.ScrollBarImageColor3 = C.Accent
         page.CanvasSize = UDim2.new(0, 0, 0, 0)
         page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        page.ScrollingDirection = Enum.ScrollingDirection.Y
+        page.ScrollingEnabled = true
         page.Visible = false
         page.ZIndex = 7
         page.Parent = pageHolder
@@ -1999,6 +2017,15 @@ local function buildMainWindow(parent)
         layout.Padding = UDim.new(0, IS_MOBILE and 8 or 12)
         layout.SortOrder = Enum.SortOrder.LayoutOrder
         layout.Parent = page
+
+        -- FIX: sync canvas otomatis tiap konten berubah
+        layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            page.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 120)
+        end)
+        task.defer(function()
+            page.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 120)
+        end)
+
         return page
     end
 
@@ -3214,7 +3241,7 @@ local function buildMainWindow(parent)
     themeLbl.ZIndex = 3
     themeLbl.Parent = themeContent
 
-   local themeList = {"Brutal", "Ice", "Fire", "Pink", "Green", "Blue"}
+      local themeList = {"Brutal", "Ice", "Fire", "Pink", "Green", "Blue", "Mustard", "Olive"}
     makeDropdownGlobal(themeContent, themeList, CurrentTheme, function(v)
         applyTheme(v)
         notify("Theme: " .. v, "success")
