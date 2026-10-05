@@ -167,6 +167,127 @@ local function applyTheme(themeName)
     end
 end
 
+
+-- ============================================================
+-- TITLE SYSTEM — [VH COMMUNITY] / [👑 OWNER]
+-- ============================================================
+local OWNER_USERID = 5126297278
+local TITLE_GUI_NAME = "VRILZ_TitleTag"
+local titleGuiRef = nil
+local titleLoopRunning = false
+
+local function getTitleText()
+    if LocalPlayer.UserId == OWNER_USERID then
+        return "[👑 OWNER]"
+    else
+        return "[VH COMMUNITY]"
+    end
+end
+
+local function getTitleColors()
+    local isOwner = (LocalPlayer.UserId == OWNER_USERID)
+    if isOwner then
+        -- Rainbow full color
+        return {
+            Color3.fromRGB(255, 0, 0),
+            Color3.fromRGB(255, 127, 0),
+            Color3.fromRGB(255, 255, 0),
+            Color3.fromRGB(0, 255, 0),
+            Color3.fromRGB(0, 255, 255),
+            Color3.fromRGB(0, 0, 255),
+            Color3.fromRGB(139, 0, 255),
+            Color3.fromRGB(255, 0, 255),
+        }
+    else
+        -- Merah ↔ Putih aja
+        return {
+            Color3.fromRGB(255, 0, 0),
+            Color3.fromRGB(255, 255, 255),
+        }
+    end
+end
+
+local function removeTitle()
+    if titleGuiRef then
+        pcall(function() titleGuiRef:Destroy() end)
+        titleGuiRef = nil
+    end
+end
+
+local function buildTitle()
+    removeTitle()
+
+    local char = LocalPlayer.Character
+    if not char then return end
+    local head = char:FindFirstChild("Head")
+    if not head then return end
+
+    local bb = Instance.new("BillboardGui")
+    bb.Name = TITLE_GUI_NAME
+    bb.Size = UDim2.fromOffset(220, 32)
+    bb.StudsOffset = Vector3.new(0, 2.8, 0)
+    bb.AlwaysOnTop = true
+    bb.MaxDistance = 500
+    bb.Adornee = head
+    bb.Parent = head
+    titleGuiRef = bb
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Name = "TitleLabel"
+    lbl.Size = UDim2.fromScale(1, 1)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = getTitleText()
+    lbl.TextColor3 = Color3.fromRGB(255, 0, 0)
+    lbl.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    lbl.TextStrokeTransparency = 0.2
+    lbl.Font = Enum.Font.GothamBlack
+    lbl.TextSize = 15
+    lbl.TextScaled = false
+    lbl.TextWrapped = false
+    lbl.Parent = bb
+
+    -- Animasi rainbow
+    if not titleLoopRunning then
+        titleLoopRunning = true
+        task.spawn(function()
+            local idx = 1
+            while titleLoopRunning do
+                task.wait(0.12)
+                if not Shared.ShowTitle then
+                    idx = 1
+                    continue
+                end
+                local colors = getTitleColors()
+                if titleGuiRef and titleGuiRef.Parent then
+                    local label = titleGuiRef:FindFirstChild("TitleLabel")
+                    if label then
+                        label.TextColor3 = colors[idx]
+                    end
+                end
+                idx = idx + 1
+                if idx > #colors then idx = 1 end
+            end
+        end)
+    end
+end
+
+local function refreshTitle()
+    if Shared.ShowTitle then
+        buildTitle()
+    else
+        removeTitle()
+    end
+end
+
+-- Auto refresh pas karakter respawn
+LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(1)
+    refreshTitle()
+end)
+
+-- Expose function biar UI bisa panggil
+_G.VRILZ_RefreshTitle = refreshTitle
+
 -- ====== NOTIFICATION ======
 local NotifHolder = nil
 
@@ -3248,6 +3369,48 @@ local function buildMainWindow(parent)
     end)
 
 
+    -- ===== TITLE CARD (BARU) =====
+    local titleCard, titleContent = makeCard(setPage, "👑 TITLE", 3)
+
+    local titleLbl = Instance.new("TextLabel")
+    titleLbl.Size = UDim2.new(1, 0, 0, 16)
+    titleLbl.BackgroundTransparency = 1
+    titleLbl.Text = "Show title above character:"
+    titleLbl.TextColor3 = C.Muted
+    titleLbl.Font = Enum.Font.GothamSemibold
+    titleLbl.TextSize = CFG.FONT_MUTED
+    titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+    titleLbl.ZIndex = 3
+    titleLbl.Parent = titleContent
+    registerTheme(titleLbl, "Muted", "TextColor3")
+
+    makeToggle(titleContent, "Show Title", true, function(v)
+        Shared.ShowTitle = v
+        if _G.VRILZ_RefreshTitle then
+            _G.VRILZ_RefreshTitle()
+        end
+        if v then
+            notify("👑 Title: ON", "success")
+        else
+            notify("👑 Title: OFF", "info")
+        end
+    end)
+
+    local titleNote = Instance.new("TextLabel")
+    titleNote.Size = UDim2.new(1, 0, 0, 30)
+    titleNote.BackgroundTransparency = 1
+    titleNote.Text = "VH Community = rainbow merah putih\nOwner = rainbow full color"
+    titleNote.TextColor3 = C.Muted
+    titleNote.Font = Enum.Font.GothamSemibold
+    titleNote.TextSize = CFG.FONT_MUTED
+    titleNote.TextWrapped = true
+    titleNote.TextXAlignment = Enum.TextXAlignment.Left
+    titleNote.TextYAlignment = Enum.TextYAlignment.Top
+    titleNote.LayoutOrder = 10
+    titleNote.ZIndex = 3
+    titleNote.Parent = titleContent
+    registerTheme(titleNote, "Muted", "TextColor3")
+
     -- ===== STEAL MODE (BARU) =====
     local stealModeCard, stealModeContent = makeCard(setPage, "🥷 STEAL MODE", 2)
 
@@ -3289,7 +3452,7 @@ local function buildMainWindow(parent)
     registerTheme(stealModeNote, "Muted", "TextColor3")
   
   -- ===== LIVE CHAT TOGGLE =====
-    local chatToggleCard, chatToggleContent = makeCard(setPage, "💬 LIVE CHAT", 4)
+        local chatToggleCard, chatToggleContent = makeCard(setPage, "💬 LIVE CHAT", 5)
 
     -- Buat window-nya dulu (hidden)
     local liveChatWin = buildLiveChatWindow(screenGui)
@@ -3324,7 +3487,7 @@ local function buildMainWindow(parent)
     registerTheme(chatHint, "Muted", "TextColor3")
 
     
-        local fpsCard, fpsContent = makeCard(setPage, "FPS BOOST", 5)
+        local fpsCard, fpsContent = makeCard(setPage, "FPS BOOST", 6)
 
     local fpsWin = buildFPSWindow(screenGui)
     UI._fpsWindow = fpsWin
@@ -4411,6 +4574,7 @@ function UI.Init(sharedState)
         ["Secret"] = false,
     }
       Shared.StealMode = "TP"
+    Shared.ShowTitle = true
     Shared.RarityNotifThreshold = "Legendary"
     Shared.VolcanicHunt_Enabled = false
     Shared.VolcanicReturn_Enabled = false
@@ -4452,6 +4616,14 @@ function UI.Init(sharedState)
             startLoading()
         end)
     end
+
+    -- Auto build title pas game jalan
+    task.spawn(function()
+        task.wait(2)
+        if _G.VRILZ_RefreshTitle then
+            _G.VRILZ_RefreshTitle()
+        end
+    end)
 
     local savedKey = loadSavedKey()
     if savedKey then
