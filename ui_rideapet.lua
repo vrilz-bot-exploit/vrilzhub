@@ -3396,20 +3396,6 @@ local function buildMainWindow(parent)
         end
     end)
 
-    local titleNote = Instance.new("TextLabel")
-    titleNote.Size = UDim2.new(1, 0, 0, 30)
-    titleNote.BackgroundTransparency = 1
-    titleNote.TextColor3 = C.Muted
-    titleNote.Font = Enum.Font.GothamSemibold
-    titleNote.TextSize = CFG.FONT_MUTED
-    titleNote.TextWrapped = true
-    titleNote.TextXAlignment = Enum.TextXAlignment.Left
-    titleNote.TextYAlignment = Enum.TextYAlignment.Top
-    titleNote.LayoutOrder = 10
-    titleNote.ZIndex = 3
-    titleNote.Parent = titleContent
-    registerTheme(titleNote, "Muted", "TextColor3")
-
     -- ===== STEAL MODE (BARU) =====
     local stealModeCard, stealModeContent = makeCard(setPage, "🥷 STEAL MODE", 2)
 
