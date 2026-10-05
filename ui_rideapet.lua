@@ -3399,7 +3399,6 @@ local function buildMainWindow(parent)
     local titleNote = Instance.new("TextLabel")
     titleNote.Size = UDim2.new(1, 0, 0, 30)
     titleNote.BackgroundTransparency = 1
-    titleNote.Text = "VH Community = rainbow merah putih\nOwner = rainbow full color"
     titleNote.TextColor3 = C.Muted
     titleNote.Font = Enum.Font.GothamSemibold
     titleNote.TextSize = CFG.FONT_MUTED
@@ -3430,16 +3429,16 @@ local function buildMainWindow(parent)
     makeDropdownGlobal(stealModeContent, stealModeList, Shared.StealMode or "TP", function(v)
         Shared.StealMode = v
         if v == "Fly" then
-            notify("🥷 Steal Mode: Fly (height 350)", "success")
+            notify(" Steal Mode: Fly (height 350)", "success")
         else
-            notify("🥷 Steal Mode: TP", "info")
+            notify(" Steal Mode: TP", "info")
         end
     end)
 
     local stealModeNote = Instance.new("TextLabel")
     stealModeNote.Size = UDim2.new(1, 0, 0, 30)
     stealModeNote.BackgroundTransparency = 1
-    stealModeNote.Text = "TP = langsung teleport ke egg\nFly = naik 350 studs dulu, baru TP ke egg"
+    stealModeNote.Text = "TP = teleport directly to egg\nFly = go up 350 studs first, then TP to egg"
     stealModeNote.TextColor3 = C.Muted
     stealModeNote.Font = Enum.Font.GothamSemibold
     stealModeNote.TextSize = CFG.FONT_MUTED
