@@ -11,6 +11,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
+
 -- ============================================================
 -- FLY STEAL (BARU) — Naik 350 → TP ke egg
 -- ============================================================
