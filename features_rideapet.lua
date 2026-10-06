@@ -11,6 +11,43 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
+-- ============================================================
+-- ANTI-AFK — Cegah kick karena idle 20 menit
+-- ============================================================
+function Features.startAntiAFK()
+    task.spawn(function()
+        local VirtualUser = game:GetService("VirtualUser")
+        local vu = game:GetService("VirtualUser")
+
+        -- Hook Idled: pas Roblox mau kick karena idle, cancel + kirim activity
+        LocalPlayer.Idled:Connect(function()
+            if Shared.AntiAFK_Enabled == false then return end
+
+            pcall(function()
+                vu:CaptureController()
+                vu:ClickButton2(Vector2.new())
+            end)
+
+            print("[ANTI-AFK] Idle terdeteksi — activity dikirim")
+        end)
+
+        -- Loop backup: kirim input tiap 60 detik
+        while task.wait(60) do
+            if Shared.AntiAFK_Enabled == false then continue end
+
+            pcall(function()
+                vu:CaptureController()
+                vu:ClickButton2(Vector2.new())
+            end)
+
+            pcall(function()
+                mousemoverel(1, 0)
+                task.wait(0.05)
+                mousemoverel(-1, 0)
+            end)
+        end
+    end)
+end
 
 -- ============================================================
 -- FLY STEAL (BARU) — Naik 350 → TP ke egg
@@ -1775,6 +1812,8 @@ end
 -- ============================================================
 function Features.Init(sharedState)
     Shared = sharedState
+
+    Features.startAntiAFK()   -- ← TAMBAH INI
 
     Features.startEggESP()
     Features.startPetESP()
