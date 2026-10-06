@@ -1062,7 +1062,7 @@ function Features.startAutoFarm()
 end
 
 -- ============================================================
--- VOLCANIC HUNTER (FIXED v3)
+-- VOLCANIC HUNTER (FIXED v4)
 -- ============================================================
 local VolcanicState = {
     Enabled = false,
@@ -1153,6 +1153,16 @@ local function tpWaypoint(wp)
     return true
 end
 
+local function tpToPos(pos, heightOffset)
+    local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not root then return false end
+    root.CFrame = CFrame.new(pos + Vector3.new(0, heightOffset or 3, 0))
+    root.Velocity = Vector3.zero
+    root.AssemblyLinearVelocity = Vector3.zero
+    task.wait(0.1)
+    return true
+end
+
 local function exitCave()
     print("[VOLCANIC] Keluar goa via waypoint reverse...")
     for i = #VolcanicWaypoints, 1, -1 do
@@ -1165,46 +1175,68 @@ local function exitCave()
     return true
 end
 
+-- ═══════════════════════════════════════════════════════════
+-- PICKUP VOLCANIC EGG — VERIFIED HOLDING (v4)
+-- ═══════════════════════════════════════════════════════════
 local function volcanicPickupVerified(egg)
     local part = egg:FindFirstChildWhichIsA("BasePart", true)
     if not part then return false end
 
+    -- Cari prompt dengan berbagai nama alternatif
     local prompt = egg:FindFirstChild("Pickup", true)
+        or egg:FindFirstChild("Collect", true)
+        or egg:FindFirstChildWhichIsA("ProximityPrompt", true)
+
     if prompt and prompt:IsA("ProximityPrompt") then
         prompt.HoldDuration = 0
     end
 
-    for i = 1, 20 do
+    local lastPos = part.Position
+
+    for i = 1, 30 do
         if not Shared.VolcanicHunt_Enabled then return false end
 
+        -- Cek holding dulu
         if isHoldingEggMutation() then
-            print("[VOLCANIC] Verified holding egg")
+            print("[VOLCANIC] Verified holding egg @ try " .. i)
             return true
         end
 
+        -- Egg ilang = kemungkinan kepegang
         if not egg.Parent then
-            task.wait(0.2)
+            task.wait(0.25)
             if isHoldingEggMutation() then
                 print("[VOLCANIC] Egg hilang & holding OK")
                 return true
             end
-            return true
+            print("[VOLCANIC] Egg hilang tapi belum holding — retry")
         end
 
+        -- Update posisi terakhir
+        if part and part.Parent then
+            lastPos = part.Position
+        end
+
+        -- TP ke egg (lookAt biar menghadap)
         local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if curRoot and part and part.Parent then
+        if curRoot then
             curRoot.CFrame = CFrame.lookAt(
-                part.Position + Vector3.new(0, 3, 0),
-                part.Position)
+                lastPos + Vector3.new(0, 3, 0),
+                lastPos)
             curRoot.Velocity = Vector3.zero
             curRoot.AssemblyLinearVelocity = Vector3.zero
         end
 
+        -- Fire prompt 2x per iterasi
+        if prompt and typeof(fireproximityprompt) == "function" then
+            pcall(fireproximityprompt, prompt)
+        end
+        task.wait(0.05)
         if prompt and typeof(fireproximityprompt) == "function" then
             pcall(fireproximityprompt, prompt)
         end
 
-        task.wait(0.2)
+        task.wait(0.15)
     end
 
     return isHoldingEggMutation()
@@ -1255,28 +1287,52 @@ function Features.startVolcanicHunt()
                         Shared.Notify("🌋 Volcanic Egg spawn!", "success")
                     end
 
-                    -- STEP 1: Masuk goa
+                    -- ═══════════════════════════════════════════
+                    -- STEP 1: Masuk goa via waypoint
+                    -- ═══════════════════════════════════════════
                     print("[VOLCANIC] STEP 1 — Masuk goa...")
                     local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+                    local targetPos = eggPart and eggPart.Position or nil
+
                     for i, wp in ipairs(VolcanicWaypoints) do
                         if not Shared.VolcanicHunt_Enabled then break end
-                        if not egg.Parent then break end
 
                         local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                        if curRoot and eggPart then
-                            local d = (eggPart.Position - curRoot.Position).Magnitude
-                            if d <= 40 then break end
+                        if curRoot and eggPart and eggPart.Parent then
+                            targetPos = eggPart.Position
+                            local d = (targetPos - curRoot.Position).Magnitude
+                            if d <= 25 then break end
                         end
                         tpWaypoint(wp)
                     end
 
-                    -- STEP 2: Pickup egg
+                    -- Kalo egg ilang di tengah jalan, TP ke posisi terakhir
+                    if not egg.Parent and targetPos then
+                        print("[VOLCANIC] Egg ilang di tengah — TP ke posisi terakhir")
+                        tpToPos(targetPos, 3)
+                    end
+
+                    -- ═══════════════════════════════════════════
+                    -- STEP 2: Pickup egg (WAJIB sampai holding)
+                    -- ═══════════════════════════════════════════
                     print("[VOLCANIC] STEP 2 — Pickup egg...")
                     local picked = false
                     if egg.Parent then
                         picked = volcanicPickupVerified(egg)
                     else
                         picked = isHoldingEggMutation()
+                    end
+
+                    -- Fallback: kalo gagal, TP ke posisi terakhir egg & coba lagi
+                    if not picked or not isHoldingEggMutation() then
+                        if targetPos then
+                            print("[VOLCANIC] Fallback — TP ke posisi terakhir & retry pickup")
+                            tpToPos(targetPos, 3)
+                            task.wait(0.2)
+                            if egg.Parent then
+                                picked = volcanicPickupVerified(egg)
+                            end
+                        end
                     end
 
                     if not picked or not isHoldingEggMutation() then
@@ -1286,7 +1342,9 @@ function Features.startVolcanicHunt()
                     end
                     print("[VOLCANIC] ✅ Pickup OK — Holding egg")
 
-                    -- STEP 3: WAJIB keluar goa dulu (apapun kondisinya)
+                    -- ═══════════════════════════════════════════
+                    -- STEP 3: WAJIB keluar goa dulu
+                    -- ═══════════════════════════════════════════
                     print("[VOLCANIC] STEP 3 — Keluar goa...")
                     local exited = exitCave()
 
@@ -1302,7 +1360,9 @@ function Features.startVolcanicHunt()
                         continue
                     end
 
+                    -- ═══════════════════════════════════════════
                     -- STEP 4: Mutation (opsional)
+                    -- ═══════════════════════════════════════════
                     if Shared.VolcanicMutation_Enabled then
                         print("[VOLCANIC] STEP 4 — Auto Mutation ON → TP lava & drop")
 
@@ -1365,7 +1425,9 @@ function Features.startVolcanicHunt()
                         print("[VOLCANIC] STEP 4 — Auto Mutation OFF, skip drop")
                     end
 
+                    -- ═══════════════════════════════════════════
                     -- STEP 5: Return ke plot (drop 100 → pickup → TP base)
+                    -- ═══════════════════════════════════════════
                     if Shared.VolcanicReturn_Enabled then
                         task.wait(0.4)
                         print("[VOLCANIC] STEP 5 — Return ke plot (drop 100 → pickup → TP base)")
@@ -1386,7 +1448,6 @@ function Features.startVolcanicHunt()
         end
     end)
 end
-
 -- ============================================================
 -- AUTO MUTATION
 -- ============================================================
