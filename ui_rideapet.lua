@@ -3312,6 +3312,31 @@ local function buildMainWindow(parent)
     local setPage = createPage("Settings")
     pages.Settings = setPage
 
+    -- ===== ANTI-AFK CARD =====
+    local afkCard, afkContent = makeCard(setPage, "🛡 ANTI-AFK", 0)
+
+    local afkLbl = Instance.new("TextLabel")
+    afkLbl.Size = UDim2.new(1, 0, 0, 16)
+    afkLbl.BackgroundTransparency = 1
+    afkLbl.Text = "Cegah kick karena idle 20 menit:"
+    afkLbl.TextColor3 = C.Muted
+    afkLbl.Font = Enum.Font.GothamSemibold
+    afkLbl.TextSize = CFG.FONT_MUTED
+    afkLbl.TextXAlignment = Enum.TextXAlignment.Left
+    afkLbl.ZIndex = 3
+    afkLbl.Parent = afkContent
+    registerTheme(afkLbl, "Muted", "TextColor3")
+
+    makeToggle(afkContent, "Enable Anti-AFK", true, function(v)
+        Shared.AntiAFK_Enabled = v
+        if v then
+            notify("🛡 Anti-AFK: ON", "success")
+        else
+            notify("🛡 Anti-AFK: OFF", "info")
+        end
+    end)
+
+    -- ===== THEME CARD =====
     local themeCard, themeContent = makeCard(setPage, "THEME", 1)
 
     local themeLbl = Instance.new("TextLabel")
@@ -3325,7 +3350,7 @@ local function buildMainWindow(parent)
     themeLbl.ZIndex = 3
     themeLbl.Parent = themeContent
 
-      local themeList = {"Brutal", "Ice", "Fire", "Pink", "Green", "Blue", "Mustard", "Olive"}
+    local themeList = {"Brutal", "Ice", "Fire", "Pink", "Green", "Blue", "Mustard", "Olive"}
     makeDropdownGlobal(themeContent, themeList, CurrentTheme, function(v)
         applyTheme(v)
         notify("Theme: " .. v, "success")
@@ -4505,10 +4530,11 @@ function UI.Init(sharedState)
     Shared.EggsInMap = {}
     Shared.EggPredictions = {}
 
-    Shared.Speed_Enabled = false
+        Shared.Speed_Enabled = false
     Shared.Speed_Value = 100
     Shared.InstantPickup_Enabled = false
     Shared.AutoFarm_Enabled = false
+    Shared.AntiAFK_Enabled = true   -- ← TAMBAH INI
     Shared.SelectedRarities = {
         ["None"] = true,
         ["Common"] = false,
