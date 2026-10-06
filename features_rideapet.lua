@@ -1062,7 +1062,7 @@ function Features.startAutoFarm()
 end
 
 -- ============================================================
--- VOLCANIC HUNTER
+-- VOLCANIC HUNTER (FIXED v6)
 -- ============================================================
 local VolcanicState = {
     Enabled = false,
@@ -1143,29 +1143,91 @@ local function getVolcanicSpawn()
     return nil
 end
 
-local function volcanicPickup(egg)
+local function tpWaypoint(wp)
+    local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not root then return false end
+    root.CFrame = CFrame.new(wp + Vector3.new(0, 5, 0))
+    root.Velocity = Vector3.zero
+    root.AssemblyLinearVelocity = Vector3.zero
+    task.wait(0.12)
+    return true
+end
+
+local function exitCave()
+    print("[VOLCANIC] Keluar goa via waypoint reverse...")
+    for i = #VolcanicWaypoints, 1, -1 do
+        if not Shared.VolcanicHunt_Enabled then return false end
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if not hum or hum.Health <= 0 then return false end
+        tpWaypoint(VolcanicWaypoints[i])
+    end
+    print("[VOLCANIC] Keluar goa OK")
+    return true
+end
+
+-- ═══════════════════════════════════════════════════════════
+-- PICKUP VOLCANIC — VERIFIED HOLDING
+-- ═══════════════════════════════════════════════════════════
+local function volcanicPickupVerified(egg)
     local part = egg:FindFirstChildWhichIsA("BasePart", true)
     if not part then return false end
+
     local prompt = egg:FindFirstChild("Pickup", true)
+        or egg:FindFirstChild("Collect", true)
+        or egg:FindFirstChildWhichIsA("ProximityPrompt", true)
+
     if prompt and prompt:IsA("ProximityPrompt") then
         prompt.HoldDuration = 0
     end
-    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not myRoot then return false end
-    myRoot.CFrame = part.CFrame + Vector3.new(0, 3, 0)
-    task.wait(0.1)
-    for i = 1, 15 do
+
+    local lastPos = part.Position
+
+    for i = 1, 25 do
+        if not Shared.VolcanicHunt_Enabled then return false end
+
+        -- Cek holding dulu
+        local holding = isHoldingEggMutation()
+        if holding then
+            print("[VOLCANIC] ✅ Verified holding egg @ try " .. i)
+            return true
+        end
+
+        -- Egg ilang = kemungkinan kepegang
+        if not egg.Parent then
+            task.wait(0.3)
+            if isHoldingEggMutation() then
+                print("[VOLCANIC] Egg hilang & holding OK")
+                return true
+            end
+        end
+
+        if part and part.Parent then
+            lastPos = part.Position
+        end
+
+        -- TP ke egg
+        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if curRoot then
+            curRoot.CFrame = CFrame.lookAt(
+                lastPos + Vector3.new(0, 3, 0),
+                lastPos)
+            curRoot.Velocity = Vector3.zero
+            curRoot.AssemblyLinearVelocity = Vector3.zero
+        end
+
+        -- Fire prompt 2x
         if prompt and typeof(fireproximityprompt) == "function" then
             pcall(fireproximityprompt, prompt)
         end
-        task.wait(0.2)
-        if not egg.Parent then return true end
-        if part and part.Parent then
-            myRoot.CFrame = part.CFrame + Vector3.new(0, 3, 0)
-            task.wait(0.1)
+        task.wait(0.08)
+        if prompt and typeof(fireproximityprompt) == "function" then
+            pcall(fireproximityprompt, prompt)
         end
+
+        task.wait(0.2)
     end
-    return false
+
+    return isHoldingEggMutation()
 end
 
 function Features.startVolcanicHunt()
@@ -1191,114 +1253,7 @@ function Features.startVolcanicHunt()
 
                     local egg = getVolcanicEgg()
 
-                    if egg then
-                        print("[VOLCANIC] Egg volcanic spawn! Travel & pickup...")
-                        if Shared.Notify then
-                            Shared.Notify("🌋 Volcanic Egg spawn!", "success")
-                        end
-
-                        local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
-                        for i, wp in ipairs(VolcanicWaypoints) do
-                            if not Shared.VolcanicHunt_Enabled then break end
-                            if not egg.Parent then break end
-                            local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                            if curRoot and eggPart then
-                                local d = (eggPart.Position - curRoot.Position).Magnitude
-                                if d <= 40 then break end
-                            end
-                            if curRoot then
-                                curRoot.CFrame = CFrame.new(wp + Vector3.new(0, 5, 0))
-                                curRoot.Velocity = Vector3.zero
-                            end
-                            task.wait(0.12)
-                        end
-
-                        if egg.Parent then
-                            local picked = volcanicPickup(egg)
-                            if picked then
-                                print("[VOLCANIC] Pickup berhasil!")
-
-                                if Shared.VolcanicMutation_Enabled then
-                                    print("[VOLCANIC] Keluar goa via waypoint reverse...")
-                                    for i = #VolcanicWaypoints, 1, -1 do
-                                        if not Shared.VolcanicHunt_Enabled then break end
-                                        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                                        if curRoot then
-                                            curRoot.CFrame = CFrame.new(VolcanicWaypoints[i] + Vector3.new(0, 5, 0))
-                                            curRoot.Velocity = Vector3.zero
-                                        end
-                                        task.wait(0.12)
-                                    end
-                                    print("[VOLCANIC] Keluar goa, di waypoint #1")
-
-                                    task.wait(0.5)
-                                    print("[VOLCANIC] Teleport ke lava...")
-                                    local safePos = findSafeVolcanoPos()
-                                    if safePos then
-                                        local rootLava = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                                        if rootLava then
-                                            rootLava.CFrame = CFrame.new(safePos)
-                                            rootLava.Velocity = Vector3.zero
-                                        end
-                                    end
-                                    task.wait(1.5)
-
-                                    print("[VOLCANIC] Drop egg via VolcanoDip...")
-                                    local dropWaited = 0
-                                    local eggReleased = false
-                                    while dropWaited < 15 do
-                                        if not Shared.VolcanicHunt_Enabled then break end
-                                        fireVolcanoDip()
-                                        task.wait(1.5)
-                                        dropWaited = dropWaited + 1.5
-                                        if not isHoldingEggMutation() then
-                                            eggReleased = true
-                                            print("[VOLCANIC] Egg dropped @ " .. dropWaited .. "s")
-                                            break
-                                        end
-                                    end
-
-                                    if not eggReleased then
-                                        print("[VOLCANIC] Egg gak lepas (timeout), tetep return")
-                                    end
-
-                                    if eggReleased then
-                                        print("[VOLCANIC] Nunggu egg balik...")
-                                        local waitStart = os.clock()
-                                        local eggBack = false
-                                        while os.clock() - waitStart < 20 do
-                                            if not Shared.VolcanicHunt_Enabled then break end
-                                            task.wait(1)
-                                            if isHoldingEggMutation() then
-                                                eggBack = true
-                                                print("[VOLCANIC] Egg balik! Mutation selesai!")
-                                                if Shared.Notify then
-                                                    Shared.Notify("🔥 Mutation selesai!", "success")
-                                                end
-                                                break
-                                            end
-                                        end
-                                        if not eggBack then
-                                            print("[VOLCANIC] Egg gak balik (timeout), tetep return")
-                                        end
-                                    end
-                                else
-                                    print("[VOLCANIC] Auto Mutation OFF, langsung return")
-                                end
-
-                                if Shared.VolcanicReturn_Enabled then
-                                    task.wait(0.4)
-                                    print("[VOLCANIC] Return ke plot (drop + pickup + TP)")
-                                    local oldFlag = Shared.AutoReturn_Enabled
-                                    Shared.AutoReturn_Enabled = true
-                                    returnToMyPlot()
-                                    Shared.AutoReturn_Enabled = oldFlag
-                                end
-
-                                task.wait(3)
-                            end
-                        end
-                    else
+                    if not egg then
                         local spawnPart = getVolcanicSpawn()
                         if spawnPart then
                             local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -1306,13 +1261,152 @@ function Features.startVolcanicHunt()
                                 local d = (spawnPart.Position - curRoot.Position).Magnitude
                                 if d > 50 then
                                     curRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
+                                    curRoot.Velocity = Vector3.zero
                                     print("[VOLCANIC] Teleport ke spawn point volcanic")
                                 end
                             end
                         end
+                        task.wait(2)
+                        continue
                     end
 
-                    task.wait(2)
+                    print("[VOLCANIC] 🎯 Egg volcanic spawn! Mulai hunt...")
+                    if Shared.Notify then
+                        Shared.Notify("🌋 Volcanic Egg spawn!", "success")
+                    end
+
+                    -- ═══════════════════════════════════════
+                    -- STEP 1: Masuk goa via waypoint
+                    -- ═══════════════════════════════════════
+                    print("[VOLCANIC] STEP 1 — Masuk goa...")
+                    local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+                    for i, wp in ipairs(VolcanicWaypoints) do
+                        if not Shared.VolcanicHunt_Enabled then break end
+
+                        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                        if curRoot and eggPart and eggPart.Parent then
+                            local d = (eggPart.Position - curRoot.Position).Magnitude
+                            if d <= 25 then break end
+                        end
+                        tpWaypoint(wp)
+                    end
+
+                    -- ═══════════════════════════════════════
+                    -- STEP 2: Pickup egg (WAJIB holding)
+                    -- ═══════════════════════════════════════
+                    print("[VOLCANIC] STEP 2 — Pickup egg...")
+                    local picked = false
+                    if egg.Parent then
+                        picked = volcanicPickupVerified(egg)
+                    else
+                        picked = isHoldingEggMutation()
+                    end
+
+                    if not picked or not isHoldingEggMutation() then
+                        print("[VOLCANIC] ❌ Gagal pickup — skip")
+                        task.wait(2)
+                        continue
+                    end
+                    print("[VOLCANIC] ✅ Pickup OK — Holding egg")
+
+                    -- ═══════════════════════════════════════
+                    -- STEP 3: WAJIB keluar goa dulu
+                    -- ═══════════════════════════════════════
+                    print("[VOLCANIC] STEP 3 — Keluar goa...")
+                    local exited = exitCave()
+
+                    if not exited then
+                        print("[VOLCANIC] ⚠️ Gagal keluar goa — skip")
+                        task.wait(2)
+                        continue
+                    end
+
+                    if not isHoldingEggMutation() then
+                        print("[VOLCANIC] ⚠️ Egg hilang setelah keluar goa — skip")
+                        task.wait(2)
+                        continue
+                    end
+
+                    -- ═══════════════════════════════════════
+                    -- STEP 4: Mutation (OPSIONAL)
+                    -- ═══════════════════════════════════════
+                    if Shared.VolcanicMutation_Enabled then
+                        print("[VOLCANIC] STEP 4 — Auto Mutation ON → TP lava & drop")
+
+                        task.wait(0.5)
+                        local safePos = findSafeVolcanoPos()
+                        if safePos then
+                            local rootLava = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                            if rootLava then
+                                rootLava.CFrame = CFrame.new(safePos)
+                                rootLava.Velocity = Vector3.zero
+                                rootLava.AssemblyLinearVelocity = Vector3.zero
+                            end
+                        end
+                        task.wait(1.5)
+
+                        if not isHoldingEggMutation() then
+                            print("[VOLCANIC] ⚠️ Egg hilang sebelum drop — skip drop")
+                        else
+                            print("[VOLCANIC] Drop egg via VolcanoDip...")
+                            local dropWaited = 0
+                            local eggReleased = false
+                            while dropWaited < 15 do
+                                if not Shared.VolcanicHunt_Enabled then break end
+
+                                fireVolcanoDip()
+                                task.wait(1.5)
+                                dropWaited = dropWaited + 1.5
+
+                                if not isHoldingEggMutation() then
+                                    eggReleased = true
+                                    print("[VOLCANIC] Egg dropped @ " .. dropWaited .. "s")
+                                    break
+                                end
+                            end
+
+                            if not eggReleased then
+                                print("[VOLCANIC] ⚠️ Egg gak lepas (timeout)")
+                            else
+                                print("[VOLCANIC] Nunggu egg balik...")
+                                local waitStart = os.clock()
+                                local eggBack = false
+                                while os.clock() - waitStart < 20 do
+                                    if not Shared.VolcanicHunt_Enabled then break end
+                                    task.wait(1)
+                                    if isHoldingEggMutation() then
+                                        eggBack = true
+                                        print("[VOLCANIC] 🔥 Egg balik! Mutation selesai!")
+                                        if Shared.Notify then
+                                            Shared.Notify("🔥 Mutation selesai!", "success")
+                                        end
+                                        break
+                                    end
+                                end
+                                if not eggBack then
+                                    print("[VOLCANIC] ⚠️ Egg gak balik (timeout)")
+                                end
+                            end
+                        end
+                    else
+                        print("[VOLCANIC] STEP 4 — Auto Mutation OFF, skip drop")
+                    end
+
+                    -- ═══════════════════════════════════════
+                    -- STEP 5: Return ke plot
+                    -- ═══════════════════════════════════════
+                    if Shared.VolcanicReturn_Enabled then
+                        task.wait(0.4)
+                        print("[VOLCANIC] STEP 5 — Return ke plot (drop 100 → pickup → TP base)")
+                        local oldFlag = Shared.AutoReturn_Enabled
+                        Shared.AutoReturn_Enabled = true
+                        returnToMyPlot()
+                        Shared.AutoReturn_Enabled = oldFlag
+                    else
+                        print("[VOLCANIC] STEP 5 — Return OFF, skip")
+                    end
+
+                    task.wait(3)
                 end
 
                 VolcanicState.Hunting = false
@@ -1321,7 +1415,6 @@ function Features.startVolcanicHunt()
         end
     end)
 end
-
 
 -- ============================================================
 -- AUTO MUTATION
