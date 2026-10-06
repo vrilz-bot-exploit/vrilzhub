@@ -1538,14 +1538,32 @@ end
 local function tpToSafe(pos)
     local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not myRoot then return false end
-    myRoot.CFrame = CFrame.new(pos)
-    task.wait(0.3)
+
+    -- STEP 1: TP tinggi dulu (250 studs di atas target) buat nunggu render
+    local highPos = pos + Vector3.new(0, 250, 0)
+    myRoot.CFrame = CFrame.new(highPos)
+    myRoot.Velocity = Vector3.zero
+    myRoot.AssemblyLinearVelocity = Vector3.zero
+    print("[MUTATION] TP step 1 — ke atas (render aman)")
+    task.wait(0.8)
+
+    -- STEP 2: TP ke target asli
+    local root2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not root2 then return false end
+    root2.CFrame = CFrame.new(pos)
+    root2.Velocity = Vector3.zero
+    root2.AssemblyLinearVelocity = Vector3.zero
+    print("[MUTATION] TP step 2 — ke target")
+    task.wait(0.5)
+
+    -- Cek kecebur
     local rootAfter = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if rootAfter and rootAfter.Position.Y < pos.Y - 50 then
         print("[MUTATION] Kecebur! Retry TP...")
         rootAfter.CFrame = CFrame.new(pos + Vector3.new(0, 50, 0))
-        task.wait(0.3)
+        task.wait(0.4)
     end
+
     return true
 end
 
@@ -1564,11 +1582,13 @@ local function runMutationOnce()
     MutationState.StealPaused = true
     task.wait(1.5)
 
+    -- STEP 1: TP ke lahar (2-step: tinggi dulu, baru turun)
     local safePos = findSafeVolcanoPos()
-    print("[MUTATION] STEP 1 — TP ke lahar")
+    print("[MUTATION] STEP 1 — TP ke lahar (2-step)")
     tpToSafe(safePos)
     task.wait(2)
 
+    -- STEP 2: Drop via VolcanoDip
     print("[MUTATION] STEP 2 — drop via VolcanoDip")
     local dropWaited = 0
     local eggReleased = false
@@ -1598,6 +1618,7 @@ local function runMutationOnce()
         return false
     end
 
+    -- STEP 3: Tunggu egg balik
     print("[MUTATION] STEP 3 — tunggu egg balik")
     local retWaited = 0
     while retWaited < MUT_CONFIG.RETURN_TIMEOUT do
@@ -1612,9 +1633,10 @@ local function runMutationOnce()
         end
     end
 
+    -- STEP 4: Return ke plot (kalo ada)
     if Shared.MutationReturn_Enabled then
         task.wait(0.5)
-        print("[MUTATION] Return ke plot (drop + pickup + TP)")
+        print("[MUTATION] STEP 4 — Return ke plot (drop + pickup + TP)")
         local oldFlag = Shared.AutoReturn_Enabled
         Shared.AutoReturn_Enabled = true
         returnToMyPlot()
