@@ -3318,7 +3318,7 @@ local function buildMainWindow(parent)
     local afkLbl = Instance.new("TextLabel")
     afkLbl.Size = UDim2.new(1, 0, 0, 16)
     afkLbl.BackgroundTransparency = 1
-    afkLbl.Text = "Cegah kick karena idle 20 menit:"
+    afkLbl.Text = "Prevent kick due to idling for 20 minutes:"
     afkLbl.TextColor3 = C.Muted
     afkLbl.Font = Enum.Font.GothamSemibold
     afkLbl.TextSize = CFG.FONT_MUTED
