@@ -1,5 +1,6 @@
 -- VRILZHUB protected build
 -- Lightweight payload protection; original source is encoded.
+-- Vm overflow protocol
 local _B="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 local function _D(s)
     s=s:gsub("[^".._B.."=]","")
