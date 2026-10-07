@@ -3212,11 +3212,21 @@ local function buildMainWindow(parent)
     plantFilterLbl.ZIndex = 3
     plantFilterLbl.Parent = hatchLuckContent
 
-    makeDropdownGlobal(hatchLuckContent, EggNames, Shared.AutoPlantEgg_Filter or "Cherub", function(v)
+        -- Bikin list baru: "None" + semua egg
+    local PlantFilterList = {"None"}
+    for _, eggN in ipairs(EggNames) do
+        table.insert(PlantFilterList, eggN)
+    end
+
+    makeDropdownGlobal(hatchLuckContent, PlantFilterList, Shared.AutoPlantEgg_Filter or "None", function(v)
         Shared.AutoPlantEgg_Filter = v
         local F = getFeatures()
         if F and F.setAutoPlantFilter then F.setAutoPlantFilter(v) end
-        notify("Plant Filter: " .. v, "info")
+        if v == "None" then
+            notify("Plant Filter: None (pilih egg dulu!)", "warning")
+        else
+            notify("Plant Filter: " .. v, "info")
+        end
     end)
 
     -- Notes
@@ -4585,6 +4595,8 @@ function UI.Init(sharedState)
     Shared.AutoSteal_Enabled = false
     Shared.AutoReturn_Enabled = false
     Shared.AutoHatch_Enabled = false
+    Shared.AutoPlantEgg_Enabled = false
+    Shared.AutoPlantEgg_Filter = "None"
     Shared.AutoRidePet_Enabled = false
     Shared.AutoEquipBest_Enabled = false
     Shared.SelectedEgg = "Cherub"
