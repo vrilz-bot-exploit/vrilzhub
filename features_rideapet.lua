@@ -1821,17 +1821,36 @@ local HatchLuckState = {
 
 local HatchLuckRS = game:GetService("ReplicatedStorage")
 
-local function getHatchLuckRemote()
-    local remotes = HatchLuckRS:FindFirstChild("Remotes")
-    local gameR = remotes and remotes:FindFirstChild("Game")
-    local plotR = gameR and gameR:FindFirstChild("Plot")
-    return plotR and plotR:FindFirstChild("Upgrades")
+-- Auto-detect remote: cari semua remote yang namanya ada "upgrade" / "luck" / "hatch"
+local HatchLuckRemoteCache = nil
+local HatchLuckLastScan = 0
+
+local function findHatchLuckRemotes()
+    local found = {}
+    for _, d in ipairs(HatchLuckRS:GetDescendants()) do
+        if d:IsA("RemoteEvent") or d:IsA("RemoteFunction") then
+            local n = d.Name:lower()
+            if n:find("upgrade") or n:find("luck") or n:find("hatch") then
+                table.insert(found, d)
+            end
+        end
+    end
+    return found
 end
 
 local function fireHatchLuckUpgrade(mode)
-    local remote = getHatchLuckRemote()
-    if not remote then
-        return false, "remote gak ada"
+    -- Scan ulang tiap 10 detik atau kalo cache kosong
+    if not HatchLuckRemoteCache or #HatchLuckRemoteCache == 0 or (os.clock() - HatchLuckLastScan) > 10 then
+        HatchLuckRemoteCache = findHatchLuckRemotes()
+        HatchLuckLastScan = os.clock()
+        print("[HATCH LUCK] Found " .. #HatchLuckRemoteCache .. " candidate remote(s)")
+        for _, r in ipairs(HatchLuckRemoteCache) do
+            print("  → " .. r:GetFullName() .. " (" .. r.ClassName .. ")")
+        end
+    end
+
+    if #HatchLuckRemoteCache == 0 then
+        return false, "no remote found"
     end
 
     local payloads
@@ -1857,16 +1876,17 @@ local function fireHatchLuckUpgrade(mode)
         }
     end
 
-    for i, payload in ipairs(payloads) do
-        local ok = pcall(function()
-            if type(payload) == "table" and #payload > 0 then
-                remote:FireServer(table.unpack(payload))
-            else
-                remote:FireServer(payload)
-            end
-        end)
-        if ok then
-            task.wait(0.1)
+    -- Fire ke SEMUA candidate remote (biar kemungkinan kena lebih gede)
+    for _, remote in ipairs(HatchLuckRemoteCache) do
+        for i, payload in ipairs(payloads) do
+            pcall(function()
+                if type(payload) == "table" and #payload > 0 then
+                    remote:FireServer(table.unpack(payload))
+                else
+                    remote:FireServer(payload)
+                end
+            end)
+            task.wait(0.05)
         end
     end
 
