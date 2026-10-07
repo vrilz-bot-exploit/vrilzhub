@@ -1817,6 +1817,7 @@ local HatchLuckState = {
     LastClick = 0,
     MaxCount = 0,
     CicilCount = 0,
+    LastError = nil,
 }
 
 local HatchLuckRS = game:GetService("ReplicatedStorage")
@@ -1839,14 +1840,10 @@ local function findHatchLuckRemotes()
 end
 
 local function fireHatchLuckUpgrade(mode)
-    -- Scan ulang tiap 10 detik atau kalo cache kosong
-    if not HatchLuckRemoteCache or #HatchLuckRemoteCache == 0 or (os.clock() - HatchLuckLastScan) > 10 then
+    -- Scan ulang tiap 60 detik atau kalo cache kosong
+    if not HatchLuckRemoteCache or #HatchLuckRemoteCache == 0 or (os.clock() - HatchLuckLastScan) > 60 then
         HatchLuckRemoteCache = findHatchLuckRemotes()
         HatchLuckLastScan = os.clock()
-        print("[HATCH LUCK] Found " .. #HatchLuckRemoteCache .. " candidate remote(s)")
-        for _, r in ipairs(HatchLuckRemoteCache) do
-            print("  → " .. r:GetFullName() .. " (" .. r.ClassName .. ")")
-        end
     end
 
     if #HatchLuckRemoteCache == 0 then
@@ -1876,7 +1873,7 @@ local function fireHatchLuckUpgrade(mode)
         }
     end
 
-    -- Fire ke SEMUA candidate remote (biar kemungkinan kena lebih gede)
+    -- Fire ke SEMUA candidate remote
     for _, remote in ipairs(HatchLuckRemoteCache) do
         for i, payload in ipairs(payloads) do
             pcall(function()
@@ -1904,13 +1901,11 @@ function Features.startAutoHatchLuck()
             if ok then
                 if HatchLuckState.Mode == "Max" then
                     HatchLuckState.MaxCount = HatchLuckState.MaxCount + 1
-                    print("[HATCH LUCK] ⚡ MAX fired #" .. HatchLuckState.MaxCount)
                 else
                     HatchLuckState.CicilCount = HatchLuckState.CicilCount + 1
-                    print("[HATCH LUCK] 🔄 CICIL fired #" .. HatchLuckState.CicilCount)
                 end
             else
-                print("[HATCH LUCK] ❌ " .. reason)
+                HatchLuckState.LastError = reason
             end
         end
     end)
@@ -1924,7 +1919,6 @@ function Features.setHatchLuckMode(mode)
     HatchLuckState.Mode = mode
     HatchLuckState.Cooldown = (mode == "Max") and 2.0 or 1.0
 end
-
 -- ============================================================
 -- FEATURES.INIT
 -- ============================================================
