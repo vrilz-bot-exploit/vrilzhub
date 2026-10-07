@@ -3152,26 +3152,54 @@ local function buildMainWindow(parent)
     makeToggle(eggEspContent, "Show Name", false, function(v) Shared.ESP_EggName_Enabled = v end)
     makeToggle(eggEspContent, "Show Luck", false, function(v) Shared.ESP_EggLuck_Enabled = v end)
 
-    local autoStealCard, autoStealContent = makeCard(eggPage, "AUTO STEAL", 2)
-    makeToggle(autoStealContent, "Enable Auto Steal", false, function(v) Shared.AutoSteal_Enabled = v end)
-    makeToggle(autoStealContent, "Auto Return to Plot", false, function(v) Shared.AutoReturn_Enabled = v end)
-    makeToggle(autoStealContent, "Auto Hatch", false, function(v) Shared.AutoHatch_Enabled = v end)
+    -- ===== AUTO HATCH LUCK =====
+    local hatchLuckCard, hatchLuckContent = makeCard(eggPage, "🔮 AUTO HATCH LUCK", 2)
 
-    local eggNameLbl = Instance.new("TextLabel")
-    eggNameLbl.Size = UDim2.new(1, 0, 0, 16)
-    eggNameLbl.BackgroundTransparency = 1
-    eggNameLbl.Text = "Select Eggs:"
-    eggNameLbl.TextColor3 = C.Muted
-    eggNameLbl.Font = Enum.Font.GothamSemibold
-    eggNameLbl.TextSize = CFG.FONT_MUTED
-    eggNameLbl.TextXAlignment = Enum.TextXAlignment.Left
-    eggNameLbl.ZIndex = 3
-    eggNameLbl.Parent = autoStealContent
-
-    makeDropdownGlobal(autoStealContent, EggNames, "Cherub", function(v)
-        Shared.SelectedEgg = v
-        notify("Egg: " .. v, "info")
+    makeToggle(hatchLuckContent, "Enable Auto Hatch Luck", false, function(v)
+        Shared.AutoHatchLuck_Enabled = v
+        if Features and Features.getHatchLuckState then
+            Features.getHatchLuckState().Enabled = v
+        end
+        if v then
+            notify("🔮 Hatch Luck: ON (" .. (Shared.HatchLuck_Mode or "Max") .. ")", "success")
+        else
+            notify("🔮 Hatch Luck: OFF", "info")
+        end
     end)
+
+    local hatchModeLbl = Instance.new("TextLabel")
+    hatchModeLbl.Size = UDim2.new(1, 0, 0, 16)
+    hatchModeLbl.BackgroundTransparency = 1
+    hatchModeLbl.Text = "Select Mode:"
+    hatchModeLbl.TextColor3 = C.Muted
+    hatchModeLbl.Font = Enum.Font.GothamSemibold
+    hatchModeLbl.TextSize = CFG.FONT_MUTED
+    hatchModeLbl.TextXAlignment = Enum.TextXAlignment.Left
+    hatchModeLbl.ZIndex = 3
+    hatchModeLbl.Parent = hatchLuckContent
+
+    makeDropdownGlobal(hatchLuckContent, {"Max", "Cicil"}, Shared.HatchLuck_Mode or "Max", function(v)
+        Shared.HatchLuck_Mode = v
+        if Features and Features.setHatchLuckMode then
+            Features.setHatchLuckMode(v)
+        end
+        notify("🔮 Hatch Luck Mode: " .. v, "info")
+    end)
+
+    local hatchLuckNote = Instance.new("TextLabel")
+    hatchLuckNote.Size = UDim2.new(1, 0, 0, 30)
+    hatchLuckNote.BackgroundTransparency = 1
+    hatchLuckNote.Text = "⚡ Max = fire remote MAX (cooldown 2s)\n🔄 Cicil = fire remote cicil (cooldown 1s)"
+    hatchLuckNote.TextColor3 = C.Muted
+    hatchLuckNote.Font = Enum.Font.GothamSemibold
+    hatchLuckNote.TextSize = CFG.FONT_MUTED
+    hatchLuckNote.TextWrapped = true
+    hatchLuckNote.TextXAlignment = Enum.TextXAlignment.Left
+    hatchLuckNote.TextYAlignment = Enum.TextYAlignment.Top
+    hatchLuckNote.LayoutOrder = 10
+    hatchLuckNote.ZIndex = 3
+    hatchLuckNote.Parent = hatchLuckContent
+    registerTheme(hatchLuckNote, "Muted", "TextColor3")
 
     registerTab("Egg", "◯", "Egg")
 
