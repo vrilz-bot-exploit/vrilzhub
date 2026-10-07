@@ -796,7 +796,6 @@ local function rePickupSameEgg(myRoot, dropPos, targetEggName, radius)
     while tries < ReturnCfg.RePickupMaxTries do
         tries = tries + 1
 
-        -- AUTO-CHECK 1: udah holding = sukses
         local holding, heldName = isHoldingEggLocal()
         if holding then
             return true, tostring(heldName), tries
@@ -808,10 +807,9 @@ local function rePickupSameEgg(myRoot, dropPos, targetEggName, radius)
             continue
         end
 
-        -- Scan semua egg di radius dropPos
-        local targetEgg = nil          -- prioritas: nama sama
+        local targetEgg = nil
         local targetDist = math.huge
-        local closestEgg = nil         -- fallback: terdekat
+        local closestEgg = nil
         local closestDist = math.huge
 
         for _, egg in ipairs(rendered:GetChildren()) do
@@ -820,13 +818,11 @@ local function rePickupSameEgg(myRoot, dropPos, targetEggName, radius)
                 if part then
                     local d = (part.Position - dropPos).Magnitude
 
-                    -- Egg terdekat (apapun) di radius
                     if d <= radius and d < closestDist then
                         closestEgg = egg
                         closestDist = d
                     end
 
-                    -- Egg dengan nama SAMA
                     if targetEggName and egg.Name == targetEggName then
                         if d <= radius and d < targetDist then
                             targetEgg = egg
@@ -837,7 +833,6 @@ local function rePickupSameEgg(myRoot, dropPos, targetEggName, radius)
             end
         end
 
-        -- Prioritaskan egg nama sama; kalo gak ada, pakai yang terdekat
         local pickEgg = targetEgg or closestEgg
         local pickDist = targetEgg and targetDist or closestDist
 
@@ -852,7 +847,6 @@ local function rePickupSameEgg(myRoot, dropPos, targetEggName, radius)
                     prompt.HoldDuration = 0
                 end
 
-                -- TP INSTANT ke egg
                 myRoot.CFrame = CFrame.lookAt(
                     eggPart.Position + Vector3.new(0, ReturnCfg.RePickupTPHeight, 0),
                     eggPart.Position)
@@ -861,20 +855,17 @@ local function rePickupSameEgg(myRoot, dropPos, targetEggName, radius)
 
                 task.wait(0.05)
 
-                -- Fire prompt
                 if typeof(fireproximityprompt) == "function" then
                     pcall(fireproximityprompt, prompt)
                 end
 
                 task.wait(0.08)
 
-                -- AUTO-CHECK 2: verify holding
                 local h, hn = isHoldingEggLocal()
                 if h then
                     return true, tostring(hn), tries
                 end
 
-                -- AUTO-CHECK 3: egg ilang dari map
                 if not pickEgg.Parent then
                     task.wait(0.15)
                     local h2, hn2 = isHoldingEggLocal()
@@ -900,7 +891,6 @@ local function returnToMyPlot()
     local holding, heldEggName = isHoldingEggLocal()
 
     if holding and heldEggName then
-        -- STEP 1: TP 100 studs dari base
         local plotCenter = getMyPlotCenterPos()
         if not plotCenter then return end
 
@@ -924,7 +914,6 @@ local function returnToMyPlot()
         myRoot.AssemblyLinearVelocity = Vector3.zero
         task.wait(ReturnCfg.DropWait)
 
-        -- STEP 2: Drop egg
         local dropRemote = getDropRemoteLocal()
         if dropRemote then
             for i = 1, ReturnCfg.DropSpamCount do
@@ -944,7 +933,6 @@ local function returnToMyPlot()
 
         task.wait(ReturnCfg.PostDropVerifyWait)
 
-        -- AUTO-CHECK: kalo masih holding, spam drop lagi
         if isHoldingEggLocal() then
             for i = 1, 5 do
                 if dropRemote then
@@ -955,7 +943,6 @@ local function returnToMyPlot()
             end
         end
 
-        -- STEP 3: Pickup ULANG (wajib — prioritas nama sama, fallback terdekat)
         local reOk, reName, reTries = rePickupSameEgg(myRoot, dropPos, heldEggName, ReturnCfg.RePickupScanRadius)
 
         if not reOk then
@@ -966,16 +953,14 @@ local function returnToMyPlot()
             end
         end
 
-        -- ═══ AUTO-CHECK FINAL: WAJIB HOLDING SEBELUM TP BASE ═══
         if not reOk or not isHoldingEggLocal() then
             print("[RETURN] Pickup ulang gagal — skip TP base")
-            return  -- jangan TP base
+            return
         end
 
         print("[RETURN] Pickup ulang OK: " .. tostring(reName))
     end
 
-    -- STEP 4: TP base (cuma kalo holding)
     if not isHoldingEggLocal() then
         return
     end
@@ -1480,7 +1465,7 @@ local function getVolcanoDipRemote()
 end
 
 -- ═══════════════════════════════════════════════════════════
--- FIX #2: findSafeVolcanoPos — RETURN SURFACE LAVA + 15
+-- FIX #2: findSafeVolcanoPos — TP TEPAT DI PERMUKAAN LAVA
 -- ═══════════════════════════════════════════════════════════
 local function findSafeVolcanoPos()
     local volcano = Workspace:FindFirstChild("Volcano")
@@ -1488,7 +1473,7 @@ local function findSafeVolcanoPos()
         return Vector3.new(-5102.84, 41396.1, -3489.11)
     end
 
-    -- Prioritas 1: Lava / Magma SURFACE
+    -- Cari part LAVA (bukan top), TP TEPAT di tengah XZ + surface Y
     local bestLava, bestScore = nil, -math.huge
     for _, d in ipairs(volcano:GetDescendants()) do
         if d:IsA("BasePart") then
@@ -1503,10 +1488,15 @@ local function findSafeVolcanoPos()
         end
     end
     if bestLava then
-        return bestLava.Position + Vector3.new(0, bestLava.Size.Y / 2 + 15, 0)
+        -- TP ke posisi lava, di surface-nya (bukan +200 di atas)
+        return Vector3.new(
+            bestLava.Position.X,
+            bestLava.Position.Y + bestLava.Size.Y / 2,
+            bestLava.Position.Z
+        )
     end
 
-    -- Prioritas 2: Top
+    -- Fallback: cari part "Top"
     local bestTop, bestSize = nil, 0
     for _, d in ipairs(volcano:GetDescendants()) do
         if d:IsA("BasePart") then
@@ -1521,7 +1511,11 @@ local function findSafeVolcanoPos()
         end
     end
     if bestTop then
-        return bestTop.Position + Vector3.new(0, bestTop.Size.Y / 2 + 15, 0)
+        return Vector3.new(
+            bestTop.Position.X,
+            bestTop.Position.Y + bestTop.Size.Y / 2,
+            bestTop.Position.Z
+        )
     end
 
     return Vector3.new(-5102.84, 41396.1, -3489.11)
