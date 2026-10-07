@@ -1927,7 +1927,8 @@ function Features.Init(sharedState)
         Features.startMutationSteal()
     Features.startAutoHatchLuck()
 
-    print("[VRILZHUB] Ride a Pet Features v3.4 loaded")
+        _G.VRILZ_Features = Features   -- ← TAMBAH INI
+    print("[VRILZHUB] Ride a Pet Features v3.5 loaded")
 end
 
 return Features
