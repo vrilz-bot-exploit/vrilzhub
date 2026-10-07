@@ -1,5 +1,5 @@
 -- ============================================================
--- VRILZHUB FEATURES — RIDE A PET v3.5
+-- VRILZHUB FEATURES — RIDE A PET v3.4
 -- Auto Return: Drop 100 → Pickup ulang (WAJIB) → TP base
 -- ============================================================
 
@@ -10,18 +10,6 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
-
--- ============================================================
--- HATCH LUCK STATE
--- ============================================================
-local HatchLuckState = {
-    Enabled = false,
-    Mode = "Max",
-    Cooldown = 2.0,
-    LastClick = 0,
-    MaxCount = 0,
-    CicilCount = 0,
-}
 
 -- ============================================================
 -- ANTI-AFK — Cegah kick karena idle 20 menit
@@ -797,6 +785,9 @@ local function getDropRemoteLocal()
         or gameR:FindFirstChild("Drop")
 end
 
+-- ═══════════════════════════════════════════════════════════
+-- PICKUP ULANG: WAJIB egg yang di-drop ATAU egg terdekat di dropPos
+-- ═══════════════════════════════════════════════════════════
 local function rePickupSameEgg(myRoot, dropPos, targetEggName, radius)
     if not dropPos then return false, "no dropPos", 0 end
     task.wait(ReturnCfg.RePickupWait)
@@ -805,6 +796,7 @@ local function rePickupSameEgg(myRoot, dropPos, targetEggName, radius)
     while tries < ReturnCfg.RePickupMaxTries do
         tries = tries + 1
 
+        -- AUTO-CHECK 1: udah holding = sukses
         local holding, heldName = isHoldingEggLocal()
         if holding then
             return true, tostring(heldName), tries
@@ -816,9 +808,10 @@ local function rePickupSameEgg(myRoot, dropPos, targetEggName, radius)
             continue
         end
 
-        local targetEgg = nil
+        -- Scan semua egg di radius dropPos
+        local targetEgg = nil          -- prioritas: nama sama
         local targetDist = math.huge
-        local closestEgg = nil
+        local closestEgg = nil         -- fallback: terdekat
         local closestDist = math.huge
 
         for _, egg in ipairs(rendered:GetChildren()) do
@@ -827,11 +820,13 @@ local function rePickupSameEgg(myRoot, dropPos, targetEggName, radius)
                 if part then
                     local d = (part.Position - dropPos).Magnitude
 
+                    -- Egg terdekat (apapun) di radius
                     if d <= radius and d < closestDist then
                         closestEgg = egg
                         closestDist = d
                     end
 
+                    -- Egg dengan nama SAMA
                     if targetEggName and egg.Name == targetEggName then
                         if d <= radius and d < targetDist then
                             targetEgg = egg
@@ -842,6 +837,7 @@ local function rePickupSameEgg(myRoot, dropPos, targetEggName, radius)
             end
         end
 
+        -- Prioritaskan egg nama sama; kalo gak ada, pakai yang terdekat
         local pickEgg = targetEgg or closestEgg
         local pickDist = targetEgg and targetDist or closestDist
 
@@ -856,6 +852,7 @@ local function rePickupSameEgg(myRoot, dropPos, targetEggName, radius)
                     prompt.HoldDuration = 0
                 end
 
+                -- TP INSTANT ke egg
                 myRoot.CFrame = CFrame.lookAt(
                     eggPart.Position + Vector3.new(0, ReturnCfg.RePickupTPHeight, 0),
                     eggPart.Position)
@@ -864,17 +861,20 @@ local function rePickupSameEgg(myRoot, dropPos, targetEggName, radius)
 
                 task.wait(0.05)
 
+                -- Fire prompt
                 if typeof(fireproximityprompt) == "function" then
                     pcall(fireproximityprompt, prompt)
                 end
 
                 task.wait(0.08)
 
+                -- AUTO-CHECK 2: verify holding
                 local h, hn = isHoldingEggLocal()
                 if h then
                     return true, tostring(hn), tries
                 end
 
+                -- AUTO-CHECK 3: egg ilang dari map
                 if not pickEgg.Parent then
                     task.wait(0.15)
                     local h2, hn2 = isHoldingEggLocal()
@@ -900,6 +900,7 @@ local function returnToMyPlot()
     local holding, heldEggName = isHoldingEggLocal()
 
     if holding and heldEggName then
+        -- STEP 1: TP 100 studs dari base
         local plotCenter = getMyPlotCenterPos()
         if not plotCenter then return end
 
@@ -923,6 +924,7 @@ local function returnToMyPlot()
         myRoot.AssemblyLinearVelocity = Vector3.zero
         task.wait(ReturnCfg.DropWait)
 
+        -- STEP 2: Drop egg
         local dropRemote = getDropRemoteLocal()
         if dropRemote then
             for i = 1, ReturnCfg.DropSpamCount do
@@ -942,6 +944,7 @@ local function returnToMyPlot()
 
         task.wait(ReturnCfg.PostDropVerifyWait)
 
+        -- AUTO-CHECK: kalo masih holding, spam drop lagi
         if isHoldingEggLocal() then
             for i = 1, 5 do
                 if dropRemote then
@@ -952,6 +955,7 @@ local function returnToMyPlot()
             end
         end
 
+        -- STEP 3: Pickup ULANG (wajib — prioritas nama sama, fallback terdekat)
         local reOk, reName, reTries = rePickupSameEgg(myRoot, dropPos, heldEggName, ReturnCfg.RePickupScanRadius)
 
         if not reOk then
@@ -962,13 +966,16 @@ local function returnToMyPlot()
             end
         end
 
-        if not reOk or not isHoldingEggLocal() then            print("[RETURN] Pickup ulang gagal — skip TP base")
-            return
+        -- ═══ AUTO-CHECK FINAL: WAJIB HOLDING SEBELUM TP BASE ═══
+        if not reOk or not isHoldingEggLocal() then
+            print("[RETURN] Pickup ulang gagal — skip TP base")
+            return  -- jangan TP base
         end
 
         print("[RETURN] Pickup ulang OK: " .. tostring(reName))
     end
 
+    -- STEP 4: TP base (cuma kalo holding)
     if not isHoldingEggLocal() then
         return
     end
@@ -1084,242 +1091,77 @@ function Features.startAutoFarm()
 end
 
 -- ============================================================
--- SHARED HELPERS — dipakai Volcanic Hunt & Auto Mutation
+-- VOLCANIC HUNTER (FIXED v6)
 -- ============================================================
-
-local NetModule = nil
-task.spawn(function()
-    local packages = game:GetService("ReplicatedStorage"):FindFirstChild("packages")
-    if packages then
-        local netMod = packages:FindFirstChild("Net")
-        if netMod then
-            local ok, result = pcall(require, netMod)
-            if ok then
-                NetModule = result
-                print("[SHARED] Net module loaded")
-            end
-        end
-    end
-end)
-
-local function getVolcanoDipRemote()
-    if NetModule then
-        local ok, remote = pcall(function() return NetModule:RemoteEvent("VolcanoDip") end)
-        if ok and remote then return remote end
-    end
-    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
-    local gameR = remotes and remotes:FindFirstChild("Game")
-    if gameR then
-        local vd = gameR:FindFirstChild("VolcanoDip")
-        if vd and vd:IsA("RemoteEvent") then return vd end
-    end
-    return nil
-end
-
-local function isHoldingEggMutation()
-    local char = LocalPlayer.Character
-    if not char then return false, nil end
-
-    local wooden = char:FindFirstChild("Wooden")
-    if wooden then
-        local displayEgg = wooden:FindFirstChild("DisplayEgg")
-        if displayEgg then
-            for _, c in ipairs(displayEgg:GetChildren()) do
-                if (c:IsA("MeshPart") or c:IsA("Part") or c:IsA("UnionOperation"))
-                   and not c.Name:lower():find("circle")
-                   and c.Transparency < 1 then
-                    return true, c.Name
-                end
-            end
-        end
-        for _, c in ipairs(wooden:GetChildren()) do
-            if (c:IsA("MeshPart") or c:IsA("Part"))
-               and not c.Name:lower():find("circle")
-               and c.Transparency < 1 then
-                return true, c.Name
-            end
-        end
-    end
-
-    for _, c in ipairs(char:GetDescendants()) do
-        if (c:IsA("MeshPart") or c:IsA("Part") or c:IsA("UnionOperation"))
-           and c.Name:lower():find("egg")
-           and c.Transparency < 1
-           and c ~= char:FindFirstChild("HumanoidRootPart") then
-            return true, c.Name
-        end
-    end
-
-    local heldEgg = char:GetAttribute("HeldEgg")
-    if heldEgg and heldEgg ~= "" then
-        return true, tostring(heldEgg)
-    end
-
-    return false, nil
-end
-
-local function fireVolcanoDip()
-    local remote = getVolcanoDipRemote()
-    if remote then
-        local ok = pcall(function() remote:FireServer() end)
-        if ok then
-            print("[MUTATION] Drop: VolcanoDip fired")
-            return true
-        end
-    end
-    return false
-end
-
-local function findSafeVolcanoPos()
-    local volcano = Workspace:FindFirstChild("Volcano")
-    if not volcano then
-        return Vector3.new(-5102.84, 41396.1, -3489.11)
-    end
-
-    local bestLava, bestScore = nil, -math.huge
-    for _, d in ipairs(volcano:GetDescendants()) do
-        if d:IsA("BasePart") then
-            local n = d.Name:lower()
-            if n:find("lava") or n:find("magma") then
-                local top = d.Position.Y + d.Size.Y / 2
-                if top > bestScore then
-                    bestLava = d
-                    bestScore = top
-                end
-            end
-        end
-    end
-    if bestLava then
-        return bestLava.Position + Vector3.new(0, bestLava.Size.Y / 2 + 15, 0)
-    end
-
-    local bestTop, bestSize = nil, 0
-    for _, d in ipairs(volcano:GetDescendants()) do
-        if d:IsA("BasePart") then
-            local n = d.Name:lower()
-            if n:find("top") then
-                local size = d.Size.X * d.Size.Z
-                if size > bestSize then
-                    bestTop = d
-                    bestSize = size
-                end
-            end
-        end
-    end
-    if bestTop then
-        return bestTop.Position + Vector3.new(0, bestTop.Size.Y / 2 + 15, 0)
-    end
-
-    return Vector3.new(-5102.84, 41396.1, -3489.11)
-end
-
-local function tpToSafe(targetPos)
-    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not myRoot then return false end
-
-    local highPos = targetPos + Vector3.new(0, 200, 0)
-    myRoot.CFrame = CFrame.new(highPos)
-    myRoot.Velocity = Vector3.zero
-    myRoot.AssemblyLinearVelocity = Vector3.zero
-    print("[MUTATION] TP step 1 — ke atas (render)")
-    task.wait(0.8)
-
-    local root2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not root2 then return false end
-    root2.CFrame = CFrame.new(targetPos)
-    root2.Velocity = Vector3.zero
-    root2.AssemblyLinearVelocity = Vector3.zero
-    print("[MUTATION] TP step 2 — ke target Y: " .. math.floor(targetPos.Y))
-    task.wait(0.5)
-
-    local rootAfter = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if rootAfter and rootAfter.Position.Y < targetPos.Y - 50 then
-        print("[MUTATION] Kecebur! Retry TP...")
-        rootAfter.CFrame = CFrame.new(targetPos + Vector3.new(0, 30, 0))
-        task.wait(0.4)
-    end
-
-    return true
-end
-
--- ============================================================
--- VOLCANIC HUNTER (FIXED v7 — REAL FIX)
--- ============================================================
-
 local VolcanicState = {
     Enabled = false,
     Hunting = false,
-    ThreadId = 0,
 }
 
 local VolcanicWaypoints = {
     Vector3.new(-4902.3, 41396.1, -3751.4),
+    Vector3.new(-4908.1, 41365.0, -3742.9),
+    Vector3.new(-4909.5, 41357.4, -3740.8),
     Vector3.new(-4923.0, 41299.5, -3719.6),
+    Vector3.new(-4927.1, 41293.3, -3712.6),
+    Vector3.new(-4951.4, 41287.6, -3669.6),
     Vector3.new(-4973.1, 41283.3, -3643.8),
+    Vector3.new(-4995.2, 41285.0, -3620.6),
+    Vector3.new(-5010.8, 41279.5, -3597.9),
     Vector3.new(-5020.6, 41275.2, -3582.6),
+    Vector3.new(-5032.2, 41272.9, -3564.8),
     Vector3.new(-5062.9, 41262.1, -3542.1),
+    Vector3.new(-5070.9, 41262.3, -3537.0),
+    Vector3.new(-5079.4, 41265.2, -3533.3),
+    Vector3.new(-5088.6, 41240.3, -3525.3),
     Vector3.new(-5096.8, 41228.7, -3520.1),
+    Vector3.new(-5101.5, 41197.4, -3514.3),
     Vector3.new(-5103.3, 41165.1, -3511.6),
+    Vector3.new(-5112.5, 41164.5, -3551.9),
     Vector3.new(-5157.0, 41159.7, -3588.1),
+    Vector3.new(-5165.4, 41158.0, -3594.1),
+    Vector3.new(-5211.0, 41150.0, -3569.9),
     Vector3.new(-5248.0, 41147.5, -3580.6),
+    Vector3.new(-5256.8, 41143.1, -3581.9),
     Vector3.new(-5260.1, 41122.3, -3580.1),
+    Vector3.new(-5268.7, 41062.3, -3575.5),
     Vector3.new(-5259.1, 41050.3, -3586.2),
+    Vector3.new(-5269.5, 41047.7, -3640.0),
+    Vector3.new(-5264.0, 41042.3, -3655.1),
     Vector3.new(-5218.7, 41023.5, -3659.7),
+    Vector3.new(-5188.9, 41037.1, -3635.5),
+    Vector3.new(-5147.5, 41037.4, -3589.8),
     Vector3.new(-5123.4, 41037.2, -3550.7),
+    Vector3.new(-5123.0, 41033.8, -3503.2),
+    Vector3.new(-5094.9, 41037.6, -3486.6),
     Vector3.new(-5081.6, 41035.8, -3474.5),
+    Vector3.new(-5040.8, 41048.6, -3433.1),
     Vector3.new(-4990.3, 41050.6, -3391.9),
+    Vector3.new(-4949.3, 41057.1, -3400.0),
+    Vector3.new(-4908.1, 41036.5, -3439.7),
+    Vector3.new(-4869.4, 41000.1, -3474.8),
     Vector3.new(-4880.2, 40975.6, -3528.0),
+    Vector3.new(-4930.9, 40973.3, -3563.7),
     Vector3.new(-4966.2, 40960.4, -3610.8),
+    Vector3.new(-5016.4, 40943.8, -3648.2),
     Vector3.new(-5072.8, 40929.0, -3667.8),
+    Vector3.new(-5136.3, 40922.9, -3656.4),
     Vector3.new(-5151.8, 40914.2, -3681.0),
+    Vector3.new(-5209.2, 40907.2, -3677.5),
     Vector3.new(-5267.7, 40907.3, -3651.2),
+    Vector3.new(-5282.4, 40908.9, -3632.6),
     Vector3.new(-5270.4, 40907.1, -3619.5),
 }
 
 local function getVolcanicEgg()
-    local candidates = {}
-
     local rendered = Workspace:FindFirstChild("RenderedEggs")
-    if rendered then
-        for _, egg in ipairs(rendered:GetChildren()) do
-            if egg:IsA("Model") and egg.Name:lower():find("volcan", 1, true) then
-                table.insert(candidates, egg)
-            end
+    if not rendered then return nil end
+    for _, egg in ipairs(rendered:GetChildren()) do
+        if egg:IsA("Model") and egg.Name:lower():find("volcan", 1, true) then
+            return egg
         end
     end
-
-    local spawns = Workspace:FindFirstChild("EggSpawns")
-    if spawns then
-        for _, egg in ipairs(spawns:GetChildren()) do
-            if egg:IsA("Model") and egg.Name:lower():find("volcan", 1, true) then
-                table.insert(candidates, egg)
-            end
-            if egg.Name:lower() == "volcanic" then
-                for _, sub in ipairs(egg:GetChildren()) do
-                    if sub:IsA("Model") and sub.Name:lower():find("egg") then
-                        table.insert(candidates, sub)
-                    end
-                end
-            end
-        end
-    end
-
-    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    local best, bestDist = nil, math.huge
-    for _, egg in ipairs(candidates) do
-        local part = egg:FindFirstChildWhichIsA("BasePart", true)
-        if part and myRoot then
-            local d = (part.Position - myRoot.Position).Magnitude
-            if d < bestDist then
-                best, bestDist = egg, d
-            end
-        elseif part then
-            best = egg
-            break
-        end
-    end
-
-    return best
+    return nil
 end
 
 local function getVolcanicSpawn()
@@ -1336,10 +1178,13 @@ local function tpWaypoint(wp)
     root.CFrame = CFrame.new(wp + Vector3.new(0, 5, 0))
     root.Velocity = Vector3.zero
     root.AssemblyLinearVelocity = Vector3.zero
-    task.wait(0.1)
+    task.wait(0.12)
     return true
 end
 
+-- ═══════════════════════════════════════════════════════════
+-- FIX #1: exitCave — TAMBAH CEK EGG
+-- ═══════════════════════════════════════════════════════════
 local function exitCave()
     print("[VOLCANIC] Keluar goa via waypoint reverse...")
     for i = #VolcanicWaypoints, 1, -1 do
@@ -1356,6 +1201,9 @@ local function exitCave()
     return true
 end
 
+-- ═══════════════════════════════════════════════════════════
+-- PICKUP VOLCANIC — VERIFIED HOLDING
+-- ═══════════════════════════════════════════════════════════
 local function volcanicPickupVerified(egg)
     local part = egg:FindFirstChildWhichIsA("BasePart", true)
     if not part then return false end
@@ -1364,26 +1212,18 @@ local function volcanicPickupVerified(egg)
         or egg:FindFirstChild("Collect", true)
         or egg:FindFirstChildWhichIsA("ProximityPrompt", true)
 
-    if not prompt then
-        print("[VOLCANIC] ⚠️ Prompt gak ketemu!")
-        return false
-    end
-
-    if prompt:IsA("ProximityPrompt") then
+    if prompt and prompt:IsA("ProximityPrompt") then
         prompt.HoldDuration = 0
-        prompt.Enabled = true
-        prompt.MaxActivationDistance = math.huge
-        prompt.RequiresLineOfSight = false
     end
 
     local lastPos = part.Position
 
-    for i = 1, 30 do
+    for i = 1, 25 do
         if not Shared.VolcanicHunt_Enabled then return false end
 
         local holding = isHoldingEggMutation()
         if holding then
-            print("[VOLCANIC] ✅ Verified holding @ try " .. i)
+            print("[VOLCANIC] ✅ Verified holding egg @ try " .. i)
             return true
         end
 
@@ -1399,41 +1239,24 @@ local function volcanicPickupVerified(egg)
             lastPos = part.Position
         end
 
-        local curChar = LocalPlayer.Character
-        local curRoot = curChar and curChar:FindFirstChild("HumanoidRootPart")
-        local curHum = curChar and curChar:FindFirstChildOfClass("Humanoid")
+        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if curRoot then
             curRoot.CFrame = CFrame.lookAt(
                 lastPos + Vector3.new(0, 3, 0),
                 lastPos)
             curRoot.Velocity = Vector3.zero
             curRoot.AssemblyLinearVelocity = Vector3.zero
-            if curHum then
-                pcall(function()
-                    curHum:MoveTo(lastPos + Vector3.new(0, 3, 0))
-                end)
-            end
         end
 
-        if typeof(fireproximityprompt) == "function" then
-            for k = 1, 3 do
-                pcall(fireproximityprompt, prompt)
-                task.wait(0.05)
-            end
+        if prompt and typeof(fireproximityprompt) == "function" then
+            pcall(fireproximityprompt, prompt)
+        end
+        task.wait(0.08)
+        if prompt and typeof(fireproximityprompt) == "function" then
+            pcall(fireproximityprompt, prompt)
         end
 
-        if not isHoldingEggMutation() then
-            local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
-            local gameR = remotes and remotes:FindFirstChild("Game")
-            if gameR then
-                local pickupRemote = gameR:FindFirstChild("PickupEgg") or gameR:FindFirstChild("CollectEgg")
-                if pickupRemote and pickupRemote:IsA("RemoteEvent") then
-                    pcall(function() pickupRemote:FireServer(egg) end)
-                end
-            end
-        end
-
-        task.wait(0.15)
+        task.wait(0.2)
     end
 
     return isHoldingEggMutation()
@@ -1449,11 +1272,9 @@ function Features.startVolcanicHunt()
 
             if VolcanicState.Hunting then continue end
             VolcanicState.Hunting = true
-            VolcanicState.ThreadId = VolcanicState.ThreadId + 1
-            local myThreadId = VolcanicState.ThreadId
 
             task.spawn(function()
-                while Shared.VolcanicHunt_Enabled and VolcanicState.ThreadId == myThreadId do
+                while Shared.VolcanicHunt_Enabled do
                     local char = LocalPlayer.Character
                     local myRoot = char and char:FindFirstChild("HumanoidRootPart")
                     local hum = char and char:FindFirstChildOfClass("Humanoid")
@@ -1473,7 +1294,7 @@ function Features.startVolcanicHunt()
                                 if d > 50 then
                                     curRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
                                     curRoot.Velocity = Vector3.zero
-                                    print("[VOLCANIC] TP ke spawn point")
+                                    print("[VOLCANIC] Teleport ke spawn point volcanic")
                                 end
                             end
                         end
@@ -1490,7 +1311,6 @@ function Features.startVolcanicHunt()
                     local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
                     for i, wp in ipairs(VolcanicWaypoints) do
                         if not Shared.VolcanicHunt_Enabled then break end
-                        if VolcanicState.ThreadId ~= myThreadId then break end
 
                         local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                         if curRoot and eggPart and eggPart.Parent then
@@ -1531,23 +1351,28 @@ function Features.startVolcanicHunt()
                     end
 
                     if Shared.VolcanicMutation_Enabled then
-                        print("[VOLCANIC] STEP 4 — Auto Mutation ON")
+                        print("[VOLCANIC] STEP 4 — Auto Mutation ON → TP lava & drop")
 
                         task.wait(0.5)
-                        local lavaPos = findSafeVolcanoPos()
-                        print("[VOLCANIC] TP ke lava surface Y: " .. math.floor(lavaPos.Y))
-                        tpToSafe(lavaPos)
+                        local safePos = findSafeVolcanoPos()
+                        if safePos then
+                            local rootLava = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                            if rootLava then
+                                rootLava.CFrame = CFrame.new(safePos)
+                                rootLava.Velocity = Vector3.zero
+                                rootLava.AssemblyLinearVelocity = Vector3.zero
+                            end
+                        end
                         task.wait(1.5)
 
                         if not isHoldingEggMutation() then
-                            print("[VOLCANIC] ⚠️ Egg hilang sebelum drop")
+                            print("[VOLCANIC] ⚠️ Egg hilang sebelum drop — skip drop")
                         else
                             print("[VOLCANIC] Drop egg via VolcanoDip...")
                             local dropWaited = 0
                             local eggReleased = false
                             while dropWaited < 15 do
                                 if not Shared.VolcanicHunt_Enabled then break end
-                                if VolcanicState.ThreadId ~= myThreadId then break end
 
                                 fireVolcanoDip()
                                 task.wait(1.5)
@@ -1568,7 +1393,6 @@ function Features.startVolcanicHunt()
                                 local eggBack = false
                                 while os.clock() - waitStart < 20 do
                                     if not Shared.VolcanicHunt_Enabled then break end
-                                    if VolcanicState.ThreadId ~= myThreadId then break end
                                     task.wait(1)
                                     if isHoldingEggMutation() then
                                         eggBack = true
@@ -1585,12 +1409,12 @@ function Features.startVolcanicHunt()
                             end
                         end
                     else
-                        print("[VOLCANIC] STEP 4 — Auto Mutation OFF, skip")
+                        print("[VOLCANIC] STEP 4 — Auto Mutation OFF, skip drop")
                     end
 
                     if Shared.VolcanicReturn_Enabled then
                         task.wait(0.4)
-                        print("[VOLCANIC] STEP 5 — Return ke plot")
+                        print("[VOLCANIC] STEP 5 — Return ke plot (drop 100 → pickup → TP base)")
                         local oldFlag = Shared.AutoReturn_Enabled
                         Shared.AutoReturn_Enabled = true
                         returnToMyPlot()
@@ -1626,10 +1450,142 @@ local MUT_CONFIG = {
     TP_ABOVE_TOP = 200,
 }
 
--- NetModule, getVolcanoDipRemote, isHoldingEggMutation,
--- fireVolcanoDip, findSafeVolcanoPos, tpToSafe
--- SUDAH DIDEfinisikan di SHARED HELPERS (di atas Volcanic Hunt)
--- Jadi DI SINI GAK PERLU didefinisikan lagi.
+local NetModule = nil
+task.spawn(function()
+    local packages = game:GetService("ReplicatedStorage"):FindFirstChild("packages")
+    if packages then
+        local netMod = packages:FindFirstChild("Net")
+        if netMod then
+            local ok, result = pcall(require, netMod)
+            if ok then
+                NetModule = result
+                print("[MUTATION] Net module loaded")
+            end
+        end
+    end
+end)
+
+local function getVolcanoDipRemote()
+    if NetModule then
+        local ok, remote = pcall(function() return NetModule:RemoteEvent("VolcanoDip") end)
+        if ok and remote then return remote end
+    end
+    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+    local gameR = remotes and remotes:FindFirstChild("Game")
+    if gameR then
+        local vd = gameR:FindFirstChild("VolcanoDip")
+        if vd and vd:IsA("RemoteEvent") then return vd end
+    end
+    return nil
+end
+
+-- ═══════════════════════════════════════════════════════════
+-- FIX #2: findSafeVolcanoPos — RETURN SURFACE LAVA + 15
+-- ═══════════════════════════════════════════════════════════
+local function findSafeVolcanoPos()
+    local volcano = Workspace:FindFirstChild("Volcano")
+    if not volcano then
+        return Vector3.new(-5102.84, 41396.1, -3489.11)
+    end
+
+    -- Prioritas 1: Lava / Magma SURFACE
+    local bestLava, bestScore = nil, -math.huge
+    for _, d in ipairs(volcano:GetDescendants()) do
+        if d:IsA("BasePart") then
+            local n = d.Name:lower()
+            if n:find("lava") or n:find("magma") then
+                local top = d.Position.Y + d.Size.Y / 2
+                if top > bestScore then
+                    bestLava = d
+                    bestScore = top
+                end
+            end
+        end
+    end
+    if bestLava then
+        return bestLava.Position + Vector3.new(0, bestLava.Size.Y / 2 + 15, 0)
+    end
+
+    -- Prioritas 2: Top
+    local bestTop, bestSize = nil, 0
+    for _, d in ipairs(volcano:GetDescendants()) do
+        if d:IsA("BasePart") then
+            local n = d.Name:lower()
+            if n:find("top") then
+                local size = d.Size.X * d.Size.Z
+                if size > bestSize then
+                    bestTop = d
+                    bestSize = size
+                end
+            end
+        end
+    end
+    if bestTop then
+        return bestTop.Position + Vector3.new(0, bestTop.Size.Y / 2 + 15, 0)
+    end
+
+    return Vector3.new(-5102.84, 41396.1, -3489.11)
+end
+
+-- ═══════════════════════════════════════════════════════════
+-- FIX #3: isHoldingEggMutation — ROBUST
+-- ═══════════════════════════════════════════════════════════
+local function isHoldingEggMutation()
+    local char = LocalPlayer.Character
+    if not char then return false, nil end
+
+    -- Metode 1: Wooden > DisplayEgg
+    local wooden = char:FindFirstChild("Wooden")
+    if wooden then
+        local displayEgg = wooden:FindFirstChild("DisplayEgg")
+        if displayEgg then
+            for _, c in ipairs(displayEgg:GetChildren()) do
+                if (c:IsA("MeshPart") or c:IsA("Part") or c:IsA("UnionOperation"))
+                   and not c.Name:lower():find("circle")
+                   and c.Transparency < 1 then
+                    return true, c.Name
+                end
+            end
+        end
+        for _, c in ipairs(wooden:GetChildren()) do
+            if (c:IsA("MeshPart") or c:IsA("Part"))
+               and not c.Name:lower():find("circle")
+               and c.Transparency < 1 then
+                return true, c.Name
+            end
+        end
+    end
+
+    -- Metode 2: Scan descendants
+    for _, c in ipairs(char:GetDescendants()) do
+        if (c:IsA("MeshPart") or c:IsA("Part") or c:IsA("UnionOperation"))
+           and c.Name:lower():find("egg")
+           and c.Transparency < 1
+           and c ~= char:FindFirstChild("HumanoidRootPart") then
+            return true, c.Name
+        end
+    end
+
+    -- Metode 3: Attribute
+    local heldEgg = char:GetAttribute("HeldEgg")
+    if heldEgg and heldEgg ~= "" then
+        return true, tostring(heldEgg)
+    end
+
+    return false, nil
+end
+
+local function fireVolcanoDip()
+    local remote = getVolcanoDipRemote()
+    if remote then
+        local ok = pcall(function() remote:FireServer() end)
+        if ok then
+            print("[MUTATION] Drop: VolcanoDip fired")
+            return true
+        end
+    end
+    return false
+end
 
 local function fireBasketDrop()
     local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
@@ -1638,6 +1594,35 @@ local function fireBasketDrop()
     local bd = gameR:FindFirstChild("BasketDrop")
     if not bd then return false end
     return pcall(function() bd:FireServer() end)
+end
+
+local function tpToSafe(pos)
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return false end
+
+    local highPos = pos + Vector3.new(0, 250, 0)
+    myRoot.CFrame = CFrame.new(highPos)
+    myRoot.Velocity = Vector3.zero
+    myRoot.AssemblyLinearVelocity = Vector3.zero
+    print("[MUTATION] TP step 1 — ke atas (render aman)")
+    task.wait(0.8)
+
+    local root2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not root2 then return false end
+    root2.CFrame = CFrame.new(pos)
+    root2.Velocity = Vector3.zero
+    root2.AssemblyLinearVelocity = Vector3.zero
+    print("[MUTATION] TP step 2 — ke target")
+    task.wait(0.5)
+
+    local rootAfter = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if rootAfter and rootAfter.Position.Y < pos.Y - 50 then
+        print("[MUTATION] Kecebur! Retry TP...")
+        rootAfter.CFrame = CFrame.new(pos + Vector3.new(0, 50, 0))
+        task.wait(0.4)
+    end
+
+    return true
 end
 
 local function runMutationOnce()
@@ -1838,96 +1823,6 @@ function Features.startMutationSteal()
 end
 
 -- ============================================================
--- AUTO HATCH LUCK — JARAK JAUH (FIRE REMOTE LANGSUNG)
--- ============================================================
-local HatchLuckRS = game:GetService("ReplicatedStorage")
-
-local function getHatchLuckRemote()
-    local remotes = HatchLuckRS:FindFirstChild("Remotes")
-    local gameR = remotes and remotes:FindFirstChild("Game")
-    local plotR = gameR and gameR:FindFirstChild("Plot")
-    return plotR and plotR:FindFirstChild("Upgrades")
-end
-
-local function fireHatchLuckUpgrade(mode)
-    local remote = getHatchLuckRemote()
-    if not remote then
-        return false, "remote gak ada"
-    end
-
-    local payloads
-    if mode == "Max" then
-        payloads = {
-            {"HatchLuck", "Max"},
-            {"HatchLuck", true},
-            {"HatchLuck", 0},
-            {"MaxHatchLuck"},
-            {"HatchLuckMax"},
-            {"Upgrade", "HatchLuck", "Max"},
-            {"Max"},
-            {Action = "Max", Type = "HatchLuck"},
-            {Type = "HatchLuck", Max = true},
-        }
-    else
-        payloads = {
-            {"HatchLuck"},
-            {"HatchLuck", 1},
-            {"Upgrade", "HatchLuck"},
-            {Type = "HatchLuck"},
-            {UpgradeType = "HatchLuck"},
-        }
-    end
-
-    for i, payload in ipairs(payloads) do
-        local ok = pcall(function()
-            if type(payload) == "table" and #payload > 0 then
-                remote:FireServer(table.unpack(payload))
-            else
-                remote:FireServer(payload)
-            end
-        end)
-        if ok then
-            task.wait(0.1)
-        end
-    end
-
-    return true, "fired"
-end
-
-function Features.startAutoHatchLuck()
-    task.spawn(function()
-        while task.wait(0.3) do
-            if not HatchLuckState.Enabled then continue end
-            if os.clock() - HatchLuckState.LastClick < HatchLuckState.Cooldown then continue end
-            HatchLuckState.LastClick = os.clock()
-
-            local ok, reason = fireHatchLuckUpgrade(HatchLuckState.Mode)
-            if ok then
-                if HatchLuckState.Mode == "Max" then
-                    HatchLuckState.MaxCount = HatchLuckState.MaxCount + 1
-                    print("[HATCH LUCK] ⚡ MAX fired #" .. HatchLuckState.MaxCount)
-                else
-                    HatchLuckState.CicilCount = HatchLuckState.CicilCount + 1
-                    print("[HATCH LUCK] 🔄 CICIL fired #" .. HatchLuckState.CicilCount)
-                end
-            else
-                print("[HATCH LUCK] ❌ " .. reason)
-            end
-        end
-    end)
-end
-
-function Features.getHatchLuckState()
-    return HatchLuckState
-end
-
-function Features.setHatchLuckMode(mode)
-    HatchLuckState.Mode = mode
-    HatchLuckState.Cooldown = (mode == "Max") and 2.0 or 1.0
-end
-
-
--- ============================================================
 -- FEATURES.INIT
 -- ============================================================
 function Features.Init(sharedState)
@@ -1947,10 +1842,8 @@ function Features.Init(sharedState)
     Features.startVolcanicHunt()
     Features.startAutoMutation()
     Features.startMutationSteal()
-    Features.startAutoHatchLuck()
 
-    _G.VRILZ_Features = Features
-    print("[VRILZHUB] Ride a Pet Features v3.5 loaded")
+    print("[VRILZHUB] Ride a Pet Features v3.4 loaded")
 end
 
 return Features
