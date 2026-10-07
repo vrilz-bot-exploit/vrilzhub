@@ -321,6 +321,15 @@ local function getMyPlot()
         if owner == LocalPlayer.UserId or owner == LocalPlayer.Name then
             return plot
         end
+
+        -- Fallback: cek plot.Data.Owner (ObjectValue)
+        local data = plot:FindFirstChild("Data")
+        if data then
+            local ownerVal = data:FindFirstChild("Owner")
+            if ownerVal and ownerVal:IsA("ObjectValue") and ownerVal.Value == LocalPlayer then
+                return plot
+            end
+        end
     end
     return nil
 end
@@ -444,28 +453,44 @@ function Features.startAutoSteal()
 end
 
 -- ============================================================
--- AUTO HATCH
+-- AUTO HATCH (NO TP) — Fire prompt dari jauh
 -- ============================================================
 function Features.startAutoHatch()
     task.spawn(function()
-        while task.wait(1) do
+        while task.wait(0.5) do
             if not Shared.AutoHatch_Enabled then continue end
+
             local plot = getMyPlot()
             if not plot then continue end
-            local eggs = plot:FindFirstChild("Eggs")
-            if not eggs then continue end
-            for _, egg in ipairs(eggs:GetChildren()) do
-                local prompt = egg:FindFirstChild("Hatch", true)
-                if prompt and prompt.Enabled then
-                    if typeof(fireproximityprompt) == "function" then
-                        pcall(fireproximityprompt, prompt)
-                    end
+
+            local eggsFolder = plot:FindFirstChild("Eggs")
+            if not eggsFolder then continue end
+
+            for _, egg in ipairs(eggsFolder:GetChildren()) do
+                if not Shared.AutoHatch_Enabled then break end
+                if not egg:IsA("Model") then continue end
+
+                local handle = egg:FindFirstChild("Handle")
+                if not handle then continue end
+
+                local hatchPrompt = handle:FindFirstChild("Hatch")
+                if not hatchPrompt or not hatchPrompt:IsA("ProximityPrompt") then continue end
+
+                -- Paksa prompt bisa di-fire dari jauh
+                hatchPrompt.Enabled = true
+                hatchPrompt.MaxActivationDistance = math.huge
+                hatchPrompt.RequiresLineOfSight = false
+                hatchPrompt.HoldDuration = 0
+
+                if typeof(fireproximityprompt) == "function" then
+                    pcall(fireproximityprompt, hatchPrompt)
+                    task.wait(0.05)
+                    pcall(fireproximityprompt, hatchPrompt)
                 end
             end
         end
     end)
 end
-
 -- ============================================================
 -- AUTO RIDE PET
 -- ============================================================
