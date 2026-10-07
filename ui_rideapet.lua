@@ -4575,6 +4575,8 @@ function UI.Init(sharedState)
         ["Ethereal"] = false,
         ["Secret"] = false,
     }
+    Shared.AutoHatchLuck_Enabled = false
+    Shared.HatchLuck_Mode = "Max"
       Shared.StealMode = "TP"
     Shared.ShowTitle = true
     Shared.RarityNotifThreshold = "Legendary"
