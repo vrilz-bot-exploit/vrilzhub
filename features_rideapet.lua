@@ -491,6 +491,130 @@ function Features.startAutoHatch()
         end
     end)
 end
+
+-- ============================================================
+-- AUTO PLANT EGG — From Backpack to Nest
+-- ============================================================
+local AutoPlantState = {
+    Enabled = false,
+    EggFilter = "Cherub",
+    PlantedCount = 0,
+    Status = "Idle",
+}
+
+local function findEggToolInBackpack(eggName)
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    if not backpack then return nil end
+    local targetName = eggName:lower()
+    for _, tool in ipairs(backpack:GetChildren()) do
+        if tool:IsA("Tool") then
+            local cleanName = tool.Name:lower():gsub("%s*egg%s*$", ""):gsub("^%s+", ""):gsub("%s+$", "")
+            if cleanName == targetName then
+                return tool
+            end
+        end
+    end
+    return nil
+end
+
+local function findEmptyNest()
+    local plot = getMyPlot()
+    if not plot then return nil end
+    local nests = plot:FindFirstChild("Nests")
+    if not nests then return nil end
+
+    for _, nest in ipairs(nests:GetChildren()) do
+        if nest:IsA("Model") and not nest:FindFirstChild("Locked") then
+            local hasEgg = false
+            for _, child in ipairs(nest:GetChildren()) do
+                if child:IsA("Model") and child.Name:lower() ~= "model" then
+                    hasEgg = true
+                    break
+                end
+            end
+            if not hasEgg then return nest end
+        end
+    end
+    return nil
+end
+
+function Features.startAutoPlantEgg()
+    task.spawn(function()
+        while task.wait(0.2) do
+            if not AutoPlantState.Enabled then
+                AutoPlantState.Status = "Idle"
+                continue
+            end
+
+            local char = LocalPlayer.Character
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if not hum or hum.Health <= 0 then continue end
+
+            local eggTool = findEggToolInBackpack(AutoPlantState.EggFilter)
+            if not eggTool then
+                AutoPlantState.Status = "X " .. AutoPlantState.EggFilter .. " not in backpack"
+                continue
+            end
+
+            -- 1. Equip tool
+            pcall(function() hum:EquipTool(eggTool) end)
+
+            -- 2. Cari nest kosong
+            local nest = findEmptyNest()
+            if not nest then
+                AutoPlantState.Status = "X No empty nest"
+                continue
+            end
+
+            -- 3. Fire remote EggPlaced
+            local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+            local gameR = remotes and remotes:FindFirstChild("Game")
+            if gameR then
+                local eggPlaced = gameR:FindFirstChild("EggPlaced")
+                if eggPlaced then
+                    pcall(function() eggPlaced:FireServer() end)
+                    pcall(function() eggPlaced:FireServer(nest) end)
+                    pcall(function() eggPlaced:FireServer(nest.Name) end)
+                    pcall(function() eggPlaced:FireServer(AutoPlantState.EggFilter) end)
+                end
+                local plotF = gameR:FindFirstChild("Plot")
+                if plotF then
+                    local nestsR = plotF:FindFirstChild("Nests")
+                    if nestsR then
+                        pcall(function() nestsR:FireServer(nest) end)
+                        pcall(function() nestsR:FireServer(nest.Name) end)
+                    end
+                end
+            end
+
+            -- 4. Activate tool
+            pcall(function() eggTool:Activate() end)
+
+            -- 5. Fire prompt di nest
+            local prompt = nest:FindFirstChildWhichIsA("ProximityPrompt", true)
+            if prompt then
+                prompt.HoldDuration = 0
+                prompt.MaxActivationDistance = math.huge
+                if typeof(fireproximityprompt) == "function" then
+                    pcall(fireproximityprompt, prompt)
+                end
+            end
+
+            AutoPlantState.PlantedCount = AutoPlantState.PlantedCount + 1
+            AutoPlantState.Status = "OK " .. AutoPlantState.EggFilter .. " (" .. AutoPlantState.PlantedCount .. ")"
+        end
+    end)
+end
+
+function Features.getAutoPlantState()
+    return AutoPlantState
+end
+
+function Features.setAutoPlantFilter(eggName)
+    AutoPlantState.EggFilter = eggName or ""
+end
+
+
 -- ============================================================
 -- AUTO RIDE PET
 -- ============================================================
@@ -1956,6 +2080,7 @@ function Features.Init(sharedState)
     Features.startPetESP()
     Features.startAutoSteal()
     Features.startAutoHatch()
+    Features.startAutoPlantEgg()
     Features.startAutoRidePet()
     Features.startEggPrediction()
     Features.startSpeed()
