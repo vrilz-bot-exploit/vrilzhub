@@ -3185,7 +3185,7 @@ local function buildMainWindow(parent)
     hatchModeLbl.ZIndex = 3
     hatchModeLbl.Parent = hatchLuckContent
 
-    makeDropdownGlobal(hatchLuckContent, {"Max", "Cicil"}, Shared.HatchLuck_Mode or "Max", function(v)
+    makeDropdownGlobal(hatchLuckContent, {"Max", "A little"}, Shared.HatchLuck_Mode or "Max", function(v)
         Shared.HatchLuck_Mode = v
         local F = getFeatures()
         if F and F.setHatchLuckMode then F.setHatchLuckMode(v) end
