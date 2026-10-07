@@ -497,7 +497,7 @@ end
 -- ============================================================
 local AutoPlantState = {
     Enabled = false,
-    EggFilter = "Cherub",
+    EggFilter = "None",
     PlantedCount = 0,
     Status = "Idle",
 }
@@ -543,6 +543,12 @@ function Features.startAutoPlantEgg()
         while task.wait(0.2) do
             if not AutoPlantState.Enabled then
                 AutoPlantState.Status = "Idle"
+                continue
+            end
+
+            -- WAJIB pilih egg dulu, kalau None = skip
+            if not AutoPlantState.EggFilter or AutoPlantState.EggFilter == "" or AutoPlantState.EggFilter == "None" then
+                AutoPlantState.Status = "Pilih egg dulu di Plant Filter!"
                 continue
             end
 
