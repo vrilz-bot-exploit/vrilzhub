@@ -1061,7 +1061,7 @@ local function returnToMyPlot()
     local holding, heldEggName = isHoldingEggLocal()
 
     if holding and heldEggName then
-        -- STEP 1: TP 100 studs dari base
+        -- STEP 1: Hitung dropPos (100 studs dari base)
         local plotCenter = getMyPlotCenterPos()
         if not plotCenter then return end
 
@@ -1080,12 +1080,28 @@ local function returnToMyPlot()
             plotCenter.Z + dir.Z * ReturnCfg.DropDistanceFromPlot
         )
 
+        -- ═══════════════════════════════════════════════════════
+        -- STEP 1: TP KE ATAS DULU (biar render aman)
+        -- ═══════════════════════════════════════════════════════
+        local highPos = dropPos + Vector3.new(0, 100, 0)  -- 100 studs di atas
+        myRoot.CFrame = CFrame.new(highPos)
+        myRoot.Velocity = Vector3.zero
+        myRoot.AssemblyLinearVelocity = Vector3.zero
+        task.wait(0.5)  -- tunggu render
+
+        -- ═══════════════════════════════════════════════════════
+        -- STEP 2: TP KE DROPPOS (di bawah)
+        -- ═══════════════════════════════════════════════════════
+        myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if not myRoot then return end
         myRoot.CFrame = CFrame.new(dropPos)
         myRoot.Velocity = Vector3.zero
         myRoot.AssemblyLinearVelocity = Vector3.zero
         task.wait(ReturnCfg.DropWait)
 
-        -- STEP 2: Drop egg
+        -- ═══════════════════════════════════════════════════════
+        -- STEP 3: DROP EGG
+        -- ═══════════════════════════════════════════════════════
         local dropRemote = getDropRemoteLocal()
         if dropRemote then
             for i = 1, ReturnCfg.DropSpamCount do
@@ -1116,7 +1132,9 @@ local function returnToMyPlot()
             end
         end
 
-        -- STEP 3: Pickup ULANG (wajib — prioritas nama sama, fallback terdekat)
+        -- ═══════════════════════════════════════════════════════
+        -- STEP 4: PICKUP ULANG (wajib)
+        -- ═══════════════════════════════════════════════════════
         local reOk, reName, reTries = rePickupSameEgg(myRoot, dropPos, heldEggName, ReturnCfg.RePickupScanRadius)
 
         if not reOk then
@@ -1127,16 +1145,18 @@ local function returnToMyPlot()
             end
         end
 
-        -- ═══ AUTO-CHECK FINAL: WAJIB HOLDING SEBELUM TP BASE ═══
+        -- AUTO-CHECK FINAL: WAJIB HOLDING SEBELUM TP BASE
         if not reOk or not isHoldingEggLocal() then
             print("[RETURN] Pickup ulang gagal — skip TP base")
-            return  -- jangan TP base
+            return
         end
 
         print("[RETURN] Pickup ulang OK: " .. tostring(reName))
     end
 
-    -- STEP 4: TP base (cuma kalo holding)
+    -- ═══════════════════════════════════════════════════════
+    -- STEP 5: TP BASE (cuma kalo holding)
+    -- ═══════════════════════════════════════════════════════
     if not isHoldingEggLocal() then
         return
     end
@@ -1153,10 +1173,20 @@ local function returnToMyPlot()
     if spawnPart then
         local rootFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if rootFinal then
-            rootFinal.CFrame = spawnPart.CFrame + Vector3.new(0, ReturnCfg.BaseTPHeight, 0)
+            -- 2-step TP juga: ke atas dulu, baru ke base
+            local baseHigh = spawnPart.Position + Vector3.new(0, 50, 0)
+            rootFinal.CFrame = CFrame.new(baseHigh)
             rootFinal.Velocity = Vector3.zero
             rootFinal.AssemblyLinearVelocity = Vector3.zero
-            print("[RETURN] TP base OK")
+            task.wait(0.3)
+
+            rootFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if rootFinal then
+                rootFinal.CFrame = spawnPart.CFrame + Vector3.new(0, ReturnCfg.BaseTPHeight, 0)
+                rootFinal.Velocity = Vector3.zero
+                rootFinal.AssemblyLinearVelocity = Vector3.zero
+                print("[RETURN] TP base OK (2-step)")
+            end
         end
     end
 end
