@@ -1808,6 +1808,104 @@ function Features.startMutationSteal()
 end
 
 -- ============================================================
+-- AUTO HATCH LUCK — JARAK JAUH (FIRE REMOTE LANGSUNG)
+-- ============================================================
+local HatchLuckState = {
+    Enabled = false,
+    Mode = "Max",
+    Cooldown = 2.0,
+    LastClick = 0,
+    MaxCount = 0,
+    CicilCount = 0,
+}
+
+local HatchLuckRS = game:GetService("ReplicatedStorage")
+
+local function getHatchLuckRemote()
+    local remotes = HatchLuckRS:FindFirstChild("Remotes")
+    local gameR = remotes and remotes:FindFirstChild("Game")
+    local plotR = gameR and gameR:FindFirstChild("Plot")
+    return plotR and plotR:FindFirstChild("Upgrades")
+end
+
+local function fireHatchLuckUpgrade(mode)
+    local remote = getHatchLuckRemote()
+    if not remote then
+        return false, "remote gak ada"
+    end
+
+    local payloads
+    if mode == "Max" then
+        payloads = {
+            {"HatchLuck", "Max"},
+            {"HatchLuck", true},
+            {"HatchLuck", 0},
+            {"MaxHatchLuck"},
+            {"HatchLuckMax"},
+            {"Upgrade", "HatchLuck", "Max"},
+            {"Max"},
+            {Action = "Max", Type = "HatchLuck"},
+            {Type = "HatchLuck", Max = true},
+        }
+    else
+        payloads = {
+            {"HatchLuck"},
+            {"HatchLuck", 1},
+            {"Upgrade", "HatchLuck"},
+            {Type = "HatchLuck"},
+            {UpgradeType = "HatchLuck"},
+        }
+    end
+
+    for i, payload in ipairs(payloads) do
+        local ok = pcall(function()
+            if type(payload) == "table" and #payload > 0 then
+                remote:FireServer(table.unpack(payload))
+            else
+                remote:FireServer(payload)
+            end
+        end)
+        if ok then
+            task.wait(0.1)
+        end
+    end
+
+    return true, "fired"
+end
+
+function Features.startAutoHatchLuck()
+    task.spawn(function()
+        while task.wait(0.3) do
+            if not HatchLuckState.Enabled then continue end
+            if os.clock() - HatchLuckState.LastClick < HatchLuckState.Cooldown then continue end
+            HatchLuckState.LastClick = os.clock()
+
+            local ok, reason = fireHatchLuckUpgrade(HatchLuckState.Mode)
+            if ok then
+                if HatchLuckState.Mode == "Max" then
+                    HatchLuckState.MaxCount = HatchLuckState.MaxCount + 1
+                    print("[HATCH LUCK] ⚡ MAX fired #" .. HatchLuckState.MaxCount)
+                else
+                    HatchLuckState.CicilCount = HatchLuckState.CicilCount + 1
+                    print("[HATCH LUCK] 🔄 CICIL fired #" .. HatchLuckState.CicilCount)
+                end
+            else
+                print("[HATCH LUCK] ❌ " .. reason)
+            end
+        end
+    end)
+end
+
+function Features.getHatchLuckState()
+    return HatchLuckState
+end
+
+function Features.setHatchLuckMode(mode)
+    HatchLuckState.Mode = mode
+    HatchLuckState.Cooldown = (mode == "Max") and 2.0 or 1.0
+end
+
+-- ============================================================
 -- FEATURES.INIT
 -- ============================================================
 function Features.Init(sharedState)
@@ -1826,7 +1924,8 @@ function Features.Init(sharedState)
     Features.startAutoFarm()
         Features.startVolcanicHunt()
         Features.startAutoMutation()
-    Features.startMutationSteal()
+        Features.startMutationSteal()
+    Features.startAutoHatchLuck()
 
     print("[VRILZHUB] Ride a Pet Features v3.4 loaded")
 end
