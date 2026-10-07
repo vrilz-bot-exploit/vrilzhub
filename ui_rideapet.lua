@@ -3229,22 +3229,6 @@ local function buildMainWindow(parent)
         end
     end)
 
-    -- Notes
-    local hatchLuckNote = Instance.new("TextLabel")
-    hatchLuckNote.Size = UDim2.new(1, 0, 0, 70)
-    hatchLuckNote.BackgroundTransparency = 1
-    hatchLuckNote.Text = "Auto Hatch = fire Hatch prompt from far\nAuto Plant = plant egg from backpack to nest\nLuck Max = fire remote MAX (2s cooldown)\nLuck Cicil = fire remote cicil (1s cooldown)"
-    hatchLuckNote.TextColor3 = C.Muted
-    hatchLuckNote.Font = Enum.Font.GothamSemibold
-    hatchLuckNote.TextSize = CFG.FONT_MUTED
-    hatchLuckNote.TextWrapped = true
-    hatchLuckNote.TextXAlignment = Enum.TextXAlignment.Left
-    hatchLuckNote.TextYAlignment = Enum.TextYAlignment.Top
-    hatchLuckNote.LayoutOrder = 10
-    hatchLuckNote.ZIndex = 3
-    hatchLuckNote.Parent = hatchLuckContent
-    registerTheme(hatchLuckNote, "Muted", "TextColor3")
-
     registerTab("Egg", "◯", "Egg")
 
     -- TAB VISUAL
