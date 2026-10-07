@@ -12,6 +12,10 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
+-- Ambil Features dari _G (biar bisa akses fungsi Hatch Luck)
+local function getFeatures()
+    return _G.VRILZ_Features
+end
 
 -- ====== AUTO-DETECT MOBILE ======
 local IS_MOBILE = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
@@ -3155,10 +3159,11 @@ local function buildMainWindow(parent)
     -- ===== AUTO HATCH LUCK =====
     local hatchLuckCard, hatchLuckContent = makeCard(eggPage, "🔮 AUTO HATCH LUCK", 2)
 
-    makeToggle(hatchLuckContent, "Enable Auto Hatch Luck", false, function(v)
+        makeToggle(hatchLuckContent, "Enable Auto Hatch Luck", false, function(v)
         Shared.AutoHatchLuck_Enabled = v
-        if Features and Features.getHatchLuckState then
-            Features.getHatchLuckState().Enabled = v
+        local F = getFeatures()
+        if F and F.getHatchLuckState then
+            F.getHatchLuckState().Enabled = v
         end
         if v then
             notify("🔮 Hatch Luck: ON (" .. (Shared.HatchLuck_Mode or "Max") .. ")", "success")
@@ -3178,10 +3183,11 @@ local function buildMainWindow(parent)
     hatchModeLbl.ZIndex = 3
     hatchModeLbl.Parent = hatchLuckContent
 
-    makeDropdownGlobal(hatchLuckContent, {"Max", "Cicil"}, Shared.HatchLuck_Mode or "Max", function(v)
+        makeDropdownGlobal(hatchLuckContent, {"Max", "Cicil"}, Shared.HatchLuck_Mode or "Max", function(v)
         Shared.HatchLuck_Mode = v
-        if Features and Features.setHatchLuckMode then
-            Features.setHatchLuckMode(v)
+        local F = getFeatures()
+        if F and F.setHatchLuckMode then
+            F.setHatchLuckMode(v)
         end
         notify("🔮 Hatch Luck Mode: " .. v, "info")
     end)
