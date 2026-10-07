@@ -3156,35 +3156,24 @@ local function buildMainWindow(parent)
     makeToggle(eggEspContent, "Show Name", false, function(v) Shared.ESP_EggName_Enabled = v end)
     makeToggle(eggEspContent, "Show Luck", false, function(v) Shared.ESP_EggLuck_Enabled = v end)
 
-    -- ===== AUTO HATCH LUCK =====
-        -- ===== AUTO HATCH + HATCH LUCK (GABUNG) =====
-    local hatchLuckCard, hatchLuckContent = makeCard(eggPage, "🔮 AUTO HATCH + LUCK", 2)
+     -- ===== EGG PLOT (HATCH + LUCK + PLANT) =====
+    local hatchLuckCard, hatchLuckContent = makeCard(eggPage, "🥚 EGG PLOT", 2)
 
-    -- === AUTO HATCH (NO TP) ===
-    makeToggle(hatchLuckContent, "Enable Auto Hatch", false, function(v)
+    -- Auto Hatch
+    makeToggle(hatchLuckContent, "Auto Hatch", false, function(v)
         Shared.AutoHatch_Enabled = v
-        if v then
-            notify("🥚 Auto Hatch: ON", "success")
-        else
-            notify("🥚 Auto Hatch: OFF", "info")
-        end
+        if v then notify("Auto Hatch: ON", "success") else notify("Auto Hatch: OFF", "info") end
     end)
 
-    -- === AUTO HATCH LUCK ===
-    makeToggle(hatchLuckContent, "Enable Auto Hatch Luck", false, function(v)
+    -- Auto Hatch Luck
+    makeToggle(hatchLuckContent, "Auto Hatch Luck", false, function(v)
         Shared.AutoHatchLuck_Enabled = v
         local F = getFeatures()
-        if F and F.getHatchLuckState then
-            F.getHatchLuckState().Enabled = v
-        end
-        if v then
-            notify("🔮 Hatch Luck: ON (" .. (Shared.HatchLuck_Mode or "Max") .. ")", "success")
-        else
-            notify("🔮 Hatch Luck: OFF", "info")
-        end
+        if F and F.getHatchLuckState then F.getHatchLuckState().Enabled = v end
+        if v then notify("Hatch Luck: ON", "success") else notify("Hatch Luck: OFF", "info") end
     end)
 
-    -- === MODE SELECT ===
+    -- Hatch Luck Mode
     local hatchModeLbl = Instance.new("TextLabel")
     hatchModeLbl.Size = UDim2.new(1, 0, 0, 16)
     hatchModeLbl.BackgroundTransparency = 1
@@ -3199,17 +3188,42 @@ local function buildMainWindow(parent)
     makeDropdownGlobal(hatchLuckContent, {"Max", "Cicil"}, Shared.HatchLuck_Mode or "Max", function(v)
         Shared.HatchLuck_Mode = v
         local F = getFeatures()
-        if F and F.setHatchLuckMode then
-            F.setHatchLuckMode(v)
-        end
-        notify("🔮 Hatch Luck Mode: " .. v, "info")
+        if F and F.setHatchLuckMode then F.setHatchLuckMode(v) end
+        notify("Hatch Luck Mode: " .. v, "info")
     end)
 
-    -- === NOTES ===
+    -- Auto Plant Egg
+    makeToggle(hatchLuckContent, "Auto Plant Egg", false, function(v)
+        Shared.AutoPlantEgg_Enabled = v
+        local F = getFeatures()
+        if F and F.getAutoPlantState then F.getAutoPlantState().Enabled = v end
+        if v then notify("Auto Plant: ON", "success") else notify("Auto Plant: OFF", "info") end
+    end)
+
+    -- Auto Plant Filter (by name)
+    local plantFilterLbl = Instance.new("TextLabel")
+    plantFilterLbl.Size = UDim2.new(1, 0, 0, 16)
+    plantFilterLbl.BackgroundTransparency = 1
+    plantFilterLbl.Text = "Plant Filter (by name):"
+    plantFilterLbl.TextColor3 = C.Muted
+    plantFilterLbl.Font = Enum.Font.GothamSemibold
+    plantFilterLbl.TextSize = CFG.FONT_MUTED
+    plantFilterLbl.TextXAlignment = Enum.TextXAlignment.Left
+    plantFilterLbl.ZIndex = 3
+    plantFilterLbl.Parent = hatchLuckContent
+
+    makeDropdownGlobal(hatchLuckContent, EggNames, Shared.AutoPlantEgg_Filter or "Cherub", function(v)
+        Shared.AutoPlantEgg_Filter = v
+        local F = getFeatures()
+        if F and F.setAutoPlantFilter then F.setAutoPlantFilter(v) end
+        notify("Plant Filter: " .. v, "info")
+    end)
+
+    -- Notes
     local hatchLuckNote = Instance.new("TextLabel")
-    hatchLuckNote.Size = UDim2.new(1, 0, 0, 56)
+    hatchLuckNote.Size = UDim2.new(1, 0, 0, 70)
     hatchLuckNote.BackgroundTransparency = 1
-    hatchLuckNote.Text = "🥚 Auto Hatch = fire prompt Hatch dari jauh (NO TP)\n⚡ Max = fire remote MAX (cooldown 2s)\n🔄 Cicil = fire remote cicil (cooldown 1s)"
+    hatchLuckNote.Text = "Auto Hatch = fire Hatch prompt from far\nAuto Plant = plant egg from backpack to nest\nLuck Max = fire remote MAX (2s cooldown)\nLuck Cicil = fire remote cicil (1s cooldown)"
     hatchLuckNote.TextColor3 = C.Muted
     hatchLuckNote.Font = Enum.Font.GothamSemibold
     hatchLuckNote.TextSize = CFG.FONT_MUTED
