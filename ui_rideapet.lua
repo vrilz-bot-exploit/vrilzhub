@@ -3157,9 +3157,21 @@ local function buildMainWindow(parent)
     makeToggle(eggEspContent, "Show Luck", false, function(v) Shared.ESP_EggLuck_Enabled = v end)
 
     -- ===== AUTO HATCH LUCK =====
-    local hatchLuckCard, hatchLuckContent = makeCard(eggPage, "🔮 AUTO HATCH LUCK", 2)
+        -- ===== AUTO HATCH + HATCH LUCK (GABUNG) =====
+    local hatchLuckCard, hatchLuckContent = makeCard(eggPage, "🔮 AUTO HATCH + LUCK", 2)
 
-        makeToggle(hatchLuckContent, "Enable Auto Hatch Luck", false, function(v)
+    -- === AUTO HATCH (NO TP) ===
+    makeToggle(hatchLuckContent, "Enable Auto Hatch", false, function(v)
+        Shared.AutoHatch_Enabled = v
+        if v then
+            notify("🥚 Auto Hatch: ON", "success")
+        else
+            notify("🥚 Auto Hatch: OFF", "info")
+        end
+    end)
+
+    -- === AUTO HATCH LUCK ===
+    makeToggle(hatchLuckContent, "Enable Auto Hatch Luck", false, function(v)
         Shared.AutoHatchLuck_Enabled = v
         local F = getFeatures()
         if F and F.getHatchLuckState then
@@ -3172,10 +3184,11 @@ local function buildMainWindow(parent)
         end
     end)
 
+    -- === MODE SELECT ===
     local hatchModeLbl = Instance.new("TextLabel")
     hatchModeLbl.Size = UDim2.new(1, 0, 0, 16)
     hatchModeLbl.BackgroundTransparency = 1
-    hatchModeLbl.Text = "Select Mode:"
+    hatchModeLbl.Text = "Hatch Luck Mode:"
     hatchModeLbl.TextColor3 = C.Muted
     hatchModeLbl.Font = Enum.Font.GothamSemibold
     hatchModeLbl.TextSize = CFG.FONT_MUTED
@@ -3183,7 +3196,7 @@ local function buildMainWindow(parent)
     hatchModeLbl.ZIndex = 3
     hatchModeLbl.Parent = hatchLuckContent
 
-        makeDropdownGlobal(hatchLuckContent, {"Max", "Cicil"}, Shared.HatchLuck_Mode or "Max", function(v)
+    makeDropdownGlobal(hatchLuckContent, {"Max", "Cicil"}, Shared.HatchLuck_Mode or "Max", function(v)
         Shared.HatchLuck_Mode = v
         local F = getFeatures()
         if F and F.setHatchLuckMode then
@@ -3192,10 +3205,11 @@ local function buildMainWindow(parent)
         notify("🔮 Hatch Luck Mode: " .. v, "info")
     end)
 
+    -- === NOTES ===
     local hatchLuckNote = Instance.new("TextLabel")
-    hatchLuckNote.Size = UDim2.new(1, 0, 0, 30)
+    hatchLuckNote.Size = UDim2.new(1, 0, 0, 56)
     hatchLuckNote.BackgroundTransparency = 1
-    hatchLuckNote.Text = "⚡ Max = fire remote MAX (cooldown 2s)\n🔄 Cicil = fire remote cicil (cooldown 1s)"
+    hatchLuckNote.Text = "🥚 Auto Hatch = fire prompt Hatch dari jauh (NO TP)\n⚡ Max = fire remote MAX (cooldown 2s)\n🔄 Cicil = fire remote cicil (cooldown 1s)"
     hatchLuckNote.TextColor3 = C.Muted
     hatchLuckNote.Font = Enum.Font.GothamSemibold
     hatchLuckNote.TextSize = CFG.FONT_MUTED
