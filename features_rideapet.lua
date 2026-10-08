@@ -1284,7 +1284,25 @@ function Features.startAutoFarm()
 end
 
 -- ============================================================
--- VOLCANIC HUNTER (FIXED v6)
+-- HELPER: CEK HOLDING EGG (WAJIB di atas, dipakai Volcanic & Mutation)
+-- ============================================================
+local function isHoldingEggMutation()
+    local char = LocalPlayer.Character
+    if not char then return false end
+    local wooden = char:FindFirstChild("Wooden")
+    if not wooden then return false end
+    local displayEgg = wooden:FindFirstChild("DisplayEgg")
+    if not displayEgg then return false end
+    for _, c in ipairs(displayEgg:GetChildren()) do
+        if c:IsA("MeshPart") and not c.Name:lower():find("circle") then
+            return true, c.Name
+        end
+    end
+    return false
+end
+
+-- ============================================================
+-- VOLCANIC HUNTER (FIXED v7)
 -- ============================================================
 local VolcanicState = {
     Enabled = false,
@@ -1375,10 +1393,12 @@ local function tpWaypoint(wp)
     return true
 end
 
+-- ═══════════════════════════════════════════════════════════
+-- KELUAR GOA — VERIFIED HOLDING TIAP CHECKPOINT
+-- ═══════════════════════════════════════════════════════════
 local function exitCave()
     print("[VOLCANIC] Keluar goa via waypoint reverse...")
 
-    -- Cek holding dulu sebelum keluar
     if not isHoldingEggMutation() then
         print("[VOLCANIC] Gak holding egg — batal keluar")
         return false
@@ -1391,20 +1411,16 @@ local function exitCave()
         local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if not hum or hum.Health <= 0 then return false end
 
-        -- Cek holding tiap waypoint — kalo hilang, langsung stop
         if not isHoldingEggMutation() then
             print("[VOLCANIC] ⚠️ Egg hilang di waypoint " .. i .. " — stop keluar")
             return false
         end
 
-        -- TP dengan delay lebih lama biar render aman
         tpWaypoint(VolcanicWaypoints[i])
         checkpointCounter = checkpointCounter + 1
 
-        -- Delay ekstra tiap 5 waypoint biar gak spam TP
         if checkpointCounter % 5 == 0 then
             task.wait(0.3)
-            -- Verifikasi holding lagi
             if not isHoldingEggMutation() then
                 print("[VOLCANIC] ⚠️ Egg drop di checkpoint " .. checkpointCounter)
                 return false
@@ -1412,7 +1428,6 @@ local function exitCave()
         end
     end
 
-    -- Verifikasi final
     task.wait(0.5)
     if not isHoldingEggMutation() then
         print("[VOLCANIC] ⚠️ Egg hilang setelah keluar goa")
@@ -1427,21 +1442,18 @@ end
 -- PICKUP VOLCANIC — VERIFIED HOLDING
 -- ═══════════════════════════════════════════════════════════
 local function volcanicPickupVerified(egg)
-    -- Cek dulu, mungkin udah holding
     if isHoldingEggMutation() then
         print("[VOLCANIC] Sudah holding egg — skip pickup")
         return true
     end
 
     if not egg or not egg.Parent then
-        -- Egg udah ilang, cek holding sekali lagi
         task.wait(0.3)
         return isHoldingEggMutation()
     end
 
     local part = egg:FindFirstChildWhichIsA("BasePart", true)
     if not part then
-        -- Part ilang tapi egg ada? Coba cari part lain
         task.wait(0.2)
         part = egg:FindFirstChildWhichIsA("BasePart", true)
         if not part then return isHoldingEggMutation() end
@@ -1462,20 +1474,17 @@ local function volcanicPickupVerified(egg)
     for i = 1, 25 do
         if not Shared.VolcanicHunt_Enabled then return false end
 
-        -- Cek holding dulu
         if isHoldingEggMutation() then
             print("[VOLCANIC] ✅ Verified holding egg @ try " .. i)
             return true
         end
 
-        -- Egg ilang = kemungkinan kepegang
         if not egg.Parent then
             task.wait(0.3)
             if isHoldingEggMutation() then
                 print("[VOLCANIC] Egg hilang & holding OK")
                 return true
             end
-            -- Egg ilang tapi gak holding = gagal
             return false
         end
 
@@ -1483,7 +1492,6 @@ local function volcanicPickupVerified(egg)
             lastPos = part.Position
         end
 
-        -- TP ke egg
         local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if curRoot then
             curRoot.CFrame = CFrame.lookAt(
@@ -1493,7 +1501,6 @@ local function volcanicPickupVerified(egg)
             curRoot.AssemblyLinearVelocity = Vector3.zero
         end
 
-        -- Fire prompt 2x dengan delay
         if prompt and typeof(fireproximityprompt) == "function" then
             pcall(fireproximityprompt, prompt)
         end
@@ -1508,64 +1515,9 @@ local function volcanicPickupVerified(egg)
     return isHoldingEggMutation()
 end
 
-    local prompt = egg:FindFirstChild("Pickup", true)
-        or egg:FindFirstChild("Collect", true)
-        or egg:FindFirstChildWhichIsA("ProximityPrompt", true)
-
-    if prompt and prompt:IsA("ProximityPrompt") then
-        prompt.HoldDuration = 0
-    end
-
-    local lastPos = part.Position
-
-    for i = 1, 25 do
-        if not Shared.VolcanicHunt_Enabled then return false end
-
-        -- Cek holding dulu
-        local holding = isHoldingEggMutation()
-        if holding then
-            print("[VOLCANIC] ✅ Verified holding egg @ try " .. i)
-            return true
-        end
-
-        -- Egg ilang = kemungkinan kepegang
-        if not egg.Parent then
-            task.wait(0.3)
-            if isHoldingEggMutation() then
-                print("[VOLCANIC] Egg hilang & holding OK")
-                return true
-            end
-        end
-
-        if part and part.Parent then
-            lastPos = part.Position
-        end
-
-        -- TP ke egg
-        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if curRoot then
-            curRoot.CFrame = CFrame.lookAt(
-                lastPos + Vector3.new(0, 3, 0),
-                lastPos)
-            curRoot.Velocity = Vector3.zero
-            curRoot.AssemblyLinearVelocity = Vector3.zero
-        end
-
-        -- Fire prompt 2x
-        if prompt and typeof(fireproximityprompt) == "function" then
-            pcall(fireproximityprompt, prompt)
-        end
-        task.wait(0.08)
-        if prompt and typeof(fireproximityprompt) == "function" then
-            pcall(fireproximityprompt, prompt)
-        end
-
-        task.wait(0.2)
-    end
-
-    return isHoldingEggMutation()
-end
-
+-- ═══════════════════════════════════════════════════════════
+-- MAIN VOLCANIC HUNT
+-- ═══════════════════════════════════════════════════════════
 function Features.startVolcanicHunt()
     task.spawn(function()
         while task.wait(1) do
@@ -1611,7 +1563,7 @@ function Features.startVolcanicHunt()
                         Shared.Notify("🌋 Volcanic Egg spawn!", "success")
                     end
 
-                                       -- ═══════════════════════════════════════
+                    -- ═══════════════════════════════════════
                     -- STEP 1: Masuk goa via waypoint
                     -- ═══════════════════════════════════════
                     print("[VOLCANIC] STEP 1 — Masuk goa...")
@@ -1620,10 +1572,8 @@ function Features.startVolcanicHunt()
                     for i, wp in ipairs(VolcanicWaypoints) do
                         if not Shared.VolcanicHunt_Enabled then break end
 
-                        -- TP dulu ke waypoint
                         tpWaypoint(wp)
 
-                        -- BARU cek jarak SETELAH TP
                         local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                         if curRoot and eggPart and eggPart.Parent then
                             local d = (eggPart.Position - curRoot.Position).Magnitude
@@ -1635,7 +1585,6 @@ function Features.startVolcanicHunt()
                         end
                     end
 
-                    -- Kalo masih jauh setelah semua waypoint, TP langsung ke egg (fallback)
                     if not reachedEgg then
                         local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                         if curRoot and eggPart and eggPart.Parent then
@@ -1855,21 +1804,6 @@ local function findSafeVolcanoPos()
         return Vector3.new(-5102.84, lavaTop + MUT_CONFIG.TP_ABOVE_TOP, -3489.11)
     end
     return Vector3.new(-5102.84, 41700, -3489.11)
-end
-
-local function isHoldingEggMutation()
-    local char = LocalPlayer.Character
-    if not char then return false end
-    local wooden = char:FindFirstChild("Wooden")
-    if not wooden then return false end
-    local displayEgg = wooden:FindFirstChild("DisplayEgg")
-    if not displayEgg then return false end
-    for _, c in ipairs(displayEgg:GetChildren()) do
-        if c:IsA("MeshPart") and not c.Name:lower():find("circle") then
-            return true, c.Name
-        end
-    end
-    return false
 end
 
 local function fireVolcanoDip()
