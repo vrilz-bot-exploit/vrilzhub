@@ -2010,13 +2010,41 @@ function Features.startMutationSteal()
                 continue
             end
 
-            local best = getBestEggInMap()
-            if not best then
+                        -- === CEK MODE STEAL ===
+            local stealMode = Shared.MutationStealMode or "Rarity"
+            local targetEgg = nil
+
+            if stealMode == "Name" then
+                -- Cari egg berdasarkan nama yang dipilih user
+                local rendered = Workspace:FindFirstChild("RenderedEggs")
+                if rendered then
+                    local myRoot2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    local bestDist = math.huge
+                    for _, egg in ipairs(rendered:GetChildren()) do
+                        if egg:IsA("Model") and Shared.MutationSelectedEggs[egg.Name] then
+                            local part = egg:FindFirstChildWhichIsA("BasePart", true)
+                            if part and myRoot2 then
+                                local d = (part.Position - myRoot2.Position).Magnitude
+                                if d < bestDist then
+                                    bestDist = d
+                                    targetEgg = egg
+                                end
+                            end
+                        end
+                    end
+                end
+            else
+                -- Mode Rarity (logika lama)
+                local best = getBestEggInMap()
+                if best then targetEgg = best.egg end
+            end
+
+            if not targetEgg then
                 task.wait(0.5)
                 continue
             end
 
-            local egg = best.egg
+            local egg = targetEgg
             local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
             local prompt = egg:FindFirstChild("Pickup", true)
             if not eggPart or not prompt then continue end
@@ -2053,8 +2081,9 @@ function Features.startMutationSteal()
                 end
             end
 
-            if picked then
-                print("[MUTATION-STEAL] picked " .. egg.Name .. " (" .. best.rarity .. ")")
+                        if picked then
+                local rarity = getEggRarity(egg.Name)
+                print("[MUTATION-STEAL] picked " .. egg.Name .. " (" .. rarity .. ")")
             end
 
             task.wait(0.3)
