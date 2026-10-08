@@ -3658,8 +3658,44 @@ local function buildMainWindow(parent)
         noteLbl.Parent = titleContent
         registerTheme(noteLbl, "Muted", "TextColor3")
 
-        -- SAVE handler
+                -- ═══════════════════════════════════════════
+        -- SAVE HANDLER — SAVE SEKALI, LANGSUNG PERMANEN
+        -- ═══════════════════════════════════════════
+        local isSaved = false  -- state: udah saved atau belum
+        
+        -- Cek apakah title skrg udah ke-save
+        if _G.VRILZ_CustomTitle and _G.VRILZ_CustomTitle == customBox.Text then
+            isSaved = true
+            saveBtn.Text = "✅ SAVED"
+            saveBtn.BackgroundColor3 = C.Muted
+        end
+
+        local function updateSaveButton()
+            if isSaved then
+                saveBtn.Text = "✅ SAVED"
+                saveBtn.BackgroundColor3 = C.Muted
+            else
+                saveBtn.Text = "💾 SAVE"
+                saveBtn.BackgroundColor3 = C.Success
+            end
+        end
+
+        -- Kalo user edit lagi, SAVE balik aktif
+        customBox:GetPropertyChangedSignal("Text"):Connect(function()
+            if isSaved and customBox.Text ~= _G.VRILZ_CustomTitle then
+                isSaved = false
+                updateSaveButton()
+            end
+        end)
+
+        -- SAVE
         saveBtn.MouseButton1Click:Connect(function()
+            -- Kalo udah saved, gak perlu save lagi
+            if isSaved then
+                notify("ℹ️ Title udah ke-save", "info")
+                return
+            end
+            
             local txt = customBox.Text:gsub("^%s+", ""):gsub("%s+$", "")
             if txt == "" then
                 notify("❌ Title kosong!", "error")
@@ -3675,25 +3711,48 @@ local function buildMainWindow(parent)
                 notify("❌ Cuma huruf & angka!", "error")
                 return
             end
+            
+            -- Update box
             customBox.Text = txt
+            
+            -- SAVE PERMANEN — sekali aja
             _G.VRILZ_CustomTitle = txt
             saveCustomTitle(txt)
-            notify("✅ Saved: " .. txt .. " (" .. #txt .. "/15)", "success")
+            
+            -- Set state
+            isSaved = true
+            updateSaveButton()
+            
+            notify("✅ Saved: " .. txt .. " (" .. #txt .. "/15) — permanen!", "success")
+            
+            -- Refresh title di atas karakter
             if _G.VRILZ_RefreshTitle then
                 _G.VRILZ_RefreshTitle()
             end
         end)
 
-        -- CLEAR handler
+                -- ═══════════════════════════════════════════
+        -- CLEAR HANDLER — RESET, ABIS ITU BISA SAVE LAGI
+        -- ═══════════════════════════════════════════
         clearBtn.MouseButton1Click:Connect(function()
             customBox.Text = ""
             clearCustomTitle()
-            notify("🗑 Title cleared", "info")
+            
+            -- Reset state — SAVE balik aktif
+            isSaved = false
+            updateSaveButton()
+            
+            notify("🗑 Title di-reset — lu bisa SAVE lagi", "info")
+            
+            -- Refresh title di atas karakter
             if _G.VRILZ_RefreshTitle then
                 _G.VRILZ_RefreshTitle()
             end
         end)
     else
+        -- ═══════════════════════════════════════════
+        -- USER BIASA — GAK DAPET CUSTOM TITLE
+        -- ═══════════════════════════════════════════
         local noteLbl = Instance.new("TextLabel")
         noteLbl.Size = UDim2.new(1, 0, 0, 40)
         noteLbl.BackgroundTransparency = 1
@@ -3707,7 +3766,7 @@ local function buildMainWindow(parent)
         noteLbl.ZIndex = 3
         noteLbl.Parent = titleContent
         registerTheme(noteLbl, "Muted", "TextColor3")
-    end
+    end   -- ← INI PENUTUP `if canCustom then`
 
     -- ===== STEAL MODE (BARU) =====
     local stealModeCard, stealModeContent = makeCard(setPage, "🥷 STEAL MODE", 2)
