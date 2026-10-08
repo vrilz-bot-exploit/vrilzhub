@@ -4601,6 +4601,52 @@ local function applyKeyInfo(data, key)
     Shared.KeyExpiresAt = tonumber(data.expires_at or data.expiry or 0) or 0
 end
 
+-- Stable device ID for Premium device-limit tracking.
+-- Persists in executor file storage when available, so the same device
+-- is recognized again after rejoining/reloading the script.
+local function getStableDeviceId()
+    local env = getKeyStorage()
+    local cached = env.VRILZ_DEVICE_ID
+    if type(cached) == "string" and #cached >= 8 then
+        return cached
+    end
+
+    local fileName = "vrilz_device_id.txt"
+
+    if readfile and isfile then
+        local okFile, exists = pcall(isfile, fileName)
+        if okFile and exists then
+            local okRead, content = pcall(readfile, fileName)
+            if okRead and type(content) == "string" then
+                content = content:gsub("^%s+", ""):gsub("%s+$", "")
+                if #content >= 8 then
+                    env.VRILZ_DEVICE_ID = content
+                    return content
+                end
+            end
+        end
+    end
+
+    local HttpService = game:GetService("HttpService")
+    local generated = nil
+
+    pcall(function()
+        generated = HttpService:GenerateGUID(false)
+    end)
+
+    if type(generated) ~= "string" or #generated < 8 then
+        generated = tostring(LocalPlayer.UserId) .. "-" .. tostring(game.PlaceId)
+    end
+
+    env.VRILZ_DEVICE_ID = generated
+
+    if writefile then
+        pcall(writefile, fileName, generated)
+    end
+
+    return generated
+end
+
 local function verifyKeyWithServer(key)
     key = tostring(key or ""):gsub("^%s+", ""):gsub("%s+$", ""):upper()
     if key == "" then
@@ -4615,6 +4661,7 @@ local function verifyKeyWithServer(key)
     local payload = HttpService:JSONEncode({
         username = LocalPlayer.Name,
         key = key,
+        device_id = getStableDeviceId(),
     })
     local url = KEY_SYSTEM_URL:gsub("/$", "") .. "/api/redeem"
 
@@ -4679,6 +4726,7 @@ local function verifySavedKeyWithServer(key)
     local payload = HttpService:JSONEncode({
         username = LocalPlayer.Name,
         key = key,
+        device_id = getStableDeviceId(),
     })
     local url = KEY_SYSTEM_URL:gsub("/$", "") .. "/api/verify"
 
