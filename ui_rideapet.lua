@@ -4253,32 +4253,144 @@ registerTab("Vulcanic", "🌋", "Vulcanic")
     local mutPage = createPage("EggMutation")
     pages.EggMutation = mutPage
 
-    -- ===== CARD 0: AUTO STEAL (RARITY) =====
-    local mutStealCard, mutStealContent = makeCard(mutPage, "🎯 AUTO STEAL (RARITY)", 0)
+        -- ===== CARD 0: AUTO STEAL (FILTER) =====
+    local mutStealCard, mutStealContent = makeCard(mutPage, "🎯 AUTO STEAL (FILTER)", 0)
 
-    makeToggle(mutStealContent, "Auto Steal by Rarity", false, function(v)
+    -- === CONTAINERS DULUAN ===
+    local raritySection = Instance.new("Frame")
+    raritySection.Size = UDim2.new(1, 0, 0, 0)
+    raritySection.AutomaticSize = Enum.AutomaticSize.Y
+    raritySection.BackgroundTransparency = 1
+    raritySection.LayoutOrder = 10
+    raritySection.ZIndex = 3
+    raritySection.Parent = mutStealContent
+
+    local rarityLayout = Instance.new("UIListLayout")
+    rarityLayout.Padding = UDim.new(0, CFG.CARD_GAP)
+    rarityLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    rarityLayout.Parent = raritySection
+
+    local nameSection = Instance.new("Frame")
+    nameSection.Size = UDim2.new(1, 0, 0, 0)
+    nameSection.AutomaticSize = Enum.AutomaticSize.Y
+    nameSection.BackgroundTransparency = 1
+    nameSection.LayoutOrder = 11
+    nameSection.ZIndex = 3
+    nameSection.Visible = false
+    nameSection.Parent = mutStealContent
+
+    local nameLayout = Instance.new("UIListLayout")
+    nameLayout.Padding = UDim.new(0, CFG.CARD_GAP)
+    nameLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    nameLayout.Parent = nameSection
+
+    -- === SHOW/HIDE FUNCTION ===
+    local function updateSections(mode)
+        if mode == "Rarity" then
+            raritySection.Visible = true
+            nameSection.Visible = false
+        else
+            raritySection.Visible = false
+            nameSection.Visible = true
+        end
+    end
+
+    -- === MODE DROPDOWN ===
+    local modeLbl = Instance.new("TextLabel")
+    modeLbl.Size = UDim2.new(1, 0, 0, 16)
+    modeLbl.BackgroundTransparency = 1
+    modeLbl.Text = "Steal Mode:"
+    modeLbl.TextColor3 = C.Muted
+    modeLbl.Font = Enum.Font.GothamSemibold
+    modeLbl.TextSize = CFG.FONT_MUTED
+    modeLbl.TextXAlignment = Enum.TextXAlignment.Left
+    modeLbl.LayoutOrder = 1
+    modeLbl.ZIndex = 3
+    modeLbl.Parent = mutStealContent
+    registerTheme(modeLbl, "Muted", "TextColor3")
+
+    local modeHolder = Instance.new("Frame")
+    modeHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
+    modeHolder.BackgroundTransparency = 1
+    modeHolder.LayoutOrder = 2
+    modeHolder.ZIndex = 3
+    modeHolder.Parent = mutStealContent
+
+    makeDropdownGlobal(modeHolder, {"Rarity", "Name"}, Shared.MutationStealMode or "Rarity", function(v)
+        Shared.MutationStealMode = v
+        if v == "Rarity" then
+            notify("🎯 Mode: Steal by Rarity", "info")
+        else
+            notify("🎯 Mode: Steal by Name", "info")
+        end
+        updateSections(v)
+    end)
+
+    -- === TOGGLE ON/OFF ===
+    local stealToggleHolder = Instance.new("Frame")
+    stealToggleHolder.Size = UDim2.new(1, 0, 0, CFG.TOGGLE_H)
+    stealToggleHolder.BackgroundTransparency = 1
+    stealToggleHolder.LayoutOrder = 3
+    stealToggleHolder.ZIndex = 3
+    stealToggleHolder.Parent = mutStealContent
+
+    makeToggle(stealToggleHolder, "Auto Steal", false, function(v)
         Shared.MutationSteal_Enabled = v
         if v then
-            notify("🎯 Mutation Steal enabled (by rarity)", "success")
+            notify("🎯 Mutation Steal: ON", "success")
         else
-            notify("🎯 Mutation Steal disabled", "info")
+            notify("🎯 Mutation Steal: OFF", "info")
         end
     end)
 
-    local mutRarLabel = Instance.new("TextLabel")
-    mutRarLabel.Size = UDim2.new(1, 0, 0, 16)
-    mutRarLabel.BackgroundTransparency = 1
-    mutRarLabel.Text = "Select Rarity Egg:"
-    mutRarLabel.TextColor3 = C.Muted
-    mutRarLabel.Font = Enum.Font.GothamSemibold
-    mutRarLabel.TextSize = CFG.FONT_MUTED
-    mutRarLabel.TextXAlignment = Enum.TextXAlignment.Left
-    mutRarLabel.LayoutOrder = 3
-    mutRarLabel.ZIndex = 3
-    mutRarLabel.Parent = mutStealContent
-    registerTheme(mutRarLabel, "Muted", "TextColor3")
+    -- === RARITY SECTION ===
+    local rarityLbl = Instance.new("TextLabel")
+    rarityLbl.Size = UDim2.new(1, 0, 0, 16)
+    rarityLbl.BackgroundTransparency = 1
+    rarityLbl.Text = "Select Rarity:"
+    rarityLbl.TextColor3 = C.Muted
+    rarityLbl.Font = Enum.Font.GothamSemibold
+    rarityLbl.TextSize = CFG.FONT_MUTED
+    rarityLbl.TextXAlignment = Enum.TextXAlignment.Left
+    rarityLbl.LayoutOrder = 1
+    rarityLbl.ZIndex = 3
+    rarityLbl.Parent = raritySection
+    registerTheme(rarityLbl, "Muted", "TextColor3")
 
-    makeDropdownMulti(mutStealContent, RarityList, Shared.SelectedRarities, nil, function(t) end)
+    local rarityDropdownHolder = Instance.new("Frame")
+    rarityDropdownHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
+    rarityDropdownHolder.BackgroundTransparency = 1
+    rarityDropdownHolder.LayoutOrder = 2
+    rarityDropdownHolder.ZIndex = 3
+    rarityDropdownHolder.Parent = raritySection
+
+    makeDropdownMulti(rarityDropdownHolder, RarityList, Shared.SelectedRarities, nil, function(t) end)
+
+    -- === NAME SECTION ===
+    local nameLbl = Instance.new("TextLabel")
+    nameLbl.Size = UDim2.new(1, 0, 0, 16)
+    nameLbl.BackgroundTransparency = 1
+    nameLbl.Text = "Select Egg Name:"
+    nameLbl.TextColor3 = C.Muted
+    nameLbl.Font = Enum.Font.GothamSemibold
+    nameLbl.TextSize = CFG.FONT_MUTED
+    nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+    nameLbl.LayoutOrder = 1
+    nameLbl.ZIndex = 3
+    nameLbl.Parent = nameSection
+    registerTheme(nameLbl, "Muted", "TextColor3")
+
+    local nameDropdownHolder = Instance.new("Frame")
+    nameDropdownHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
+    nameDropdownHolder.BackgroundTransparency = 1
+    nameDropdownHolder.LayoutOrder = 2
+    nameDropdownHolder.ZIndex = 3
+    nameDropdownHolder.Parent = nameSection
+
+    makeDropdownMulti(nameDropdownHolder, EggNames, Shared.MutationSelectedEggs, nil, function(t) end)
+
+    -- === INIT VISIBILITY ===
+    updateSections(Shared.MutationStealMode or "Rarity")
 
     -- CARD 1: AUTO MUTATION
     local mutCard, mutContent = makeCard(mutPage, "🔥 EGG MUTATION", 1)
@@ -5235,8 +5347,19 @@ function UI.Init(sharedState)
     Shared.VolcanicHunt_Enabled = false
     Shared.VolcanicReturn_Enabled = false
     Shared.VolcanicMutation_Enabled = false
-    Shared.AutoMutation_Enabled = false
+        Shared.AutoMutation_Enabled = false
     Shared.MutationReturn_Enabled = false
+    Shared.MutationStealMode = "Rarity"   -- "Rarity" atau "Name"
+    Shared.MutationSelectedEggs = {
+        ["Cherub"] = false, ["Volcanic"] = false, ["Blackhole"] = false,
+        ["Solaris"] = false, ["Galaxy"] = false, ["Crystal"] = false,
+        ["Golden"] = false, ["Glass"] = false, ["Skull"] = false,
+        ["Sinister"] = false, ["Soul"] = false, ["Dominus"] = false,
+        ["Slime"] = false, ["Flower"] = false, ["Leaf"] = false,
+        ["Stone"] = false, ["Easter"] = false, ["Cracked"] = false,
+        ["Ice"] = false, ["Tidal"] = false, ["Bloom"] = false,
+        ["Aurora"] = false, ["White"] = false, ["Brown"] = false,
+    }
         Shared.FPSBoost_Enabled = false
     Shared.HD4K_Enabled = false
 
