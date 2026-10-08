@@ -505,10 +505,25 @@ local AutoPlantState = {
 local function findEggToolInBackpack(eggName)
     local backpack = LocalPlayer:FindFirstChild("Backpack")
     if not backpack then return nil end
-    local targetName = eggName:lower()
+
+    -- Normalize: lowercase + hapus suffix "egg" + trim
+    local function norm(s)
+        s = tostring(s or "")
+        s = s:lower()
+        s = s:gsub("%s*egg%s*$", "")   -- hapus " egg" di akhir
+        s = s:gsub("^%s+", "")          -- trim kiri
+        s = s:gsub("%s+$", "")          -- trim kanan
+        return s
+    end
+
+    local targetName = norm(eggName)
+    
+    -- Kalo targetName kosong (filter "None" / ""), skip
+    if targetName == "" then return nil end
+
     for _, tool in ipairs(backpack:GetChildren()) do
         if tool:IsA("Tool") then
-            local cleanName = tool.Name:lower():gsub("%s*egg%s*$", ""):gsub("^%s+", ""):gsub("%s+$", "")
+            local cleanName = norm(tool.Name)
             if cleanName == targetName then
                 return tool
             end
