@@ -1491,6 +1491,304 @@ function ChatClient.start()
 end
 
 -- ============================================================
+-- 🎮 GRAPHICS ENGINE — FPS BOOST + 4K HD MODE
+-- ============================================================
+local GFX = {
+    FPSEnabled = false,
+    HDEnabled = false,
+    Original = {},
+    Created = {},
+    LoopThread = nil,
+    TextureBackup = {},
+    HiddenParts = {},
+}
+
+local function gfx_save(obj, prop)
+    local ok, val = pcall(function() return obj[prop] end)
+    if ok then table.insert(GFX.Original, {obj = obj, prop = prop, value = val}) end
+end
+
+local function gfx_restore()
+    for _, item in ipairs(GFX.Original) do
+        pcall(function() item.obj[item.prop] = item.value end)
+    end
+    GFX.Original = {}
+end
+
+local function gfx_add(inst)
+    table.insert(GFX.Created, inst)
+    return inst
+end
+
+local function gfx_cleanup()
+    for _, inst in ipairs(GFX.Created) do
+        pcall(function() if inst and inst.Parent then inst:Destroy() end end)
+    end
+    GFX.Created = {}
+end
+
+-- ===== FPS BOOST =====
+local function gfx_enableFPS()
+    if GFX.FPSEnabled then return end
+    GFX.FPSEnabled = true
+
+    pcall(function() Lighting.GlobalShadows = false end)
+    pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
+
+    task.spawn(function()
+        local hidden = {}
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("BasePart") then
+                local name = string.lower(obj.Name)
+                local parentName = obj.Parent and string.lower(obj.Parent.Name) or ""
+                local skip = false
+                if obj:FindFirstChildWhichIsA("Humanoid") then skip = true end
+                if name:find("egg") or name:find("nest") then skip = true end
+                if parentName:find("plot") or parentName:find("char") then skip = true end
+                if obj:FindFirstChildWhichIsA("ProximityPrompt") then skip = true end
+                if not skip then
+                    local isDeco = false
+                    if obj.Transparency >= 0.5 then isDeco = true end
+                    if name:find("tree") or name:find("rock") or name:find("bush") then isDeco = true end
+                    if name:find("grass") or name:find("flower") or name:find("cloud") then isDeco = true end
+                    if isDeco and obj.Size.Magnitude < 50 then
+                        obj.LocalTransparencyModifier = 1
+                        obj.CanCollide = false
+                        table.insert(hidden, obj)
+                    end
+                end
+            end
+        end
+        GFX.HiddenParts = hidden
+        notify("FPS Boost: " .. #hidden .. " Parts hidden", "info")
+    end)
+
+    notify("FPS Boost enabled", "success")
+end
+
+local function gfx_disableFPS()
+    if not GFX.FPSEnabled then return end
+    GFX.FPSEnabled = false
+
+    pcall(function() Lighting.GlobalShadows = true end)
+    pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level10 end)
+
+    for _, part in ipairs(GFX.HiddenParts) do
+        if part and part.Parent then
+            pcall(function()
+                part.LocalTransparencyModifier = 0
+                part.CanCollide = true
+            end)
+        end
+    end
+    GFX.HiddenParts = {}
+
+    notify("FPS Boost disabled", "info")
+end
+
+-- ===== 4K HD MODE =====
+local function gfx_enableHD()
+    if GFX.HDEnabled then return end
+    GFX.HDEnabled = true
+
+    -- Auto-disable FPS Boost
+    if GFX.FPSEnabled then
+        gfx_disableFPS()
+        notify("⚠️ FPS Boost dimatiin (bentrok sama 4K HD)", "warning")
+    end
+
+    -- Render
+    pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level10 end)
+    pcall(function() settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level04 end)
+    pcall(function() settings().Rendering.AntiAliasing = Enum.AntiAliasingMode.MSAA_4x end)
+    pcall(function() settings().Rendering.EagerBulkExecution = false end)
+    pcall(function() workspace.StreamingTargetRadius = 1024 end)
+    pcall(function() workspace.StreamingMinRadius = 256 end)
+
+    -- Lighting
+    gfx_save(Lighting, "GlobalShadows")
+    gfx_save(Lighting, "EnvironmentDiffuseScale")
+    gfx_save(Lighting, "EnvironmentSpecularScale")
+    gfx_save(Lighting, "Ambient")
+    gfx_save(Lighting, "OutdoorAmbient")
+    gfx_save(Lighting, "Brightness")
+    gfx_save(Lighting, "ClockTime")
+    gfx_save(Lighting, "ExposureCompensation")
+    gfx_save(Lighting, "FogEnd")
+    gfx_save(Lighting, "FogStart")
+    gfx_save(Lighting, "ShadowSoftness")
+    pcall(function()
+        Lighting.GlobalShadows = true
+        Lighting.ShadowSoftness = 0.2
+        Lighting.EnvironmentDiffuseScale = 1
+        Lighting.EnvironmentSpecularScale = 1
+        Lighting.Brightness = 2.5
+        Lighting.ExposureCompensation = 0.3
+        Lighting.ClockTime = 14.5
+        Lighting.GeographicLatitude = 0
+        Lighting.Ambient = Color3.fromRGB(75, 78, 90)
+        Lighting.OutdoorAmbient = Color3.fromRGB(115, 120, 135)
+        Lighting.FogEnd = 100000
+        Lighting.FogStart = 0
+    end)
+    pcall(function()
+        gfx_save(Lighting, "Technology")
+        Lighting.Technology = Enum.Technology.Future
+    end)
+
+    -- Post FX
+    for _, name in ipairs({"VRILZ_HD_Bloom","VRILZ_HD_SunRays","VRILZ_HD_DOF",
+                            "VRILZ_HD_ColorCorrection","VRILZ_HD_Atmosphere","VRILZ_HD_Sky"}) do
+        local old = Lighting:FindFirstChild(name)
+        if old then old:Destroy() end
+    end
+
+    local bloom = Instance.new("BloomEffect")
+    bloom.Name = "VRILZ_HD_Bloom"
+    bloom.Intensity = 1.4
+    bloom.Size = 28
+    bloom.Threshold = 0.82
+    bloom.Parent = Lighting
+    gfx_add(bloom)
+
+    local sunRays = Instance.new("SunRaysEffect")
+    sunRays.Name = "VRILZ_HD_SunRays"
+    sunRays.Intensity = 0.18
+    sunRays.Spread = 0.95
+    sunRays.Parent = Lighting
+    gfx_add(sunRays)
+
+    local dof = Instance.new("DepthOfFieldEffect")
+    dof.Name = "VRILZ_HD_DOF"
+    dof.FarIntensity = 0.18
+    dof.FocusDistance = 38
+    dof.InFocusRadius = 28
+    dof.NearIntensity = 0.06
+    dof.Parent = Lighting
+    gfx_add(dof)
+
+    local cc = Instance.new("ColorCorrectionEffect")
+    cc.Name = "VRILZ_HD_ColorCorrection"
+    cc.Brightness = 0.03
+    cc.Contrast = 0.18
+    cc.Saturation = 0.15
+    cc.TintColor = Color3.fromRGB(255, 252, 246)
+    cc.Parent = Lighting
+    gfx_add(cc)
+
+    local atmo = Instance.new("Atmosphere")
+    atmo.Name = "VRILZ_HD_Atmosphere"
+    atmo.Density = 0.32
+    atmo.Offset = 0.15
+    atmo.Color = Color3.fromRGB(200, 202, 208)
+    atmo.Decay = Color3.fromRGB(108, 115, 128)
+    atmo.Glare = 0.18
+    atmo.Haze = 1.3
+    atmo.Parent = Lighting
+    gfx_add(atmo)
+
+    if not Lighting:FindFirstChildOfClass("Sky") then
+        local sky = Instance.new("Sky")
+        sky.Name = "VRILZ_HD_Sky"
+        sky.SkyboxBk = "rbxassetid://159454299"
+        sky.SkyboxDn = "rbxassetid://159454296"
+        sky.SkyboxFt = "rbxassetid://159454293"
+        sky.SkyboxLf = "rbxassetid://159454286"
+        sky.SkyboxRt = "rbxassetid://159454300"
+        sky.SkyboxUp = "rbxassetid://159454288"
+        sky.SunAngularSize = 22
+        sky.MoonAngularSize = 12
+        sky.StarCount = 3500
+        sky.Parent = Lighting
+        gfx_add(sky)
+    end
+
+    -- Terrain
+    pcall(function()
+        local terrain = workspace:FindFirstChildOfClass("Terrain")
+        if terrain then
+            gfx_save(terrain, "WaterWaveSize")
+            gfx_save(terrain, "WaterWaveSpeed")
+            gfx_save(terrain, "WaterReflectance")
+            gfx_save(terrain, "WaterTransparency")
+            terrain.WaterWaveSize = 0.18
+            terrain.WaterWaveSpeed = 12
+            terrain.WaterReflectance = 0.18
+            terrain.WaterTransparency = 0.08
+        end
+    end)
+
+    -- Materials
+    pcall(function()
+        local ms = game:GetService("MaterialService")
+        if ms then
+            gfx_save(ms, "Use2022Materials")
+            ms.Use2022Materials = true
+        end
+    end)
+
+    -- Texture sharpen
+    task.spawn(function()
+        local count = 0
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if count >= 800 then break end
+            if obj:IsA("Texture") then
+                pcall(function()
+                    table.insert(GFX.TextureBackup, {obj = obj, u = obj.StudsPerTileU, v = obj.StudsPerTileV})
+                    obj.StudsPerTileU = obj.StudsPerTileU * 0.6
+                    obj.StudsPerTileV = obj.StudsPerTileV * 0.6
+                end)
+                count = count + 1
+            elseif obj:IsA("Decal") or obj:IsA("SurfaceAppearance") then
+                count = count + 1
+            end
+        end
+    end)
+
+    -- Continuous re-apply
+    if not GFX.LoopThread then
+        GFX.LoopThread = task.spawn(function()
+            while GFX.HDEnabled do
+                task.wait(2)
+                pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level10 end)
+                pcall(function()
+                    Lighting.GlobalShadows = true
+                    Lighting.EnvironmentDiffuseScale = 1
+                    Lighting.EnvironmentSpecularScale = 1
+                end)
+                pcall(function() workspace.StreamingTargetRadius = 1024 end)
+            end
+        end)
+    end
+
+    notify("🎮 4K HD Mode: ON", "success")
+end
+
+local function gfx_disableHD()
+    if not GFX.HDEnabled then return end
+    GFX.HDEnabled = false
+    GFX.LoopThread = nil
+
+    gfx_cleanup()
+
+    for _, item in ipairs(GFX.TextureBackup) do
+        pcall(function()
+            if item.obj and item.obj.Parent then
+                item.obj.StudsPerTileU = item.u
+                item.obj.StudsPerTileV = item.v
+            end
+        end)
+    end
+    GFX.TextureBackup = {}
+
+    gfx_restore()
+
+    pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level06 end)
+
+    notify("🎮 4K HD Mode: OFF", "info")
+end
+
+-- ============================================================
 -- BUILD MAIN WINDOW
 -- ============================================================
 local function buildMainWindow(parent)
@@ -3844,63 +4142,47 @@ local function buildMainWindow(parent)
     registerTheme(chatHint, "Muted", "TextColor3")
 
     
-        local fpsCard, fpsContent = makeCard(setPage, "FPS BOOST", 6)
+            local fpsCard, fpsContent = makeCard(setPage, "⚡ GRAPHICS", 6)
 
     local fpsWin = buildFPSWindow(screenGui)
     UI._fpsWindow = fpsWin
 
+    local gfxInfoLbl = Instance.new("TextLabel")
+    gfxInfoLbl.Size = UDim2.new(1, 0, 0, 30)
+    gfxInfoLbl.BackgroundTransparency = 1
+    gfxInfoLbl.Text = "Pilih salah satu. FPS Boost = perf, 4K HD = kualitas."
+    gfxInfoLbl.TextColor3 = C.Muted
+    gfxInfoLbl.Font = Enum.Font.GothamSemibold
+    gfxInfoLbl.TextSize = CFG.FONT_MUTED
+    gfxInfoLbl.TextWrapped = true
+    gfxInfoLbl.TextXAlignment = Enum.TextXAlignment.Left
+    gfxInfoLbl.TextYAlignment = Enum.TextYAlignment.Top
+    gfxInfoLbl.LayoutOrder = 0
+    gfxInfoLbl.ZIndex = 3
+    gfxInfoLbl.Parent = fpsContent
+    registerTheme(gfxInfoLbl, "Muted", "TextColor3")
+
     makeToggle(fpsContent, "FPS Boost", false, function(v)
+        Shared.FPSBoost_Enabled = v
         if v then
-            pcall(function() Lighting.GlobalShadows = false end)
-            pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
-            task.spawn(function()
-                local hidden = {}
-                for _, obj in ipairs(Workspace:GetDescendants()) do
-                    if obj:IsA("BasePart") then
-                        local name = string.lower(obj.Name)
-                        local parentName = obj.Parent and string.lower(obj.Parent.Name) or ""
-                        local skip = false
-                        if obj:FindFirstChildWhichIsA("Humanoid") then skip = true end
-                        if name:find("egg") or name:find("nest") then skip = true end
-                        if parentName:find("plot") or parentName:find("char") then skip = true end
-                        if obj:FindFirstChildWhichIsA("ProximityPrompt") then skip = true end
-                        if not skip then
-                            local isDeco = false
-                            if obj.Transparency >= 0.5 then isDeco = true end
-                            if name:find("tree") or name:find("rock") or name:find("bush") then isDeco = true end
-                            if name:find("grass") or name:find("flower") or name:find("cloud") then isDeco = true end
-                            if isDeco and obj.Size.Magnitude < 50 then
-                                obj.LocalTransparencyModifier = 1
-                                obj.CanCollide = false
-                                table.insert(hidden, obj)
-                            end
-                        end
-                    end
-                end
-                UI._fpsHiddenParts = hidden
-                notify("FPS Boost: " .. #hidden .. " Parts hidden", "info")
-            end)
-            notify("FPS Boost enabled", "success")
+            gfx_enableFPS()
         else
-            pcall(function() Lighting.GlobalShadows = true end)
-            pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level10 end)
-            if UI._fpsHiddenParts then
-                for _, part in ipairs(UI._fpsHiddenParts) do
-                    if part and part.Parent then
-                        part.LocalTransparencyModifier = 0
-                        part.CanCollide = true
-                    end
-                end
-                UI._fpsHiddenParts = nil
-            end
-            notify("FPS Boost disabled", "info")
+            gfx_disableFPS()
         end
-    end, "FPS Boost")
+    end)
+
+    makeToggle(fpsContent, "4K HD Mode", false, function(v)
+        Shared.HD4K_Enabled = v
+        if v then
+            gfx_enableHD()
+        else
+            gfx_disableHD()
+        end
+    end)
 
     makeToggle(fpsContent, "FPS Window", false, function(v)
         if fpsWin then fpsWin.Visible = v end
-    end, "FPS Window")
-
+    end)
    -- TAB VOLCANIC
 local volcanicPage = createPage("Vulcanic")
 pages.Vulcanic = volcanicPage
@@ -4943,6 +5225,8 @@ function UI.Init(sharedState)
     Shared.VolcanicMutation_Enabled = false
     Shared.AutoMutation_Enabled = false
     Shared.MutationReturn_Enabled = false
+        Shared.FPSBoost_Enabled = false
+    Shared.HD4K_Enabled = false
 
     -- Live Chat state
     Shared.LiveChat_Messages = {}
