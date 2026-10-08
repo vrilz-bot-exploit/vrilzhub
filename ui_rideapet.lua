@@ -4192,21 +4192,6 @@ local function buildMainWindow(parent)
     local fpsWin = buildFPSWindow(screenGui)
     UI._fpsWindow = fpsWin
 
-    local gfxInfoLbl = Instance.new("TextLabel")
-    gfxInfoLbl.Size = UDim2.new(1, 0, 0, 30)
-    gfxInfoLbl.BackgroundTransparency = 1
-    gfxInfoLbl.Text = "Pilih salah satu. FPS Boost = perf, 4K HD = kualitas."
-    gfxInfoLbl.TextColor3 = C.Muted
-    gfxInfoLbl.Font = Enum.Font.GothamSemibold
-    gfxInfoLbl.TextSize = CFG.FONT_MUTED
-    gfxInfoLbl.TextWrapped = true
-    gfxInfoLbl.TextXAlignment = Enum.TextXAlignment.Left
-    gfxInfoLbl.TextYAlignment = Enum.TextYAlignment.Top
-    gfxInfoLbl.LayoutOrder = 0
-    gfxInfoLbl.ZIndex = 3
-    gfxInfoLbl.Parent = fpsContent
-    registerTheme(gfxInfoLbl, "Muted", "TextColor3")
-
     makeToggle(fpsContent, "FPS Boost", false, function(v)
         Shared.FPSBoost_Enabled = v
         if v then
