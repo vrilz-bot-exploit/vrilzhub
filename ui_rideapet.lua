@@ -3857,7 +3857,7 @@ local function buildMainWindow(parent)
         customBox.BackgroundColor3 = C.Surface3
         customBox.BorderSizePixel = 0
         customBox.Text = _G.VRILZ_CustomTitle or ""
-        customBox.PlaceholderText = "Contoh: PRINCESS"
+        customBox.PlaceholderText = "Enter Text"
         customBox.PlaceholderColor3 = C.Muted
         customBox.TextColor3 = C.Text
         customBox.Font = Enum.Font.GothamBold
