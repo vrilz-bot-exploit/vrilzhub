@@ -173,25 +173,110 @@ end
 
 
 -- ============================================================
--- TITLE SYSTEM — [VH COMMUNITY] / [👑 OWNER VH]
+-- TITLE SYSTEM v2 — OWNER + PREMIUM CUSTOM TITLE + SAVE
 -- ============================================================
 local OWNER_USERID = 5126297278
 local TITLE_GUI_NAME = "VRILZ_TitleTag"
 local titleGuiRef = nil
 local titleLoopRunning = false
 
-local function getTitleText()
-    if LocalPlayer.UserId == OWNER_USERID then
-        return "[👑 OWNER]"
-    else
-        return "[VH COMMUNITY]"
+-- ═══════════════════════════════════════════
+-- SAVE/LOAD TITLE (pake writefile/readfile)
+-- ═══════════════════════════════════════════
+local TITLE_SAVE_FILE = "vrilz_title.txt"
+
+local function saveCustomTitle(title)
+    if writefile then
+        pcall(function()
+            writefile(TITLE_SAVE_FILE, title or "")
+        end)
+    end
+    -- Simpen juga ke _G biar cepet akses
+    _G.VRILZ_CustomTitle = title
+end
+
+local function loadCustomTitle()
+    -- Cek _G dulu
+    if _G.VRILZ_CustomTitle then
+        return _G.VRILZ_CustomTitle
+    end
+    
+    -- Cek file
+    if readfile and isfile then
+        local ok, exists = pcall(isfile, TITLE_SAVE_FILE)
+        if ok and exists then
+            local okRead, content = pcall(readfile, TITLE_SAVE_FILE)
+            if okRead and content then
+                content = content:gsub("^%s+", ""):gsub("%s+$", "")
+                if content ~= "" then
+                    _G.VRILZ_CustomTitle = content
+                    return content
+                end
+            end
+        end
+    end
+    
+    return nil
+end
+
+local function clearCustomTitle()
+    _G.VRILZ_CustomTitle = nil
+    if delfile and isfile then
+        local ok, exists = pcall(isfile, TITLE_SAVE_FILE)
+        if ok and exists then
+            pcall(delfile, TITLE_SAVE_FILE)
+        end
     end
 end
 
+-- ═══════════════════════════════════════════
+-- CEK APAKAH USER BISA CUSTOM TITLE
+-- ═══════════════════════════════════════════
+local function canCustomTitle()
+    -- Owner = selalu bisa
+    if LocalPlayer.UserId == OWNER_USERID then
+        return true
+    end
+    
+    -- Cek key type = PREMIUM
+    if Shared and Shared.KeyType then
+        local kt = tostring(Shared.KeyType):upper()
+        if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
+            return true
+        end
+    end
+    
+    return false
+end
+
+-- ═══════════════════════════════════════════
+-- GET TITLE TEXT
+-- ═══════════════════════════════════════════
+local function getTitleText()
+    -- Owner
+    if LocalPlayer.UserId == OWNER_USERID then
+        local custom = _G.VRILZ_CustomTitle
+        if custom and custom ~= "" then
+            return "[👑 " .. custom .. "]"
+        end
+        return "[👑 OWNER]"
+    end
+    
+    -- Premium user — cek custom title
+    if canCustomTitle() then
+        local custom = _G.VRILZ_CustomTitle
+        if custom and custom ~= "" then
+            return "[👑 " .. custom .. "]"
+        end
+    end
+    
+    -- Default
+    return "[VH COMMUNITY]"
+end
+
 local function getTitleColors()
-    local isOwner = (LocalPlayer.UserId == OWNER_USERID)
-    if isOwner then
-        -- Rainbow full color
+    -- Owner ATAU Premium = rainbow
+    if LocalPlayer.UserId == OWNER_USERID or canCustomTitle() then
         return {
             Color3.fromRGB(255, 0, 0),
             Color3.fromRGB(255, 127, 0),
@@ -203,7 +288,6 @@ local function getTitleColors()
             Color3.fromRGB(255, 0, 255),
         }
     else
-        -- Merah ↔ Putih aja
         return {
             Color3.fromRGB(255, 0, 0),
             Color3.fromRGB(255, 255, 255),
@@ -3413,7 +3497,7 @@ local function buildMainWindow(parent)
     end)
 
 
-    -- ===== TITLE CARD (BARU) =====
+        -- ===== TITLE CARD v2 — SHOW + CUSTOM =====
     local titleCard, titleContent = makeCard(setPage, "👑 TITLE", 3)
 
     local titleLbl = Instance.new("TextLabel")
@@ -3439,6 +3523,191 @@ local function buildMainWindow(parent)
             notify("👑 Title: OFF", "info")
         end
     end)
+
+    -- ═══════════════════════════════════════════
+    -- CUSTOM TITLE INPUT (OWNER + PREMIUM)
+    -- ═══════════════════════════════════════════
+    local canCustom = false
+    pcall(function()
+        if LocalPlayer.UserId == OWNER_USERID then
+            canCustom = true
+        elseif Shared and Shared.KeyType then
+            local kt = tostring(Shared.KeyType):upper()
+            if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
+                canCustom = true
+            end
+        end
+    end)
+
+    if canCustom then
+        -- Label
+        local customLbl = Instance.new("TextLabel")
+        customLbl.Size = UDim2.new(1, 0, 0, 16)
+        customLbl.BackgroundTransparency = 1
+        customLbl.Text = "Custom Title (auto UPPERCASE, max 15):"
+        customLbl.TextColor3 = C.Accent
+        customLbl.Font = Enum.Font.GothamBold
+        customLbl.TextSize = CFG.FONT_MUTED
+        customLbl.TextXAlignment = Enum.TextXAlignment.Left
+        customLbl.ZIndex = 3
+        customLbl.Parent = titleContent
+        registerTheme(customLbl, "Accent", "TextColor3")
+
+        -- Input box
+        local customBox = Instance.new("TextBox")
+        customBox.Size = UDim2.new(1, 0, 0, 34)
+        customBox.BackgroundColor3 = C.Surface3
+        customBox.BorderSizePixel = 0
+        customBox.Text = _G.VRILZ_CustomTitle or ""
+        customBox.PlaceholderText = "Contoh: PRINCESS"
+        customBox.PlaceholderColor3 = C.Muted
+        customBox.TextColor3 = C.Text
+        customBox.Font = Enum.Font.GothamBold
+        customBox.TextSize = CFG.FONT_LABEL
+        customBox.TextXAlignment = Enum.TextXAlignment.Center
+        customBox.ClearTextOnFocus = false
+        customBox.ZIndex = 3
+        customBox.Parent = titleContent
+        registerTheme(customBox, "Surface3", "BackgroundColor3")
+        registerTheme(customBox, "Text", "TextColor3")
+
+        local cbCorner = Instance.new("UICorner")
+        cbCorner.CornerRadius = UDim.new(0, 8)
+        cbCorner.Parent = customBox
+
+        local cbStroke = Instance.new("UIStroke")
+        cbStroke.Color = C.Accent
+        cbStroke.Thickness = 1.5
+        cbStroke.Transparency = 0.3
+        cbStroke.Parent = customBox
+        registerTheme(cbStroke, "Accent", "Color")
+
+        -- ═══ AUTO UPPERCASE + MAX 15 LIVE ═══
+        customBox:GetPropertyChangedSignal("Text"):Connect(function()
+            local current = customBox.Text
+            local upper = current:upper()
+            if #upper > 15 then
+                upper = upper:sub(1, 15)
+            end
+            upper = upper:gsub("[^%w%s]", "")
+            if current ~= upper then
+                local cursorPos = customBox.CursorPosition
+                customBox.Text = upper
+                customBox.CursorPosition = math.min(cursorPos, #upper + 1)
+            end
+        end)
+
+        -- Tombol row
+        local btnRow = Instance.new("Frame")
+        btnRow.Size = UDim2.new(1, 0, 0, 32)
+        btnRow.BackgroundTransparency = 1
+        btnRow.ZIndex = 3
+        btnRow.Parent = titleContent
+
+        -- SAVE
+        local saveBtn = Instance.new("TextButton")
+        saveBtn.Size = UDim2.new(0.48, 0, 1, 0)
+        saveBtn.Position = UDim2.new(0, 0, 0, 0)
+        saveBtn.BackgroundColor3 = C.Success
+        saveBtn.Text = "💾 SAVE"
+        saveBtn.TextColor3 = Color3.new(1, 1, 1)
+        saveBtn.Font = Enum.Font.GothamBold
+        saveBtn.TextSize = CFG.FONT_LABEL
+        saveBtn.BorderSizePixel = 0
+        saveBtn.ZIndex = 4
+        saveBtn.Parent = btnRow
+        registerTheme(saveBtn, "Success", "BackgroundColor3")
+
+        local sbCorner = Instance.new("UICorner")
+        sbCorner.CornerRadius = UDim.new(0, 8)
+        sbCorner.Parent = saveBtn
+
+        -- CLEAR
+        local clearBtn = Instance.new("TextButton")
+        clearBtn.Size = UDim2.new(0.48, 0, 1, 0)
+        clearBtn.Position = UDim2.new(0.52, 0, 0, 0)
+        clearBtn.BackgroundColor3 = C.Error
+        clearBtn.Text = "🗑 CLEAR"
+        clearBtn.TextColor3 = Color3.new(1, 1, 1)
+        clearBtn.Font = Enum.Font.GothamBold
+        clearBtn.TextSize = CFG.FONT_LABEL
+        clearBtn.BorderSizePixel = 0
+        clearBtn.ZIndex = 4
+        clearBtn.Parent = btnRow
+        registerTheme(clearBtn, "Error", "BackgroundColor3")
+
+        local clbCorner = Instance.new("UICorner")
+        clbCorner.CornerRadius = UDim.new(0, 8)
+        clbCorner.Parent = clearBtn
+
+        -- Note
+        local noteLbl = Instance.new("TextLabel")
+        noteLbl.Size = UDim2.new(1, 0, 0, 45)
+        noteLbl.BackgroundTransparency = 1
+        noteLbl.Text = "⚠️ Custom title (PREMIUM/Owner)\n" ..
+                       "   • Otomatis HURUF BESAR\n" ..
+                       "   • Max 15 karakter\n" ..
+                       "   • Cuma huruf & angka"
+        noteLbl.TextColor3 = C.Muted
+        noteLbl.Font = Enum.Font.GothamSemibold
+        noteLbl.TextSize = CFG.FONT_MUTED
+        noteLbl.TextWrapped = true
+        noteLbl.TextXAlignment = Enum.TextXAlignment.Left
+        noteLbl.TextYAlignment = Enum.TextYAlignment.Top
+        noteLbl.ZIndex = 3
+        noteLbl.Parent = titleContent
+        registerTheme(noteLbl, "Muted", "TextColor3")
+
+        -- SAVE handler
+        saveBtn.MouseButton1Click:Connect(function()
+            local txt = customBox.Text:gsub("^%s+", ""):gsub("%s+$", "")
+            if txt == "" then
+                notify("❌ Title kosong!", "error")
+                return
+            end
+            txt = txt:upper()
+            if #txt > 15 then
+                txt = txt:sub(1, 15)
+                notify("⚠️ Dipotong jadi 15 char: " .. txt, "warning")
+            end
+            txt = txt:gsub("[^%w%s]", "")
+            if txt == "" then
+                notify("❌ Cuma huruf & angka!", "error")
+                return
+            end
+            customBox.Text = txt
+            _G.VRILZ_CustomTitle = txt
+            saveCustomTitle(txt)
+            notify("✅ Saved: " .. txt .. " (" .. #txt .. "/15)", "success")
+            if _G.VRILZ_RefreshTitle then
+                _G.VRILZ_RefreshTitle()
+            end
+        end)
+
+        -- CLEAR handler
+        clearBtn.MouseButton1Click:Connect(function()
+            customBox.Text = ""
+            clearCustomTitle()
+            notify("🗑 Title cleared", "info")
+            if _G.VRILZ_RefreshTitle then
+                _G.VRILZ_RefreshTitle()
+            end
+        end)
+    else
+        local noteLbl = Instance.new("TextLabel")
+        noteLbl.Size = UDim2.new(1, 0, 0, 40)
+        noteLbl.BackgroundTransparency = 1
+        noteLbl.Text = "🔒 Custom title cuma buat PREMIUM key & Owner.\n   Upgrade key lu buat dapet fitur ini!"
+        noteLbl.TextColor3 = C.Muted
+        noteLbl.Font = Enum.Font.GothamSemibold
+        noteLbl.TextSize = CFG.FONT_MUTED
+        noteLbl.TextWrapped = true
+        noteLbl.TextXAlignment = Enum.TextXAlignment.Left
+        noteLbl.TextYAlignment = Enum.TextYAlignment.Top
+        noteLbl.ZIndex = 3
+        noteLbl.Parent = titleContent
+        registerTheme(noteLbl, "Muted", "TextColor3")
+    end
 
     -- ===== STEAL MODE (BARU) =====
     local stealModeCard, stealModeContent = makeCard(setPage, "🥷 STEAL MODE", 2)
@@ -4651,9 +4920,14 @@ function UI.Init(sharedState)
         end)
     end
 
-    -- Auto build title pas game jalan
+        -- Load custom title dari save file
     task.spawn(function()
-        task.wait(2)
+        task.wait(1)
+        local savedTitle = loadCustomTitle()
+        if savedTitle then
+            print("[TITLE] Loaded: " .. savedTitle)
+        end
+        task.wait(1)
         if _G.VRILZ_RefreshTitle then
             _G.VRILZ_RefreshTitle()
         end
