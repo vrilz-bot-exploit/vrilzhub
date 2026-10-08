@@ -57,13 +57,16 @@ local KEY_SYSTEM_URL = "https://key-system.vrilzwops.workers.dev"
 
 local CFG = IS_MOBILE and UI_CONFIG.MOBILE or UI_CONFIG.PC
 
--- ====== EGG NAMES ======
+-- ====== EGG NAMES (WAJIB SAMA DENGAN NAMA DI GAME) ======
 local EggNames = {
-    "Cherub", "Volcanic", "Blackhole", "Solaris", "Galaxy",
-    "Crystal", "Golden", "Glass", "Skull", "Sinister",
-    "Soul", "Dominus", "Slime", "Flower", "Leaf",
-    "Stone", "Easter", "Cracked", "Ice", "Tidal",
-    "Bloom", "Aurora", "White", "Brown"
+    "Cherub Egg", "Volcanic Egg", "Blackhole Egg", "Solaris Egg", "Galaxy Egg",
+    "Crystal Egg", "Golden Egg", "Glass Egg", "Skull Egg", "Sinister Egg",
+    "Soul Egg", "Dominus Egg", "Slime Egg", "Flower Egg", "Leaf Egg",
+    "Stone Egg", "Easter Egg", "Cracked Egg", "Ice Egg", "Tidal Egg",
+    "Bloom Egg", "Aurora Egg", "White Egg", "Brown Egg",
+    -- Tambahan dari GameData:
+    "Flaming Egg", "Mushroom Egg", "Asteroid Egg", "Giant Egg",
+    "Diamond Egg", "Dragon Egg"
 }
 
 -- ====== RARITY ======
@@ -5302,6 +5305,7 @@ end
 function UI.Init(sharedState)
     Shared = sharedState
     Shared.Notify = notify
+    _G.VRILZ_UI_Shared = Shared   -- ← TAMBAH INI (biar bisa debug)
 
     Shared.ESP_Eggs_Enabled = false
     Shared.ESP_EggName_Enabled = false
@@ -5350,15 +5354,17 @@ function UI.Init(sharedState)
         Shared.AutoMutation_Enabled = false
     Shared.MutationReturn_Enabled = false
     Shared.MutationStealMode = "Rarity"   -- "Rarity" atau "Name"
-    Shared.MutationSelectedEggs = {
-        ["Cherub"] = false, ["Volcanic"] = false, ["Blackhole"] = false,
-        ["Solaris"] = false, ["Galaxy"] = false, ["Crystal"] = false,
-        ["Golden"] = false, ["Glass"] = false, ["Skull"] = false,
-        ["Sinister"] = false, ["Soul"] = false, ["Dominus"] = false,
-        ["Slime"] = false, ["Flower"] = false, ["Leaf"] = false,
-        ["Stone"] = false, ["Easter"] = false, ["Cracked"] = false,
-        ["Ice"] = false, ["Tidal"] = false, ["Bloom"] = false,
-        ["Aurora"] = false, ["White"] = false, ["Brown"] = false,
+        Shared.MutationSelectedEggs = {
+        ["Cherub Egg"] = false, ["Volcanic Egg"] = false, ["Blackhole Egg"] = false,
+        ["Solaris Egg"] = false, ["Galaxy Egg"] = false, ["Crystal Egg"] = false,
+        ["Golden Egg"] = false, ["Glass Egg"] = false, ["Skull Egg"] = false,
+        ["Sinister Egg"] = false, ["Soul Egg"] = false, ["Dominus Egg"] = false,
+        ["Slime Egg"] = false, ["Flower Egg"] = false, ["Leaf Egg"] = false,
+        ["Stone Egg"] = false, ["Easter Egg"] = false, ["Cracked Egg"] = false,
+        ["Ice Egg"] = false, ["Tidal Egg"] = false, ["Bloom Egg"] = false,
+        ["Aurora Egg"] = false, ["White Egg"] = false, ["Brown Egg"] = false,
+        ["Flaming Egg"] = false, ["Mushroom Egg"] = false, ["Asteroid Egg"] = false,
+        ["Giant Egg"] = false, ["Diamond Egg"] = false, ["Dragon Egg"] = false,
     }
         Shared.FPSBoost_Enabled = false
     Shared.HD4K_Enabled = false
