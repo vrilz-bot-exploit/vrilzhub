@@ -571,21 +571,6 @@ function Features.startAutoPlantEgg()
             local hum = char and char:FindFirstChildOfClass("Humanoid")
             if not hum or hum.Health <= 0 then continue end
 
-            -- ═══════════════════════════════════════════
-            -- FIX: DEBUG — print status + isi backpack
-            -- ═══════════════════════════════════════════
-            AutoPlantState.Status = "🔍 Cari: " .. AutoPlantState.EggFilter
-            do
-                local bp = LocalPlayer:FindFirstChild("Backpack")
-                local toolNames = {}
-                if bp then
-                    for _, t in ipairs(bp:GetChildren()) do
-                        if t:IsA("Tool") then table.insert(toolNames, t.Name) end
-                    end
-                end
-                print("[AUTO-PLANT] Filter:", AutoPlantState.EggFilter, "| Backpack:", #toolNames > 0 and table.concat(toolNames, ", ") or "(kosong)")
-            end
-
             local eggTool = findEggToolInBackpack(AutoPlantState.EggFilter)
             if not eggTool then
                 AutoPlantState.Status = "X " .. AutoPlantState.EggFilter .. " not in backpack"
