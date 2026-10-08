@@ -3938,24 +3938,6 @@ local function buildMainWindow(parent)
         clbCorner.CornerRadius = UDim.new(0, 8)
         clbCorner.Parent = clearBtn
 
-        -- Note
-        local noteLbl = Instance.new("TextLabel")
-        noteLbl.Size = UDim2.new(1, 0, 0, 45)
-        noteLbl.BackgroundTransparency = 1
-        noteLbl.Text = "⚠️ Custom title (PREMIUM/Owner)\n" ..
-                       "   • Otomatis HURUF BESAR\n" ..
-                       "   • Max 15 karakter\n" ..
-                       "   • Cuma huruf & angka"
-        noteLbl.TextColor3 = C.Muted
-        noteLbl.Font = Enum.Font.GothamSemibold
-        noteLbl.TextSize = CFG.FONT_MUTED
-        noteLbl.TextWrapped = true
-        noteLbl.TextXAlignment = Enum.TextXAlignment.Left
-        noteLbl.TextYAlignment = Enum.TextYAlignment.Top
-        noteLbl.ZIndex = 3
-        noteLbl.Parent = titleContent
-        registerTheme(noteLbl, "Muted", "TextColor3")
-
                 -- ═══════════════════════════════════════════
         -- SAVE HANDLER — SAVE SEKALI, LANGSUNG PERMANEN
         -- ═══════════════════════════════════════════
@@ -4099,7 +4081,7 @@ local function buildMainWindow(parent)
         lockDesc.Size = UDim2.new(1, -50, 0, 22)
         lockDesc.Position = UDim2.fromOffset(42, 25)
         lockDesc.BackgroundTransparency = 1
-        lockDesc.Text = "This feature is exclusive to Premium\nand Owner keys only."
+        lockDesc.Text = "This feature is exclusive to\nPremium keys only."
         lockDesc.TextColor3 = C.Muted
         lockDesc.Font = Enum.Font.GothamSemibold
         lockDesc.TextSize = CFG.FONT_MUTED
