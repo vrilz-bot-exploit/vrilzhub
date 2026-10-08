@@ -4705,14 +4705,18 @@ local function verifyKeyWithServer(key)
         if data.success == true then
             return true, data.message or "Key valid.", data
         end
-        return false, data.message or "Invalid key.", data
+        local serverMessage = tostring(data.message or "Invalid key.")
+        if status > 0 and status ~= 200 then
+            serverMessage = serverMessage .. " [HTTP " .. tostring(status) .. "]"
+        end
+        return false, serverMessage, data
     end
 
     if status >= 200 and status < 300 then
         return false, "Invalid Key System response."
     end
 
-    return false, "Invalid key."
+    return false, "Key System server error [HTTP " .. tostring(status) .. "]."
 end
 
 -- Mengecek key yang SUDAH pernah diredeem tanpa membuat redeem kedua.
