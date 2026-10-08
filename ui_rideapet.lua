@@ -4048,22 +4048,67 @@ local function buildMainWindow(parent)
             end
         end)
     else
+                -- ═══════════════════════════════════════════
+        -- REGULAR USER — CUSTOM TITLE LOCKED
         -- ═══════════════════════════════════════════
-        -- USER BIASA — GAK DAPET CUSTOM TITLE
-        -- ═══════════════════════════════════════════
-        local noteLbl = Instance.new("TextLabel")
-        noteLbl.Size = UDim2.new(1, 0, 0, 40)
-        noteLbl.BackgroundTransparency = 1
-        noteLbl.Text = "🔒 Custom title cuma buat PREMIUM key & Owner.\n   Upgrade key lu buat dapet fitur ini!"
-        noteLbl.TextColor3 = C.Muted
-        noteLbl.Font = Enum.Font.GothamSemibold
-        noteLbl.TextSize = CFG.FONT_MUTED
-        noteLbl.TextWrapped = true
-        noteLbl.TextXAlignment = Enum.TextXAlignment.Left
-        noteLbl.TextYAlignment = Enum.TextYAlignment.Top
-        noteLbl.ZIndex = 3
-        noteLbl.Parent = titleContent
-        registerTheme(noteLbl, "Muted", "TextColor3")
+        local lockedFrame = Instance.new("Frame")
+        lockedFrame.Size = UDim2.new(1, 0, 0, 52)
+        lockedFrame.BackgroundColor3 = C.Surface3
+        lockedFrame.BackgroundTransparency = 0.5
+        lockedFrame.BorderSizePixel = 0
+        lockedFrame.ZIndex = 3
+        lockedFrame.Parent = titleContent
+        registerTheme(lockedFrame, "Surface3", "BackgroundColor3")
+
+        local lockedCorner = Instance.new("UICorner")
+        lockedCorner.CornerRadius = UDim.new(0, 8)
+        lockedCorner.Parent = lockedFrame
+
+        local lockedStroke = Instance.new("UIStroke")
+        lockedStroke.Color = C.Muted
+        lockedStroke.Thickness = 1
+        lockedStroke.Transparency = 0.6
+        lockedStroke.Parent = lockedFrame
+
+        local lockIcon = Instance.new("TextLabel")
+        lockIcon.Size = UDim2.fromOffset(28, 28)
+        lockIcon.Position = UDim2.fromOffset(10, 12)
+        lockIcon.BackgroundTransparency = 1
+        lockIcon.Text = "🔒"
+        lockIcon.TextColor3 = C.Muted
+        lockIcon.Font = Enum.Font.GothamBold
+        lockIcon.TextSize = 18
+        lockIcon.ZIndex = 4
+        lockIcon.Parent = lockedFrame
+        registerTheme(lockIcon, "Muted", "TextColor3")
+
+        local lockTitle = Instance.new("TextLabel")
+        lockTitle.Size = UDim2.new(1, -50, 0, 16)
+        lockTitle.Position = UDim2.fromOffset(42, 9)
+        lockTitle.BackgroundTransparency = 1
+        lockTitle.Text = "CUSTOM TITLE LOCKED"
+        lockTitle.TextColor3 = C.Muted
+        lockTitle.Font = Enum.Font.GothamBold
+        lockTitle.TextSize = CFG.FONT_MUTED
+        lockTitle.TextXAlignment = Enum.TextXAlignment.Left
+        lockTitle.ZIndex = 4
+        lockTitle.Parent = lockedFrame
+        registerTheme(lockTitle, "Muted", "TextColor3")
+
+        local lockDesc = Instance.new("TextLabel")
+        lockDesc.Size = UDim2.new(1, -50, 0, 22)
+        lockDesc.Position = UDim2.fromOffset(42, 25)
+        lockDesc.BackgroundTransparency = 1
+        lockDesc.Text = "This feature is exclusive to Premium\nand Owner keys only."
+        lockDesc.TextColor3 = C.Muted
+        lockDesc.Font = Enum.Font.GothamSemibold
+        lockDesc.TextSize = CFG.FONT_MUTED
+        lockDesc.TextWrapped = true
+        lockDesc.TextXAlignment = Enum.TextXAlignment.Left
+        lockDesc.TextYAlignment = Enum.TextYAlignment.Top
+        lockDesc.ZIndex = 4
+        lockDesc.Parent = lockedFrame
+        registerTheme(lockDesc, "Muted", "TextColor3")
     end   -- ← INI PENUTUP `if canCustom then`
 
     -- ===== STEAL MODE (BARU) =====
