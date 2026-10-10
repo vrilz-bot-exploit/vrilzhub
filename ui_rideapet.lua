@@ -4199,139 +4199,141 @@ local function buildMainWindow(parent)
         if fpsWin then fpsWin.Visible = v end
     end)
 
-    -- ============================================================
+       -- ============================================================
     -- TAB EVENT (HALLOWEEN)
     -- ============================================================
-    local eventPage = createPage("Event")
-    pages.Event = eventPage
+    do
+        local eventPage = createPage("Event")
+        pages.Event = eventPage
 
-    -- Card: AUTO CLAIM
-    local eventCard, eventContent = makeCard(eventPage, "🎃 AUTO HALLOWEEN", 1)
+        -- Card: AUTO CLAIM
+        local eventCard, eventContent = makeCard(eventPage, "🎃 AUTO HALLOWEEN", 1)
 
-    makeToggle(eventContent, "Auto Claim Candy", false, function(v)
-        local F = getFeatures()
-        if F and F.getHalloweenState then
-            F.getHalloweenState().Enabled = v
-        end
-        if v then
-            notify("🎃 Halloween Auto: ON", "success")
-        else
-            notify("🎃 Halloween Auto: OFF", "info")
-        end
-    end)
-
-    makeToggle(eventContent, "Auto Return Home", true, function(v)
-        local F = getFeatures()
-        if F and F.getHalloweenState then
-            F.getHalloweenState().AutoReturn = v
-        end
-        if v then notify("🏠 Return Home: ON", "success") end
-    end)
-
-    makeToggle(eventContent, "Auto Drop Candy", true, function(v)
-        local F = getFeatures()
-        if F and F.getHalloweenState then
-            F.getHalloweenState().AutoDrop = v
-        end
-        if v then notify("📦 Drop Candy: ON", "success") end
-    end)
-
-    -- Card: PILIH JENIS CANDY
-    local eventCandyCard, eventCandyContent = makeCard(eventPage, "🍬 JENIS CANDY", 2)
-
-    local eventCandyLbl = Instance.new("TextLabel")
-    eventCandyLbl.Size = UDim2.new(1, 0, 0, 16)
-    eventCandyLbl.BackgroundTransparency = 1
-    eventCandyLbl.Text = "Centang jenis candy yang mau di-claim:"
-    eventCandyLbl.TextColor3 = C.Muted
-    eventCandyLbl.Font = Enum.Font.GothamSemibold
-    eventCandyLbl.TextSize = CFG.FONT_MUTED
-    eventCandyLbl.TextXAlignment = Enum.TextXAlignment.Left
-    eventCandyLbl.ZIndex = 3
-    eventCandyLbl.Parent = eventCandyContent
-    registerTheme(eventCandyLbl, "Muted", "TextColor3")
-
-    local eventCandyDefs = {
-        {name = "Candy_01", label = "Candy_01 (biasa)", color = Color3.fromRGB(200, 100, 100)},
-        {name = "Candy_02", label = "⭐ Rare Candy (Candy_02)", color = Color3.fromRGB(255, 100, 200)},
-        {name = "Candy_03", label = "Candy_03 (kecil)", color = Color3.fromRGB(100, 150, 255)},
-    }
-
-    for _, def in ipairs(eventCandyDefs) do
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, 0, 0, 32)
-        btn.BackgroundColor3 = def.color
-        btn.BorderSizePixel = 0
-        btn.Text = "☑ " .. def.label
-        btn.TextColor3 = Color3.new(1, 1, 1)
-        btn.Font = Enum.Font.GothamBold
-        btn.TextSize = CFG.FONT_LABEL
-        btn.TextXAlignment = Enum.TextXAlignment.Left
-        btn.ZIndex = 3
-        btn.Parent = eventCandyContent
-
-        local btnCorner = Instance.new("UICorner")
-        btnCorner.CornerRadius = UDim.new(0, 6)
-        btnCorner.Parent = btn
-
-        local btnPad = Instance.new("UIPadding")
-        btnPad.PaddingLeft = UDim.new(0, 10)
-        btnPad.Parent = btn
-
-        local isOn = true
-
-        btn.MouseButton1Click:Connect(function()
+        makeToggle(eventContent, "Auto Claim Candy", false, function(v)
             local F = getFeatures()
             if F and F.getHalloweenState then
-                local st = F.getHalloweenState()
-                st.CandyTypes[def.name] = not st.CandyTypes[def.name]
-                isOn = st.CandyTypes[def.name]
-                btn.BackgroundColor3 = isOn and def.color or C.Surface3
-                btn.Text = (isOn and "☑ " or "☐ ") .. def.label
+                F.getHalloweenState().Enabled = v
+            end
+            if v then
+                notify("🎃 Halloween Auto: ON", "success")
+            else
+                notify("🎃 Halloween Auto: OFF", "info")
             end
         end)
-    end
 
-    -- Card: STATUS
-    local eventStatusCard, eventStatusContent = makeCard(eventPage, "📊 STATUS", 3)
-
-    local eventStatusLbl = Instance.new("TextLabel")
-    eventStatusLbl.Size = UDim2.new(1, 0, 0, 50)
-    eventStatusLbl.BackgroundColor3 = C.Surface3
-    eventStatusLbl.BackgroundTransparency = 0.3
-    eventStatusLbl.BorderSizePixel = 0
-    eventStatusLbl.Text = "⏸️ Idle"
-    eventStatusLbl.TextColor3 = C.Text
-    eventStatusLbl.Font = Enum.Font.Code
-    eventStatusLbl.TextSize = CFG.FONT_MUTED
-    eventStatusLbl.TextXAlignment = Enum.TextXAlignment.Left
-    eventStatusLbl.TextYAlignment = Enum.TextYAlignment.Top
-    eventStatusLbl.ZIndex = 3
-    eventStatusLbl.Parent = eventStatusContent
-    registerTheme(eventStatusLbl, "Text", "TextColor3")
-
-    local esCorner = Instance.new("UICorner")
-    esCorner.CornerRadius = UDim.new(0, 6)
-    esCorner.Parent = eventStatusLbl
-
-    local esPad = Instance.new("UIPadding")
-    esPad.PaddingLeft = UDim.new(0, 8)
-    esPad.PaddingTop = UDim.new(0, 6)
-    esPad.Parent = eventStatusLbl
-
-    task.spawn(function()
-        while eventStatusLbl.Parent do
-            task.wait(0.5)
+        makeToggle(eventContent, "Auto Return Home", true, function(v)
             local F = getFeatures()
             if F and F.getHalloweenState then
-                local st = F.getHalloweenState()
-                eventStatusLbl.Text = st.Status .. "\n✅ Claimed: " .. st.Claimed .. " | ⭐ Rare: " .. st.RareClaimed
+                F.getHalloweenState().AutoReturn = v
             end
+            if v then notify("🏠 Return Home: ON", "success") end
+        end)
+
+        makeToggle(eventContent, "Auto Drop Candy", true, function(v)
+            local F = getFeatures()
+            if F and F.getHalloweenState then
+                F.getHalloweenState().AutoDrop = v
+            end
+            if v then notify("📦 Drop Candy: ON", "success") end
+        end)
+
+        -- Card: PILIH JENIS CANDY
+        local eventCandyCard, eventCandyContent = makeCard(eventPage, "🍬 JENIS CANDY", 2)
+
+        local eventCandyLbl = Instance.new("TextLabel")
+        eventCandyLbl.Size = UDim2.new(1, 0, 0, 16)
+        eventCandyLbl.BackgroundTransparency = 1
+        eventCandyLbl.Text = "Centang jenis candy yang mau di-claim:"
+        eventCandyLbl.TextColor3 = C.Muted
+        eventCandyLbl.Font = Enum.Font.GothamSemibold
+        eventCandyLbl.TextSize = CFG.FONT_MUTED
+        eventCandyLbl.TextXAlignment = Enum.TextXAlignment.Left
+        eventCandyLbl.ZIndex = 3
+        eventCandyLbl.Parent = eventCandyContent
+        registerTheme(eventCandyLbl, "Muted", "TextColor3")
+
+        local eventCandyDefs = {
+            {name = "Candy_01", label = "Candy_01 (biasa)", color = Color3.fromRGB(200, 100, 100)},
+            {name = "Candy_02", label = "⭐ Rare Candy (Candy_02)", color = Color3.fromRGB(255, 100, 200)},
+            {name = "Candy_03", label = "Candy_03 (kecil)", color = Color3.fromRGB(100, 150, 255)},
+        }
+
+        for _, def in ipairs(eventCandyDefs) do
+            local btn = Instance.new("TextButton")
+            btn.Size = UDim2.new(1, 0, 0, 32)
+            btn.BackgroundColor3 = def.color
+            btn.BorderSizePixel = 0
+            btn.Text = "☑ " .. def.label
+            btn.TextColor3 = Color3.new(1, 1, 1)
+            btn.Font = Enum.Font.GothamBold
+            btn.TextSize = CFG.FONT_LABEL
+            btn.TextXAlignment = Enum.TextXAlignment.Left
+            btn.ZIndex = 3
+            btn.Parent = eventCandyContent
+
+            local btnCorner = Instance.new("UICorner")
+            btnCorner.CornerRadius = UDim.new(0, 6)
+            btnCorner.Parent = btn
+
+            local btnPad = Instance.new("UIPadding")
+            btnPad.PaddingLeft = UDim.new(0, 10)
+            btnPad.Parent = btn
+
+            local isOn = true
+
+            btn.MouseButton1Click:Connect(function()
+                local F = getFeatures()
+                if F and F.getHalloweenState then
+                    local st = F.getHalloweenState()
+                    st.CandyTypes[def.name] = not st.CandyTypes[def.name]
+                    isOn = st.CandyTypes[def.name]
+                    btn.BackgroundColor3 = isOn and def.color or C.Surface3
+                    btn.Text = (isOn and "☑ " or "☐ ") .. def.label
+                end
+            end)
         end
-    end)
 
-    registerTab("Event", "🎃", "Event")
+        -- Card: STATUS
+        local eventStatusCard, eventStatusContent = makeCard(eventPage, "📊 STATUS", 3)
 
+        local eventStatusLbl = Instance.new("TextLabel")
+        eventStatusLbl.Size = UDim2.new(1, 0, 0, 50)
+        eventStatusLbl.BackgroundColor3 = C.Surface3
+        eventStatusLbl.BackgroundTransparency = 0.3
+        eventStatusLbl.BorderSizePixel = 0
+        eventStatusLbl.Text = "⏸️ Idle"
+        eventStatusLbl.TextColor3 = C.Text
+        eventStatusLbl.Font = Enum.Font.Code
+        eventStatusLbl.TextSize = CFG.FONT_MUTED
+        eventStatusLbl.TextXAlignment = Enum.TextXAlignment.Left
+        eventStatusLbl.TextYAlignment = Enum.TextYAlignment.Top
+        eventStatusLbl.ZIndex = 3
+        eventStatusLbl.Parent = eventStatusContent
+        registerTheme(eventStatusLbl, "Text", "TextColor3")
+
+        local esCorner = Instance.new("UICorner")
+        esCorner.CornerRadius = UDim.new(0, 6)
+        esCorner.Parent = eventStatusLbl
+
+        local esPad = Instance.new("UIPadding")
+        esPad.PaddingLeft = UDim.new(0, 8)
+        esPad.PaddingTop = UDim.new(0, 6)
+        esPad.Parent = eventStatusLbl
+
+        task.spawn(function()
+            while eventStatusLbl.Parent do
+                task.wait(0.5)
+                local F = getFeatures()
+                if F and F.getHalloweenState then
+                    local st = F.getHalloweenState()
+                    eventStatusLbl.Text = st.Status .. "\n✅ Claimed: " .. st.Claimed .. " | ⭐ Rare: " .. st.RareClaimed
+                end
+            end
+        end)
+
+        registerTab("Event", "🎃", "Event")
+    end
+    -- ^^^ do...end — semua local variable di dalam sini bakal di-GC setelah block selesai
 
    -- TAB VOLCANIC
 local volcanicPage = createPage("Vulcanic")
