@@ -1,6 +1,6 @@
 -- ============================================================
--- VRILZHUB FEATURES — RIDE A PET v3.5
--- Auto Return: TP lompat 100 studs → base → drop
+-- VRILZHUB FEATURES — RIDE A PET v3.8
+-- Halloween: Ambil SEMUA candy priority tertinggi → balik base → ulangi
 -- ============================================================
 
 local Features = {}
@@ -12,32 +12,26 @@ local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
 -- ============================================================
--- ANTI-AFK — Cegah kick karena idle 20 menit
+-- ANTI-AFK
 -- ============================================================
 function Features.startAntiAFK()
     task.spawn(function()
-        local VirtualUser = game:GetService("VirtualUser")
         local vu = game:GetService("VirtualUser")
 
         LocalPlayer.Idled:Connect(function()
             if Shared.AntiAFK_Enabled == false then return end
-
             pcall(function()
                 vu:CaptureController()
                 vu:ClickButton2(Vector2.new())
             end)
-
-            print("[ANTI-AFK] Idle terdeteksi — activity dikirim")
         end)
 
         while task.wait(60) do
             if Shared.AntiAFK_Enabled == false then continue end
-
             pcall(function()
                 vu:CaptureController()
                 vu:ClickButton2(Vector2.new())
             end)
-
             pcall(function()
                 mousemoverel(1, 0)
                 task.wait(0.05)
@@ -48,7 +42,7 @@ function Features.startAntiAFK()
 end
 
 -- ============================================================
--- FLY STEAL (BARU) — Naik 350 → TP ke egg
+-- FLY STEAL
 -- ============================================================
 local function clearForces(root)
     for _, c in ipairs(root:GetChildren()) do
@@ -64,7 +58,6 @@ local function doStealFly(egg, prompt, eggPart)
     local myRoot = char and char:FindFirstChild("HumanoidRootPart")
     if not myRoot or not eggPart then return false end
 
-    print("[FLY] 🛫 Naik 350 studs")
     clearForces(myRoot)
 
     local bvUp = Instance.new("BodyVelocity")
@@ -79,8 +72,6 @@ local function doStealFly(egg, prompt, eggPart)
         task.wait(0.03)
     end
     bvUp:Destroy()
-
-    print("[FLY] ⚡ TP ke egg dari Y:", math.floor(myRoot.Position.Y))
 
     myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not myRoot then return false end
@@ -118,7 +109,7 @@ local function getEggLuck(egg)
 end
 
 -- ============================================================
--- EGG ESP (TRANSPARENT — NO BOX)
+-- EGG ESP
 -- ============================================================
 local EggESPTracked = {}
 
@@ -197,7 +188,7 @@ function Features.startEggESP()
 end
 
 -- ============================================================
--- PET ESP (TRANSPARENT — NO BOX)
+-- PET ESP
 -- ============================================================
 local PetESPTracked = {}
 
@@ -369,17 +360,14 @@ local function findEggByName(eggName)
     return best
 end
 
--- ============================================================
--- CEK EGG MASIH DI MAP
--- ============================================================
 local function isEggStillInMap(egg)
     if not egg or not egg.Parent then return false end
     return true
 end
 
--- ═══════════════════════════════════════════════════════════
--- AUTO RETURN — TP LOMPAT 100 STUDS (FIX)
--- ═══════════════════════════════════════════════════════════
+-- ============================================================
+-- AUTO RETURN
+-- ============================================================
 local ReturnCfg = {
     StepDistance = 100,
     TPHeight = 5,
@@ -387,18 +375,6 @@ local ReturnCfg = {
     MaxSteps = 300,
     FinalDropWait = 0.3,
 }
-
-local function getMyPlotCenterPos()
-    local plot = getMyPlot()
-    if not plot then return nil end
-    local bp = plot:FindFirstChild("Baseplate", true)
-        or plot:FindFirstChild("BasePlate", true)
-        or plot:FindFirstChildWhichIsA("SpawnLocation", true)
-    if bp then return bp.Position end
-    local ok, modelCF = pcall(function() return plot:GetBoundingBox() end)
-    if ok and modelCF then return modelCF.Position end
-    return nil
-end
 
 local function isHoldingEggLocal()
     local char = LocalPlayer.Character
@@ -433,26 +409,16 @@ local function returnToMyPlot()
     if not myRoot then return end
 
     local holding = isHoldingEggLocal()
-    if not holding then
-        print("[RETURN] ❌ Gak holding — skip")
-        return
-    end
+    if not holding then return end
 
     local spawnPart = getMyPlotSpawn()
-    if not spawnPart then
-        print("[RETURN] ❌ Base gak ketemu")
-        return
-    end
+    if not spawnPart then return end
 
     local startPos = myRoot.Position
     local basePos = spawnPart.Position
     local totalDist = (basePos - startPos).Magnitude
     local stepSize = ReturnCfg.StepDistance
     local steps = math.min(ReturnCfg.MaxSteps, math.ceil(totalDist / stepSize))
-
-    print("[RETURN] ⚡ TP lompat per " .. stepSize .. " studs")
-    print("[RETURN] 📏 Total jarak: " .. math.floor(totalDist) .. " studs")
-    print("[RETURN] 📊 Total TP: " .. steps)
 
     local dir = (basePos - startPos)
     dir = Vector3.new(dir.X, 0, dir.Z)
@@ -466,11 +432,7 @@ local function returnToMyPlot()
     for i = 1, steps do
         myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if not myRoot then return end
-
-        if not isHoldingEggLocal() then
-            print("[RETURN] ❌ Egg ilang di TP " .. i)
-            return
-        end
+        if not isHoldingEggLocal() then return end
 
         local dist = math.min(stepSize * i, totalDist)
         local targetPos = startPos + dir * dist + Vector3.new(0, ReturnCfg.TPHeight, 0)
@@ -480,29 +442,20 @@ local function returnToMyPlot()
         myRoot.Velocity = Vector3.zero
         myRoot.AssemblyLinearVelocity = Vector3.zero
 
-        if i % 5 == 1 or i == steps then
-            print("[RETURN] 📍 TP " .. i .. "/" .. steps .. " — " .. math.floor(dist) .. " studs")
-        end
-
         task.wait(ReturnCfg.WaitBetweenTP)
     end
 
     myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not myRoot then return end
 
-    print("[RETURN] 🏠 TP ke base — final")
     clearForces(myRoot)
     myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, ReturnCfg.TPHeight, 0)
     myRoot.Velocity = Vector3.zero
     myRoot.AssemblyLinearVelocity = Vector3.zero
     task.wait(ReturnCfg.FinalDropWait)
 
-    if not isHoldingEggLocal() then
-        print("[RETURN] ❌ Egg drop sebelum drop")
-        return
-    end
+    if not isHoldingEggLocal() then return end
 
-    print("[RETURN] 🎒 Drop egg di base")
     local dropRemote = getDropRemoteLocal()
 
     for _, d in ipairs(char:GetDescendants()) do
@@ -520,20 +473,14 @@ local function returnToMyPlot()
     end
 
     task.wait(0.3)
-
-    if isHoldingEggLocal() then
-        print("[RETURN] ⚠️ Gagal drop — coba lagi")
-        if dropRemote then
-            pcall(function() dropRemote:FireServer() end)
-        end
+    if isHoldingEggLocal() and dropRemote then
+        pcall(function() dropRemote:FireServer() end)
         task.wait(0.2)
     end
-
-    print("[RETURN] ✅ Selesai — egg di base")
 end
 
 -- ============================================================
--- AUTO STEAL + NOTIF "EGG NO SPAWN"
+-- AUTO STEAL
 -- ============================================================
 local lastNoEggNotif = 0
 
@@ -576,18 +523,15 @@ function Features.startAutoSteal()
             task.wait(0.1)
 
             local picked = false
-            local maxTries = 10
-            for i = 1, maxTries do
+            for i = 1, 10 do
                 if typeof(fireproximityprompt) == "function" then
                     pcall(fireproximityprompt, prompt)
                 end
                 task.wait(0.3)
-
                 if not isEggStillInMap(egg) then
                     picked = true
                     break
                 end
-
                 if eggPart and eggPart.Parent then
                     myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
                     task.wait(0.1)
@@ -604,7 +548,7 @@ function Features.startAutoSteal()
 end
 
 -- ============================================================
--- AUTO HATCH (NO TP) — Fire prompt dari jauh
+-- AUTO HATCH
 -- ============================================================
 function Features.startAutoHatch()
     task.spawn(function()
@@ -643,7 +587,7 @@ function Features.startAutoHatch()
 end
 
 -- ============================================================
--- AUTO PLANT EGG — From Backpack to Nest
+-- AUTO PLANT EGG
 -- ============================================================
 local AutoPlantState = {
     Enabled = false,
@@ -800,7 +744,7 @@ function Features.startAutoRidePet()
 end
 
 -- ============================================================
--- EGG PREDICTION SYSTEM — SELALU JALAN
+-- EGG PREDICTION
 -- ============================================================
 local EggHistory = {}
 local LastEggList = {}
@@ -886,42 +830,30 @@ end
 
 function Features.rideAlong()
     local remote = getRemote("RideAlong")
-    if remote then
-        remote:FireServer()
-        return true
-    end
+    if remote then remote:FireServer() return true end
     return false
 end
 
 function Features.petDismount()
     local remote = getRemote("PetDismount")
-    if remote then
-        remote:FireServer()
-        return true
-    end
+    if remote then remote:FireServer() return true end
     return false
 end
 
 function Features.pickupPet()
     local remote = getRemote("PickupPet")
-    if remote then
-        remote:FireServer()
-        return true
-    end
+    if remote then remote:FireServer() return true end
     return false
 end
 
 function Features.hatchEgg()
     local remote = getRemote("Hatch")
-    if remote then
-        remote:FireServer()
-        return true
-    end
+    if remote then remote:FireServer() return true end
     return false
 end
 
 -- ============================================================
--- GAMEDATA (EGGS + PETS)
+-- GAMEDATA
 -- ============================================================
 local GameData = game:GetService("ReplicatedStorage"):FindFirstChild("GameData")
 local EggData, PetData = {}, {}
@@ -975,7 +907,7 @@ function Features.startSpeed()
 end
 
 -- ============================================================
--- INSTANT PICKUP — HoldDuration = 0
+-- INSTANT PICKUP
 -- ============================================================
 function Features.startInstantPickup()
     task.spawn(function()
@@ -1071,9 +1003,7 @@ function Features.startAutoFarm()
             end
 
             local best = getBestEggInMap()
-            if not best then
-                continue
-            end
+            if not best then continue end
 
             local egg = best.egg
             local eggName = egg.Name
@@ -1105,18 +1035,15 @@ function Features.startAutoFarm()
                 myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 5, 0)
                 task.wait(0.1)
 
-                local maxTries = 10
-                for i = 1, maxTries do
+                for i = 1, 10 do
                     if prompt and typeof(fireproximityprompt) == "function" then
                         pcall(fireproximityprompt, prompt)
                     end
                     task.wait(0.3)
-
                     if not isEggStillInMap(egg) then
                         picked = true
                         break
                     end
-
                     if eggPart and eggPart.Parent then
                         myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 5, 0)
                         task.wait(0.1)
@@ -1135,7 +1062,7 @@ function Features.startAutoFarm()
 end
 
 -- ============================================================
--- HELPER: CEK HOLDING EGG (WAJIB di atas, dipakai Volcanic & Mutation)
+-- HELPER: CEK HOLDING EGG
 -- ============================================================
 local function isHoldingEggMutation()
     local char = LocalPlayer.Character
@@ -1153,7 +1080,7 @@ local function isHoldingEggMutation()
 end
 
 -- ============================================================
--- VOLCANIC HUNTER (FIXED v7)
+-- VOLCANIC HUNTER
 -- ============================================================
 local VolcanicState = {
     Enabled = false,
@@ -1245,53 +1172,24 @@ local function tpWaypoint(wp)
 end
 
 local function exitCave()
-    print("[VOLCANIC] Keluar goa via waypoint reverse...")
+    if not isHoldingEggMutation() then return false end
 
-    if not isHoldingEggMutation() then
-        print("[VOLCANIC] Gak holding egg — batal keluar")
-        return false
-    end
-
-    local checkpointCounter = 0
     for i = #VolcanicWaypoints, 1, -1 do
         if not Shared.VolcanicHunt_Enabled then return false end
 
         local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if not hum or hum.Health <= 0 then return false end
-
-        if not isHoldingEggMutation() then
-            print("[VOLCANIC] ⚠️ Egg hilang di waypoint " .. i .. " — stop keluar")
-            return false
-        end
+        if not isHoldingEggMutation() then return false end
 
         tpWaypoint(VolcanicWaypoints[i])
-        checkpointCounter = checkpointCounter + 1
-
-        if checkpointCounter % 5 == 0 then
-            task.wait(0.3)
-            if not isHoldingEggMutation() then
-                print("[VOLCANIC] ⚠️ Egg drop di checkpoint " .. checkpointCounter)
-                return false
-            end
-        end
     end
 
     task.wait(0.5)
-    if not isHoldingEggMutation() then
-        print("[VOLCANIC] ⚠️ Egg hilang setelah keluar goa")
-        return false
-    end
-
-    print("[VOLCANIC] Keluar goa OK — holding egg")
-    return true
+    return isHoldingEggMutation()
 end
 
 local function volcanicPickupVerified(egg)
-    if isHoldingEggMutation() then
-        print("[VOLCANIC] Sudah holding egg — skip pickup")
-        return true
-    end
-
+    if isHoldingEggMutation() then return true end
     if not egg or not egg.Parent then
         task.wait(0.3)
         return isHoldingEggMutation()
@@ -1314,34 +1212,19 @@ local function volcanicPickupVerified(egg)
         prompt.RequiresLineOfSight = false
     end
 
-    local lastPos = part.Position
-
     for i = 1, 25 do
         if not Shared.VolcanicHunt_Enabled then return false end
-
-        if isHoldingEggMutation() then
-            print("[VOLCANIC] ✅ Verified holding egg @ try " .. i)
-            return true
-        end
+        if isHoldingEggMutation() then return true end
 
         if not egg.Parent then
             task.wait(0.3)
-            if isHoldingEggMutation() then
-                print("[VOLCANIC] Egg hilang & holding OK")
-                return true
-            end
-            return false
+            return isHoldingEggMutation()
         end
 
-        if part and part.Parent then
-            lastPos = part.Position
-        end
-
+        local lastPos = part and part.Parent and part.Position or egg:GetPivot().Position
         local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if curRoot then
-            curRoot.CFrame = CFrame.lookAt(
-                lastPos + Vector3.new(0, 3, 0),
-                lastPos)
+            curRoot.CFrame = CFrame.lookAt(lastPos + Vector3.new(0, 3, 0), lastPos)
             curRoot.Velocity = Vector3.zero
             curRoot.AssemblyLinearVelocity = Vector3.zero
         end
@@ -1353,7 +1236,6 @@ local function volcanicPickupVerified(egg)
         if prompt and typeof(fireproximityprompt) == "function" then
             pcall(fireproximityprompt, prompt)
         end
-
         task.wait(0.25)
     end
 
@@ -1382,7 +1264,6 @@ function Features.startVolcanicHunt()
                     end
 
                     local egg = getVolcanicEgg()
-
                     if not egg then
                         local spawnPart = getVolcanicSpawn()
                         if spawnPart then
@@ -1392,7 +1273,6 @@ function Features.startVolcanicHunt()
                                 if d > 50 then
                                     curRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
                                     curRoot.Velocity = Vector3.zero
-                                    print("[VOLCANIC] Teleport ke spawn point volcanic")
                                 end
                             end
                         end
@@ -1400,24 +1280,19 @@ function Features.startVolcanicHunt()
                         continue
                     end
 
-                    print("[VOLCANIC] 🎯 Egg volcanic spawn! Mulai hunt...")
                     if Shared.Notify then
                         Shared.Notify("🌋 Volcanic Egg spawn!", "success")
                     end
 
-                    print("[VOLCANIC] STEP 1 — Masuk goa...")
                     local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
                     local reachedEgg = false
                     for i, wp in ipairs(VolcanicWaypoints) do
                         if not Shared.VolcanicHunt_Enabled then break end
-
                         tpWaypoint(wp)
-
                         local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                         if curRoot and eggPart and eggPart.Parent then
                             local d = (eggPart.Position - curRoot.Position).Magnitude
                             if d <= 40 then
-                                print("[VOLCANIC] Deket egg (dist " .. math.floor(d) .. ") — stop waypoint")
                                 reachedEgg = true
                                 break
                             end
@@ -1427,17 +1302,12 @@ function Features.startVolcanicHunt()
                     if not reachedEgg then
                         local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                         if curRoot and eggPart and eggPart.Parent then
-                            print("[VOLCANIC] Fallback — TP langsung ke egg")
-                            curRoot.CFrame = CFrame.lookAt(
-                                eggPart.Position + Vector3.new(0, 3, 0),
-                                eggPart.Position)
+                            curRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
                             curRoot.Velocity = Vector3.zero
-                            curRoot.AssemblyLinearVelocity = Vector3.zero
                             task.wait(0.3)
                         end
                     end
 
-                    print("[VOLCANIC] STEP 2 — Pickup egg...")
                     local picked = false
                     if egg.Parent then
                         picked = volcanicPickupVerified(egg)
@@ -1446,30 +1316,17 @@ function Features.startVolcanicHunt()
                     end
 
                     if not picked or not isHoldingEggMutation() then
-                        print("[VOLCANIC] ❌ Gagal pickup — skip")
                         task.wait(2)
                         continue
                     end
-                    print("[VOLCANIC] ✅ Pickup OK — Holding egg")
 
-                    print("[VOLCANIC] STEP 3 — Keluar goa...")
                     local exited = exitCave()
-
-                    if not exited then
-                        print("[VOLCANIC] ⚠️ Gagal keluar goa — skip")
-                        task.wait(2)
-                        continue
-                    end
-
-                    if not isHoldingEggMutation() then
-                        print("[VOLCANIC] ⚠️ Egg hilang setelah keluar goa — skip")
+                    if not exited or not isHoldingEggMutation() then
                         task.wait(2)
                         continue
                     end
 
                     if Shared.VolcanicMutation_Enabled then
-                        print("[VOLCANIC] STEP 4 — Auto Mutation ON → TP lava & drop")
-
                         task.wait(0.5)
                         local safePos = findSafeVolcanoPos()
                         if safePos then
@@ -1477,74 +1334,52 @@ function Features.startVolcanicHunt()
                             if rootLava then
                                 rootLava.CFrame = CFrame.new(safePos)
                                 rootLava.Velocity = Vector3.zero
-                                rootLava.AssemblyLinearVelocity = Vector3.zero
                             end
                         end
                         task.wait(1.5)
 
-                        if not isHoldingEggMutation() then
-                            print("[VOLCANIC] ⚠️ Egg hilang sebelum drop — skip drop")
-                        else
-                            print("[VOLCANIC] Drop egg via VolcanoDip...")
+                        if isHoldingEggMutation() then
                             local dropWaited = 0
                             local eggReleased = false
                             while dropWaited < 15 do
                                 if not Shared.VolcanicHunt_Enabled then break end
-
                                 fireVolcanoDip()
                                 task.wait(1.5)
                                 dropWaited = dropWaited + 1.5
-
                                 if not isHoldingEggMutation() then
                                     eggReleased = true
-                                    print("[VOLCANIC] Egg dropped @ " .. dropWaited .. "s")
                                     break
                                 end
                             end
 
-                            if not eggReleased then
-                                print("[VOLCANIC] ⚠️ Egg gak lepas (timeout)")
-                            else
-                                print("[VOLCANIC] Nunggu egg balik...")
+                            if eggReleased then
                                 local waitStart = os.clock()
-                                local eggBack = false
                                 while os.clock() - waitStart < 20 do
                                     if not Shared.VolcanicHunt_Enabled then break end
                                     task.wait(1)
                                     if isHoldingEggMutation() then
-                                        eggBack = true
-                                        print("[VOLCANIC] 🔥 Egg balik! Mutation selesai!")
                                         if Shared.Notify then
                                             Shared.Notify("🔥 Mutation selesai!", "success")
                                         end
                                         break
                                     end
                                 end
-                                if not eggBack then
-                                    print("[VOLCANIC] ⚠️ Egg gak balik (timeout)")
-                                end
                             end
                         end
-                    else
-                        print("[VOLCANIC] STEP 4 — Auto Mutation OFF, skip drop")
                     end
 
                     if Shared.VolcanicReturn_Enabled then
                         task.wait(0.4)
-                        print("[VOLCANIC] STEP 5 — Return ke plot")
                         local oldFlag = Shared.AutoReturn_Enabled
                         Shared.AutoReturn_Enabled = true
                         returnToMyPlot()
                         Shared.AutoReturn_Enabled = oldFlag
-                    else
-                        print("[VOLCANIC] STEP 5 — Return OFF, skip")
                     end
 
                     task.wait(3)
                 end
 
                 VolcanicState.Hunting = false
-                print("[VOLCANIC] Hunt berhenti")
             end)
         end
     end)
@@ -1576,7 +1411,6 @@ task.spawn(function()
             local ok, result = pcall(require, netMod)
             if ok then
                 NetModule = result
-                print("[MUTATION] Net module loaded")
             end
         end
     end
@@ -1637,10 +1471,7 @@ local function fireVolcanoDip()
     local remote = getVolcanoDipRemote()
     if remote then
         local ok = pcall(function() remote:FireServer() end)
-        if ok then
-            print("[MUTATION] Drop: VolcanoDip fired")
-            return true
-        end
+        if ok then return true end
     end
     return false
 end
@@ -1662,7 +1493,6 @@ local function tpToSafe(pos)
     myRoot.CFrame = CFrame.new(highPos)
     myRoot.Velocity = Vector3.zero
     myRoot.AssemblyLinearVelocity = Vector3.zero
-    print("[MUTATION] TP step 1 — ke atas (render aman)")
     task.wait(0.8)
 
     local root2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -1670,12 +1500,10 @@ local function tpToSafe(pos)
     root2.CFrame = CFrame.new(pos)
     root2.Velocity = Vector3.zero
     root2.AssemblyLinearVelocity = Vector3.zero
-    print("[MUTATION] TP step 2 — ke target")
     task.wait(0.5)
 
     local rootAfter = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if rootAfter and rootAfter.Position.Y < pos.Y - 50 then
-        print("[MUTATION] Kecebur! Retry TP...")
         rootAfter.CFrame = CFrame.new(pos + Vector3.new(0, 50, 0))
         task.wait(0.4)
     end
@@ -1693,17 +1521,13 @@ local function runMutationOnce()
         return false
     end
 
-    print("[MUTATION] holding " .. (eggName or "?") .. ", starting")
-
     MutationState.StealPaused = true
     task.wait(1.5)
 
     local safePos = findSafeVolcanoPos()
-    print("[MUTATION] STEP 1 — TP ke lahar (2-step)")
     tpToSafe(safePos)
     task.wait(2)
 
-    print("[MUTATION] STEP 2 — drop via VolcanoDip")
     local dropWaited = 0
     local eggReleased = false
     MutationState.LastFire = 0
@@ -1713,42 +1537,31 @@ local function runMutationOnce()
             local ok = fireVolcanoDip()
             if not ok then fireBasketDrop() end
             MutationState.LastFire = os.clock()
-            print("[MUTATION] fired @ " .. dropWaited .. "s")
         end
         task.wait(0.5)
         dropWaited = dropWaited + 0.5
         if not isHoldingEggMutation() then
             eggReleased = true
-            print("[MUTATION] egg LEPAS @ " .. dropWaited .. "s")
             break
         end
     end
 
     if not eggReleased then
-        print("[MUTATION] egg GAK LEPAS")
         MutationState.Running = false
         MutationState.StealPaused = false
         MutationState.EggLocked = false
         return false
     end
 
-    print("[MUTATION] STEP 3 — tunggu egg balik")
     local retWaited = 0
     while retWaited < MUT_CONFIG.RETURN_TIMEOUT do
         task.wait(1)
         retWaited = retWaited + 1
-        if isHoldingEggMutation() then
-            print("[MUTATION] egg BALIK @ " .. retWaited .. "s")
-            break
-        end
-        if retWaited % 5 == 0 then
-            print("[MUTATION] waiting... " .. retWaited .. "s")
-        end
+        if isHoldingEggMutation() then break end
     end
 
     if Shared.MutationReturn_Enabled then
         task.wait(0.5)
-        print("[MUTATION] STEP 4 — Return ke plot")
         local oldFlag = Shared.AutoReturn_Enabled
         Shared.AutoReturn_Enabled = true
         returnToMyPlot()
@@ -1778,7 +1591,6 @@ function Features.startAutoMutation()
             end
 
             if isHoldingEggMutation() then
-                print("[MUTATION] egg held, starting")
                 pcall(runMutationOnce)
                 task.wait(2)
             end
@@ -1795,17 +1607,13 @@ function Features.isHoldingEgg()
 end
 
 -- ============================================================
--- MUTATION STEAL — KHUSUS TAB EGG MUTATION (by RARITY)
+-- MUTATION STEAL
 -- ============================================================
 function Features.startMutationSteal()
     task.spawn(function()
         while task.wait(0.5) do
             if not Shared.MutationSteal_Enabled then continue end
 
-            if Features.hasVolcanicEgg and Features.hasVolcanicEgg() then
-                task.wait(1)
-                continue
-            end
             if Features.getMutationState and Features.getMutationState().Running then
                 task.wait(1)
                 continue
@@ -1883,22 +1691,15 @@ function Features.startMutationSteal()
                         pcall(fireproximityprompt, prompt)
                     end
                     task.wait(0.25)
-
                     if not isEggStillInMap(egg) then
                         picked = true
                         break
                     end
-
                     if eggPart and eggPart.Parent then
                         myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
                         task.wait(0.1)
                     end
                 end
-            end
-
-            if picked then
-                local rarity = getEggRarity(egg.Name)
-                print("[MUTATION-STEAL] picked " .. egg.Name .. " (" .. rarity .. ")")
             end
 
             task.wait(0.3)
@@ -1907,7 +1708,7 @@ function Features.startMutationSteal()
 end
 
 -- ============================================================
--- AUTO HATCH LUCK — JARAK JAUH (FIRE REMOTE LANGSUNG)
+-- AUTO HATCH LUCK
 -- ============================================================
 local HatchLuckState = {
     Enabled = false,
@@ -1920,7 +1721,6 @@ local HatchLuckState = {
 }
 
 local HatchLuckRS = game:GetService("ReplicatedStorage")
-
 local HatchLuckRemoteCache = nil
 local HatchLuckLastScan = 0
 
@@ -2017,26 +1817,15 @@ function Features.setHatchLuckMode(mode)
 end
 
 -- ============================================================
--- AUTO HALLOWEEN — EVENT
+-- AUTO HALLOWEEN — AMBIL SEMUA PRIORITY TERTINGGI
 -- ============================================================
 local HalloweenState = {
     Enabled = false,
-    AutoReturn = true,
-    AutoDrop = true,
     Status = "⏸️ Idle",
     Claimed = 0,
     RareClaimed = 0,
-    CandyTypes = {
-        Candy_01 = true,
-        Candy_02 = true,
-        Candy_03 = true,
-    },
-    -- ⭐ BARU: Priority per candy type (angka lebih tinggi = prioritas lebih tinggi)
-    CandyPriority = {
-        Candy_01 = 1,
-        Candy_02 = 10,
-        Candy_03 = 1,
-    },
+    CandyTypes = {},
+    CandyPriority = {},
 }
 
 local HalloweenCfg = {
@@ -2045,7 +1834,36 @@ local HalloweenCfg = {
     TP_WAIT = 0.08,
     LOOP_WAIT = 0.3,
     CLAIM_WAIT = 0.5,
+    RETURN_WAIT = 0.4,
 }
+
+-- Cari base Halloween
+local function getHalloweenBase()
+    local candidates = {
+        "HalloweenHomeAnchor",
+        "HalloweenBase",
+        "HalloweenSpawn",
+        "HalloweenBaseplate",
+        "HalloweenStart",
+    }
+
+    for _, name in ipairs(candidates) do
+        local part = Workspace:FindFirstChild(name, true)
+        if part and part:IsA("BasePart") then
+            return part
+        end
+    end
+
+    local halloweenFolder = Workspace:FindFirstChild("Halloween")
+    if halloweenFolder then
+        local spawn = halloweenFolder:FindFirstChildWhichIsA("SpawnLocation", true)
+        if spawn then return spawn end
+        local bp = halloweenFolder:FindFirstChildWhichIsA("BasePart", true)
+        if bp then return bp end
+    end
+
+    return nil
+end
 
 local function isInHalloweenZone()
     return LocalPlayer:GetAttribute("InHalloweenZone") == true
@@ -2062,13 +1880,7 @@ local function getHalloweenRemote(name)
     return gameR:FindFirstChild(name)
 end
 
-local function getHalloweenHomeAnchor()
-    local a = Workspace:FindFirstChild("HalloweenHomeAnchor")
-    if a and a:IsA("BasePart") then return a.Position end
-    return nil
-end
-
--- ⭐ GANTI fungsi ini: sort candy berdasarkan priority
+-- Scan semua candy yang enabled + ada priority
 local function getHalloweenCandyList()
     local f = Workspace:FindFirstChild("HalloweenCandy")
     if not f then return {} end
@@ -2078,35 +1890,13 @@ local function getHalloweenCandyList()
             table.insert(list, c)
         end
     end
-    -- Sort by priority (descending) — priority tinggi duluan
+    -- Sort by priority DESC
     table.sort(list, function(a, b)
         local pa = HalloweenState.CandyPriority[a.Name] or 1
         local pb = HalloweenState.CandyPriority[b.Name] or 1
-        if pa == pb then
-            local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if root then
-                return (a.Position - root.Position).Magnitude < (b.Position - root.Position).Magnitude
-            end
-            return false
-        end
         return pa > pb
     end)
     return list
-end
-
-local function getHalloweenDropOff()
-    local d = Workspace:FindFirstChild("CandyDropOff")
-    if not d then return nil end
-    return d:FindFirstChild("Pad", true)
-end
-
-local function getHalloweenPortalEnter()
-    local map = Workspace:FindFirstChild("Map")
-    if not map then return nil, nil end
-    local portal = map:FindFirstChild("Portal", true)
-    if not portal then return nil, nil end
-    local prompt = portal:FindFirstChild("HalloweenPortalPrompt", true)
-    return portal, prompt
 end
 
 local function halloweenTpTo(pos)
@@ -2116,18 +1906,6 @@ local function halloweenTpTo(pos)
     root.CFrame = CFrame.new(pos)
     root.Velocity = Vector3.zero
     root.AssemblyLinearVelocity = Vector3.zero
-    return true
-end
-
-local function halloweenFirePrompt(prompt)
-    if not prompt or not prompt:IsA("ProximityPrompt") then return false end
-    prompt.HoldDuration = 0
-    prompt.MaxActivationDistance = math.huge
-    pcall(function()
-        if typeof(fireproximityprompt) == "function" then
-            fireproximityprompt(prompt)
-        end
-    end)
     return true
 end
 
@@ -2160,10 +1938,12 @@ local function halloweenTpJumpTo(targetPos)
     return true
 end
 
-local function halloweenReturnHome()
-    local home = getHalloweenHomeAnchor()
-    if not home then return false end
-    halloweenTpJumpTo(home)
+-- Balik ke base Halloween
+local function halloweenReturnToBase()
+    local base = getHalloweenBase()
+    if not base then return false end
+    halloweenTpJumpTo(base.Position)
+    task.wait(HalloweenCfg.RETURN_WAIT)
     return true
 end
 
@@ -2173,13 +1953,7 @@ local function halloweenClaimCandy(candy)
     local stateRemote = getHalloweenRemote("CandyState")
     if not collectRemote then return false end
 
-    if isCarryingCandy() then
-        local dropR = getHalloweenRemote("DropCandy")
-        if dropR then
-            pcall(function() dropR:FireServer() end)
-            task.wait(0.5)
-        end
-    end
+    if isCarryingCandy() then return false end
 
     halloweenTpTo(candy.Position + Vector3.new(0, 2, 0))
     task.wait(0.3)
@@ -2206,27 +1980,38 @@ local function halloweenClaimCandy(candy)
     return isCarryingCandy()
 end
 
-local function halloweenDropCandy()
-    local r = getHalloweenRemote("DropCandy")
-    if not r then return false end
-    pcall(function() r:FireServer() end)
-    return true
-end
-
+-- Masuk zona Halloween via portal
 local function halloweenEnterZone()
     if isInHalloweenZone() then return true end
-    local portal, prompt = getHalloweenPortalEnter()
-    if not portal then return false end
-    local part = portal:FindFirstChildWhichIsA("BasePart", true)
-    if part then
-        halloweenTpTo(part.Position + Vector3.new(0, 5, 0))
-        task.wait(0.5)
+
+    local map = Workspace:FindFirstChild("Map")
+    if map then
+        local portal = map:FindFirstChild("Portal", true)
+        if portal then
+            local part = portal:FindFirstChildWhichIsA("BasePart", true)
+            if part then
+                halloweenTpTo(part.Position + Vector3.new(0, 5, 0))
+                task.wait(0.5)
+
+                local prompt = portal:FindFirstChild("HalloweenPortalPrompt", true)
+                if prompt and prompt:IsA("ProximityPrompt") then
+                    prompt.HoldDuration = 0
+                    prompt.MaxActivationDistance = math.huge
+                    pcall(function()
+                        if typeof(fireproximityprompt) == "function" then
+                            fireproximityprompt(prompt)
+                        end
+                    end)
+                    task.wait(1.5)
+                end
+            end
+        end
     end
-    halloweenFirePrompt(prompt)
-    task.wait(1.5)
+
     return isInHalloweenZone()
 end
 
+-- MAIN LOOP
 function Features.startAutoHalloween()
     task.spawn(function()
         while task.wait(HalloweenCfg.LOOP_WAIT) do
@@ -2239,6 +2024,7 @@ function Features.startAutoHalloween()
             local root = char and char:FindFirstChild("HumanoidRootPart")
             if not root then task.wait(1) continue end
 
+            -- STEP 0: masuk area kalau belum
             if not isInHalloweenZone() then
                 HalloweenState.Status = "🚪 Masuk area..."
                 if not halloweenEnterZone() then
@@ -2247,72 +2033,77 @@ function Features.startAutoHalloween()
                 end
             end
 
-            if isCarryingCandy() and HalloweenState.AutoDrop then
-                HalloweenState.Status = "📦 Drop candy..."
-                local pad = getHalloweenDropOff()
-                if pad and pad:IsA("BasePart") then
-                    halloweenTpJumpTo(pad.Position)
-                    task.wait(0.3)
-                    halloweenDropCandy()
-                    task.wait(0.5)
-                end
+            -- STEP 1: kalau lagi bawa candy, tunggu
+            if isCarryingCandy() then
+                HalloweenState.Status = "🎒 Bawa candy — nunggu proses..."
+                task.wait(1)
                 continue
             end
 
-                        local candies = getHalloweenCandyList()
-            if #candies > 0 then
-                -- ⭐ AMBIL PRIORITY TERTINGGI (bukan yang terdekat)
-                local bestCandy = candies[1]  -- udah di-sort by priority
-                local bestPriority = HalloweenState.CandyPriority[bestCandy.Name] or 1
-
-                -- Cari semua candy dengan priority tertinggi, lalu pilih yang terdekat
-                local candidates = {}
-                for _, c in ipairs(candies) do
-                    local p = HalloweenState.CandyPriority[c.Name] or 1
-                    if p == bestPriority then
-                        table.insert(candidates, c)
-                    end
-                end
-
-                local closest, closestDist = nil, math.huge
-                for _, c in ipairs(candidates) do
-                    local d = (c.Position - root.Position).Magnitude
-                    if d < closestDist then
-                        closest = c
-                        closestDist = d
-                    end
-                end
-
-                if closest then
-                    local isRare = (closest.Name == "Candy_02")
-                    local prio = HalloweenState.CandyPriority[closest.Name] or 1
-                    HalloweenState.Status = "🍬 " .. closest.Name .. " (P" .. prio .. ")" .. (isRare and " ⭐" or "") .. " (" .. #candies .. " sisa)"
-
-                    halloweenTpJumpTo(closest.Position)
-                    task.wait(0.3)
-
-                    local ok = halloweenClaimCandy(closest)
-                    if ok then
-                        HalloweenState.Claimed = HalloweenState.Claimed + 1
-                        if isRare then
-                            HalloweenState.RareClaimed = HalloweenState.RareClaimed + 1
-                        end
-                    end
-                    task.wait(HalloweenCfg.CLAIM_WAIT)
-
-                    if HalloweenState.AutoReturn then
-                        HalloweenState.Status = "🏠 Balik home..."
-                        halloweenReturnHome()
-                        task.wait(0.3)
-                    end
-
-                    continue
-                end
-            else
-                HalloweenState.Status = "✅ Habis (" .. HalloweenState.Claimed .. ")"
+            -- STEP 2: scan candy
+            local candies = getHalloweenCandyList()
+            if #candies == 0 then
+                HalloweenState.Status = "⏳ Nunggu candy spawn... (" .. HalloweenState.Claimed .. " claimed)"
                 task.wait(2)
+                continue
             end
-            task.wait(1)
+
+            -- STEP 3: kumpulin SEMUA candy dengan priority tertinggi
+            local bestPriority = HalloweenState.CandyPriority[candies[1].Name] or 1
+
+            local topPriorityCandies = {}
+            for _, c in ipairs(candies) do
+                local p = HalloweenState.CandyPriority[c.Name] or 1
+                if p == bestPriority then
+                    table.insert(topPriorityCandies, c)
+                end
+            end
+
+            if #topPriorityCandies == 0 then
+                task.wait(0.5)
+                continue
+            end
+
+            -- STEP 4: loop semua candy top priority — TP satu-satu
+            HalloweenState.Status = string.format(
+                "🍬 [P%d] %d candy prioritas tertinggi",
+                bestPriority,
+                #topPriorityCandies
+            )
+
+            for idx, candy in ipairs(topPriorityCandies) do
+                if not HalloweenState.Enabled then break end
+                if not candy or not candy.Parent then continue end
+                if isCarryingCandy() then break end
+
+                HalloweenState.Status = string.format(
+                    "🍬 [P%d] %s (%d/%d) — %d sisa",
+                    bestPriority,
+                    candy.Name,
+                    idx,
+                    #topPriorityCandies,
+                    #candies
+                )
+
+                halloweenTpJumpTo(candy.Position)
+                task.wait(0.3)
+
+                local ok = halloweenClaimCandy(candy)
+                if ok then
+                    HalloweenState.Claimed = HalloweenState.Claimed + 1
+                    if candy.Name == "Candy_02" then
+                        HalloweenState.RareClaimed = HalloweenState.RareClaimed + 1
+                    end
+                end
+
+                task.wait(HalloweenCfg.CLAIM_WAIT)
+            end
+
+            -- STEP 5: balik ke base Halloween
+            HalloweenState.Status = "🏠 Balik ke base Halloween..."
+            halloweenReturnToBase()
+
+            task.wait(HalloweenCfg.RETURN_WAIT)
         end
     end)
 end
@@ -2320,7 +2111,6 @@ end
 function Features.getHalloweenState()
     return HalloweenState
 end
-
 
 -- ============================================================
 -- FEATURES.INIT
@@ -2344,10 +2134,10 @@ function Features.Init(sharedState)
     Features.startAutoMutation()
     Features.startMutationSteal()
     Features.startAutoHatchLuck()
-    Features.startAutoHalloween()    -- ← TAMBAH INI
+    Features.startAutoHalloween()
 
     _G.VRILZ_Features = Features
-    print("[VRILZHUB] Ride a Pet Features v3.5 loaded")
+    print("[VRILZHUB] Ride a Pet Features v3.8 loaded")
 end
 
 return Features
