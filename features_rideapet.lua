@@ -2031,6 +2031,12 @@ local HalloweenState = {
         Candy_02 = true,
         Candy_03 = true,
     },
+    -- ⭐ BARU: Priority per candy type (angka lebih tinggi = prioritas lebih tinggi)
+    CandyPriority = {
+        Candy_01 = 1,
+        Candy_02 = 10,
+        Candy_03 = 1,
+    },
 }
 
 local HalloweenCfg = {
@@ -2062,6 +2068,7 @@ local function getHalloweenHomeAnchor()
     return nil
 end
 
+-- ⭐ GANTI fungsi ini: sort candy berdasarkan priority
 local function getHalloweenCandyList()
     local f = Workspace:FindFirstChild("HalloweenCandy")
     if not f then return {} end
@@ -2071,6 +2078,19 @@ local function getHalloweenCandyList()
             table.insert(list, c)
         end
     end
+    -- Sort by priority (descending) — priority tinggi duluan
+    table.sort(list, function(a, b)
+        local pa = HalloweenState.CandyPriority[a.Name] or 1
+        local pb = HalloweenState.CandyPriority[b.Name] or 1
+        if pa == pb then
+            local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if root then
+                return (a.Position - root.Position).Magnitude < (b.Position - root.Position).Magnitude
+            end
+            return false
+        end
+        return pa > pb
+    end)
     return list
 end
 
@@ -2239,10 +2259,23 @@ function Features.startAutoHalloween()
                 continue
             end
 
-            local candies = getHalloweenCandyList()
+                        local candies = getHalloweenCandyList()
             if #candies > 0 then
-                local closest, closestDist = nil, math.huge
+                -- ⭐ AMBIL PRIORITY TERTINGGI (bukan yang terdekat)
+                local bestCandy = candies[1]  -- udah di-sort by priority
+                local bestPriority = HalloweenState.CandyPriority[bestCandy.Name] or 1
+
+                -- Cari semua candy dengan priority tertinggi, lalu pilih yang terdekat
+                local candidates = {}
                 for _, c in ipairs(candies) do
+                    local p = HalloweenState.CandyPriority[c.Name] or 1
+                    if p == bestPriority then
+                        table.insert(candidates, c)
+                    end
+                end
+
+                local closest, closestDist = nil, math.huge
+                for _, c in ipairs(candidates) do
                     local d = (c.Position - root.Position).Magnitude
                     if d < closestDist then
                         closest = c
@@ -2252,7 +2285,8 @@ function Features.startAutoHalloween()
 
                 if closest then
                     local isRare = (closest.Name == "Candy_02")
-                    HalloweenState.Status = "🍬 " .. closest.Name .. (isRare and " ⭐" or "") .. " (" .. #candies .. " sisa)"
+                    local prio = HalloweenState.CandyPriority[closest.Name] or 1
+                    HalloweenState.Status = "🍬 " .. closest.Name .. " (P" .. prio .. ")" .. (isRare and " ⭐" or "") .. " (" .. #candies .. " sisa)"
 
                     halloweenTpJumpTo(closest.Position)
                     task.wait(0.3)
@@ -2278,7 +2312,6 @@ function Features.startAutoHalloween()
                 HalloweenState.Status = "✅ Habis (" .. HalloweenState.Claimed .. ")"
                 task.wait(2)
             end
-
             task.wait(1)
         end
     end)
