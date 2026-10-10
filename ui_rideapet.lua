@@ -1839,25 +1839,28 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     local candyTypes = scanCandyTypes()
     local eventCard, eventContent = makeCard(eventPage, "🎃 AUTO HALLOWEEN", 1)
 
-    makeToggle(eventContent, "Auto Claim Candy", false, function(v)
+        makeToggle(eventContent, "Auto Claim Candy", false, function(v)
         local F = getFeatures()
         if F and F.getHalloweenState then F.getHalloweenState().Enabled = v end
         if v then notify("🎃 Halloween Auto: ON", "success")
         else notify("🎃 Halloween Auto: OFF", "info") end
     end)
 
-    makeToggle(eventContent, "Auto Return Home", true, function(v)
-        local F = getFeatures()
-        if F and F.getHalloweenState then F.getHalloweenState().AutoReturn = v end
-        if v then notify("🏠 Return Home: ON", "success") end
-    end)
-
-    makeToggle(eventContent, "Auto Drop Candy", true, function(v)
-        local F = getFeatures()
-        if F and F.getHalloweenState then F.getHalloweenState().AutoDrop = v end
-        if v then notify("📦 Drop Candy: ON", "success") end
-    end)
-
+    local eventNote = Instance.new("TextLabel")
+    eventNote.Size = UDim2.new(1, 0, 0, 32)
+    eventNote.BackgroundTransparency = 1
+    eventNote.Text = "Alur: TP ke candy priority tertinggi\n→ collect semua → balik base Halloween"
+    eventNote.TextColor3 = C_local.Muted
+    eventNote.Font = Enum.Font.GothamSemibold
+    eventNote.TextSize = CFG.FONT_MUTED
+    eventNote.TextWrapped = true
+    eventNote.TextXAlignment = Enum.TextXAlignment.Left
+    eventNote.TextYAlignment = Enum.TextYAlignment.Top
+    eventNote.LayoutOrder = 10
+    eventNote.ZIndex = 3
+    eventNote.Parent = eventContent
+    registerTheme(eventNote, "Muted", "TextColor3")
+    
         local eventCandyCard, eventCandyContent = makeCard(eventPage, "🍬 CANDY PRIORITY", 2)
 
     local eventCandyLbl = Instance.new("TextLabel")
