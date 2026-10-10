@@ -1794,24 +1794,21 @@ end
 -- ============================================================
 -- BUILD EVENT TAB (HALLOWEEN) — PAKE DROPDOWN MULTI
 -- ============================================================
+-- ============================================================
+-- BUILD EVENT TAB (HALLOWEEN) — RARITY-BASED
+-- ============================================================
 local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti, notify)
     local C_local = C
 
-        -- ═══════════════════════════════════════════════════════════
-    -- SCAN CANDY TYPES — Lebih agresif + fallback list
-    -- ═══════════════════════════════════════════════════════════
+    -- Scan candy types dari workspace
     local function scanCandyTypes()
         local set = {}
-        
-        -- Scan dari Workspace.HalloweenCandy (cara utama)
         local f = game:GetService("Workspace"):FindFirstChild("HalloweenCandy")
         if f then
             for _, c in ipairs(f:GetChildren()) do
                 if c:IsA("BasePart") then set[c.Name] = true end
             end
         end
-        
-        -- Scan dari semua descendants kalau ada candy yang di folder lain
         pcall(function()
             for _, obj in ipairs(game:GetService("Workspace"):GetDescendants()) do
                 if obj:IsA("BasePart") then
@@ -1822,14 +1819,12 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
                 end
             end
         end)
-        
-        -- Fallback: kalau masih kosong, kasih default list
         if next(set) == nil then
             set["Candy_01"] = true
             set["Candy_02"] = true
             set["Candy_03"] = true
+            set["Candy_04"] = true
         end
-        
         local list = {}
         for name, _ in pairs(set) do table.insert(list, name) end
         table.sort(list)
@@ -1837,9 +1832,11 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     end
 
     local candyTypes = scanCandyTypes()
+
+    -- CARD 1: AUTO HALLOWEEN
     local eventCard, eventContent = makeCard(eventPage, "🎃 AUTO HALLOWEEN", 1)
 
-        makeToggle(eventContent, "Auto Claim Candy", false, function(v)
+    makeToggle(eventContent, "Auto Claim Candy", false, function(v)
         local F = getFeatures()
         if F and F.getHalloweenState then F.getHalloweenState().Enabled = v end
         if v then notify("🎃 Halloween Auto: ON", "success")
@@ -1849,7 +1846,7 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     local eventNote = Instance.new("TextLabel")
     eventNote.Size = UDim2.new(1, 0, 0, 32)
     eventNote.BackgroundTransparency = 1
-    eventNote.Text = "Alur: TP ke candy priority tertinggi\n→ collect semua → balik base Halloween"
+    eventNote.Text = "Alur: Collect semua candy rarity tertinggi dulu\n(Legendary → Epic → Rare → Common)"
     eventNote.TextColor3 = C_local.Muted
     eventNote.Font = Enum.Font.GothamSemibold
     eventNote.TextSize = CFG.FONT_MUTED
@@ -1860,13 +1857,14 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     eventNote.ZIndex = 3
     eventNote.Parent = eventContent
     registerTheme(eventNote, "Muted", "TextColor3")
-    
-        local eventCandyCard, eventCandyContent = makeCard(eventPage, "🍬 CANDY PRIORITY", 2)
+
+    -- CARD 2: CANDY SELECT (tanpa angka priority)
+    local eventCandyCard, eventCandyContent = makeCard(eventPage, "🍬 CANDY SELECT", 2)
 
     local eventCandyLbl = Instance.new("TextLabel")
     eventCandyLbl.Size = UDim2.new(1, 0, 0, 16)
     eventCandyLbl.BackgroundTransparency = 1
-    eventCandyLbl.Text = "Centang candy + atur priority (1-10):"
+    eventCandyLbl.Text = "Pilih candy yang mau di-collect (centang):"
     eventCandyLbl.TextColor3 = C_local.Muted
     eventCandyLbl.Font = Enum.Font.GothamSemibold
     eventCandyLbl.TextSize = CFG.FONT_MUTED
@@ -1882,7 +1880,6 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
         st = F_init.getHalloweenState()
         for _, name in ipairs(candyTypes) do
             if st.CandyTypes[name] == nil then st.CandyTypes[name] = true end
-            if st.CandyPriority[name] == nil then st.CandyPriority[name] = 1 end
             candyTable[name] = st.CandyTypes[name]
         end
     else
@@ -1890,11 +1887,10 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     end
 
     if #candyTypes == 0 then
-        candyTypes = {"(Kosong — masuk area dulu)"}
-        candyTable[candyTypes[1]] = false
+        candyTypes = {"Candy_01", "Candy_02", "Candy_03", "Candy_04"}
+        for _, name in ipairs(candyTypes) do candyTable[name] = true end
     end
 
-    -- Dropdown multi untuk enable/disable
     local candyDropHolder = Instance.new("Frame")
     candyDropHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
     candyDropHolder.BackgroundTransparency = 1
@@ -1909,82 +1905,7 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
         end
     end)
 
-    -- ⭐ Priority input per candy
-    local priorityLbl = Instance.new("TextLabel")
-    priorityLbl.Size = UDim2.new(1, 0, 0, 16)
-    priorityLbl.BackgroundTransparency = 1
-    priorityLbl.Text = "Priority (angka besar = duluan):"
-    priorityLbl.TextColor3 = C_local.Accent
-    priorityLbl.Font = Enum.Font.GothamBold
-    priorityLbl.TextSize = CFG.FONT_MUTED
-    priorityLbl.TextXAlignment = Enum.TextXAlignment.Left
-    priorityLbl.ZIndex = 3
-    priorityLbl.Parent = eventCandyContent
-    registerTheme(priorityLbl, "Accent", "TextColor3")
-
-    for _, candyName in ipairs(candyTypes) do
-        if candyName:sub(1,1) ~= "(" then
-            local row = Instance.new("Frame")
-            row.Size = UDim2.new(1, 0, 0, 30)
-            row.BackgroundColor3 = C_local.Surface3
-            row.BackgroundTransparency = 0.4
-            row.BorderSizePixel = 0
-            row.ZIndex = 3
-            row.Parent = eventCandyContent
-            registerTheme(row, "Surface3", "BackgroundColor3")
-
-            local rc = Instance.new("UICorner")
-            rc.CornerRadius = UDim.new(0, 6)
-            rc.Parent = row
-
-            local nLbl = Instance.new("TextLabel")
-            nLbl.Size = UDim2.new(0.6, 0, 1, 0)
-            nLbl.Position = UDim2.fromOffset(8, 0)
-            nLbl.BackgroundTransparency = 1
-            nLbl.Text = candyName
-            nLbl.TextColor3 = C_local.Text
-            nLbl.Font = Enum.Font.GothamBold
-            nLbl.TextSize = CFG.FONT_MUTED
-            nLbl.TextXAlignment = Enum.TextXAlignment.Left
-            nLbl.ZIndex = 4
-            nLbl.Parent = row
-            registerTheme(nLbl, "Text", "TextColor3")
-
-            local curPrio = 1
-            if st and st.CandyPriority and st.CandyPriority[candyName] then
-                curPrio = st.CandyPriority[candyName]
-            end
-
-            local pBox = Instance.new("TextBox")
-            pBox.Size = UDim2.fromOffset(50, 24)
-            pBox.Position = UDim2.new(1, -58, 0.5, -12)
-            pBox.BackgroundColor3 = C_local.Accent
-            pBox.BorderSizePixel = 0
-            pBox.Text = tostring(curPrio)
-            pBox.TextColor3 = Color3.new(1, 1, 1)
-            pBox.Font = Enum.Font.GothamBold
-            pBox.TextSize = CFG.FONT_LABEL
-            pBox.ZIndex = 4
-            pBox.Parent = row
-            registerTheme(pBox, "Accent", "BackgroundColor3")
-
-            local pbc = Instance.new("UICorner")
-            pbc.CornerRadius = UDim.new(0, 6)
-            pbc.Parent = pBox
-
-            pBox.FocusLost:Connect(function()
-                local num = tonumber(pBox.Text) or 1
-                num = math.clamp(math.floor(num), 1, 10)
-                pBox.Text = tostring(num)
-                local F = getFeatures()
-                if F and F.getHalloweenState then
-                    F.getHalloweenState().CandyPriority[candyName] = num
-                end
-                notify("🍬 " .. candyName .. " priority → " .. num, "info")
-            end)
-        end
-    end
-
+    -- CARD 3: STATUS
     local eventStatusCard, eventStatusContent = makeCard(eventPage, "📊 STATUS", 3)
     local eventStatusLbl = Instance.new("TextLabel")
     eventStatusLbl.Size = UDim2.new(1, 0, 0, 50)
@@ -2015,13 +1936,12 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
             task.wait(0.5)
             local F = getFeatures()
             if F and F.getHalloweenState then
-                local st = F.getHalloweenState()
-                eventStatusLbl.Text = st.Status .. "\n✅ Claimed: " .. st.Claimed .. " | ⭐ Rare: " .. st.RareClaimed
+                local s = F.getHalloweenState()
+                eventStatusLbl.Text = s.Status .. "\n✅ Claimed: " .. s.Claimed .. " | ⭐ Rare: " .. s.RareClaimed
             end
         end
     end)
 end
-
 -- ============================================================
 -- BUILD MAIN WINDOW
 -- ============================================================
