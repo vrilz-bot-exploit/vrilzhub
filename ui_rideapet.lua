@@ -1797,13 +1797,39 @@ end
 local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti, notify)
     local C_local = C
 
+        -- ═══════════════════════════════════════════════════════════
+    -- SCAN CANDY TYPES — Lebih agresif + fallback list
+    -- ═══════════════════════════════════════════════════════════
     local function scanCandyTypes()
-        local f = game:GetService("Workspace"):FindFirstChild("HalloweenCandy")
-        if not f then return {} end
         local set = {}
-        for _, c in ipairs(f:GetChildren()) do
-            if c:IsA("BasePart") then set[c.Name] = true end
+        
+        -- Scan dari Workspace.HalloweenCandy (cara utama)
+        local f = game:GetService("Workspace"):FindFirstChild("HalloweenCandy")
+        if f then
+            for _, c in ipairs(f:GetChildren()) do
+                if c:IsA("BasePart") then set[c.Name] = true end
+            end
         end
+        
+        -- Scan dari semua descendants kalau ada candy yang di folder lain
+        pcall(function()
+            for _, obj in ipairs(game:GetService("Workspace"):GetDescendants()) do
+                if obj:IsA("BasePart") then
+                    local n = obj.Name
+                    if n:match("^Candy_%d+$") or n:lower():find("candy") then
+                        set[n] = true
+                    end
+                end
+            end
+        end)
+        
+        -- Fallback: kalau masih kosong, kasih default list
+        if next(set) == nil then
+            set["Candy_01"] = true
+            set["Candy_02"] = true
+            set["Candy_03"] = true
+        end
+        
         local list = {}
         for name, _ in pairs(set) do table.insert(list, name) end
         table.sort(list)
@@ -1811,7 +1837,6 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     end
 
     local candyTypes = scanCandyTypes()
-
     local eventCard, eventContent = makeCard(eventPage, "🎃 AUTO HALLOWEEN", 1)
 
     makeToggle(eventContent, "Auto Claim Candy", false, function(v)
