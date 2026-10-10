@@ -2017,6 +2017,279 @@ function Features.setHatchLuckMode(mode)
 end
 
 -- ============================================================
+-- AUTO HALLOWEEN — EVENT
+-- ============================================================
+local HalloweenState = {
+    Enabled = false,
+    AutoReturn = true,
+    AutoDrop = true,
+    Status = "⏸️ Idle",
+    Claimed = 0,
+    RareClaimed = 0,
+    CandyTypes = {
+        Candy_01 = true,
+        Candy_02 = true,
+        Candy_03 = true,
+    },
+}
+
+local HalloweenCfg = {
+    TP_STEP = 100,
+    TP_HEIGHT = 5,
+    TP_WAIT = 0.08,
+    LOOP_WAIT = 0.3,
+    CLAIM_WAIT = 0.5,
+}
+
+local function isInHalloweenZone()
+    return LocalPlayer:GetAttribute("InHalloweenZone") == true
+end
+
+local function isCarryingCandy()
+    return LocalPlayer:GetAttribute("CarriedCandyModel") ~= nil
+end
+
+local function getHalloweenRemote(name)
+    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+    local gameR = remotes and remotes:FindFirstChild("Game")
+    if not gameR then return nil end
+    return gameR:FindFirstChild(name)
+end
+
+local function getHalloweenHomeAnchor()
+    local a = Workspace:FindFirstChild("HalloweenHomeAnchor")
+    if a and a:IsA("BasePart") then return a.Position end
+    return nil
+end
+
+local function getHalloweenCandyList()
+    local f = Workspace:FindFirstChild("HalloweenCandy")
+    if not f then return {} end
+    local list = {}
+    for _, c in ipairs(f:GetChildren()) do
+        if c:IsA("BasePart") and HalloweenState.CandyTypes[c.Name] then
+            table.insert(list, c)
+        end
+    end
+    return list
+end
+
+local function getHalloweenDropOff()
+    local d = Workspace:FindFirstChild("CandyDropOff")
+    if not d then return nil end
+    return d:FindFirstChild("Pad", true)
+end
+
+local function getHalloweenPortalEnter()
+    local map = Workspace:FindFirstChild("Map")
+    if not map then return nil, nil end
+    local portal = map:FindFirstChild("Portal", true)
+    if not portal then return nil, nil end
+    local prompt = portal:FindFirstChild("HalloweenPortalPrompt", true)
+    return portal, prompt
+end
+
+local function halloweenTpTo(pos)
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return false end
+    root.CFrame = CFrame.new(pos)
+    root.Velocity = Vector3.zero
+    root.AssemblyLinearVelocity = Vector3.zero
+    return true
+end
+
+local function halloweenFirePrompt(prompt)
+    if not prompt or not prompt:IsA("ProximityPrompt") then return false end
+    prompt.HoldDuration = 0
+    prompt.MaxActivationDistance = math.huge
+    pcall(function()
+        if typeof(fireproximityprompt) == "function" then
+            fireproximityprompt(prompt)
+        end
+    end)
+    return true
+end
+
+local function halloweenTpJumpTo(targetPos)
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return false end
+    local startPos = root.Position
+    local totalDist = (targetPos - startPos).Magnitude
+    local steps = math.ceil(totalDist / HalloweenCfg.TP_STEP)
+    if steps <= 1 then
+        halloweenTpTo(targetPos + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0))
+        task.wait(0.15)
+        return true
+    end
+    local dir = (targetPos - startPos)
+    dir = Vector3.new(dir.X, 0, dir.Z)
+    if dir.Magnitude > 1 then
+        dir = dir.Unit
+    else
+        local ang = math.random() * math.pi * 2
+        dir = Vector3.new(math.cos(ang), 0, math.sin(ang))
+    end
+    for i = 1, steps do
+        local dist = math.min(HalloweenCfg.TP_STEP * i, totalDist)
+        local pos = startPos + dir * dist + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
+        halloweenTpTo(pos)
+        task.wait(HalloweenCfg.TP_WAIT)
+    end
+    return true
+end
+
+local function halloweenReturnHome()
+    local home = getHalloweenHomeAnchor()
+    if not home then return false end
+    halloweenTpJumpTo(home)
+    return true
+end
+
+local function halloweenClaimCandy(candy)
+    if not candy or not candy.Parent then return false end
+    local collectRemote = getHalloweenRemote("CollectCandy")
+    local stateRemote = getHalloweenRemote("CandyState")
+    if not collectRemote then return false end
+
+    if isCarryingCandy() then
+        local dropR = getHalloweenRemote("DropCandy")
+        if dropR then
+            pcall(function() dropR:FireServer() end)
+            task.wait(0.5)
+        end
+    end
+
+    halloweenTpTo(candy.Position + Vector3.new(0, 2, 0))
+    task.wait(0.3)
+
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if root then
+        local d = (root.Position - candy.Position).Magnitude
+        if d > 30 then return false end
+    end
+
+    local spawnId = candy:GetAttribute("SpawnId") or candy.Name
+    if stateRemote then
+        pcall(function() stateRemote:FireServer(spawnId) end)
+        task.wait(0.1)
+    end
+
+    pcall(function() collectRemote:FireServer(spawnId) end)
+    task.wait(0.3)
+    if isCarryingCandy() then return true end
+
+    pcall(function() collectRemote:FireServer(candy) end)
+    task.wait(0.3)
+    return isCarryingCandy()
+end
+
+local function halloweenDropCandy()
+    local r = getHalloweenRemote("DropCandy")
+    if not r then return false end
+    pcall(function() r:FireServer() end)
+    return true
+end
+
+local function halloweenEnterZone()
+    if isInHalloweenZone() then return true end
+    local portal, prompt = getHalloweenPortalEnter()
+    if not portal then return false end
+    local part = portal:FindFirstChildWhichIsA("BasePart", true)
+    if part then
+        halloweenTpTo(part.Position + Vector3.new(0, 5, 0))
+        task.wait(0.5)
+    end
+    halloweenFirePrompt(prompt)
+    task.wait(1.5)
+    return isInHalloweenZone()
+end
+
+function Features.startAutoHalloween()
+    task.spawn(function()
+        while task.wait(HalloweenCfg.LOOP_WAIT) do
+            if not HalloweenState.Enabled then
+                HalloweenState.Status = "⏸️ Idle"
+                continue
+            end
+
+            local char = LocalPlayer.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            if not root then task.wait(1) continue end
+
+            if not isInHalloweenZone() then
+                HalloweenState.Status = "🚪 Masuk area..."
+                if not halloweenEnterZone() then
+                    task.wait(2)
+                    continue
+                end
+            end
+
+            if isCarryingCandy() and HalloweenState.AutoDrop then
+                HalloweenState.Status = "📦 Drop candy..."
+                local pad = getHalloweenDropOff()
+                if pad and pad:IsA("BasePart") then
+                    halloweenTpJumpTo(pad.Position)
+                    task.wait(0.3)
+                    halloweenDropCandy()
+                    task.wait(0.5)
+                end
+                continue
+            end
+
+            local candies = getHalloweenCandyList()
+            if #candies > 0 then
+                local closest, closestDist = nil, math.huge
+                for _, c in ipairs(candies) do
+                    local d = (c.Position - root.Position).Magnitude
+                    if d < closestDist then
+                        closest = c
+                        closestDist = d
+                    end
+                end
+
+                if closest then
+                    local isRare = (closest.Name == "Candy_02")
+                    HalloweenState.Status = "🍬 " .. closest.Name .. (isRare and " ⭐" or "") .. " (" .. #candies .. " sisa)"
+
+                    halloweenTpJumpTo(closest.Position)
+                    task.wait(0.3)
+
+                    local ok = halloweenClaimCandy(closest)
+                    if ok then
+                        HalloweenState.Claimed = HalloweenState.Claimed + 1
+                        if isRare then
+                            HalloweenState.RareClaimed = HalloweenState.RareClaimed + 1
+                        end
+                    end
+                    task.wait(HalloweenCfg.CLAIM_WAIT)
+
+                    if HalloweenState.AutoReturn then
+                        HalloweenState.Status = "🏠 Balik home..."
+                        halloweenReturnHome()
+                        task.wait(0.3)
+                    end
+
+                    continue
+                end
+            else
+                HalloweenState.Status = "✅ Habis (" .. HalloweenState.Claimed .. ")"
+                task.wait(2)
+            end
+
+            task.wait(1)
+        end
+    end)
+end
+
+function Features.getHalloweenState()
+    return HalloweenState
+end
+
+
+-- ============================================================
 -- FEATURES.INIT
 -- ============================================================
 function Features.Init(sharedState)
@@ -2038,6 +2311,7 @@ function Features.Init(sharedState)
     Features.startAutoMutation()
     Features.startMutationSteal()
     Features.startAutoHatchLuck()
+    Features.startAutoHalloween()    -- ← TAMBAH INI
 
     _G.VRILZ_Features = Features
     print("[VRILZHUB] Ride a Pet Features v3.5 loaded")
