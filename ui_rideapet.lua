@@ -1833,12 +1833,12 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
         if v then notify("📦 Drop Candy: ON", "success") end
     end)
 
-    local eventCandyCard, eventCandyContent = makeCard(eventPage, "🍬 JENIS CANDY", 2)
+        local eventCandyCard, eventCandyContent = makeCard(eventPage, "🍬 CANDY PRIORITY", 2)
 
     local eventCandyLbl = Instance.new("TextLabel")
     eventCandyLbl.Size = UDim2.new(1, 0, 0, 16)
     eventCandyLbl.BackgroundTransparency = 1
-    eventCandyLbl.Text = "Pilih jenis candy (centang):"
+    eventCandyLbl.Text = "Centang candy + atur priority (1-10):"
     eventCandyLbl.TextColor3 = C_local.Muted
     eventCandyLbl.Font = Enum.Font.GothamSemibold
     eventCandyLbl.TextSize = CFG.FONT_MUTED
@@ -1849,10 +1849,12 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
 
     local candyTable = {}
     local F_init = getFeatures()
+    local st = nil
     if F_init and F_init.getHalloweenState then
-        local st = F_init.getHalloweenState()
+        st = F_init.getHalloweenState()
         for _, name in ipairs(candyTypes) do
             if st.CandyTypes[name] == nil then st.CandyTypes[name] = true end
+            if st.CandyPriority[name] == nil then st.CandyPriority[name] = 1 end
             candyTable[name] = st.CandyTypes[name]
         end
     else
@@ -1864,6 +1866,7 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
         candyTable[candyTypes[1]] = false
     end
 
+    -- Dropdown multi untuk enable/disable
     local candyDropHolder = Instance.new("Frame")
     candyDropHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
     candyDropHolder.BackgroundTransparency = 1
@@ -1873,13 +1876,88 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     makeDropdownMulti(candyDropHolder, candyTypes, candyTable, nil, function(t)
         local F = getFeatures()
         if F and F.getHalloweenState then
-            local st = F.getHalloweenState()
-            for name, on in pairs(t) do st.CandyTypes[name] = on end
+            local s = F.getHalloweenState()
+            for name, on in pairs(t) do s.CandyTypes[name] = on end
         end
     end)
 
-    local eventStatusCard, eventStatusContent = makeCard(eventPage, "📊 STATUS", 3)
+    -- ⭐ Priority input per candy
+    local priorityLbl = Instance.new("TextLabel")
+    priorityLbl.Size = UDim2.new(1, 0, 0, 16)
+    priorityLbl.BackgroundTransparency = 1
+    priorityLbl.Text = "Priority (angka besar = duluan):"
+    priorityLbl.TextColor3 = C_local.Accent
+    priorityLbl.Font = Enum.Font.GothamBold
+    priorityLbl.TextSize = CFG.FONT_MUTED
+    priorityLbl.TextXAlignment = Enum.TextXAlignment.Left
+    priorityLbl.ZIndex = 3
+    priorityLbl.Parent = eventCandyContent
+    registerTheme(priorityLbl, "Accent", "TextColor3")
 
+    for _, candyName in ipairs(candyTypes) do
+        if candyName:sub(1,1) ~= "(" then
+            local row = Instance.new("Frame")
+            row.Size = UDim2.new(1, 0, 0, 30)
+            row.BackgroundColor3 = C_local.Surface3
+            row.BackgroundTransparency = 0.4
+            row.BorderSizePixel = 0
+            row.ZIndex = 3
+            row.Parent = eventCandyContent
+            registerTheme(row, "Surface3", "BackgroundColor3")
+
+            local rc = Instance.new("UICorner")
+            rc.CornerRadius = UDim.new(0, 6)
+            rc.Parent = row
+
+            local nLbl = Instance.new("TextLabel")
+            nLbl.Size = UDim2.new(0.6, 0, 1, 0)
+            nLbl.Position = UDim2.fromOffset(8, 0)
+            nLbl.BackgroundTransparency = 1
+            nLbl.Text = candyName
+            nLbl.TextColor3 = C_local.Text
+            nLbl.Font = Enum.Font.GothamBold
+            nLbl.TextSize = CFG.FONT_MUTED
+            nLbl.TextXAlignment = Enum.TextXAlignment.Left
+            nLbl.ZIndex = 4
+            nLbl.Parent = row
+            registerTheme(nLbl, "Text", "TextColor3")
+
+            local curPrio = 1
+            if st and st.CandyPriority and st.CandyPriority[candyName] then
+                curPrio = st.CandyPriority[candyName]
+            end
+
+            local pBox = Instance.new("TextBox")
+            pBox.Size = UDim2.fromOffset(50, 24)
+            pBox.Position = UDim2.new(1, -58, 0.5, -12)
+            pBox.BackgroundColor3 = C_local.Accent
+            pBox.BorderSizePixel = 0
+            pBox.Text = tostring(curPrio)
+            pBox.TextColor3 = Color3.new(1, 1, 1)
+            pBox.Font = Enum.Font.GothamBold
+            pBox.TextSize = CFG.FONT_LABEL
+            pBox.ZIndex = 4
+            pBox.Parent = row
+            registerTheme(pBox, "Accent", "BackgroundColor3")
+
+            local pbc = Instance.new("UICorner")
+            pbc.CornerRadius = UDim.new(0, 6)
+            pbc.Parent = pBox
+
+            pBox.FocusLost:Connect(function()
+                local num = tonumber(pBox.Text) or 1
+                num = math.clamp(math.floor(num), 1, 10)
+                pBox.Text = tostring(num)
+                local F = getFeatures()
+                if F and F.getHalloweenState then
+                    F.getHalloweenState().CandyPriority[candyName] = num
+                end
+                notify("🍬 " .. candyName .. " priority → " .. num, "info")
+            end)
+        end
+    end
+
+    local eventStatusCard, eventStatusContent = makeCard(eventPage, "📊 STATUS", 3)
     local eventStatusLbl = Instance.new("TextLabel")
     eventStatusLbl.Size = UDim2.new(1, 0, 0, 50)
     eventStatusLbl.BackgroundColor3 = C_local.Surface3
