@@ -4821,7 +4821,7 @@ registerTab("Vulcanic", "🌋", "Vulcanic")
 
         registerTab("EggMutation", "🔥", "Egg Mutation")
 
-    registerTab("Settings", "⚙", "Settings")
+    registerTab("Settings", "⚙\u{FE0E}", "Settings")
 
     pages.Info.Visible = true
     navs.Info.btn.BackgroundColor3 = C.Accent
