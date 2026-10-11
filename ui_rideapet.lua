@@ -1917,21 +1917,6 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
             end
         end)
 
-        local tpMethodNote = Instance.new("TextLabel")
-        tpMethodNote.Size = UDim2.new(1, 0, 0, 28)
-        tpMethodNote.BackgroundTransparency = 1
-        tpMethodNote.Text = "TP GLIDE = 100 studs/step | TP FAST = 150 studs/step"
-        tpMethodNote.TextColor3 = C_local.Muted
-        tpMethodNote.Font = Enum.Font.GothamSemibold
-        tpMethodNote.TextSize = CFG.FONT_MUTED
-        tpMethodNote.TextWrapped = true
-        tpMethodNote.TextXAlignment = Enum.TextXAlignment.Left
-        tpMethodNote.TextYAlignment = Enum.TextYAlignment.Top
-        tpMethodNote.LayoutOrder = 13
-        tpMethodNote.ZIndex = 3
-        tpMethodNote.Parent = eventContent
-        registerTheme(tpMethodNote, "Muted", "TextColor3")
-
     else
         -- Non-premium: locked frame
         local lockedFrame = Instance.new("Frame")
@@ -3894,8 +3879,8 @@ local function buildMainWindow(parent)
         Shared.AutoPlantEgg_Filter = v
         local F = getFeatures()
         if F and F.setAutoPlantFilter then F.setAutoPlantFilter(v) end
-        if v == "None" then
-            notify("Plant Filter: None (pilih egg dulu!)", "warning")
+                if v == "None" then
+            notify("Plant Filter: None (pick an egg first!)", "warning")
         else
             notify("Plant Filter: " .. v, "info")
         end
@@ -4314,27 +4299,27 @@ end)
             end
         end)
 
-        -- SAVE
+                -- SAVE
         saveBtn.MouseButton1Click:Connect(function()
             -- Kalo udah saved, gak perlu save lagi
             if isSaved then
-                notify("ℹ️ Title udah ke-save", "info")
+                notify("ℹ️ Title already saved", "info")
                 return
             end
             
             local txt = customBox.Text:gsub("^%s+", ""):gsub("%s+$", "")
             if txt == "" then
-                notify("❌ Title kosong!", "error")
+                notify("❌ Title is empty!", "error")
                 return
             end
             txt = txt:upper()
             if #txt > 15 then
                 txt = txt:sub(1, 15)
-                notify("⚠️ Dipotong jadi 15 char: " .. txt, "warning")
+                notify("⚠️ Trimmed to 15 chars: " .. txt, "warning")
             end
-            txt = txt:gsub("[^%w%s]", "")
+                        txt = txt:gsub("[^%w%s]", "")
             if txt == "" then
-                notify("❌ Cuma huruf & angka!", "error")
+                notify("❌ Only letters & numbers!", "error")
                 return
             end
             
@@ -4349,7 +4334,7 @@ end)
             isSaved = true
             updateSaveButton()
             
-            notify("✅ Saved: " .. txt .. " (" .. #txt .. "/15) — permanen!", "success")
+            notify("✅ Saved: " .. txt .. " (" .. #txt .. "/15) — permanent!", "success")
             
             -- Refresh title di atas karakter
             if _G.VRILZ_RefreshTitle then
@@ -4360,7 +4345,7 @@ end)
                 -- ═══════════════════════════════════════════
         -- CLEAR HANDLER — RESET, ABIS ITU BISA SAVE LAGI
         -- ═══════════════════════════════════════════
-        clearBtn.MouseButton1Click:Connect(function()
+                clearBtn.MouseButton1Click:Connect(function()
             customBox.Text = ""
             clearCustomTitle()
             
@@ -4368,7 +4353,7 @@ end)
             isSaved = false
             updateSaveButton()
             
-            notify("🗑 Title di-reset — lu bisa SAVE lagi", "info")
+            notify("🗑 Title reset — you can SAVE again", "info")
             
             -- Refresh title di atas karakter
             if _G.VRILZ_RefreshTitle then
