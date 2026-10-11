@@ -1926,20 +1926,9 @@ local function halloweenTpTo(pos)
     return true
 end
 
--- ⭐ TP INSTANT (langsung, no step)
-local function halloweenTpInstant(targetPos)
-    local char = LocalPlayer.Character
-    local root = char and char:FindFirstChild("HumanoidRootPart")
-    if not root then return false end
-    root.CFrame = CFrame.new(targetPos + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0))
-    root.Velocity = Vector3.zero
-    root.AssemblyLinearVelocity = Vector3.zero
-    task.wait(0.1)
-    return true
-end
-
 -- ⭐ TP STEP (glide, per step 100 / 180)
-local function halloweenTpStep(targetPos, stepSize)
+local function halloweenTpStep(targetPos, stepSize, waitTime)
+    waitTime = waitTime or HalloweenCfg.TP_WAIT
     local char = LocalPlayer.Character
     local root = char and char:FindFirstChild("HumanoidRootPart")
     if not root then return false end
@@ -1967,7 +1956,7 @@ local function halloweenTpStep(targetPos, stepSize)
         local dist = math.min(stepSize * i, totalDist)
         local pos = startPos + dir * dist + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
         halloweenTpTo(pos)
-        task.wait(HalloweenCfg.TP_WAIT)
+        task.wait(waitTime)   -- ✅ pakai waitTime
     end
     return true
 end
@@ -1977,17 +1966,17 @@ local function halloweenTpJumpTo(targetPos)
     local method = HalloweenState.TPMethod or "TP100"
 
     if method == "TP180" then
-        -- PREMIUM: TP 180 studs instant / lompat cepet
         if not isPremiumUser() then
             -- Fallback kalau bukan premium
-            method = "TP100"
+            return halloweenTpStep(targetPos, HalloweenCfg.TP_STEP_FREE, 0.08)
         else
-            return halloweenTpInstant(targetPos)
+            -- PREMIUM: step 180, wait lebih cepat biar beda dari TP100
+            return halloweenTpStep(targetPos, HalloweenCfg.TP_STEP_PREMIUM, 0.05)
         end
     end
 
     -- FREE: TP 100 studs step
-    return halloweenTpStep(targetPos, HalloweenCfg.TP_STEP_FREE)
+    return halloweenTpStep(targetPos, HalloweenCfg.TP_STEP_FREE, 0.08)
 end
 
 local function halloweenReturnToBase()
@@ -2005,10 +1994,7 @@ local function halloweenClaimCandy(candy)
     if not collectRemote then return false end
 
     if isCarryingCandy() then return false end
-
-    halloweenTpTo(candy.Position + Vector3.new(0, 2, 0))
-    task.wait(0.3)
-
+    
     local char = LocalPlayer.Character
     local root = char and char:FindFirstChild("HumanoidRootPart")
     if root then
