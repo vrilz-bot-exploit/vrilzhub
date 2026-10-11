@@ -729,6 +729,7 @@ local AutoRideState = {
     IsRiding = false,
     Cooldown = 1.0,
     Status = "Idle",
+    SelectedPet = "Auto (Best KG)",   -- ← TAMBAH BARIS INI
 }
 
 local function getPetKG(tool)
@@ -803,13 +804,33 @@ function Features.startAutoRidePet()
                 continue
             end
 
-            local best = findBestPetForRide()
+                        local best
+            if AutoRideState.SelectedPet and AutoRideState.SelectedPet ~= "Auto (Best KG)" then
+                local backpack = LocalPlayer:FindFirstChild("Backpack")
+                local bestKG = -1
+                if backpack then
+                    for _, tool in ipairs(backpack:GetChildren()) do
+                        if tool:IsA("Tool") then
+                            local pname = tool:GetAttribute("PetName")
+                            if pname == AutoRideState.SelectedPet then
+                                local kg = getPetKG(tool)
+                                if kg > bestKG then
+                                    bestKG = kg
+                                    best = tool
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            if not best then
+                best = findBestPetForRide()
+            end
             if not best then
                 AutoRideState.Status = "No pet in backpack"
                 task.wait(1)
                 continue
             end
-
             local petKey = best:GetAttribute("PetKey")
             local petName = best:GetAttribute("PetName") or best.Name
 
@@ -861,6 +882,40 @@ end
 function Features.setAutoRideEnabled(v)
     AutoRideState.Enabled = v
 end
+
+-- ⬇️ TAMBAH 2 FUNGSI INI ⬇️
+function Features.getPetListForDropdown()
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    if not backpack then return {} end
+
+    local map = {}
+    for _, tool in ipairs(backpack:GetChildren()) do
+        if tool:IsA("Tool") then
+            local pname = tool:GetAttribute("PetName")
+            if pname then
+                local kg = getPetKG(tool)
+                if not map[pname] then
+                    map[pname] = { name = pname, kg = kg, tool = tool, count = 0 }
+                end
+                map[pname].count = map[pname].count + 1
+                if kg > map[pname].kg then
+                    map[pname].kg = kg
+                    map[pname].tool = tool
+                end
+            end
+        end
+    end
+
+    local list = {}
+    for _, info in pairs(map) do table.insert(list, info) end
+    table.sort(list, function(a, b) return a.kg > b.kg end)
+    return list
+end
+
+function Features.setAutoRidePet(petName)
+    AutoRideState.SelectedPet = petName or "Auto (Best KG)"
+end
+-- ⬆️ SAMPAI SINI ⬆️
 
 function Features.getAutoRideState()
     return AutoRideState
