@@ -1819,17 +1819,18 @@ end
 -- ============================================================
 -- AUTO HALLOWEEN — PRIORITY BY RARITY
 -- Legendary (Candy_04) dulu, baru Epic, Rare, Common
+-- TP 100 = FREE | TP 180 INSTANT = PREMIUM
 -- ============================================================
 local HalloweenState = {
     Enabled = false,
     Status = "⏸️ Idle",
     Claimed = 0,
     RareClaimed = 0,
-    CandyTypes = {},        -- di-inject dari UI (candy mana yang mau di-collect)
+    CandyTypes = {},
+    TPMethod = "TP100",   -- "TP100" (free) atau "TP180" (premium)
 }
 
--- ⭐ RARITY MAPPING — dari GameData.Halloween.CandyTypes
--- Model → Tier (makin tinggi = makin rare)
+-- ⭐ RARITY MAPPING
 local CANDY_RARITY = {
     ["Candy_01"] = 1,       -- Common
     ["Candy_02"] = 2,       -- Rare
@@ -1837,13 +1838,26 @@ local CANDY_RARITY = {
     ["Candy_04"] = 4,       -- Legendary
 }
 
--- ⭐ Ambil tier/rarity candy
 local function getCandyRarity(candyName)
     return CANDY_RARITY[candyName] or 0
 end
 
+-- ⭐ CEK PREMIUM
+local OWNER_USERID = 5126297278
+local function isPremiumUser()
+    if LocalPlayer.UserId == OWNER_USERID then return true end
+    if Shared and Shared.KeyType then
+        local kt = tostring(Shared.KeyType):upper()
+        if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
+            return true
+        end
+    end
+    return false
+end
+
 local HalloweenCfg = {
-    TP_STEP = 100,
+    TP_STEP_FREE = 100,
+    TP_STEP_PREMIUM = 180,
     TP_HEIGHT = 5,
     TP_WAIT = 0.08,
     LOOP_WAIT = 0.3,
@@ -1851,7 +1865,6 @@ local HalloweenCfg = {
     RETURN_WAIT = 0.4,
 }
 
--- Cari base Halloween
 local function getHalloweenBase()
     local candidates = {
         "HalloweenHomeAnchor", "HalloweenBase", "HalloweenSpawn",
@@ -1886,7 +1899,6 @@ local function getHalloweenRemote(name)
     return gameR:FindFirstChild(name)
 end
 
--- ⭐ Scan + sort by RARITY tertinggi ke terendah (gak peduli jarak)
 local function getHalloweenCandyList()
     local f = Workspace:FindFirstChild("HalloweenCandy")
     if not f then return {} end
@@ -1896,7 +1908,6 @@ local function getHalloweenCandyList()
             table.insert(list, c)
         end
     end
-    -- Sort by rarity DESC — tertinggi dulu
     table.sort(list, function(a, b)
         local ra = getCandyRarity(a.Name)
         local rb = getCandyRarity(b.Name)
@@ -1915,18 +1926,34 @@ local function halloweenTpTo(pos)
     return true
 end
 
-local function halloweenTpJumpTo(targetPos)
+-- ⭐ TP INSTANT (langsung, no step)
+local function halloweenTpInstant(targetPos)
     local char = LocalPlayer.Character
     local root = char and char:FindFirstChild("HumanoidRootPart")
     if not root then return false end
+    root.CFrame = CFrame.new(targetPos + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0))
+    root.Velocity = Vector3.zero
+    root.AssemblyLinearVelocity = Vector3.zero
+    task.wait(0.1)
+    return true
+end
+
+-- ⭐ TP STEP (glide, per step 100 / 180)
+local function halloweenTpStep(targetPos, stepSize)
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return false end
+
     local startPos = root.Position
     local totalDist = (targetPos - startPos).Magnitude
-    local steps = math.ceil(totalDist / HalloweenCfg.TP_STEP)
+    local steps = math.ceil(totalDist / stepSize)
+
     if steps <= 1 then
         halloweenTpTo(targetPos + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0))
         task.wait(0.15)
         return true
     end
+
     local dir = (targetPos - startPos)
     dir = Vector3.new(dir.X, 0, dir.Z)
     if dir.Magnitude > 1 then
@@ -1935,13 +1962,32 @@ local function halloweenTpJumpTo(targetPos)
         local ang = math.random() * math.pi * 2
         dir = Vector3.new(math.cos(ang), 0, math.sin(ang))
     end
+
     for i = 1, steps do
-        local dist = math.min(HalloweenCfg.TP_STEP * i, totalDist)
+        local dist = math.min(stepSize * i, totalDist)
         local pos = startPos + dir * dist + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
         halloweenTpTo(pos)
         task.wait(HalloweenCfg.TP_WAIT)
     end
     return true
+end
+
+-- ⭐ TP MAIN FUNCTION — pilih metode
+local function halloweenTpJumpTo(targetPos)
+    local method = HalloweenState.TPMethod or "TP100"
+
+    if method == "TP180" then
+        -- PREMIUM: TP 180 studs instant / lompat cepet
+        if not isPremiumUser() then
+            -- Fallback kalau bukan premium
+            method = "TP100"
+        else
+            return halloweenTpInstant(targetPos)
+        end
+    end
+
+    -- FREE: TP 100 studs step
+    return halloweenTpStep(targetPos, HalloweenCfg.TP_STEP_FREE)
 end
 
 local function halloweenReturnToBase()
@@ -1987,7 +2033,6 @@ end
 
 local function halloweenEnterZone()
     if isInHalloweenZone() then return true end
-
     local map = Workspace:FindFirstChild("Map")
     if map then
         local portal = map:FindFirstChild("Portal", true)
@@ -2010,11 +2055,9 @@ local function halloweenEnterZone()
             end
         end
     end
-
     return isInHalloweenZone()
 end
 
--- ⭐ MAIN LOOP — HABISIN RARITY TERTINGGI DULU
 function Features.startAutoHalloween()
     task.spawn(function()
         while task.wait(HalloweenCfg.LOOP_WAIT) do
@@ -2027,7 +2070,6 @@ function Features.startAutoHalloween()
             local root = char and char:FindFirstChild("HumanoidRootPart")
             if not root then task.wait(1) continue end
 
-            -- Masuk area kalau belum
             if not isInHalloweenZone() then
                 HalloweenState.Status = "🚪 Masuk area..."
                 if not halloweenEnterZone() then
@@ -2036,14 +2078,12 @@ function Features.startAutoHalloween()
                 end
             end
 
-            -- Kalau bawa candy, tunggu
             if isCarryingCandy() then
                 HalloweenState.Status = "🎒 Bawa candy — nunggu proses..."
                 task.wait(1)
                 continue
             end
 
-            -- Scan candy (udah di-sort by rarity DESC)
             local candies = getHalloweenCandyList()
             if #candies == 0 then
                 HalloweenState.Status = "⏳ Nunggu candy spawn... (" .. HalloweenState.Claimed .. " claimed)"
@@ -2051,10 +2091,7 @@ function Features.startAutoHalloween()
                 continue
             end
 
-            -- ⭐ Cari RARITY TERTINGGI dari candy yang ada di map
             local highestRarity = getCandyRarity(candies[1].Name)
-
-            -- Kumpulin SEMUA candy dengan rarity tertinggi
             local topRarityCandies = {}
             for _, c in ipairs(candies) do
                 local r = getCandyRarity(c.Name)
@@ -2068,7 +2105,6 @@ function Features.startAutoHalloween()
                 continue
             end
 
-            -- Nama rarity
             local rarityName = ({
                 [1] = "Common",
                 [2] = "Rare",
@@ -2076,10 +2112,12 @@ function Features.startAutoHalloween()
                 [4] = "Legendary",
             })[highestRarity] or ("Tier " .. highestRarity)
 
-            -- ⭐ HABISIN SEMUA candy rarity tertinggi dulu
+            local methodLabel = HalloweenState.TPMethod == "TP180" and "TP180⭐" or "TP100"
+
             HalloweenState.Status = string.format(
-                "🎯 %s — %d candy target",
+                "🎯 %s [%s] — %d candy",
                 rarityName,
+                methodLabel,
                 #topRarityCandies
             )
 
@@ -2089,11 +2127,12 @@ function Features.startAutoHalloween()
                 if isCarryingCandy() then break end
 
                 HalloweenState.Status = string.format(
-                    "🍬 %s (%d/%d) — %s",
+                    "🍬 %s (%d/%d) — %s [%s]",
                     candy.Name,
                     idx,
                     #topRarityCandies,
-                    rarityName
+                    rarityName,
+                    methodLabel
                 )
 
                 halloweenTpJumpTo(candy.Position)
@@ -2110,10 +2149,8 @@ function Features.startAutoHalloween()
                 task.wait(HalloweenCfg.CLAIM_WAIT)
             end
 
-            -- Balik ke base Halloween
             HalloweenState.Status = "🏠 Balik ke base Halloween..."
             halloweenReturnToBase()
-
             task.wait(HalloweenCfg.RETURN_WAIT)
         end
     end)
@@ -2122,6 +2159,12 @@ end
 function Features.getHalloweenState()
     return HalloweenState
 end
+
+-- ⭐ Expose premium check ke UI
+function Features.isPremiumUser()
+    return isPremiumUser()
+end
+
 -- ============================================================
 -- FEATURES.INIT
 -- ============================================================
