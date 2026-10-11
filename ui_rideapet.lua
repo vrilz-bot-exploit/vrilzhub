@@ -4030,60 +4030,63 @@ local function buildMainWindow(parent)
         Shared.RarityNotifThreshold = v
     end)
 
-        local autoCard, autoContent = makeCard(autoPage, "OTHER AUTO", 4)
+                local autoCard, autoContent = makeCard(autoPage, "OTHER AUTO", 4)
+    
+    -- Wrap semua variable dropdown di do...end biar gak numpuk local register
+    do
+        makeToggle(autoContent, "Auto Ride Pet", false, function(v)
+            Shared.AutoRidePet_Enabled = v
+            local F = getFeatures()
+            if F and F.setAutoRideEnabled then F.setAutoRideEnabled(v) end
+            if v then notify("🐉 Auto Ride Pet: ON", "success")
+            else notify("🐉 Auto Ride Pet: OFF", "info") end
+        end)
 
-    makeToggle(autoContent, "Auto Ride Pet", false, function(v)
-        Shared.AutoRidePet_Enabled = v
-        local F = getFeatures()
-        if F and F.setAutoRideEnabled then F.setAutoRideEnabled(v) end
-        if v then notify("🐉 Auto Ride Pet: ON", "success")
-        else notify("🐉 Auto Ride Pet: OFF", "info") end
-    end)
+        local ridePetLbl = Instance.new("TextLabel")
+        ridePetLbl.Size = UDim2.new(1, 0, 0, 16)
+        ridePetLbl.BackgroundTransparency = 1
+        ridePetLbl.Text = "Select Pet:"
+        ridePetLbl.TextColor3 = C.Muted
+        ridePetLbl.Font = Enum.Font.GothamSemibold
+        ridePetLbl.TextSize = CFG.FONT_MUTED
+        ridePetLbl.TextXAlignment = Enum.TextXAlignment.Left
+        ridePetLbl.ZIndex = 3
+        ridePetLbl.Parent = autoContent
+        registerTheme(ridePetLbl, "Muted", "TextColor3")
 
-    local ridePetLbl = Instance.new("TextLabel")
-    ridePetLbl.Size = UDim2.new(1, 0, 0, 16)
-    ridePetLbl.BackgroundTransparency = 1
-    ridePetLbl.Text = "Select Pet:"
-    ridePetLbl.TextColor3 = C.Muted
-    ridePetLbl.Font = Enum.Font.GothamSemibold
-    ridePetLbl.TextSize = CFG.FONT_MUTED
-    ridePetLbl.TextXAlignment = Enum.TextXAlignment.Left
-    ridePetLbl.ZIndex = 3
-    ridePetLbl.Parent = autoContent
-    registerTheme(ridePetLbl, "Muted", "TextColor3")
+        local petDropHolder = Instance.new("Frame")
+        petDropHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
+        petDropHolder.BackgroundTransparency = 1
+        petDropHolder.ZIndex = 3
+        petDropHolder.Parent = autoContent
 
-    local petDropHolder = Instance.new("Frame")
-    petDropHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
-    petDropHolder.BackgroundTransparency = 1
-    petDropHolder.ZIndex = 3
-    petDropHolder.Parent = autoContent
-
-    local function buildPetList()
-        local list = {"Auto (Best KG)"}
-        local F = getFeatures()
-        if F and F.getPetListForDropdown then
-            for _, p in ipairs(F.getPetListForDropdown()) do
-                local kgStr
-                if p.kg >= 1e12 then kgStr = string.format("%.2fT", p.kg / 1e12)
-                elseif p.kg >= 1e9 then kgStr = string.format("%.2fB", p.kg / 1e9)
-                elseif p.kg >= 1e6 then kgStr = string.format("%.1fM", p.kg / 1e6)
-                elseif p.kg >= 1e3 then kgStr = string.format("%.1fK", p.kg / 1e3)
-                else kgStr = string.format("%.0f", p.kg) end
-                table.insert(list, p.name .. " (" .. kgStr .. ")")
+        local function buildPetList()
+            local list = {"Auto (Best KG)"}
+            local F = getFeatures()
+            if F and F.getPetListForDropdown then
+                for _, p in ipairs(F.getPetListForDropdown()) do
+                    local kgStr
+                    if p.kg >= 1e12 then kgStr = string.format("%.2fT", p.kg / 1e12)
+                    elseif p.kg >= 1e9 then kgStr = string.format("%.2fB", p.kg / 1e9)
+                    elseif p.kg >= 1e6 then kgStr = string.format("%.1fM", p.kg / 1e6)
+                    elseif p.kg >= 1e3 then kgStr = string.format("%.1fK", p.kg / 1e3)
+                    else kgStr = string.format("%.0f", p.kg) end
+                    table.insert(list, p.name .. " (" .. kgStr .. ")")
+                end
             end
+            return list
         end
-        return list
-    end
 
-    makeDropdownGlobal(petDropHolder, buildPetList(), Shared.AutoRideSelectedPet or "Auto (Best KG)", function(v)
-        local petName = v:match("^([^%(]+)")
-        if petName then petName = petName:gsub("%s+$", "") end
-        if not petName or petName == "" then petName = "Auto (Best KG)" end
-        Shared.AutoRideSelectedPet = petName
-        local F = getFeatures()
-        if F and F.setAutoRidePet then F.setAutoRidePet(petName) end
-        notify("🐉 Selected: " .. petName, "info")
-    end)
+        makeDropdownGlobal(petDropHolder, buildPetList(), Shared.AutoRideSelectedPet or "Auto (Best KG)", function(v)
+            local petName = v:match("^([^%(]+)")
+            if petName then petName = petName:gsub("%s+$", "") end
+            if not petName or petName == "" then petName = "Auto (Best KG)" end
+            Shared.AutoRideSelectedPet = petName
+            local F = getFeatures()
+            if F and F.setAutoRidePet then F.setAutoRidePet(petName) end
+            notify("🐉 Selected: " .. petName, "info")
+        end)
+    end  -- ← PENUTUP do...end
 
     makeToggle(autoContent, "Auto Equip Best", false, function(v) Shared.AutoEquipBest_Enabled = v end)
 
