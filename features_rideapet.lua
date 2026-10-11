@@ -797,7 +797,28 @@ local function isRidingPetAuto()
     if not char then return false end
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return false end
-    return hum.SeatPart ~= nil
+
+    -- Cara 1: Standard SeatPart (paling reliable)
+    if hum.SeatPart ~= nil then return true end
+
+    -- Cara 2: Ada pet di character (indikasi udah naik)
+    for _, tool in ipairs(char:GetChildren()) do
+        if tool:IsA("Tool") and tool:GetAttribute("PetName") then
+            -- Cek apakah udah lama di character (bukan baru equip)
+            -- Kalo LastPetName sama dengan pet di char, anggap riding
+            if AutoRideState.LastPetName and 
+               tool:GetAttribute("PetName") == AutoRideState.LastPetName and
+               AutoRideState.HasRiddenOnce then
+                return true
+            end
+        end
+    end
+
+    -- Cara 3: Cek attribute riding di player
+    if LocalPlayer:GetAttribute("Riding") == true then return true end
+    if LocalPlayer:GetAttribute("IsRiding") == true then return true end
+
+    return false
 end
 
 function Features.startAutoRidePet()
