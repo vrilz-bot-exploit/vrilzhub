@@ -2167,7 +2167,7 @@ end
 
 local HalloweenCfg = {
     TP_STEP_FREE = 55,
-    TP_STEP_PREMIUM = 75,
+    TP_STEP_PREMIUM = 85,
     TP_HEIGHT = 5,
     TP_WAIT = 0.08,
     LOOP_WAIT = 0.3,
