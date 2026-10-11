@@ -2680,22 +2680,41 @@ local function buildMainWindow(parent)
         tabStroke.Parent = btn
         registerTheme(tabStroke, "Accent", "Color")
 
-        local ic = Instance.new("TextLabel")
-        if CFG.TAB_SHOW_LABEL then
-            ic.Size = UDim2.fromOffset(28, tabH)
-            ic.Position = UDim2.fromOffset(10, 0)
+                local ic
+        if icon == "GEAR_ICON" then
+            ic = Instance.new("ImageLabel")
+            if CFG.TAB_SHOW_LABEL then
+                ic.Size = UDim2.fromOffset(18, 18)
+                ic.Position = UDim2.fromOffset(15, (tabH - 18) / 2)
+            else
+                ic.Size = UDim2.fromOffset(22, 22)
+                ic.Position = UDim2.new(0.5, -11, 0.5, -11)
+            end
+            ic.BackgroundTransparency = 1
+            ic.Image = "rbxassetid://3926305904"
+            ic.ImageColor3 = C.Accent
+            ic.ImageTransparency = 0.2
+            ic.ZIndex = 6
+            ic.Parent = btn
+            registerTheme(ic, "Accent", "ImageColor3")
         else
-            ic.Size = UDim2.fromScale(1, 1)
-            ic.Position = UDim2.fromOffset(0, 0)
+            ic = Instance.new("TextLabel")
+            if CFG.TAB_SHOW_LABEL then
+                ic.Size = UDim2.fromOffset(28, tabH)
+                ic.Position = UDim2.fromOffset(10, 0)
+            else
+                ic.Size = UDim2.fromScale(1, 1)
+                ic.Position = UDim2.fromOffset(0, 0)
+            end
+            ic.BackgroundTransparency = 1
+            ic.Text = icon
+            ic.TextSize = CFG.TAB_ICON
+            ic.Font = Enum.Font.SourceSansBold
+            ic.TextColor3 = C.Accent
+            ic.ZIndex = 6
+            ic.Parent = btn
+            registerTheme(ic, "Accent", "TextColor3")
         end
-        ic.BackgroundTransparency = 1
-        ic.Text = icon
-        ic.TextSize = CFG.TAB_ICON
-        ic.Font = Enum.Font.GothamBold
-        ic.TextColor3 = C.Accent
-        ic.ZIndex = 6
-        ic.Parent = btn
-        registerTheme(ic, "Accent", "TextColor3")
 
         if CFG.TAB_SHOW_LABEL then
             local lbl = Instance.new("TextLabel")
@@ -4821,7 +4840,7 @@ registerTab("Vulcanic", "🌋", "Vulcanic")
 
         registerTab("EggMutation", "🔥", "Egg Mutation")
 
-    registerTab("Settings", "⚙\u{FE0E}", "Settings")
+        registerTab("Settings", "GEAR_ICON", "Settings")
 
     pages.Info.Visible = true
     navs.Info.btn.BackgroundColor3 = C.Accent
