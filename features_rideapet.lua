@@ -722,14 +722,38 @@ end
 -- ============================================================
 -- AUTO RIDE PET — Auto Equip Best KG → PetRideMode
 -- ============================================================
+-- ============================================================
+-- FLYING PET BLACKLIST
+-- ============================================================
+local FLYING_BLACKLIST = {
+    "phoenix", "dragon", "sky", "air", "cloud",
+    "bird", "eagle", "hawk", "griffin", "pegasus",
+    "fairy", "angel", "wing", "fly", "aero", "zephyr",
+    "wyvern", "roc", "raven", "owl", "bat",
+    "butterfly", "bee", "wasp", "moth", "hornet",
+    "flying", "float", "hover", "soar", "glide",
+    "celestial", "spirit", "ghost", "phantom",
+    "vulture", "flamingo", "peacock", "manticore", "wukong",
+    "hydra", "skeletal", "headless", "volkaris",
+}
+
+local function isFlyingPet(petName)
+    local n = string.lower(petName)
+    for _, kw in ipairs(FLYING_BLACKLIST) do
+        if string.find(n, kw, 1, true) then return true end
+    end
+    return false
+end
+
 local AutoRideState = {
     Enabled = false,
     LastRideTime = 0,
     LastPetName = nil,
     IsRiding = false,
-    Cooldown = 1.0,
+    Cooldown = 3.0,           -- ← DARI 1.0 JADI 3.0
     Status = "Idle",
-    SelectedPet = "Auto (Best KG)",   -- ← TAMBAH BARIS INI
+    SelectedPet = "Auto (Best KG)",
+    HasRiddenOnce = false,    -- ← BARU: flag udah pernah naik
 }
 
 local function getPetKG(tool)
@@ -756,7 +780,7 @@ local function findBestPetForRide()
         if tool:IsA("Tool") then
             local key = tool:GetAttribute("PetKey")
             local pname = tool:GetAttribute("PetName")
-            if key and pname then
+            if key and pname and not isFlyingPet(pname) then  -- ← FILTER
                 local kg = getPetKG(tool)
                 if kg > bestKG then
                     bestKG = kg
@@ -781,17 +805,32 @@ function Features.startAutoRidePet()
         while task.wait(0.5) do
             if not AutoRideState.Enabled then
                 AutoRideState.IsRiding = false
+                AutoRideState.HasRiddenOnce = false
                 AutoRideState.Status = "Idle"
                 continue
             end
 
+            -- ═══════════════════════════════════════════════════════
+            -- KALO UDAH RIDING, STOP. GAK USAH GANTI-GANTI PET.
+            -- ═══════════════════════════════════════════════════════
             if isRidingPetAuto() then
                 AutoRideState.IsRiding = true
+                AutoRideState.HasRiddenOnce = true
                 AutoRideState.Status = "Riding " .. tostring(AutoRideState.LastPetName or "pet")
                 continue
             end
             AutoRideState.IsRiding = false
 
+            -- ═══════════════════════════════════════════════════════
+            -- KALO UDAH PERNAH RIDING TAPI SEKARANG TURUN, JANGAN AUTO RE-RIDE
+            -- (biar gak ganti-ganti. User harus toggle OFF-ON kalo mau re-ride)
+            -- ═══════════════════════════════════════════════════════
+            if AutoRideState.HasRiddenOnce then
+                AutoRideState.Status = "Selesai (toggle OFF-ON buat re-ride)"
+                continue
+            end
+
+            -- Cooldown
             if os.clock() - AutoRideState.LastRideTime < AutoRideState.Cooldown then
                 continue
             end
@@ -804,43 +843,63 @@ function Features.startAutoRidePet()
                 continue
             end
 
-                        local best
+            -- ═══════════════════════════════════════════════════════
+            -- CARI PET (by dropdown ato auto best)
+            -- ═══════════════════════════════════════════════════════
+            local best
+
             if AutoRideState.SelectedPet and AutoRideState.SelectedPet ~= "Auto (Best KG)" then
-                local backpack = LocalPlayer:FindFirstChild("Backpack")
-                local bestKG = -1
-                if backpack then
-                    for _, tool in ipairs(backpack:GetChildren()) do
-                        if tool:IsA("Tool") then
-                            local pname = tool:GetAttribute("PetName")
-                            if pname == AutoRideState.SelectedPet then
-                                local kg = getPetKG(tool)
-                                if kg > bestKG then
-                                    bestKG = kg
-                                    best = tool
+                -- Cari pet by name (skip kalo flying)
+                if not isFlyingPet(AutoRideState.SelectedPet) then
+                    local backpack = LocalPlayer:FindFirstChild("Backpack")
+                    local bestKG = -1
+                    if backpack then
+                        for _, tool in ipairs(backpack:GetChildren()) do
+                            if tool:IsA("Tool") then
+                                local pname = tool:GetAttribute("PetName")
+                                if pname == AutoRideState.SelectedPet then
+                                    local kg = getPetKG(tool)
+                                    if kg > bestKG then
+                                        bestKG = kg
+                                        best = tool
+                                    end
                                 end
                             end
                         end
                     end
                 end
             end
+
+            -- Fallback: best KG (udah di-filter flying)
             if not best then
                 best = findBestPetForRide()
             end
+
             if not best then
-                AutoRideState.Status = "No pet in backpack"
+                AutoRideState.Status = "Gak ada pet darat di backpack"
                 task.wait(1)
                 continue
             end
+
             local petKey = best:GetAttribute("PetKey")
             local petName = best:GetAttribute("PetName") or best.Name
 
+            -- Cek dobel filter
+            if isFlyingPet(petName) then
+                AutoRideState.Status = "Skip flying pet: " .. petName
+                task.wait(1)
+                continue
+            end
+
+            -- ═══════════════════════════════════════════════════════
+            -- EQUIP + NAIKIN
+            -- ═══════════════════════════════════════════════════════
             AutoRideState.Status = "Equipping: " .. petName
             pcall(function() hum:EquipTool(best) end)
-            task.wait(0.5)
+            task.wait(0.8)
 
             AutoRideState.Status = "Riding: " .. petName
 
-            -- Inline remote lookup
             local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
             local gameR = remotes and remotes:FindFirstChild("Game")
             local rideRemote = gameR and gameR:FindFirstChild("PetRideMode")
@@ -848,27 +907,28 @@ function Features.startAutoRidePet()
 
             if rideRemote then
                 pcall(function() rideRemote:FireServer(true) end)
-                task.wait(0.15)
+                task.wait(0.2)
                 if not isRidingPetAuto() then
                     pcall(function() rideRemote:FireServer(petKey, true) end)
-                    task.wait(0.15)
+                    task.wait(0.2)
                 end
                 if not isRidingPetAuto() then
                     pcall(function() rideRemote:FireServer(petKey) end)
-                    task.wait(0.15)
+                    task.wait(0.2)
                 end
             end
 
             if not isRidingPetAuto() and mountingRemote then
                 pcall(function() mountingRemote:FireServer(petKey) end)
-                task.wait(0.3)
+                task.wait(0.5)
             end
 
             AutoRideState.LastRideTime = os.clock()
             AutoRideState.LastPetName = petName
 
             if isRidingPetAuto() then
-                AutoRideState.Status = "Riding " .. petName
+                AutoRideState.Status = "✓ Riding " .. petName
+                AutoRideState.HasRiddenOnce = true
                 if Shared.Notify then
                     Shared.Notify("Riding " .. petName, "success")
                 end
@@ -892,7 +952,7 @@ function Features.getPetListForDropdown()
     for _, tool in ipairs(backpack:GetChildren()) do
         if tool:IsA("Tool") then
             local pname = tool:GetAttribute("PetName")
-            if pname then
+            if pname and not isFlyingPet(pname) then
                 local kg = getPetKG(tool)
                 if not map[pname] then
                     map[pname] = { name = pname, kg = kg, tool = tool, count = 0 }
@@ -915,6 +975,7 @@ end
 function Features.setAutoRidePet(petName)
     AutoRideState.SelectedPet = petName or "Auto (Best KG)"
 end
+
 -- ⬆️ SAMPAI SINI ⬆️
 
 function Features.getAutoRideState()
