@@ -1860,7 +1860,84 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
 
     -- CARD 2: CANDY SELECT (tanpa angka priority)
     local eventCandyCard, eventCandyContent = makeCard(eventPage, "🍬 CANDY SELECT", 2)
+    -- ============================================================
+    -- ⭐ DROPDOWN: PILIH METODE TP (TP100 free / TP180 premium)
+    -- ============================================================
+    local tpMethodLbl = Instance.new("TextLabel")
+    tpMethodLbl.Size = UDim2.new(1, 0, 0, 16)
+    tpMethodLbl.BackgroundTransparency = 1
+    tpMethodLbl.Text = "TP Method:"
+    tpMethodLbl.TextColor3 = C_local.Muted
+    tpMethodLbl.Font = Enum.Font.GothamBold
+    tpMethodLbl.TextSize = CFG.FONT_MUTED
+    tpMethodLbl.TextXAlignment = Enum.TextXAlignment.Left
+    tpMethodLbl.LayoutOrder = 11
+    tpMethodLbl.ZIndex = 3
+    tpMethodLbl.Parent = eventContent
+    registerTheme(tpMethodLbl, "Muted", "TextColor3")
 
+    local tpMethodHolder = Instance.new("Frame")
+    tpMethodHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
+    tpMethodHolder.BackgroundTransparency = 1
+    tpMethodHolder.LayoutOrder = 12
+    tpMethodHolder.ZIndex = 3
+    tpMethodHolder.Parent = eventContent
+
+    -- Cek premium
+    local F_check = getFeatures()
+    local isPrem = false
+    if F_check and F_check.isPremiumUser then
+        isPrem = F_check.isPremiumUser()
+    end
+
+    -- Build list
+    local tpMethodList = {
+        "TP 100 (Free)",
+        isPrem and "TP 180 Instant (Premium)" or "🔒 TP 180 Instant (Premium Locked)"
+    }
+
+    local currentMethod = "TP 100 (Free)"
+    if Shared and Shared.TP_Method == "TP180" and isPrem then
+        currentMethod = "TP 180 Instant (Premium)"
+    end
+
+    makeDropdownGlobal(tpMethodHolder, tpMethodList, currentMethod, function(v)
+        local F = getFeatures()
+        if v:find("TP 180") then
+            if not isPrem then
+                notify("🔒 TP 180 Instant cuma buat PREMIUM!", "error")
+                return
+            end
+            if F and F.getHalloweenState then
+                F.getHalloweenState().TPMethod = "TP180"
+            end
+            Shared.TP_Method = "TP180"
+            notify("⚡ TP Method: TP 180 INSTANT (Premium)", "success")
+        else
+            if F and F.getHalloweenState then
+                F.getHalloweenState().TPMethod = "TP100"
+            end
+            Shared.TP_Method = "TP100"
+            notify("🆓 TP Method: TP 100 (Free)", "info")
+        end
+    end)
+
+    -- Note kecil
+    local tpMethodNote = Instance.new("TextLabel")
+    tpMethodNote.Size = UDim2.new(1, 0, 0, 28)
+    tpMethodNote.BackgroundTransparency = 1
+    tpMethodNote.Text = "TP 100 = semua user | TP 180 Instant = premium only"
+    tpMethodNote.TextColor3 = C_local.Muted
+    tpMethodNote.Font = Enum.Font.GothamSemibold
+    tpMethodNote.TextSize = CFG.FONT_MUTED
+    tpMethodNote.TextWrapped = true
+    tpMethodNote.TextXAlignment = Enum.TextXAlignment.Left
+    tpMethodNote.TextYAlignment = Enum.TextYAlignment.Top
+    tpMethodNote.LayoutOrder = 13
+    tpMethodNote.ZIndex = 3
+    tpMethodNote.Parent = eventContent
+    registerTheme(tpMethodNote, "Muted", "TextColor3")
+    
     local eventCandyLbl = Instance.new("TextLabel")
     eventCandyLbl.Size = UDim2.new(1, 0, 0, 16)
     eventCandyLbl.BackgroundTransparency = 1
@@ -5558,7 +5635,8 @@ function UI.Init(sharedState)
     }
     Shared.AutoHatchLuck_Enabled = false
     Shared.HatchLuck_Mode = "Max"
-      Shared.StealMode = "TP"
+          Shared.StealMode = "TP"
+    Shared.TP_Method = "TP100"
     Shared.ShowTitle = true
     Shared.RarityNotifThreshold = "Legendary"
     Shared.VolcanicHunt_Enabled = false
