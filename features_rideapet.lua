@@ -801,44 +801,23 @@ local function isRidingPetAuto()
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return false end
 
-    -- ⭐ CARA 1: SeatPart (kalo game pake Seat)
+    -- CARA 1: SeatPart (paling reliable kalo game pake Seat)
     if hum.SeatPart ~= nil then return true end
 
-    -- ⭐ CARA 2: Raycast ke bawah — cek ada pet di bawah character
-    local root = char:FindFirstChild("HumanoidRootPart")
-    if root then
-        local params = RaycastParams.new()
-        params.FilterType = Enum.RaycastFilterType.Exclude
-        params.FilterDescendantsInstances = {char}
-        local result = Workspace:Raycast(root.Position, Vector3.new(0, -12, 0), params)
-        if result and result.Instance then
-            local model = result.Instance:FindFirstAncestorOfClass("Model")
-            if model then
-                if model:GetAttribute("PetName") or model:GetAttribute("PetKey") then
-                    return true
-                end
-                if model.Name:lower():find("pet") then
-                    return true
-                end
-            end
-        end
-    end
-
-    -- ⭐ CARA 3: Attribute game
+    -- CARA 2: Cek attribute game (biasanya game Ride a Pet pake ini)
     if LocalPlayer:GetAttribute("Riding") == true then return true end
     if LocalPlayer:GetAttribute("IsRiding") == true then return true end
     if LocalPlayer:GetAttribute("CurrentPet") ~= nil then return true end
     if LocalPlayer:GetAttribute("MountedPet") ~= nil then return true end
+    if LocalPlayer:GetAttribute("CurrentRidingPet") ~= nil then return true end
 
-    -- ⭐ CARA 4: Tool pet di character (last resort)
-    for _, tool in ipairs(char:GetChildren()) do
-        if tool:IsA("Tool") and tool:GetAttribute("PetName") then
-            return true
-        end
-    end
+    -- CARA 3: Cek attribute di character
+    if char:GetAttribute("Riding") == true then return true end
+    if char:GetAttribute("IsRiding") == true then return true end
 
     return false
 end
+
 function Features.startAutoRidePet()
     task.spawn(function()
         while task.wait(0.3) do   -- ⬅️ lebih responsif dari 0.5
@@ -953,58 +932,44 @@ function Features.startAutoRidePet()
             end
 
             -- ═══════════════════════════════════════════════════════
-            -- KALO FORCE & UDAH RIDING PET YANG BEDA → DISMOUNT DULU
-            -- ═══════════════════════════════════════════════════════
-            if force and isRidingPetAuto() then
-                if AutoRideState.LastPetName == petName then
-                    AutoRideState.Status = "✓ Riding " .. petName
-                    AutoRideState.HasRiddenOnce = true
-                    continue
-                end
-
-                AutoRideState.Status = "🔄 Ganti ke " .. petName .. "..."
-                local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
-                local gameR = remotes and remotes:FindFirstChild("Game")
-                local dismountRemote = gameR and (gameR:FindFirstChild("PetDismount") or gameR:FindFirstChild("Dismount"))
-                if dismountRemote then
-                    pcall(function() dismountRemote:FireServer() end)
-                end
-                task.wait(0.8)
-            end
-
-            -- ═══════════════════════════════════════════════════════
-            -- EQUIP + NAIKIN
+            -- EQUIP + NAIKIN — FIRE MULTIPLE PAYLOAD
             -- ═══════════════════════════════════════════════════════
             AutoRideState.Status = "Equipping: " .. petName
             pcall(function() hum:EquipTool(best) end)
-            task.wait(1.2)
+            task.wait(0.5)
 
-            if isRidingPetAuto() then
-                AutoRideState.LastRideTime = os.clock()
-                AutoRideState.LastPetName = petName
-                AutoRideState.HasRiddenOnce = true
-                AutoRideState.Status = "✓ Riding " .. petName
-                if Shared.Notify then
-                    Shared.Notify("Riding " .. petName, "success")
-                end
-                continue
-            end
-
-            AutoRideState.Status = "Riding: " .. petName
-
+            -- Fire remote dengan MULTIPLE payload (biar salah satu kena)
             local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
             local gameR = remotes and remotes:FindFirstChild("Game")
             local rideRemote = gameR and gameR:FindFirstChild("PetRideMode")
             local mountingRemote = gameR and gameR:FindFirstChild("Mounting")
 
-            if rideRemote then
-                pcall(function() rideRemote:FireServer(petKey, true) end)
-                task.wait(0.6)
-            end
+            -- Coba sampe 6x dengan delay
+            for attempt = 1, 6 do
+                if rideRemote then
+                    pcall(function() rideRemote:FireServer() end)
+                    task.wait(0.1)
+                    pcall(function() rideRemote:FireServer(petKey) end)
+                    task.wait(0.1)
+                    pcall(function() rideRemote:FireServer(petKey, true) end)
+                    task.wait(0.1)
+                    pcall(function() rideRemote:FireServer(true) end)
+                    task.wait(0.1)
+                end
 
-            if not isRidingPetAuto() and mountingRemote then
-                pcall(function() mountingRemote:FireServer(petKey) end)
-                task.wait(0.6)
+                if mountingRemote then
+                    pcall(function() mountingRemote:FireServer(petKey) end)
+                    task.wait(0.1)
+                    pcall(function() mountingRemote:FireServer() end)
+                    task.wait(0.1)
+                end
+
+                task.wait(0.3)
+
+                -- Cek apakah udah naik
+                if isRidingPetAuto() then
+                    break
+                end
             end
 
             AutoRideState.LastRideTime = os.clock()
@@ -1030,10 +995,11 @@ function Features.setAutoRideEnabled(v)
         AutoRideState.IsRiding = false
         AutoRideState.LastRideTime = 0
         AutoRideState.DismountTime = 0
-        AutoRideState.ForceAction = true   -- ⭐ LANGSUNG EKSEKUSI
+        AutoRideState.ForceAction = true
     else
         AutoRideState.DismountTime = 0
         AutoRideState.ForceAction = false
+        AutoRideState.LastPetName = nil   -- ⭐ tambah baris ini
     end
 end
 
@@ -1071,8 +1037,8 @@ function Features.setAutoRidePet(petName)
     AutoRideState.HasRiddenOnce = false
     AutoRideState.LastRideTime = 0
     AutoRideState.DismountTime = 0
-    AutoRideState.ForceAction = true   -- ⭐ LANGSUNG GANTI
-    -- ⚠️ JANGAN reset LastPetName — biar loop bisa bandingin pet lama vs baru
+    AutoRideState.ForceAction = true
+    AutoRideState.LastPetName = nil   -- ⭐ tambah baris ini
 end
 
 -- ⬆️ SAMPAI SINI ⬆️
@@ -2538,7 +2504,10 @@ function Features.Init(sharedState)
     Features.startAutoHatchLuck()
     Features.startAutoHalloween()
 
-       -- ⭐ AUTO-ENABLE AUTO RIDE PET PAS LOAD
+           -- ⭐ AUTO-ENABLE AUTO RIDE PET — LANGSUNG ON
+    Shared.AutoRidePet_Enabled = true
+    Features.setAutoRideEnabled(true)
+
     task.spawn(function()
         -- Tunggu character loaded
         local timeout = 0
@@ -2548,7 +2517,7 @@ function Features.Init(sharedState)
             if timeout > 10 then break end
         end
 
-        -- ⭐ Tunggu sampe ada pet di backpack (max 15 detik)
+        -- Tunggu sampe ada pet di backpack (max 15 detik)
         local petTimeout = 0
         while petTimeout < 15 do
             local backpack = LocalPlayer:FindFirstChild("Backpack")
@@ -2566,23 +2535,17 @@ function Features.Init(sharedState)
             petTimeout = petTimeout + 0.5
         end
 
-        task.wait(0.5)
-
-        if Shared and Shared.AutoRidePet_Enabled ~= false then
-            Shared.AutoRidePet_Enabled = true
-            if Features.setAutoRideEnabled then
-                Features.setAutoRideEnabled(true)
-            end
-            if Shared.Notify then
-                Shared.Notify("🐉 Auto Ride Pet: AUTO-ON", "success")
-            end
+        task.wait(0.3)
+        Shared.AutoRidePet_Enabled = true
+        Features.setAutoRideEnabled(true)
+        if Shared.Notify then
+            Shared.Notify("🐉 Auto Ride Pet: AUTO-ON", "success")
         end
     end)
 
-    -- ⭐ AUTO-RE-ENABLE PAS RESPAWN
+    -- ⭐ RE-TRIGGER PAS RESPAWN
     LocalPlayer.CharacterAdded:Connect(function()
         task.wait(3)
-        -- ⭐ Reset LastPetName karena character baru = pet lama udah hilang
         AutoRideState.LastPetName = nil
         if Shared and Shared.AutoRidePet_Enabled ~= false then
             if Features.setAutoRideEnabled then
