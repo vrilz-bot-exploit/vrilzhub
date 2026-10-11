@@ -1,1 +1,2694 @@
-local _Hw1RzdFZJP7=function(s)return s:reverse()end;do;local _SycpvfSpflf=(37976+678);local _H0Zcnz45Y3k=(470632%86);local _siljvzeP8JR=nil;local _D2DTWIGWqi9={k=161,ok=false};local _gJ01ceZcUIo="state887";local _MJVAEnxgiUL=(686*91);local _s8yb6jcdxEO=(7294+374);local _aPlRU1zPeJF=(131899%13);local _kBkYHJgPqxr=true;local _Yf7S1kil4rt={k=5704,ok=false};local _toPILUmvFww="state293";local _SqlgaHHZTfM=(400*45);local _v3xKsPq1iWT=(34858+336);local _Oo5wsSCWfdE=(50266%61);local _bXBhFUEr4gf=true;local _OAv0LXUHXd5={k=9331,ok=false};local _KufJi4rean9="state129";local _cQaAAMNtPW0=(898*29);local _tQupGsSJQzs=(74098+488);local _Dua19NGFrEC=(234741%23);local _CQMvNtls8QZ=false;local _uswBmCaj1hH={k=5603,ok=false};local _Maay66i0arG="queue191";local _uMAGNYWY65g=(827*26);local _zxDbb5GXBuX=(20172+502);local _mucGIkbFfAr=(744583%43);local _yp6wDbCTP54=nil;local _UXTBYSMhZjn={k=4862,ok=false};local _AMyIhVWnxuH="cache783";local _ESoypE5lysC=(315*68);local _DgzHzt0wZ1S=(85009+312);local _Nk6BdBJ3AH2=(494414%24);local _VnJFJKX5Ula=false;local _Op144V3iI33={k=3434,ok=false};local _dUqYdXqw9E9="signal159";local _zYRQiqSIu9o=(710*91);local _yl3R9Q5M569=(70180+313);local _Rcq1c7ewynB=(663444%72);local _T1KXDtsGYjw=nil;local _W3KrMtm1hpr={k=699,ok=false};local _MAFYLdf3Gci="state921";local _R8ZtODAp0h9=(897*13);local _sJnheV3sxos=(98927+161);local _lnHTqrJgXdn=(134048%82);local _J4RlmVTMajF=true;local _p79BubkPMci={k=4497,ok=false};local _iSYS71GcDJi="router841";local _uu6lMfX0tHi=(47*91);local _eKKViJmmYF7=(50645+424);local _Si3Qq2bq8Is=(107028%78);local _rQsc01OzNJo=nil;local _VX36RBMgu4A={k=5370,ok=false};local _hpbBdfxt6Pa="signal286";local _NVzu2eh08KE=(683*68);local _nSXghr1KJ1q=(39303+282);local _QZgQj4QbI5t=(221683%9);local _tHjInabTB2h=nil;local _EkyUIIubaMl={k=4498,ok=false};local _yajbZf6RRvU="signal473";local _pukJCApS7Yb=(121*86);local _R21OaQEnGTy=(45418+338);local _su2GJodTBoe=(371655%46);local _lKyMJWDnZgu=false;local _DfDbXS2zHFg={k=4802,ok=false};local _CO4xboNVaHM="queue708";local _TmsdSpor42a=(363*11);local _D17uA8bdhCc=(47550+280);local _FmCJxMDGJOv=(695642%28);local _dq1FhCayuJO=true;local _DJ4l8bvcvef={k=851,ok=false};local _DCSyAduDeKZ="cache526";local _mGCMIE2Gse3=(161*6);local function _Iq6duTn9v8T(_cwXMpgMz5dK,_Ia4oMtjkged) return tostring(_cwXMpgMz5dK)..':'..tostring(_Ia4oMtjkged) end;local function _PRkpONCEwaK(_Ia4oMtjkged,_SNEpyFvblfS) return (_Ia4oMtjkged~=nil) and (_SNEpyFvblfS~=nil) end;local function _HQTN50tFplr(_SNEpyFvblfS,_r3VULiJeamT) local _q={_SNEpyFvblfS,_r3VULiJeamT};return nil end;local function _zWU4YHxULpI(_r3VULiJeamT,_L6ajwv0W30U) return {enabled=false,stamp=287690} end;local function _pApL0KKstTb(_L6ajwv0W30U,_ildW44POzI5) return tostring(_L6ajwv0W30U)..':'..tostring(_ildW44POzI5) end;local function _nP5wirIKdyB(_ildW44POzI5,_OTYw82awH9G) return (_ildW44POzI5~=nil) and (_OTYw82awH9G~=nil) end;local function _NzxhWUAOdJX(_OTYw82awH9G,_eNjdOyPhwK6) local _q={_OTYw82awH9G,_eNjdOyPhwK6};return nil end;local function _IUW1pEBFtQs(_eNjdOyPhwK6,_cwXMpgMz5dK) return {enabled=false,stamp=268806} end;local function _DpwNe2ohPbe(_cwXMpgMz5dK,_Ia4oMtjkged) return tostring(_cwXMpgMz5dK)..':'..tostring(_Ia4oMtjkged) end;local function _Vh1tzRwo3zM(_Ia4oMtjkged,_SNEpyFvblfS) return (_Ia4oMtjkged~=nil) and (_SNEpyFvblfS~=nil) end;local function _gRXiUynQxgy(_SNEpyFvblfS,_r3VULiJeamT) local _q={_SNEpyFvblfS,_r3VULiJeamT};return nil end;local function _CHVVVOAvVN0(_r3VULiJeamT,_L6ajwv0W30U) return {enabled=false,stamp=785574} end;local function _oQ2QIUqQC3k(_L6ajwv0W30U,_ildW44POzI5) return tostring(_L6ajwv0W30U)..':'..tostring(_ildW44POzI5) end;local function _acakGeJMjm0(_ildW44POzI5,_OTYw82awH9G) return (_ildW44POzI5~=nil) and (_OTYw82awH9G~=nil) end;local function _phGOcmsjcnf(_OTYw82awH9G,_eNjdOyPhwK6) local _q={_OTYw82awH9G,_eNjdOyPhwK6};return nil end;local function _uvxWN5hzrFq(_eNjdOyPhwK6,_cwXMpgMz5dK) return {enabled=false,stamp=708803} end;local function _CqKV9dMS6EA(_cwXMpgMz5dK,_Ia4oMtjkged) return tostring(_cwXMpgMz5dK)..':'..tostring(_Ia4oMtjkged) end;local function _lrcfKZD4AOa(_Ia4oMtjkged,_SNEpyFvblfS) return (_Ia4oMtjkged~=nil) and (_SNEpyFvblfS~=nil) end;local function _UbjhpL4qGtN(_SNEpyFvblfS,_r3VULiJeamT) local _q={_SNEpyFvblfS,_r3VULiJeamT};return nil end;local function _aBx8ViptFz5(_r3VULiJeamT,_L6ajwv0W30U) return {enabled=false,stamp=675017} end;local function _YSKUTuVjHcc(_L6ajwv0W30U,_ildW44POzI5) return tostring(_L6ajwv0W30U)..':'..tostring(_ildW44POzI5) end;local function _Xi7zlObFWsc(_ildW44POzI5,_OTYw82awH9G) return (_ildW44POzI5~=nil) and (_OTYw82awH9G~=nil) end;local function _ZxBL2fDynnJ(_OTYw82awH9G,_eNjdOyPhwK6) local _q={_OTYw82awH9G,_eNjdOyPhwK6};return nil end;local function _Wj2OeWeetWo(_eNjdOyPhwK6,_cwXMpgMz5dK) return {enabled=false,stamp=102391} end;local function _wUQ2qe8LNjX(_cwXMpgMz5dK,_Ia4oMtjkged) return tostring(_cwXMpgMz5dK)..':'..tostring(_Ia4oMtjkged) end;local function _F9hsuVrfawV(_Ia4oMtjkged,_SNEpyFvblfS) return (_Ia4oMtjkged~=nil) and (_SNEpyFvblfS~=nil) end;local function _vg7J6sP2erb(_SNEpyFvblfS,_r3VULiJeamT) local _q={_SNEpyFvblfS,_r3VULiJeamT};return nil end;local function _cTwlfrhni8e(_r3VULiJeamT,_L6ajwv0W30U) return {enabled=false,stamp=451552} end;local function _lpfZTZntkcT(_L6ajwv0W30U,_ildW44POzI5) return tostring(_L6ajwv0W30U)..':'..tostring(_ildW44POzI5) end;local function _zorSMnJRyyw(_ildW44POzI5,_OTYw82awH9G) return (_ildW44POzI5~=nil) and (_OTYw82awH9G~=nil) end;local function _ZxPaTwfR67W(_OTYw82awH9G,_eNjdOyPhwK6) local _q={_OTYw82awH9G,_eNjdOyPhwK6};return nil end;local function _V7JsY68ZBBJ(_eNjdOyPhwK6,_cwXMpgMz5dK) return {enabled=false,stamp=195479} end;local function _uU7HB7ZzJzz(_cwXMpgMz5dK,_Ia4oMtjkged) return tostring(_cwXMpgMz5dK)..':'..tostring(_Ia4oMtjkged) end;local function _ylfADWtkCDV(_Ia4oMtjkged,_SNEpyFvblfS) return (_Ia4oMtjkged~=nil) and (_SNEpyFvblfS~=nil) end;local function _HUNlYonJKv1(_SNEpyFvblfS,_r3VULiJeamT) local _q={_SNEpyFvblfS,_r3VULiJeamT};return nil end;local function _wyNgOlaDAvq(_r3VULiJeamT,_L6ajwv0W30U) return {enabled=false,stamp=123856} end;local _eNjdOyPhwK6={[1]=function()return 974205 end,[2]=function()return 455492 end,[3]=function()return 263550 end,[4]=function()return 514416 end,[5]=function()return 437187 end,[6]=function()return 428203 end,[7]=function()return 282483 end,[8]=function()return 125387 end,[9]=function()return 947470 end,[10]=function()return 743175 end,[11]=function()return 956683 end,[12]=function()return 48932 end};end;local Features={}local Shared=nil local Players=game:GetService(_Hw1RzdFZJP7("sreyalP"))local RunService=game:GetService(_Hw1RzdFZJP7("ecivreSnuR"))local Workspace=game:GetService(_Hw1RzdFZJP7("ecapskroW"))local LocalPlayer=Players.LocalPlayer function Features.startAntiAFK()task.spawn(function()local vu=game:GetService(_Hw1RzdFZJP7("resUlautriV"))LocalPlayer.Idled:Connect(function()if Shared.AntiAFK_Enabled==false then return end pcall(function()vu:CaptureController()vu:ClickButton2(Vector2.new())end)end)while task.wait(60)do if Shared.AntiAFK_Enabled==false then continue end pcall(function()vu:CaptureController()vu:ClickButton2(Vector2.new())end)pcall(function()mousemoverel(1,0)task.wait(0.05)mousemoverel(-1,0)end)end end)end local function clearForces(root)for _,c in ipairs(root:GetChildren())do if c:IsA(_Hw1RzdFZJP7("yticoleVydoB"))or c:IsA(_Hw1RzdFZJP7("noitisoPydoB"))or c:IsA(_Hw1RzdFZJP7("oryGydoB"))or c:IsA(_Hw1RzdFZJP7("yticoleVraeniL"))then c:Destroy()end end end local function doStealFly(egg,prompt,eggPart)local char=LocalPlayer.Character local myRoot=char and char:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if not myRoot or not eggPart then return false end clearForces(myRoot)local bvUp=Instance.new(_Hw1RzdFZJP7("yticoleVydoB"))bvUp.Name=_Hw1RzdFZJP7("pUylF_zlirV")bvUp.MaxForce=Vector3.new(0,1e5,0)bvUp.Velocity=Vector3.new(0,500,0)bvUp.Parent=myRoot local targetY=myRoot.Position.Y+350 local t1=tick()while myRoot.Parent and myRoot.Position.Y<targetY and(tick()-t1)<5 do task.wait(0.03)end bvUp:Destroy()myRoot=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if not myRoot then return false end myRoot.CFrame=CFrame.new(eggPart.Position+Vector3.new(0,3,0))myRoot.Velocity=Vector3.zero myRoot.AssemblyLinearVelocity=Vector3.zero task.wait(0.15)for i=1,15 do if typeof(fireproximityprompt)==_Hw1RzdFZJP7("noitcnuf")then pcall(fireproximityprompt,prompt)end task.wait(0.15)if not egg.Parent then return true end if eggPart and eggPart.Parent then myRoot.CFrame=CFrame.new(eggPart.Position+Vector3.new(0,3,0))end end return not egg.Parent end local function getEggLuck(egg)local luckGui=egg:FindFirstChild(_Hw1RzdFZJP7("kcuLggE"),true)if luckGui then local luckLabel=luckGui:FindFirstChild(_Hw1RzdFZJP7("kcuL"))if luckLabel and luckLabel:IsA(_Hw1RzdFZJP7("lebaLtxeT"))then return luckLabel.Text end end return _Hw1RzdFZJP7("?")end local EggESPTracked={}function Features.startEggESP()task.spawn(function()while task.wait(0.3)do if Shared.ESP_Eggs_Enabled then local rendered=Workspace:FindFirstChild(_Hw1RzdFZJP7("sggEderedneR"))if rendered then for _,egg in ipairs(rendered:GetChildren())do if egg:IsA(_Hw1RzdFZJP7("ledoM"))and not EggESPTracked[egg]then local eggPart=egg:FindFirstChildWhichIsA(_Hw1RzdFZJP7("traPesaB"),true)if eggPart then local hl=Instance.new(_Hw1RzdFZJP7("thgilhgiH"))hl.Name=_Hw1RzdFZJP7("LHggE_tePAediR_ZLIRV")hl.FillColor=Color3.fromRGB(255,215,0)hl.OutlineColor=Color3.new(1,1,1)hl.FillTransparency=0.5 hl.Adornee=egg hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop hl.Parent=egg local bb=Instance.new(_Hw1RzdFZJP7("iuGdraoblliB"))bb.Name=_Hw1RzdFZJP7("PSEggE_tePAediR_ZLIRV")bb.Size=UDim2.fromOffset(200,22)bb.StudsOffset=Vector3.new(0,2.5,0)bb.AlwaysOnTop=true bb.MaxDistance=500 bb.Adornee=eggPart bb.Parent=eggPart local lbl=Instance.new(_Hw1RzdFZJP7("lebaLtxeT"))lbl.Name=_Hw1RzdFZJP7("lebaLofnI")lbl.Size=UDim2.fromScale(1,1)lbl.BackgroundTransparency=1 lbl.TextColor3=Color3.fromRGB(255,215,0)lbl.TextStrokeColor3=Color3.new(0,0,0)lbl.TextStrokeTransparency=0.2 lbl.Font=Enum.Font.GothamBold lbl.TextSize=14 lbl.TextWrapped=false lbl.Text=_Hw1RzdFZJP7("")lbl.Parent=bb EggESPTracked[egg]={hl=hl,bb=bb,lbl=lbl,part=eggPart}end end end end else for egg,data in pairs(EggESPTracked)do if data.hl then data.hl:Destroy()end if data.bb then data.bb:Destroy()end EggESPTracked[egg]=nil end end for egg,data in pairs(EggESPTracked)do if not egg.Parent then if data.hl then data.hl:Destroy()end if data.bb then data.bb:Destroy()end EggESPTracked[egg]=nil elseif data.lbl then local parts={}if Shared.ESP_EggName_Enabled then table.insert(parts,"🥚 "..egg.Name)end if Shared.ESP_EggLuck_Enabled then table.insert(parts,"🍀 "..getEggLuck(egg))end data.lbl.Text=_Hw1RzdFZJP7(" [")..table.concat(parts,_Hw1RzdFZJP7("  ")).._Hw1RzdFZJP7("] ")end end end end)end local PetESPTracked={}local function getPetInfo(pet)local cash,speed=_Hw1RzdFZJP7("?"),_Hw1RzdFZJP7("?")local cashGui=pet:FindFirstChild(_Hw1RzdFZJP7("hsaCteP"),true)if cashGui then for _,desc in ipairs(cashGui:GetDescendants())do if desc:IsA(_Hw1RzdFZJP7("lebaLtxeT"))and desc.Text:find(_Hw1RzdFZJP7("$%"))and desc.Text:find(_Hw1RzdFZJP7("s/"))then cash=desc.Text break end end end local speedGui=pet:FindFirstChild(_Hw1RzdFZJP7("deepSteP"),true)if speedGui then for _,desc in ipairs(speedGui:GetDescendants())do if desc:IsA(_Hw1RzdFZJP7("lebaLtxeT"))and desc.Text~=_Hw1RzdFZJP7("")then speed=desc.Text break end end end return cash,speed end function Features.startPetESP()task.spawn(function()while task.wait(0.3)do if Shared.ESP_Pets_Enabled then local plots=Workspace:FindFirstChild(_Hw1RzdFZJP7("stolP"))if plots then for _,plot in ipairs(plots:GetChildren())do local pets=plot:FindFirstChild(_Hw1RzdFZJP7("steP"))if pets then for _,pet in ipairs(pets:GetChildren())do if pet:IsA(_Hw1RzdFZJP7("ledoM"))and not PetESPTracked[pet]then local petPart=pet:FindFirstChildWhichIsA(_Hw1RzdFZJP7("traPesaB"),true)if petPart then local hl=Instance.new(_Hw1RzdFZJP7("thgilhgiH"))hl.Name=_Hw1RzdFZJP7("LHteP_tePAediR_ZLIRV")hl.FillColor=Color3.fromRGB(100,200,255)hl.OutlineColor=Color3.new(1,1,1)hl.FillTransparency=0.5 hl.Adornee=pet hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop hl.Parent=pet local bb=Instance.new(_Hw1RzdFZJP7("iuGdraoblliB"))bb.Name=_Hw1RzdFZJP7("PSEteP_tePAediR_ZLIRV")bb.Size=UDim2.fromOffset(220,22)bb.StudsOffset=Vector3.new(0,3,0)bb.AlwaysOnTop=true bb.MaxDistance=500 bb.Adornee=petPart bb.Parent=petPart local lbl=Instance.new(_Hw1RzdFZJP7("lebaLtxeT"))lbl.Name=_Hw1RzdFZJP7("lebaLofnI")lbl.Size=UDim2.fromScale(1,1)lbl.BackgroundTransparency=1 lbl.TextColor3=Color3.fromRGB(100,200,255)lbl.TextStrokeColor3=Color3.new(0,0,0)lbl.TextStrokeTransparency=0.2 lbl.Font=Enum.Font.GothamBold lbl.TextSize=14 lbl.TextWrapped=false lbl.Text=_Hw1RzdFZJP7("")lbl.Parent=bb PetESPTracked[pet]={hl=hl,bb=bb,lbl=lbl,part=petPart}end end end end end end else for pet,data in pairs(PetESPTracked)do if data.hl then data.hl:Destroy()end if data.bb then data.bb:Destroy()end PetESPTracked[pet]=nil end end for pet,data in pairs(PetESPTracked)do if not pet.Parent then if data.hl then data.hl:Destroy()end if data.bb then data.bb:Destroy()end PetESPTracked[pet]=nil elseif data.lbl then local cash,speed=getPetInfo(pet)local parts={}if Shared.ESP_PetName_Enabled then table.insert(parts,"🐾 "..pet.Name)end if Shared.ESP_PetCash_Enabled then table.insert(parts,"💰 "..cash)end if Shared.ESP_PetSpeed_Enabled then table.insert(parts,"⚡ "..speed)end data.lbl.Text=_Hw1RzdFZJP7(" [")..table.concat(parts,_Hw1RzdFZJP7("  ")).._Hw1RzdFZJP7("] ")end end end end)end local function getMyPlot()local plots=Workspace:FindFirstChild(_Hw1RzdFZJP7("stolP"))if not plots then return nil end for _,plot in ipairs(plots:GetChildren())do local owner=plot:GetAttribute(_Hw1RzdFZJP7("dIresUrenwO"))or plot:GetAttribute(_Hw1RzdFZJP7("renwO"))or plot:GetAttribute(_Hw1RzdFZJP7("dedaoLrenwOstseN"))if owner==LocalPlayer.UserId or owner==LocalPlayer.Name then return plot end local data=plot:FindFirstChild(_Hw1RzdFZJP7("ataD"))if data then local ownerVal=data:FindFirstChild(_Hw1RzdFZJP7("renwO"))if ownerVal and ownerVal:IsA(_Hw1RzdFZJP7("eulaVtcejbO"))and ownerVal.Value==LocalPlayer then return plot end end end return nil end local function getMyPlotSpawn()local plot=getMyPlot()if not plot then return nil end local spawnPart=plot:FindFirstChild(_Hw1RzdFZJP7("nwapS"),true)or plot:FindFirstChildWhichIsA(_Hw1RzdFZJP7("noitacoLnwapS"),true)or plot:FindFirstChild(_Hw1RzdFZJP7("etalpesaB"),true)or plot:FindFirstChildWhichIsA(_Hw1RzdFZJP7("traPesaB"),true)return spawnPart end local function findEggByName(eggName)local rendered=Workspace:FindFirstChild(_Hw1RzdFZJP7("sggEderedneR"))if not rendered then return nil end local targetName=eggName:lower()local best,bestDist=nil,math.huge local myRoot=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if not myRoot then return nil end for _,egg in ipairs(rendered:GetChildren())do if egg:IsA(_Hw1RzdFZJP7("ledoM"))then local name=egg.Name:lower()if name==targetName or name:find(targetName,1,true)then local eggPart=egg:FindFirstChildWhichIsA(_Hw1RzdFZJP7("traPesaB"),true)if eggPart then local d=(eggPart.Position-myRoot.Position).Magnitude if d<bestDist then best,bestDist=egg,d end end end end end return best end local function isEggStillInMap(egg)if not egg or not egg.Parent then return false end return true end local ReturnCfg={StepDistance=100,TPHeight=5,WaitBetweenTP=0.08,MaxSteps=300,FinalDropWait=0.3,}local function isHoldingEggLocal()local char=LocalPlayer.Character if not char then return false,nil end local wooden=char:FindFirstChild(_Hw1RzdFZJP7("nedooW"))if not wooden then return false,nil end local displayEgg=wooden:FindFirstChild(_Hw1RzdFZJP7("ggEyalpsiD"))if not displayEgg then return false,nil end for _,c in ipairs(displayEgg:GetChildren())do if c:IsA(_Hw1RzdFZJP7("traPhseM"))and not c.Name:lower():find(_Hw1RzdFZJP7("elcric"))then return true,c.Name end end return false,nil end local function getDropRemoteLocal()local remotes=game:GetService(_Hw1RzdFZJP7("egarotSdetacilpeR")):FindFirstChild(_Hw1RzdFZJP7("setomeR"))local gameR=remotes and remotes:FindFirstChild(_Hw1RzdFZJP7("emaG"))if not gameR then return nil end return gameR:FindFirstChild(_Hw1RzdFZJP7("porDteksaB"))or gameR:FindFirstChild(_Hw1RzdFZJP7("ggEporD"))or gameR:FindFirstChild(_Hw1RzdFZJP7("porDggE"))or gameR:FindFirstChild(_Hw1RzdFZJP7("porD"))end local function returnToMyPlot()if not Shared.AutoReturn_Enabled then return end local char=LocalPlayer.Character local myRoot=char and char:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if not myRoot then return end local holding=isHoldingEggLocal()if not holding then return end local spawnPart=getMyPlotSpawn()if not spawnPart then return end local startPos=myRoot.Position local basePos=spawnPart.Position local totalDist=(basePos-startPos).Magnitude local stepSize=ReturnCfg.StepDistance local steps=math.min(ReturnCfg.MaxSteps,math.ceil(totalDist/stepSize))local dir=(basePos-startPos)dir=Vector3.new(dir.X,0,dir.Z)if dir.Magnitude<1 then local ang=math.random()*math.pi*2 dir=Vector3.new(math.cos(ang),0,math.sin(ang))else dir=dir.Unit end for i=1,steps do myRoot=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if not myRoot then return end if not isHoldingEggLocal()then return end local dist=math.min(stepSize*i,totalDist)local targetPos=startPos+dir*dist+Vector3.new(0,ReturnCfg.TPHeight,0)clearForces(myRoot)myRoot.CFrame=CFrame.new(targetPos)myRoot.Velocity=Vector3.zero myRoot.AssemblyLinearVelocity=Vector3.zero task.wait(ReturnCfg.WaitBetweenTP)end myRoot=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if not myRoot then return end clearForces(myRoot)myRoot.CFrame=spawnPart.CFrame+Vector3.new(0,ReturnCfg.TPHeight,0)myRoot.Velocity=Vector3.zero myRoot.AssemblyLinearVelocity=Vector3.zero task.wait(ReturnCfg.FinalDropWait)if not isHoldingEggLocal()then return end local dropRemote=getDropRemoteLocal()for _,d in ipairs(char:GetDescendants())do if d:IsA(_Hw1RzdFZJP7("tpmorPytimixorP"))and d.Name:lower():find(_Hw1RzdFZJP7("pord"))then d.HoldDuration=0 if typeof(fireproximityprompt)==_Hw1RzdFZJP7("noitcnuf")then pcall(fireproximityprompt,d)break end end end if dropRemote then pcall(function()dropRemote:FireServer()end)end task.wait(0.3)if isHoldingEggLocal()and dropRemote then pcall(function()dropRemote:FireServer()end)task.wait(0.2)end end local lastNoEggNotif=0 function Features.startAutoSteal()task.spawn(function()while task.wait(0.5)do if not Shared.AutoSteal_Enabled then continue end local char=LocalPlayer.Character local myRoot=char and char:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))local hum=char and char:FindFirstChildOfClass(_Hw1RzdFZJP7("dionamuH"))if not myRoot or not hum or hum.Health<=0 then task.wait(1)continue end local eggName=Shared.SelectedEgg or _Hw1RzdFZJP7("burehC")local egg=findEggByName(eggName)if not egg then local now=os.clock()if now-lastNoEggNotif>5 then lastNoEggNotif=now if Shared.Notify then Shared.Notify(_Hw1RzdFZJP7(" :nwaps on ggE")..eggName,_Hw1RzdFZJP7("gninraw"))end end continue end local eggPart=egg:FindFirstChildWhichIsA(_Hw1RzdFZJP7("traPesaB"),true)local prompt=egg:FindFirstChild(_Hw1RzdFZJP7("pukciP"),true)if not eggPart or not prompt then continue end if prompt:IsA(_Hw1RzdFZJP7("tpmorPytimixorP"))then prompt.HoldDuration=0 end myRoot.CFrame=eggPart.CFrame+Vector3.new(0,3,0)task.wait(0.1)local picked=false for i=1,10 do if typeof(fireproximityprompt)==_Hw1RzdFZJP7("noitcnuf")then pcall(fireproximityprompt,prompt)end task.wait(0.3)if not isEggStillInMap(egg)then picked=true break end if eggPart and eggPart.Parent then myRoot.CFrame=eggPart.CFrame+Vector3.new(0,3,0)task.wait(0.1)end end if picked and Shared.AutoReturn_Enabled then returnToMyPlot()end task.wait(0.3)end end)end function Features.startAutoHatch()task.spawn(function()while task.wait(0.5)do if not Shared.AutoHatch_Enabled then continue end local plot=getMyPlot()if not plot then continue end local eggsFolder=plot:FindFirstChild(_Hw1RzdFZJP7("sggE"))if not eggsFolder then continue end for _,egg in ipairs(eggsFolder:GetChildren())do if not Shared.AutoHatch_Enabled then break end if not egg:IsA(_Hw1RzdFZJP7("ledoM"))then continue end local handle=egg:FindFirstChild(_Hw1RzdFZJP7("eldnaH"))if not handle then continue end local hatchPrompt=handle:FindFirstChild(_Hw1RzdFZJP7("hctaH"))if not hatchPrompt or not hatchPrompt:IsA(_Hw1RzdFZJP7("tpmorPytimixorP"))then continue end hatchPrompt.Enabled=true hatchPrompt.MaxActivationDistance=math.huge hatchPrompt.RequiresLineOfSight=false hatchPrompt.HoldDuration=0 if typeof(fireproximityprompt)==_Hw1RzdFZJP7("noitcnuf")then pcall(fireproximityprompt,hatchPrompt)task.wait(0.05)pcall(fireproximityprompt,hatchPrompt)end end end end)end local AutoPlantState={Enabled=false,EggFilter=_Hw1RzdFZJP7("enoN"),PlantedCount=0,Status=_Hw1RzdFZJP7("eldI"),}local function findEggToolInBackpack(eggName)local backpack=LocalPlayer:FindFirstChild(_Hw1RzdFZJP7("kcapkcaB"))if not backpack then return nil end local function norm(s)s=tostring(s or _Hw1RzdFZJP7(""))s=s:lower()s=s:gsub(_Hw1RzdFZJP7("$*s%gge*s%"),_Hw1RzdFZJP7(""))s=s:gsub(_Hw1RzdFZJP7("+s%^"),_Hw1RzdFZJP7(""))s=s:gsub(_Hw1RzdFZJP7("$+s%"),_Hw1RzdFZJP7(""))return s end local targetName=norm(eggName)if targetName==_Hw1RzdFZJP7("")then return nil end for _,tool in ipairs(backpack:GetChildren())do if tool:IsA(_Hw1RzdFZJP7("looT"))then local cleanName=norm(tool.Name)if cleanName==targetName then return tool end end end return nil end local function findEmptyNest()local plot=getMyPlot()if not plot then return nil end local nests=plot:FindFirstChild(_Hw1RzdFZJP7("stseN"))if not nests then return nil end for _,nest in ipairs(nests:GetChildren())do if nest:IsA(_Hw1RzdFZJP7("ledoM"))and not nest:FindFirstChild(_Hw1RzdFZJP7("dekcoL"))then local hasEgg=false for _,child in ipairs(nest:GetChildren())do if child:IsA(_Hw1RzdFZJP7("ledoM"))and child.Name:lower()~=_Hw1RzdFZJP7("ledom")then hasEgg=true break end end if not hasEgg then return nest end end end return nil end function Features.startAutoPlantEgg()task.spawn(function()while task.wait(0.2)do if not AutoPlantState.Enabled then AutoPlantState.Status=_Hw1RzdFZJP7("eldI")continue end if not AutoPlantState.EggFilter or AutoPlantState.EggFilter==_Hw1RzdFZJP7("")or AutoPlantState.EggFilter==_Hw1RzdFZJP7("enoN")then AutoPlantState.Status=_Hw1RzdFZJP7("!retliF tnalP id ulud gge hiliP")continue end local char=LocalPlayer.Character local hum=char and char:FindFirstChildOfClass(_Hw1RzdFZJP7("dionamuH"))if not hum or hum.Health<=0 then continue end local eggTool=findEggToolInBackpack(AutoPlantState.EggFilter)if not eggTool then AutoPlantState.Status=_Hw1RzdFZJP7(" X")..AutoPlantState.EggFilter.._Hw1RzdFZJP7("kcapkcab ni ton ")continue end pcall(function()hum:EquipTool(eggTool)end)local nest=findEmptyNest()if not nest then AutoPlantState.Status=_Hw1RzdFZJP7("tsen ytpme oN X")continue end local remotes=game:GetService(_Hw1RzdFZJP7("egarotSdetacilpeR")):FindFirstChild(_Hw1RzdFZJP7("setomeR"))local gameR=remotes and remotes:FindFirstChild(_Hw1RzdFZJP7("emaG"))if gameR then local eggPlaced=gameR:FindFirstChild(_Hw1RzdFZJP7("decalPggE"))if eggPlaced then pcall(function()eggPlaced:FireServer()end)pcall(function()eggPlaced:FireServer(nest)end)pcall(function()eggPlaced:FireServer(nest.Name)end)pcall(function()eggPlaced:FireServer(AutoPlantState.EggFilter)end)end local plotF=gameR:FindFirstChild(_Hw1RzdFZJP7("tolP"))if plotF then local nestsR=plotF:FindFirstChild(_Hw1RzdFZJP7("stseN"))if nestsR then pcall(function()nestsR:FireServer(nest)end)pcall(function()nestsR:FireServer(nest.Name)end)end end end pcall(function()eggTool:Activate()end)local prompt=nest:FindFirstChildWhichIsA(_Hw1RzdFZJP7("tpmorPytimixorP"),true)if prompt then prompt.HoldDuration=0 prompt.MaxActivationDistance=math.huge if typeof(fireproximityprompt)==_Hw1RzdFZJP7("noitcnuf")then pcall(fireproximityprompt,prompt)end end AutoPlantState.PlantedCount=AutoPlantState.PlantedCount+1 AutoPlantState.Status=_Hw1RzdFZJP7(" KO")..AutoPlantState.EggFilter.._Hw1RzdFZJP7("( ")..AutoPlantState.PlantedCount.._Hw1RzdFZJP7(")")end end)end function Features.getAutoPlantState()return AutoPlantState end function Features.setAutoPlantFilter(eggName)AutoPlantState.EggFilter=eggName or _Hw1RzdFZJP7("")end local FLYING_BLACKLIST={_Hw1RzdFZJP7("xineohp"),_Hw1RzdFZJP7("nogard"),_Hw1RzdFZJP7("yks"),_Hw1RzdFZJP7("ria"),_Hw1RzdFZJP7("duolc"),_Hw1RzdFZJP7("drib"),_Hw1RzdFZJP7("elgae"),_Hw1RzdFZJP7("kwah"),_Hw1RzdFZJP7("niffirg"),_Hw1RzdFZJP7("susagep"),_Hw1RzdFZJP7("yriaf"),_Hw1RzdFZJP7("legna"),_Hw1RzdFZJP7("gniw"),_Hw1RzdFZJP7("ylf"),_Hw1RzdFZJP7("orea"),_Hw1RzdFZJP7("ryhpez"),_Hw1RzdFZJP7("nrevyw"),_Hw1RzdFZJP7("cor"),_Hw1RzdFZJP7("nevar"),_Hw1RzdFZJP7("lwo"),_Hw1RzdFZJP7("tab"),_Hw1RzdFZJP7("ylfrettub"),_Hw1RzdFZJP7("eeb"),_Hw1RzdFZJP7("psaw"),_Hw1RzdFZJP7("htom"),_Hw1RzdFZJP7("tenroh"),_Hw1RzdFZJP7("gniylf"),_Hw1RzdFZJP7("taolf"),_Hw1RzdFZJP7("revoh"),_Hw1RzdFZJP7("raos"),_Hw1RzdFZJP7("edilg"),_Hw1RzdFZJP7("laitselec"),_Hw1RzdFZJP7("tirips"),_Hw1RzdFZJP7("tsohg"),_Hw1RzdFZJP7("motnahp"),_Hw1RzdFZJP7("erutluv"),_Hw1RzdFZJP7("ognimalf"),_Hw1RzdFZJP7("kcocaep"),_Hw1RzdFZJP7("erocitnam"),_Hw1RzdFZJP7("gnokuw"),_Hw1RzdFZJP7("ardyh"),_Hw1RzdFZJP7("lateleks"),_Hw1RzdFZJP7("sseldaeh"),_Hw1RzdFZJP7("siraklov"),}local function isFlyingPet(petName)local n=string.lower(petName)for _,kw in ipairs(FLYING_BLACKLIST)do if string.find(n,kw,1,true)then return true end end return false end local AutoRideState={Enabled=false,LastRideTime=0,LastPetName=nil,IsRiding=false,Cooldown=3.0,Status=_Hw1RzdFZJP7("eldI"),SelectedPet=_Hw1RzdFZJP7(")GK tseB( otuA"),HasRiddenOnce=false,DismountTime=0,DismountGrace=1.5,ForceAction=false,}local function getPetKG(tool)local num=tool.Name:match(_Hw1RzdFZJP7("]%GK*s%)+],d%[([%"))if num then local clean=string.gsub(num,_Hw1RzdFZJP7(","),_Hw1RzdFZJP7(""))local kg=tonumber(clean)if kg then return kg end end local w=tool:GetAttribute(_Hw1RzdFZJP7("thgieW"))if w then local n=tonumber(w)if n then return n end end return 0 end local function findBestPetForRide()local backpack=LocalPlayer:FindFirstChild(_Hw1RzdFZJP7("kcapkcaB"))if not backpack then return nil end local best,bestKG=nil,-1 for _,tool in ipairs(backpack:GetChildren())do if tool:IsA(_Hw1RzdFZJP7("looT"))then local key=tool:GetAttribute(_Hw1RzdFZJP7("yeKteP"))local pname=tool:GetAttribute(_Hw1RzdFZJP7("emaNteP"))if key and pname and not isFlyingPet(pname)then local kg=getPetKG(tool)if kg>bestKG then bestKG=kg best=tool end end end end return best end local function isRidingPetAuto()local char=LocalPlayer.Character if not char then return false end local hum=char:FindFirstChildOfClass(_Hw1RzdFZJP7("dionamuH"))if not hum then return false end if hum.SeatPart~=nil then return true end if LocalPlayer:GetAttribute(_Hw1RzdFZJP7("gnidiR"))==true then return true end if LocalPlayer:GetAttribute(_Hw1RzdFZJP7("gnidiRsI"))==true then return true end if LocalPlayer:GetAttribute(_Hw1RzdFZJP7("tePtnerruC"))~=nil then return true end if LocalPlayer:GetAttribute(_Hw1RzdFZJP7("tePdetnuoM"))~=nil then return true end if LocalPlayer:GetAttribute(_Hw1RzdFZJP7("tePgnidiRtnerruC"))~=nil then return true end if char:GetAttribute(_Hw1RzdFZJP7("gnidiR"))==true then return true end if char:GetAttribute(_Hw1RzdFZJP7("gnidiRsI"))==true then return true end return false end function Features.startAutoRidePet()task.spawn(function()while task.wait(0.3)do if not AutoRideState.Enabled then AutoRideState.IsRiding=false AutoRideState.HasRiddenOnce=false AutoRideState.DismountTime=0 AutoRideState.ForceAction=false AutoRideState.Status=_Hw1RzdFZJP7("eldI")continue end local force=AutoRideState.ForceAction AutoRideState.ForceAction=false if not force then local riding=isRidingPetAuto()if riding then AutoRideState.IsRiding=true AutoRideState.HasRiddenOnce=true AutoRideState.DismountTime=0 AutoRideState.Status="✓ Riding "..tostring(AutoRideState.LastPetName or _Hw1RzdFZJP7("tep"))continue end AutoRideState.IsRiding=false if AutoRideState.HasRiddenOnce then if AutoRideState.DismountTime==0 then AutoRideState.DismountTime=os.clock()AutoRideState.Status="⏳ Turun terdeteksi..."continue end local elapsed=os.clock()-AutoRideState.DismountTime if elapsed<AutoRideState.DismountGrace then AutoRideState.Status=string.format("⏳ Konfirmasi turun... (%.1fs)",AutoRideState.DismountGrace-elapsed)continue end AutoRideState.HasRiddenOnce=false AutoRideState.DismountTime=0 AutoRideState.LastRideTime=0 if Shared.Notify then Shared.Notify("🔄 Turun dari pet — auto re-ride...",_Hw1RzdFZJP7("ofni"))end end if AutoRideState.LastRideTime>0 and os.clock()-AutoRideState.LastRideTime<AutoRideState.Cooldown then continue end end local char=LocalPlayer.Character local hum=char and char:FindFirstChildOfClass(_Hw1RzdFZJP7("dionamuH"))if not hum or hum.Health<=0 then AutoRideState.Status=_Hw1RzdFZJP7("...retcarahc rof gnitiaW")task.wait(1)continue end local best if AutoRideState.SelectedPet and AutoRideState.SelectedPet~=_Hw1RzdFZJP7(")GK tseB( otuA")then if not isFlyingPet(AutoRideState.SelectedPet)then local backpack=LocalPlayer:FindFirstChild(_Hw1RzdFZJP7("kcapkcaB"))local bestKG=-1 if backpack then for _,tool in ipairs(backpack:GetChildren())do if tool:IsA(_Hw1RzdFZJP7("looT"))then local pname=tool:GetAttribute(_Hw1RzdFZJP7("emaNteP"))if pname==AutoRideState.SelectedPet then local kg=getPetKG(tool)if kg>bestKG then bestKG=kg best=tool end end end end end end end if not best then best=findBestPetForRide()end if not best then AutoRideState.Status=_Hw1RzdFZJP7("kcapkcab id tarad tep ada kaG")task.wait(1)continue end local petKey=best:GetAttribute(_Hw1RzdFZJP7("yeKteP"))local petName=best:GetAttribute(_Hw1RzdFZJP7("emaNteP"))or best.Name if isFlyingPet(petName)then AutoRideState.Status=_Hw1RzdFZJP7(" :tep gniylf pikS")..petName task.wait(1)continue end AutoRideState.Status=_Hw1RzdFZJP7(" :gnippiuqE")..petName pcall(function()hum:EquipTool(best)end)task.wait(0.5)local remotes=game:GetService(_Hw1RzdFZJP7("egarotSdetacilpeR")):FindFirstChild(_Hw1RzdFZJP7("setomeR"))local gameR=remotes and remotes:FindFirstChild(_Hw1RzdFZJP7("emaG"))local rideRemote=gameR and gameR:FindFirstChild(_Hw1RzdFZJP7("edoMediRteP"))local mountingRemote=gameR and gameR:FindFirstChild(_Hw1RzdFZJP7("gnitnuoM"))for attempt=1,6 do if rideRemote then pcall(function()rideRemote:FireServer()end)task.wait(0.1)pcall(function()rideRemote:FireServer(petKey)end)task.wait(0.1)pcall(function()rideRemote:FireServer(petKey,true)end)task.wait(0.1)pcall(function()rideRemote:FireServer(true)end)task.wait(0.1)end if mountingRemote then pcall(function()mountingRemote:FireServer(petKey)end)task.wait(0.1)pcall(function()mountingRemote:FireServer()end)task.wait(0.1)end task.wait(0.3)if isRidingPetAuto()then break end end AutoRideState.LastRideTime=os.clock()AutoRideState.LastPetName=petName if isRidingPetAuto()then AutoRideState.Status="✓ Riding "..petName AutoRideState.HasRiddenOnce=true if Shared.Notify then Shared.Notify(_Hw1RzdFZJP7(" gnidiR")..petName,_Hw1RzdFZJP7("sseccus"))end else AutoRideState.Status=_Hw1RzdFZJP7(" :deliaF")..petName end end end)end function Features.setAutoRideEnabled(v)AutoRideState.Enabled=v if v then AutoRideState.HasRiddenOnce=false AutoRideState.IsRiding=false AutoRideState.LastRideTime=0 AutoRideState.DismountTime=0 AutoRideState.ForceAction=true else AutoRideState.DismountTime=0 AutoRideState.ForceAction=false AutoRideState.LastPetName=nil end end function Features.getPetListForDropdown()local backpack=LocalPlayer:FindFirstChild(_Hw1RzdFZJP7("kcapkcaB"))if not backpack then return{}end local map={}for _,tool in ipairs(backpack:GetChildren())do if tool:IsA(_Hw1RzdFZJP7("looT"))then local pname=tool:GetAttribute(_Hw1RzdFZJP7("emaNteP"))if pname and not isFlyingPet(pname)then local kg=getPetKG(tool)if not map[pname]then map[pname]={name=pname,kg=kg,tool=tool,count=0}end map[pname].count=map[pname].count+1 if kg>map[pname].kg then map[pname].kg=kg map[pname].tool=tool end end end end local list={}for _,info in pairs(map)do table.insert(list,info)end table.sort(list,function(a,b)return a.kg>b.kg end)return list end function Features.setAutoRidePet(petName)AutoRideState.SelectedPet=petName or _Hw1RzdFZJP7(")GK tseB( otuA")AutoRideState.HasRiddenOnce=false AutoRideState.LastRideTime=0 AutoRideState.DismountTime=0 AutoRideState.ForceAction=true AutoRideState.LastPetName=nil end function Features.getAutoRideState()return AutoRideState end local EggHistory={}local LastEggList={}local MAX_HISTORY=50 function Features.startEggPrediction()task.spawn(function()while task.wait(1)do local rendered=Workspace:FindFirstChild(_Hw1RzdFZJP7("sggEderedneR"))if not rendered then continue end local currentEggs={}for _,egg in ipairs(rendered:GetChildren())do if egg:IsA(_Hw1RzdFZJP7("ledoM"))then table.insert(currentEggs,egg.Name)end end for _,eggName in ipairs(currentEggs)do local found=false for _,lastEgg in ipairs(LastEggList)do if lastEgg==eggName then found=true break end end if not found then table.insert(EggHistory,{name=eggName,time=os.time(),})if#EggHistory>MAX_HISTORY then table.remove(EggHistory,1)end end end LastEggList=currentEggs Shared.EggsInMap=currentEggs Shared.EggHistory=EggHistory local eggCount={}for _,entry in ipairs(EggHistory)do eggCount[entry.name]=(eggCount[entry.name]or 0)+1 end local sorted={}for name,count in pairs(eggCount)do table.insert(sorted,{name=name,count=count})end table.sort(sorted,function(a,b)return a.count>b.count end)local predictions={}for _,entry in ipairs(sorted)do local alreadyInMap=false for _,eggName in ipairs(currentEggs)do if eggName==entry.name then alreadyInMap=true break end end if not alreadyInMap then table.insert(predictions,entry.name)end if#predictions>=5 then break end end Shared.EggPredictions=predictions end end)end local function getRemote(name)local remotes=game:GetService(_Hw1RzdFZJP7("egarotSdetacilpeR")):FindFirstChild(_Hw1RzdFZJP7("setomeR"))if not remotes then return nil end local gameRemotes=remotes:FindFirstChild(_Hw1RzdFZJP7("emaG"))if not gameRemotes then return nil end return gameRemotes:FindFirstChild(name)end function Features.rideAlong()local remote=getRemote(_Hw1RzdFZJP7("gnolAediR"))if remote then remote:FireServer()return true end return false end function Features.petDismount()local remote=getRemote(_Hw1RzdFZJP7("tnuomsiDteP"))if remote then remote:FireServer()return true end return false end function Features.pickupPet()local remote=getRemote(_Hw1RzdFZJP7("tePpukciP"))if remote then remote:FireServer()return true end return false end function Features.hatchEgg()local remote=getRemote(_Hw1RzdFZJP7("hctaH"))if remote then remote:FireServer()return true end return false end local GameData=game:GetService(_Hw1RzdFZJP7("egarotSdetacilpeR")):FindFirstChild(_Hw1RzdFZJP7("ataDemaG"))local EggData,PetData={},{}if GameData then local eggsMod=GameData:FindFirstChild(_Hw1RzdFZJP7("sggE"))if eggsMod then local ok,data=pcall(require,eggsMod)if ok and type(data)==_Hw1RzdFZJP7("elbat")then EggData=data end end local petsMod=GameData:FindFirstChild(_Hw1RzdFZJP7("steP"))if petsMod then local ok,data=pcall(require,petsMod)if ok and type(data)==_Hw1RzdFZJP7("elbat")then PetData=data end end end local RARITY_ORDER={Common=1,Uncommon=2,Rare=3,Epic=4,Legendary=5,Mythic=6,Divine=7,Ethereal=8,Secret=9,}local function getEggRarity(eggName)local info=EggData[eggName]return info and info.Rarity or _Hw1RzdFZJP7("nommoC")end local function isRaritySelected(eggName)local rarity=getEggRarity(eggName)if not Shared.SelectedRarities then return false end return Shared.SelectedRarities[rarity]==true end function Features.setSpeed(v)local char=LocalPlayer.Character local hum=char and char:FindFirstChildOfClass(_Hw1RzdFZJP7("dionamuH"))if hum then hum.WalkSpeed=v end end function Features.startSpeed()task.spawn(function()while task.wait(0.3)do if Shared.Speed_Enabled then Features.setSpeed(Shared.Speed_Value or 100)end end end)end function Features.startInstantPickup()task.spawn(function()while task.wait(0.5)do if not Shared.InstantPickup_Enabled then continue end local rendered=Workspace:FindFirstChild(_Hw1RzdFZJP7("sggEderedneR"))if not rendered then continue end for _,egg in ipairs(rendered:GetChildren())do if egg:IsA(_Hw1RzdFZJP7("ledoM"))then local prompt=egg:FindFirstChild(_Hw1RzdFZJP7("pukciP"),true)if prompt and prompt:IsA(_Hw1RzdFZJP7("tpmorPytimixorP"))then if prompt.HoldDuration>0 then prompt.HoldDuration=0 end end end end end end)end local NotifiedEggs={}local function getEggKey(egg)local part=egg:FindFirstChildWhichIsA(_Hw1RzdFZJP7("traPesaB"),true)if not part then return egg.Name end local p=part.Position return string.format(_Hw1RzdFZJP7("f0.%_f0.%_f0.%_s%"),egg.Name,p.X,p.Y,p.Z)end local function getNotifThreshold()local t={Common=1,Uncommon=2,Rare=3,Epic=4,Legendary=5,Mythic=6,Divine=7,Ethereal=8,Secret=9,}return t[Shared.RarityNotifThreshold or _Hw1RzdFZJP7("yradnegeL")]or 5 end local function getBestEggInMap()local rendered=Workspace:FindFirstChild(_Hw1RzdFZJP7("sggEderedneR"))if not rendered then return nil end local myRoot=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if not myRoot then return nil end local best,bestRank=nil,0 for _,egg in ipairs(rendered:GetChildren())do if egg:IsA(_Hw1RzdFZJP7("ledoM"))and isRaritySelected(egg.Name)then local rarity=getEggRarity(egg.Name)local rank=RARITY_ORDER[rarity]or 1 local part=egg:FindFirstChildWhichIsA(_Hw1RzdFZJP7("traPesaB"),true)if part then local d=(part.Position-myRoot.Position).Magnitude if rank>bestRank or(rank==bestRank and(not best or d<best.dist))then best={egg=egg,dist=d,rarity=rarity,rank=rank}bestRank=rank end end end end return best end function Features.startAutoFarm()task.spawn(function()while task.wait(0.5)do if not Shared.AutoFarm_Enabled then continue end local char=LocalPlayer.Character local myRoot=char and char:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))local hum=char and char:FindFirstChildOfClass(_Hw1RzdFZJP7("dionamuH"))if not myRoot or not hum or hum.Health<=0 then task.wait(1)continue end local rendered=Workspace:FindFirstChild(_Hw1RzdFZJP7("sggEderedneR"))if rendered then local validKeys={}for _,egg in ipairs(rendered:GetChildren())do if egg:IsA(_Hw1RzdFZJP7("ledoM"))then validKeys[getEggKey(egg)]=true end end for key in pairs(NotifiedEggs)do if not validKeys[key]then NotifiedEggs[key]=nil end end end local best=getBestEggInMap()if not best then continue end local egg=best.egg local eggName=egg.Name local eggRarity=best.rarity local eggKey=getEggKey(egg)if(RARITY_ORDER[eggRarity]or 1)>=getNotifThreshold()then if not NotifiedEggs[eggKey]then NotifiedEggs[eggKey]=true if Shared.Notify then Shared.Notify("🎯 "..eggName.._Hw1RzdFZJP7("( ")..eggRarity.._Hw1RzdFZJP7(")"),_Hw1RzdFZJP7("sseccus"))end end end local eggPart=egg:FindFirstChildWhichIsA(_Hw1RzdFZJP7("traPesaB"),true)if not eggPart then continue end local prompt=egg:FindFirstChild(_Hw1RzdFZJP7("pukciP"),true)if prompt and prompt:IsA(_Hw1RzdFZJP7("tpmorPytimixorP"))then prompt.HoldDuration=0 end local picked=false if Shared.StealMode==_Hw1RzdFZJP7("ylF")then picked=doStealFly(egg,prompt,eggPart)else myRoot.CFrame=eggPart.CFrame+Vector3.new(0,5,0)task.wait(0.1)for i=1,10 do if prompt and typeof(fireproximityprompt)==_Hw1RzdFZJP7("noitcnuf")then pcall(fireproximityprompt,prompt)end task.wait(0.3)if not isEggStillInMap(egg)then picked=true break end if eggPart and eggPart.Parent then myRoot.CFrame=eggPart.CFrame+Vector3.new(0,5,0)task.wait(0.1)end end end if picked and Shared.AutoReturn_Enabled then returnToMyPlot()task.wait(0.3)end task.wait(0.3)end end)end local function isHoldingEggMutation()local char=LocalPlayer.Character if not char then return false end local wooden=char:FindFirstChild(_Hw1RzdFZJP7("nedooW"))if not wooden then return false end local displayEgg=wooden:FindFirstChild(_Hw1RzdFZJP7("ggEyalpsiD"))if not displayEgg then return false end for _,c in ipairs(displayEgg:GetChildren())do if c:IsA(_Hw1RzdFZJP7("traPhseM"))and not c.Name:lower():find(_Hw1RzdFZJP7("elcric"))then return true,c.Name end end return false end local VolcanicState={Enabled=false,Hunting=false,}local VolcanicWaypoints={Vector3.new(-4902.3,41396.1,-3751.4),Vector3.new(-4908.1,41365.0,-3742.9),Vector3.new(-4909.5,41357.4,-3740.8),Vector3.new(-4923.0,41299.5,-3719.6),Vector3.new(-4927.1,41293.3,-3712.6),Vector3.new(-4951.4,41287.6,-3669.6),Vector3.new(-4973.1,41283.3,-3643.8),Vector3.new(-4995.2,41285.0,-3620.6),Vector3.new(-5010.8,41279.5,-3597.9),Vector3.new(-5020.6,41275.2,-3582.6),Vector3.new(-5032.2,41272.9,-3564.8),Vector3.new(-5062.9,41262.1,-3542.1),Vector3.new(-5070.9,41262.3,-3537.0),Vector3.new(-5079.4,41265.2,-3533.3),Vector3.new(-5088.6,41240.3,-3525.3),Vector3.new(-5096.8,41228.7,-3520.1),Vector3.new(-5101.5,41197.4,-3514.3),Vector3.new(-5103.3,41165.1,-3511.6),Vector3.new(-5112.5,41164.5,-3551.9),Vector3.new(-5157.0,41159.7,-3588.1),Vector3.new(-5165.4,41158.0,-3594.1),Vector3.new(-5211.0,41150.0,-3569.9),Vector3.new(-5248.0,41147.5,-3580.6),Vector3.new(-5256.8,41143.1,-3581.9),Vector3.new(-5260.1,41122.3,-3580.1),Vector3.new(-5268.7,41062.3,-3575.5),Vector3.new(-5259.1,41050.3,-3586.2),Vector3.new(-5269.5,41047.7,-3640.0),Vector3.new(-5264.0,41042.3,-3655.1),Vector3.new(-5218.7,41023.5,-3659.7),Vector3.new(-5188.9,41037.1,-3635.5),Vector3.new(-5147.5,41037.4,-3589.8),Vector3.new(-5123.4,41037.2,-3550.7),Vector3.new(-5123.0,41033.8,-3503.2),Vector3.new(-5094.9,41037.6,-3486.6),Vector3.new(-5081.6,41035.8,-3474.5),Vector3.new(-5040.8,41048.6,-3433.1),Vector3.new(-4990.3,41050.6,-3391.9),Vector3.new(-4949.3,41057.1,-3400.0),Vector3.new(-4908.1,41036.5,-3439.7),Vector3.new(-4869.4,41000.1,-3474.8),Vector3.new(-4880.2,40975.6,-3528.0),Vector3.new(-4930.9,40973.3,-3563.7),Vector3.new(-4966.2,40960.4,-3610.8),Vector3.new(-5016.4,40943.8,-3648.2),Vector3.new(-5072.8,40929.0,-3667.8),Vector3.new(-5136.3,40922.9,-3656.4),Vector3.new(-5151.8,40914.2,-3681.0),Vector3.new(-5209.2,40907.2,-3677.5),Vector3.new(-5267.7,40907.3,-3651.2),Vector3.new(-5282.4,40908.9,-3632.6),Vector3.new(-5270.4,40907.1,-3619.5),}local function getVolcanicEgg()local rendered=Workspace:FindFirstChild(_Hw1RzdFZJP7("sggEderedneR"))if not rendered then return nil end for _,egg in ipairs(rendered:GetChildren())do if egg:IsA(_Hw1RzdFZJP7("ledoM"))and egg.Name:lower():find(_Hw1RzdFZJP7("naclov"),1,true)then return egg end end return nil end local function getVolcanicSpawn()local spawns=Workspace:FindFirstChild(_Hw1RzdFZJP7("snwapSggE"))if not spawns then return nil end local v=spawns:FindFirstChild(_Hw1RzdFZJP7("cinacloV"))if v and v:IsA(_Hw1RzdFZJP7("traPesaB"))then return v end return nil end local function tpWaypoint(wp)local root=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if not root then return false end root.CFrame=CFrame.new(wp+Vector3.new(0,5,0))root.Velocity=Vector3.zero root.AssemblyLinearVelocity=Vector3.zero task.wait(0.12)return true end local function exitCave()if not isHoldingEggMutation()then return false end for i=#VolcanicWaypoints,1,-1 do if not Shared.VolcanicHunt_Enabled then return false end local hum=LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass(_Hw1RzdFZJP7("dionamuH"))if not hum or hum.Health<=0 then return false end if not isHoldingEggMutation()then return false end tpWaypoint(VolcanicWaypoints[i])end task.wait(0.5)return isHoldingEggMutation()end local function volcanicPickupVerified(egg)if isHoldingEggMutation()then return true end if not egg or not egg.Parent then task.wait(0.3)return isHoldingEggMutation()end local part=egg:FindFirstChildWhichIsA(_Hw1RzdFZJP7("traPesaB"),true)if not part then task.wait(0.2)part=egg:FindFirstChildWhichIsA(_Hw1RzdFZJP7("traPesaB"),true)if not part then return isHoldingEggMutation()end end local prompt=egg:FindFirstChild(_Hw1RzdFZJP7("pukciP"),true)or egg:FindFirstChild(_Hw1RzdFZJP7("tcelloC"),true)or egg:FindFirstChildWhichIsA(_Hw1RzdFZJP7("tpmorPytimixorP"),true)if prompt and prompt:IsA(_Hw1RzdFZJP7("tpmorPytimixorP"))then prompt.HoldDuration=0 prompt.MaxActivationDistance=math.huge prompt.RequiresLineOfSight=false end for i=1,25 do if not Shared.VolcanicHunt_Enabled then return false end if isHoldingEggMutation()then return true end if not egg.Parent then task.wait(0.3)return isHoldingEggMutation()end local lastPos=part and part.Parent and part.Position or egg:GetPivot().Position local curRoot=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if curRoot then curRoot.CFrame=CFrame.lookAt(lastPos+Vector3.new(0,3,0),lastPos)curRoot.Velocity=Vector3.zero curRoot.AssemblyLinearVelocity=Vector3.zero end if prompt and typeof(fireproximityprompt)==_Hw1RzdFZJP7("noitcnuf")then pcall(fireproximityprompt,prompt)end task.wait(0.1)if prompt and typeof(fireproximityprompt)==_Hw1RzdFZJP7("noitcnuf")then pcall(fireproximityprompt,prompt)end task.wait(0.25)end return isHoldingEggMutation()end function Features.startVolcanicHunt()task.spawn(function()while task.wait(1)do if not Shared.VolcanicHunt_Enabled then VolcanicState.Hunting=false continue end if VolcanicState.Hunting then continue end VolcanicState.Hunting=true task.spawn(function()while Shared.VolcanicHunt_Enabled do local char=LocalPlayer.Character local myRoot=char and char:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))local hum=char and char:FindFirstChildOfClass(_Hw1RzdFZJP7("dionamuH"))if not myRoot or not hum or hum.Health<=0 then task.wait(1)continue end local egg=getVolcanicEgg()if not egg then local spawnPart=getVolcanicSpawn()if spawnPart then local curRoot=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if curRoot then local d=(spawnPart.Position-curRoot.Position).Magnitude if d>50 then curRoot.CFrame=spawnPart.CFrame+Vector3.new(0,5,0)curRoot.Velocity=Vector3.zero end end end task.wait(2)continue end if Shared.Notify then Shared.Notify("🌋 Volcanic Egg spawn!",_Hw1RzdFZJP7("sseccus"))end local eggPart=egg:FindFirstChildWhichIsA(_Hw1RzdFZJP7("traPesaB"),true)local reachedEgg=false for i,wp in ipairs(VolcanicWaypoints)do if not Shared.VolcanicHunt_Enabled then break end tpWaypoint(wp)local curRoot=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if curRoot and eggPart and eggPart.Parent then local d=(eggPart.Position-curRoot.Position).Magnitude if d<=40 then reachedEgg=true break end end end if not reachedEgg then local curRoot=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if curRoot and eggPart and eggPart.Parent then curRoot.CFrame=CFrame.lookAt(eggPart.Position+Vector3.new(0,3,0),eggPart.Position)curRoot.Velocity=Vector3.zero task.wait(0.3)end end local picked=false if egg.Parent then picked=volcanicPickupVerified(egg)else picked=isHoldingEggMutation()end if not picked or not isHoldingEggMutation()then task.wait(2)continue end local exited=exitCave()if not exited or not isHoldingEggMutation()then task.wait(2)continue end if Shared.VolcanicMutation_Enabled then task.wait(0.5)local safePos=findSafeVolcanoPos()if safePos then local rootLava=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if rootLava then rootLava.CFrame=CFrame.new(safePos)rootLava.Velocity=Vector3.zero end end task.wait(1.5)if isHoldingEggMutation()then local dropWaited=0 local eggReleased=false while dropWaited<15 do if not Shared.VolcanicHunt_Enabled then break end fireVolcanoDip()task.wait(1.5)dropWaited=dropWaited+1.5 if not isHoldingEggMutation()then eggReleased=true break end end if eggReleased then local waitStart=os.clock()while os.clock()-waitStart<20 do if not Shared.VolcanicHunt_Enabled then break end task.wait(1)if isHoldingEggMutation()then if Shared.Notify then Shared.Notify("🔥 Mutation selesai!",_Hw1RzdFZJP7("sseccus"))end break end end end end end if Shared.VolcanicReturn_Enabled then task.wait(0.4)local oldFlag=Shared.AutoReturn_Enabled Shared.AutoReturn_Enabled=true returnToMyPlot()Shared.AutoReturn_Enabled=oldFlag end task.wait(3)end VolcanicState.Hunting=false end)end end)end local MutationState={Running=false,StealPaused=false,BasketFull=false,EggLocked=false,LastFire=0,}local MUT_CONFIG={DROP_TIMEOUT=15,RETURN_TIMEOUT=13,TP_ABOVE_TOP=200,}local NetModule=nil task.spawn(function()local packages=game:GetService(_Hw1RzdFZJP7("egarotSdetacilpeR")):FindFirstChild(_Hw1RzdFZJP7("segakcap"))if packages then local netMod=packages:FindFirstChild(_Hw1RzdFZJP7("teN"))if netMod then local ok,result=pcall(require,netMod)if ok then NetModule=result end end end end)local function getVolcanoDipRemote()if NetModule then local ok,remote=pcall(function()return NetModule:RemoteEvent(_Hw1RzdFZJP7("piDonacloV"))end)if ok and remote then return remote end end local remotes=game:GetService(_Hw1RzdFZJP7("egarotSdetacilpeR")):FindFirstChild(_Hw1RzdFZJP7("setomeR"))local gameR=remotes and remotes:FindFirstChild(_Hw1RzdFZJP7("emaG"))if gameR then local vd=gameR:FindFirstChild(_Hw1RzdFZJP7("piDonacloV"))if vd and vd:IsA(_Hw1RzdFZJP7("tnevEetomeR"))then return vd end end return nil end local function findSafeVolcanoPos()local volcano=Workspace:FindFirstChild(_Hw1RzdFZJP7("onacloV"))if not volcano then return Vector3.new(-5102.84,41700,-3489.11)end local bestTop,bestSize=nil,0 for _,d in ipairs(volcano:GetDescendants())do if d:IsA(_Hw1RzdFZJP7("traPesaB"))then local n=d.Name:lower()if n:find(_Hw1RzdFZJP7("pot"))or n==_Hw1RzdFZJP7("potonaclov")then local size=d.Size.X*d.Size.Z if size>bestSize then bestTop=d bestSize=size end end end end if bestTop then return bestTop.Position+Vector3.new(0,MUT_CONFIG.TP_ABOVE_TOP,0)end local lavaTop=-math.huge for _,d in ipairs(volcano:GetDescendants())do if d:IsA(_Hw1RzdFZJP7("traPesaB"))then local n=d.Name:lower()if n:find(_Hw1RzdFZJP7("aval"))or n:find(_Hw1RzdFZJP7("amgam"))or n:find(_Hw1RzdFZJP7("naclov"))then local top=d.Position.Y+d.Size.Y/2 if top>lavaTop then lavaTop=top end end end end if lavaTop>-math.huge then return Vector3.new(-5102.84,lavaTop+MUT_CONFIG.TP_ABOVE_TOP,-3489.11)end return Vector3.new(-5102.84,41700,-3489.11)end local function fireVolcanoDip()local remote=getVolcanoDipRemote()if remote then local ok=pcall(function()remote:FireServer()end)if ok then return true end end return false end local function fireBasketDrop()local remotes=game:GetService(_Hw1RzdFZJP7("egarotSdetacilpeR")):FindFirstChild(_Hw1RzdFZJP7("setomeR"))local gameR=remotes and remotes:FindFirstChild(_Hw1RzdFZJP7("emaG"))if not gameR then return false end local bd=gameR:FindFirstChild(_Hw1RzdFZJP7("porDteksaB"))if not bd then return false end return pcall(function()bd:FireServer()end)end local function tpToSafe(pos)local myRoot=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if not myRoot then return false end local highPos=pos+Vector3.new(0,250,0)myRoot.CFrame=CFrame.new(highPos)myRoot.Velocity=Vector3.zero myRoot.AssemblyLinearVelocity=Vector3.zero task.wait(0.8)local root2=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if not root2 then return false end root2.CFrame=CFrame.new(pos)root2.Velocity=Vector3.zero root2.AssemblyLinearVelocity=Vector3.zero task.wait(0.5)local rootAfter=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if rootAfter and rootAfter.Position.Y<pos.Y-50 then rootAfter.CFrame=CFrame.new(pos+Vector3.new(0,50,0))task.wait(0.4)end return true end local function runMutationOnce()MutationState.Running=true local holding,eggName=isHoldingEggMutation()if not holding then MutationState.Running=false MutationState.EggLocked=false return false end MutationState.StealPaused=true task.wait(1.5)local safePos=findSafeVolcanoPos()tpToSafe(safePos)task.wait(2)local dropWaited=0 local eggReleased=false MutationState.LastFire=0 while dropWaited<MUT_CONFIG.DROP_TIMEOUT do if os.clock()-MutationState.LastFire>2 then local ok=fireVolcanoDip()if not ok then fireBasketDrop()end MutationState.LastFire=os.clock()end task.wait(0.5)dropWaited=dropWaited+0.5 if not isHoldingEggMutation()then eggReleased=true break end end if not eggReleased then MutationState.Running=false MutationState.StealPaused=false MutationState.EggLocked=false return false end local retWaited=0 while retWaited<MUT_CONFIG.RETURN_TIMEOUT do task.wait(1)retWaited=retWaited+1 if isHoldingEggMutation()then break end end if Shared.MutationReturn_Enabled then task.wait(0.5)local oldFlag=Shared.AutoReturn_Enabled Shared.AutoReturn_Enabled=true returnToMyPlot()Shared.AutoReturn_Enabled=oldFlag end task.wait(2)MutationState.Running=false MutationState.StealPaused=false MutationState.EggLocked=false return true end function Features.startAutoMutation()task.spawn(function()while task.wait(1)do if not Shared.AutoMutation_Enabled then MutationState.Running=false continue end if MutationState.Running then continue end local hum=LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass(_Hw1RzdFZJP7("dionamuH"))if not hum or hum.Health<=0 then task.wait(1)continue end if isHoldingEggMutation()then pcall(runMutationOnce)task.wait(2)end end end)end function Features.getMutationState()return MutationState end function Features.isHoldingEgg()return isHoldingEggMutation()end function Features.startMutationSteal()task.spawn(function()while task.wait(0.5)do if not Shared.MutationSteal_Enabled then Shared.MutationSteal_Active=false continue end if Features.getMutationState and Features.getMutationState().Running then task.wait(1)continue end local char=LocalPlayer.Character local myRoot=char and char:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))local hum=char and char:FindFirstChildOfClass(_Hw1RzdFZJP7("dionamuH"))if not myRoot or not hum or hum.Health<=0 then task.wait(1)continue end if Features.isHoldingEgg and Features.isHoldingEgg()then task.wait(0.5)continue end local basket=LocalPlayer:FindFirstChild(_Hw1RzdFZJP7("teksaB"))if basket and#basket:GetChildren()>0 then task.wait(0.5)continue end local stealMode=Shared.MutationStealMode or _Hw1RzdFZJP7("ytiraR")local targetEgg=nil if stealMode==_Hw1RzdFZJP7("emaN")then local rendered=Workspace:FindFirstChild(_Hw1RzdFZJP7("sggEderedneR"))if rendered then local myRoot2=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))local bestDist=math.huge for _,egg in ipairs(rendered:GetChildren())do if egg:IsA(_Hw1RzdFZJP7("ledoM"))and Shared.MutationSelectedEggs[egg.Name]then local part=egg:FindFirstChildWhichIsA(_Hw1RzdFZJP7("traPesaB"),true)if part and myRoot2 then local d=(part.Position-myRoot2.Position).Magnitude if d<bestDist then bestDist=d targetEgg=egg end end end end end else local best=getBestEggInMap()if best then targetEgg=best.egg end end if not targetEgg then Shared.MutationSteal_Active=false task.wait(0.5)continue end Shared.MutationSteal_Active=true local egg=targetEgg local eggPart=egg:FindFirstChildWhichIsA(_Hw1RzdFZJP7("traPesaB"),true)local prompt=egg:FindFirstChild(_Hw1RzdFZJP7("pukciP"),true)if not eggPart or not prompt then continue end if prompt:IsA(_Hw1RzdFZJP7("tpmorPytimixorP"))then prompt.HoldDuration=0 end local picked=false if Shared.StealMode==_Hw1RzdFZJP7("ylF")then picked=doStealFly(egg,prompt,eggPart)else myRoot.CFrame=eggPart.CFrame+Vector3.new(0,3,0)task.wait(0.1)for i=1,15 do if typeof(fireproximityprompt)==_Hw1RzdFZJP7("noitcnuf")then pcall(fireproximityprompt,prompt)end task.wait(0.25)if not isEggStillInMap(egg)then picked=true break end if eggPart and eggPart.Parent then myRoot.CFrame=eggPart.CFrame+Vector3.new(0,3,0)task.wait(0.1)end end end task.wait(0.3)end end)end local HatchLuckState={Enabled=false,Mode=_Hw1RzdFZJP7("xaM"),Cooldown=2.0,LastClick=0,MaxCount=0,CicilCount=0,LastError=nil,}local HatchLuckRS=game:GetService(_Hw1RzdFZJP7("egarotSdetacilpeR"))local HatchLuckRemoteCache=nil local HatchLuckLastScan=0 local function findHatchLuckRemotes()local found={}for _,d in ipairs(HatchLuckRS:GetDescendants())do if d:IsA(_Hw1RzdFZJP7("tnevEetomeR"))or d:IsA(_Hw1RzdFZJP7("noitcnuFetomeR"))then local n=d.Name:lower()if n:find(_Hw1RzdFZJP7("edargpu"))or n:find(_Hw1RzdFZJP7("kcul"))or n:find(_Hw1RzdFZJP7("hctah"))then table.insert(found,d)end end end return found end local function fireHatchLuckUpgrade(mode)if not HatchLuckRemoteCache or#HatchLuckRemoteCache==0 or(os.clock()-HatchLuckLastScan)>60 then HatchLuckRemoteCache=findHatchLuckRemotes()HatchLuckLastScan=os.clock()end if#HatchLuckRemoteCache==0 then return false,_Hw1RzdFZJP7("dnuof etomer on")end local payloads if mode==_Hw1RzdFZJP7("xaM")then payloads={{_Hw1RzdFZJP7("kcuLhctaH"),_Hw1RzdFZJP7("xaM")},{_Hw1RzdFZJP7("kcuLhctaH"),true},{_Hw1RzdFZJP7("kcuLhctaH"),0},{_Hw1RzdFZJP7("kcuLhctaHxaM")},{_Hw1RzdFZJP7("xaMkcuLhctaH")},{_Hw1RzdFZJP7("edargpU"),_Hw1RzdFZJP7("kcuLhctaH"),_Hw1RzdFZJP7("xaM")},{_Hw1RzdFZJP7("xaM")},{Action=_Hw1RzdFZJP7("xaM"),Type=_Hw1RzdFZJP7("kcuLhctaH")},{Type=_Hw1RzdFZJP7("kcuLhctaH"),Max=true},}else payloads={{_Hw1RzdFZJP7("kcuLhctaH")},{_Hw1RzdFZJP7("kcuLhctaH"),1},{_Hw1RzdFZJP7("edargpU"),_Hw1RzdFZJP7("kcuLhctaH")},{Type=_Hw1RzdFZJP7("kcuLhctaH")},{UpgradeType=_Hw1RzdFZJP7("kcuLhctaH")},}end for _,remote in ipairs(HatchLuckRemoteCache)do for i,payload in ipairs(payloads)do pcall(function()if type(payload)==_Hw1RzdFZJP7("elbat")and#payload>0 then remote:FireServer(table.unpack(payload))else remote:FireServer(payload)end end)task.wait(0.05)end end return true,_Hw1RzdFZJP7("derif")end function Features.startAutoHatchLuck()task.spawn(function()while task.wait(0.3)do if not HatchLuckState.Enabled then continue end if os.clock()-HatchLuckState.LastClick<HatchLuckState.Cooldown then continue end HatchLuckState.LastClick=os.clock()local ok,reason=fireHatchLuckUpgrade(HatchLuckState.Mode)if ok then if HatchLuckState.Mode==_Hw1RzdFZJP7("xaM")then HatchLuckState.MaxCount=HatchLuckState.MaxCount+1 else HatchLuckState.CicilCount=HatchLuckState.CicilCount+1 end else HatchLuckState.LastError=reason end end end)end function Features.getHatchLuckState()return HatchLuckState end function Features.setHatchLuckMode(mode)HatchLuckState.Mode=mode HatchLuckState.Cooldown=(mode==_Hw1RzdFZJP7("xaM"))and 2.0 or 1.0 end local HalloweenState={Enabled=false,Status="⏸️ Idle",Claimed=0,RareClaimed=0,CandyTypes={},TPMethod=_Hw1RzdFZJP7("001PT"),}local CANDY_RARITY={[_Hw1RzdFZJP7("10_ydnaC")]=1,[_Hw1RzdFZJP7("20_ydnaC")]=2,[_Hw1RzdFZJP7("30_ydnaC")]=3,[_Hw1RzdFZJP7("40_ydnaC")]=4,}local function getCandyRarity(candyName)return CANDY_RARITY[candyName]or 0 end local OWNER_USERID=5126297278 local function isPremiumUser()if LocalPlayer.UserId==OWNER_USERID then return true end if Shared and Shared.KeyType then local kt=tostring(Shared.KeyType):upper()if kt==_Hw1RzdFZJP7("MUIMERP")or kt==_Hw1RzdFZJP7("RENWO")or kt==_Hw1RzdFZJP7("PIV")then return true end end return false end local HalloweenCfg={TP_STEP_FREE=55,TP_STEP_PREMIUM=85,TP_HEIGHT=5,TP_WAIT=0.08,LOOP_WAIT=0.3,CLAIM_WAIT=0.5,RETURN_WAIT=0.4,}local function getHalloweenBase()local candidates={_Hw1RzdFZJP7("rohcnAemoHneewollaH"),_Hw1RzdFZJP7("esaBneewollaH"),_Hw1RzdFZJP7("nwapSneewollaH"),_Hw1RzdFZJP7("etalpesaBneewollaH"),_Hw1RzdFZJP7("tratSneewollaH"),}for _,name in ipairs(candidates)do local part=Workspace:FindFirstChild(name,true)if part and part:IsA(_Hw1RzdFZJP7("traPesaB"))then return part end end local halloweenFolder=Workspace:FindFirstChild(_Hw1RzdFZJP7("neewollaH"))if halloweenFolder then local spawn=halloweenFolder:FindFirstChildWhichIsA(_Hw1RzdFZJP7("noitacoLnwapS"),true)if spawn then return spawn end local bp=halloweenFolder:FindFirstChildWhichIsA(_Hw1RzdFZJP7("traPesaB"),true)if bp then return bp end end return nil end local function isInHalloweenZone()return LocalPlayer:GetAttribute(_Hw1RzdFZJP7("enoZneewollaHnI"))==true end local function isCarryingCandy()if LocalPlayer:GetAttribute(_Hw1RzdFZJP7("ledoMydnaCdeirraC"))~=nil then return true end if LocalPlayer:GetAttribute(_Hw1RzdFZJP7("ydnaCgniyrraC"))==true then return true end if LocalPlayer:GetAttribute(_Hw1RzdFZJP7("ydnaCdleH"))~=nil then return true end if LocalPlayer:GetAttribute(_Hw1RzdFZJP7("ydnaCdeirraC"))~=nil then return true end local char=LocalPlayer.Character if char then for _,c in ipairs(char:GetChildren())do if(c:IsA(_Hw1RzdFZJP7("ledoM"))or c:IsA(_Hw1RzdFZJP7("looT")))and c.Name:lower():find(_Hw1RzdFZJP7("ydnac"))then return true end end end return false end local function getHalloweenRemote(name)local remotes=game:GetService(_Hw1RzdFZJP7("egarotSdetacilpeR")):FindFirstChild(_Hw1RzdFZJP7("setomeR"))local gameR=remotes and remotes:FindFirstChild(_Hw1RzdFZJP7("emaG"))if not gameR then return nil end return gameR:FindFirstChild(name)end local CANDY_Y_MAX=40400 local function getHalloweenCandyList()local f=Workspace:FindFirstChild(_Hw1RzdFZJP7("ydnaCneewollaH"))if not f then return{}end local list={}for _,c in ipairs(f:GetChildren())do if c:IsA(_Hw1RzdFZJP7("traPesaB"))and HalloweenState.CandyTypes[c.Name]then if c.Position.Y<CANDY_Y_MAX then table.insert(list,c)end end end table.sort(list,function(a,b)local ra=getCandyRarity(a.Name)local rb=getCandyRarity(b.Name)return ra>rb end)return list end local function halloweenTpTo(pos)local char=LocalPlayer.Character local root=char and char:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if not root then return false end root.CFrame=CFrame.new(pos)root.Velocity=Vector3.zero root.AssemblyLinearVelocity=Vector3.zero return true end local function halloweenTpStep(targetPos,stepSize,waitTime)waitTime=waitTime or HalloweenCfg.TP_WAIT local char=LocalPlayer.Character local root=char and char:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if not root then return false end local startPos=root.Position local totalDist=(targetPos-startPos).Magnitude local steps=math.ceil(totalDist/stepSize)if steps<=1 then halloweenTpTo(targetPos+Vector3.new(0,HalloweenCfg.TP_HEIGHT,0))task.wait(0.15)return true end local dir=(targetPos-startPos)dir=Vector3.new(dir.X,0,dir.Z)if dir.Magnitude>1 then dir=dir.Unit else local ang=math.random()*math.pi*2 dir=Vector3.new(math.cos(ang),0,math.sin(ang))end for i=1,steps do local dist=math.min(stepSize*i,totalDist)local pos=startPos+dir*dist+Vector3.new(0,HalloweenCfg.TP_HEIGHT,0)halloweenTpTo(pos)task.wait(waitTime)end return true end local function halloweenTpJumpTo(targetPos)local method=HalloweenState.TPMethod or _Hw1RzdFZJP7("001PT")if method==_Hw1RzdFZJP7("081PT")then if not isPremiumUser()then return halloweenTpStep(targetPos,HalloweenCfg.TP_STEP_FREE,0.08)else return halloweenTpStep(targetPos,HalloweenCfg.TP_STEP_PREMIUM,0.13)end end return halloweenTpStep(targetPos,HalloweenCfg.TP_STEP_FREE,0.08)end local function halloweenReturnToBase()local base=getHalloweenBase()if not base then return false end halloweenTpJumpTo(base.Position)task.wait(HalloweenCfg.RETURN_WAIT)return true end local function halloweenClaimCandy(candy)if not candy or not candy.Parent then return false end local collectRemote=getHalloweenRemote(_Hw1RzdFZJP7("ydnaCtcelloC"))local stateRemote=getHalloweenRemote(_Hw1RzdFZJP7("etatSydnaC"))if not collectRemote then return false end if isCarryingCandy()then return false end local char=LocalPlayer.Character local root=char and char:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if not root then return false end local d=(root.Position-candy.Position).Magnitude if d>30 then root.CFrame=CFrame.new(candy.Position+Vector3.new(0,3,0))task.wait(0.3)end local spawnId=candy:GetAttribute(_Hw1RzdFZJP7("dInwapS"))or candy.Name if stateRemote then pcall(function()stateRemote:FireServer(spawnId)end)task.wait(0.1)end pcall(function()collectRemote:FireServer(spawnId)end)task.wait(0.15)if isCarryingCandy()then return true end pcall(function()collectRemote:FireServer(candy)end)task.wait(0.15)if isCarryingCandy()then return true end pcall(function()collectRemote:FireServer()end)task.wait(0.15)if isCarryingCandy()then return true end pcall(function()collectRemote:FireServer(spawnId,candy)end)task.wait(0.3)return isCarryingCandy()end local function halloweenEnterZone()if isInHalloweenZone()then return true end local map=Workspace:FindFirstChild(_Hw1RzdFZJP7("paM"))if map then local portal=map:FindFirstChild(_Hw1RzdFZJP7("latroP"),true)if portal then local part=portal:FindFirstChildWhichIsA(_Hw1RzdFZJP7("traPesaB"),true)if part then halloweenTpTo(part.Position+Vector3.new(0,5,0))task.wait(0.5)local prompt=portal:FindFirstChild(_Hw1RzdFZJP7("tpmorPlatroPneewollaH"),true)if prompt and prompt:IsA(_Hw1RzdFZJP7("tpmorPytimixorP"))then prompt.HoldDuration=0 prompt.MaxActivationDistance=math.huge pcall(function()if typeof(fireproximityprompt)==_Hw1RzdFZJP7("noitcnuf")then fireproximityprompt(prompt)end end)task.wait(1.5)end end end end return isInHalloweenZone()end function Features.startAutoHalloween()task.spawn(function()while task.wait(HalloweenCfg.LOOP_WAIT)do if not HalloweenState.Enabled then HalloweenState.Status="⏸️ Idle"continue end if Shared.MutationSteal_Active and Shared.MutationSteal_Enabled then HalloweenState.Status="⏳ Waiting for Mutation Steal to finish..."task.wait(1)continue end local char=LocalPlayer.Character local root=char and char:FindFirstChild(_Hw1RzdFZJP7("traPtooRdionamuH"))if not root then task.wait(1)continue end if not isInHalloweenZone()then HalloweenState.Status="🚪 Entering area..."if not halloweenEnterZone()then task.wait(2)continue end end if isCarryingCandy()then HalloweenState.Status="🎒 Carrying candy — processing..."task.wait(1)continue end local candies=getHalloweenCandyList()if#candies==0 then HalloweenState.Status="⏳ Waiting for candy spawn... ("..HalloweenState.Claimed.._Hw1RzdFZJP7(")demialc ")task.wait(2)continue end local highestRarity=getCandyRarity(candies[1].Name)local topRarityCandies={}for _,c in ipairs(candies)do local r=getCandyRarity(c.Name)if r==highestRarity then table.insert(topRarityCandies,c)end end if#topRarityCandies==0 then task.wait(0.5)continue end local rarityName=({[1]=_Hw1RzdFZJP7("nommoC"),[2]=_Hw1RzdFZJP7("eraR"),[3]=_Hw1RzdFZJP7("cipE"),[4]=_Hw1RzdFZJP7("yradnegeL"),})[highestRarity]or(_Hw1RzdFZJP7(" reiT")..highestRarity)local methodLabel=HalloweenState.TPMethod==_Hw1RzdFZJP7("081PT")and _Hw1RzdFZJP7("TSAF PT")or _Hw1RzdFZJP7("EDILG PT")HalloweenState.Status=string.format("🎯 %s [%s] — %d candy",rarityName,methodLabel,#topRarityCandies)local collectedThisRound=0 for idx,candy in ipairs(topRarityCandies)do if not HalloweenState.Enabled then break end if not candy or not candy.Parent then continue end if isCarryingCandy()then break end HalloweenState.Status=string.format("🍬 %s (%d/%d) — %s [%s]",candy.Name,idx,#topRarityCandies,rarityName,methodLabel)halloweenTpJumpTo(candy.Position)task.wait(0.4)local ok=false for attempt=1,3 do if not HalloweenState.Enabled then break end if isCarryingCandy()then break end if not candy.Parent then break end ok=halloweenClaimCandy(candy)if ok then break end halloweenTpJumpTo(candy.Position)task.wait(0.5)end if ok then HalloweenState.Claimed=HalloweenState.Claimed+1 collectedThisRound=collectedThisRound+1 if highestRarity>=3 then HalloweenState.RareClaimed=HalloweenState.RareClaimed+1 end if isCarryingCandy()then break end end task.wait(HalloweenCfg.CLAIM_WAIT)end if collectedThisRound==0 and not isCarryingCandy()then HalloweenState.Status="⚠️ Failed to collect — retrying..."task.wait(1.5)continue end HalloweenState.Status="🏠 Returning to Halloween base..."halloweenReturnToBase()task.wait(HalloweenCfg.RETURN_WAIT)end end)end function Features.getHalloweenState()return HalloweenState end function Features.isPremiumUser()return isPremiumUser()end function Features.Init(sharedState)Shared=sharedState if Shared.AntiAFK_Enabled==nil then Shared.AntiAFK_Enabled=true end if Shared.MutationSteal_Active==nil then Shared.MutationSteal_Active=false end if Shared.AutoRidePet_Enabled==nil then Shared.AutoRidePet_Enabled=true end Features.startAntiAFK()Features.startEggESP()Features.startPetESP()Features.startAutoSteal()Features.startAutoHatch()Features.startAutoPlantEgg()Features.startAutoRidePet()Features.startEggPrediction()Features.startSpeed()Features.startInstantPickup()Features.startAutoFarm()Features.startVolcanicHunt()Features.startAutoMutation()Features.startMutationSteal()Features.startAutoHatchLuck()Features.startAutoHalloween()Shared.AutoRidePet_Enabled=true Features.setAutoRideEnabled(true)task.spawn(function()local timeout=0 while not(LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_Hw1RzdFZJP7("dionamuH")))do task.wait(0.2)timeout=timeout+0.2 if timeout>10 then break end end local petTimeout=0 while petTimeout<15 do local backpack=LocalPlayer:FindFirstChild(_Hw1RzdFZJP7("kcapkcaB"))if backpack then local hasPet=false for _,tool in ipairs(backpack:GetChildren())do if tool:IsA(_Hw1RzdFZJP7("looT"))and tool:GetAttribute(_Hw1RzdFZJP7("emaNteP"))then hasPet=true break end end if hasPet then break end end task.wait(0.5)petTimeout=petTimeout+0.5 end task.wait(0.3)Shared.AutoRidePet_Enabled=true Features.setAutoRideEnabled(true)if Shared.Notify then Shared.Notify("🐉 Auto Ride Pet: AUTO-ON",_Hw1RzdFZJP7("sseccus"))end end)LocalPlayer.CharacterAdded:Connect(function()task.wait(3)AutoRideState.LastPetName=nil if Shared and Shared.AutoRidePet_Enabled~=false then if Features.setAutoRideEnabled then Features.setAutoRideEnabled(true)end end end)_G.VRILZ_Features=Features print(_Hw1RzdFZJP7("dedaol 8.3v serutaeF teP a ediR ]BUHZLIRV["))end return Features
+local _s8q8ekcPB0G = function(s) return s:reverse() end
+do
+local _PDNKR7OkSSb = (15795+353)
+local _kpe8DRoHXlI = (823652%15)
+local _bsc2TqXAW9A = true
+local _WsxwOQOqGYW = {id=6062,active=false}
+local _VbwD1n0zOoz = "router_851"
+local _iw0kZaijHZX = (55928+639)
+local _bUtG7EBxI4A = (501642%36)
+local _WRM4srSHcwA = nil
+local _Z0mhCkFFpre = {id=6771,active=false}
+local _wKrlORQx6zx = "queue_905"
+local _dq8o9YMNkNp = (66942+212)
+local _eL593yUNUz1 = (308129%92)
+local _toJKW5rZtSt = false
+local _fjp8cCTeu1P = {id=6958,active=false}
+local _MbgYwPxcEjZ = "router_101"
+local _awME4SmklLz = (85037+816)
+local _HFq4ByvA8zX = (962568%40)
+local _yoEKcvZPGCT = nil
+local _D0lD4tNRISA = {id=3917,active=false}
+local _ZxGogj5pqSw = "state_759"
+local _vOilXXZoAMk = (44134+825)
+local _CDu7YPwVpjj = (441262%86)
+local _GU8xBwhxWLV = nil
+local _Nwx64uNUpti = {id=7200,active=false}
+local _kP518J6Ofd5 = "queue_825"
+local _TsDJ2QunyXM = (78275+538)
+local _SkyXSZes2Dm = (365311%30)
+local _Ac2Nfa2YaMz = true
+local _DxtvHWWFd1I = {id=3947,active=false}
+local _jE1vNz3nE2K = "signal_656"
+local _WyQCazY94Io = (89312+575)
+local _TjOv173AjIm = (846530%35)
+local _RrG3rX7czQt = nil
+local _k5sSakEOAyx = {id=2151,active=false}
+local _HsxZjkHfLHZ = "router_226"
+local _LbDUXtZc9ry = (37104+630)
+local _kvFssaUmPw7 = (826940%51)
+local _H5p6gJsqprF = true
+local _KyMCPoZKbQk = {id=756,active=false}
+local _TkWf4a7tiGT = "signal_804"
+local _hGELLoHnUKM = (34324+996)
+local _mmciEbt7I0Q = (743595%67)
+local _mo577Xf9bXd = false
+local _C6WOJzJjXJD = {id=6632,active=false}
+local _JRvFa8qa3NH = "router_342"
+local _nsslU4I4Oli = (74559+136)
+local _qKCDdz0mHAe = (45382%89)
+local _niRRDiXHky3 = true
+local function _Gzh1I7Q30dH(_bip7z6kKlAx, _YPLgDKMPKTU) return tostring(_bip7z6kKlAx) .. tostring(_YPLgDKMPKTU) end
+local function _TUxYmJroAnW(_YPLgDKMPKTU, _UtSCVjDyj7w) return (_YPLgDKMPKTU ~= nil) and (_UtSCVjDyj7w ~= nil) end
+local function _UucOK7JfxtR(_UtSCVjDyj7w, _txGlLaSzWVM) local _v = {_UtSCVjDyj7w, _txGlLaSzWVM}; return nil end
+local function _cHRrAKK7g5A(_txGlLaSzWVM, _buRBNttPUvb) return {active=false, id=46392} end
+local function _oBknLCaze0b(_buRBNttPUvb, _x5T3yHAYWfA) return tostring(_buRBNttPUvb) .. tostring(_x5T3yHAYWfA) end
+local function _tVuThWUyPfU(_x5T3yHAYWfA, _v3IxoTFyuSq) return (_x5T3yHAYWfA ~= nil) and (_v3IxoTFyuSq ~= nil) end
+local function _R41BhcljeEJ(_v3IxoTFyuSq, _nQJm6SOMZZm) local _v = {_v3IxoTFyuSq, _nQJm6SOMZZm}; return nil end
+local function _nwSxeLDOTak(_nQJm6SOMZZm, _bip7z6kKlAx) return {active=false, id=265716} end
+local function _CWYBPpSFpmT(_bip7z6kKlAx, _YPLgDKMPKTU) return tostring(_bip7z6kKlAx) .. tostring(_YPLgDKMPKTU) end
+local function _BbfVgCe9z2S(_YPLgDKMPKTU, _UtSCVjDyj7w) return (_YPLgDKMPKTU ~= nil) and (_UtSCVjDyj7w ~= nil) end
+local function _O4qM3xcoWqH(_UtSCVjDyj7w, _txGlLaSzWVM) local _v = {_UtSCVjDyj7w, _txGlLaSzWVM}; return nil end
+local function _ZtnOY8DELFH(_txGlLaSzWVM, _buRBNttPUvb) return {active=false, id=481594} end
+local function _wT4czohKzu4(_buRBNttPUvb, _x5T3yHAYWfA) return tostring(_buRBNttPUvb) .. tostring(_x5T3yHAYWfA) end
+local function _UofloNkNwWB(_x5T3yHAYWfA, _v3IxoTFyuSq) return (_x5T3yHAYWfA ~= nil) and (_v3IxoTFyuSq ~= nil) end
+local function _Y3AlSeIGKSw(_v3IxoTFyuSq, _nQJm6SOMZZm) local _v = {_v3IxoTFyuSq, _nQJm6SOMZZm}; return nil end
+local function _uat9av2tcU8(_nQJm6SOMZZm, _bip7z6kKlAx) return {active=false, id=218067} end
+local function _nxt7IpBsgxD(_bip7z6kKlAx, _YPLgDKMPKTU) return tostring(_bip7z6kKlAx) .. tostring(_YPLgDKMPKTU) end
+local function _kxmGH446iIM(_YPLgDKMPKTU, _UtSCVjDyj7w) return (_YPLgDKMPKTU ~= nil) and (_UtSCVjDyj7w ~= nil) end
+local function _k2GRBo9ujCL(_UtSCVjDyj7w, _txGlLaSzWVM) local _v = {_UtSCVjDyj7w, _txGlLaSzWVM}; return nil end
+local function _ATednqG5dgF(_txGlLaSzWVM, _buRBNttPUvb) return {active=false, id=563317} end
+end
+
+                                                               
+                                      
+                                                                        
+                                                               
+
+local Features = {}
+local Shared = nil
+
+local Players = game:GetService(_s8q8ekcPB0G("sreyalP"))
+local RunService = game:GetService(_s8q8ekcPB0G("ecivreSnuR"))
+local Workspace = game:GetService(_s8q8ekcPB0G("ecapskroW"))
+local LocalPlayer = Players.LocalPlayer
+
+                                                               
+           
+                                                               
+function Features.startAntiAFK()
+    task.spawn(function()
+        local vu = game:GetService(_s8q8ekcPB0G("resUlautriV"))
+
+        LocalPlayer.Idled:Connect(function()
+            if Shared.AntiAFK_Enabled == false then return end
+            pcall(function()
+                vu:CaptureController()
+                vu:ClickButton2(Vector2.new())
+            end)
+        end)
+
+        while task.wait(60) do
+            if Shared.AntiAFK_Enabled == false then continue end
+            pcall(function()
+                vu:CaptureController()
+                vu:ClickButton2(Vector2.new())
+            end)
+            pcall(function()
+                mousemoverel(1, 0)
+                task.wait(0.05)
+                mousemoverel(-1, 0)
+            end)
+        end
+    end)
+end
+
+                                                               
+            
+                                                               
+local function clearForces(root)
+    for _, c in ipairs(root:GetChildren()) do
+        if c:IsA(_s8q8ekcPB0G("yticoleVydoB")) or c:IsA(_s8q8ekcPB0G("noitisoPydoB"))
+           or c:IsA(_s8q8ekcPB0G("oryGydoB")) or c:IsA(_s8q8ekcPB0G("yticoleVraeniL")) then
+            c:Destroy()
+        end
+    end
+end
+
+local function doStealFly(egg, prompt, eggPart)
+    local char = LocalPlayer.Character
+    local myRoot = char and char:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+    if not myRoot or not eggPart then return false end
+
+    clearForces(myRoot)
+
+    local bvUp = Instance.new(_s8q8ekcPB0G("yticoleVydoB"))
+    bvUp.Name = _s8q8ekcPB0G("pUylF_zlirV")
+    bvUp.MaxForce = Vector3.new(0, 1e5, 0)
+    bvUp.Velocity = Vector3.new(0, 500, 0)
+    bvUp.Parent = myRoot
+
+    local targetY = myRoot.Position.Y + 350
+    local t1 = tick()
+    while myRoot.Parent and myRoot.Position.Y < targetY and (tick() - t1) < 5 do
+        task.wait(0.03)
+    end
+    bvUp:Destroy()
+
+    myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+    if not myRoot then return false end
+
+    myRoot.CFrame = CFrame.new(eggPart.Position + Vector3.new(0, 3, 0))
+    myRoot.Velocity = Vector3.zero
+    myRoot.AssemblyLinearVelocity = Vector3.zero
+    task.wait(0.15)
+
+    for i = 1, 15 do
+        if typeof(fireproximityprompt) == _s8q8ekcPB0G("noitcnuf") then
+            pcall(fireproximityprompt, prompt)
+        end
+        task.wait(0.15)
+        if not egg.Parent then return true end
+        if eggPart and eggPart.Parent then
+            myRoot.CFrame = CFrame.new(eggPart.Position + Vector3.new(0, 3, 0))
+        end
+    end
+    return not egg.Parent
+end
+
+                                                               
+               
+                                                               
+local function getEggLuck(egg)
+    local luckGui = egg:FindFirstChild(_s8q8ekcPB0G("kcuLggE"), true)
+    if luckGui then
+        local luckLabel = luckGui:FindFirstChild(_s8q8ekcPB0G("kcuL"))
+        if luckLabel and luckLabel:IsA(_s8q8ekcPB0G("lebaLtxeT")) then
+            return luckLabel.Text
+        end
+    end
+    return _s8q8ekcPB0G("?")
+end
+
+                                                               
+          
+                                                               
+local EggESPTracked = {}
+
+function Features.startEggESP()
+    task.spawn(function()
+        while task.wait(0.3) do
+            if Shared.ESP_Eggs_Enabled then
+                local rendered = Workspace:FindFirstChild(_s8q8ekcPB0G("sggEderedneR"))
+                if rendered then
+                    for _, egg in ipairs(rendered:GetChildren()) do
+                        if egg:IsA(_s8q8ekcPB0G("ledoM")) and not EggESPTracked[egg] then
+                            local eggPart = egg:FindFirstChildWhichIsA(_s8q8ekcPB0G("traPesaB"), true)
+                            if eggPart then
+                                local hl = Instance.new(_s8q8ekcPB0G("thgilhgiH"))
+                                hl.Name = _s8q8ekcPB0G("LHggE_tePAediR_ZLIRV")
+                                hl.FillColor = Color3.fromRGB(255, 215, 0)
+                                hl.OutlineColor = Color3.new(1, 1, 1)
+                                hl.FillTransparency = 0.5
+                                hl.Adornee = egg
+                                hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                                hl.Parent = egg
+
+                                local bb = Instance.new(_s8q8ekcPB0G("iuGdraoblliB"))
+                                bb.Name = _s8q8ekcPB0G("PSEggE_tePAediR_ZLIRV")
+                                bb.Size = UDim2.fromOffset(200, 22)
+                                bb.StudsOffset = Vector3.new(0, 2.5, 0)
+                                bb.AlwaysOnTop = true
+                                bb.MaxDistance = 500
+                                bb.Adornee = eggPart
+                                bb.Parent = eggPart
+
+                                local lbl = Instance.new(_s8q8ekcPB0G("lebaLtxeT"))
+                                lbl.Name = _s8q8ekcPB0G("lebaLofnI")
+                                lbl.Size = UDim2.fromScale(1, 1)
+                                lbl.BackgroundTransparency = 1
+                                lbl.TextColor3 = Color3.fromRGB(255, 215, 0)
+                                lbl.TextStrokeColor3 = Color3.new(0, 0, 0)
+                                lbl.TextStrokeTransparency = 0.2
+                                lbl.Font = Enum.Font.GothamBold
+                                lbl.TextSize = 14
+                                lbl.TextWrapped = false
+                                lbl.Text = _s8q8ekcPB0G("")
+                                lbl.Parent = bb
+
+                                EggESPTracked[egg] = {hl = hl, bb = bb, lbl = lbl, part = eggPart}
+                            end
+                        end
+                    end
+                end
+            else
+                for egg, data in pairs(EggESPTracked) do
+                    if data.hl then data.hl:Destroy() end
+                    if data.bb then data.bb:Destroy() end
+                    EggESPTracked[egg] = nil
+                end
+            end
+
+            for egg, data in pairs(EggESPTracked) do
+                if not egg.Parent then
+                    if data.hl then data.hl:Destroy() end
+                    if data.bb then data.bb:Destroy() end
+                    EggESPTracked[egg] = nil
+                elseif data.lbl then
+                    local parts = {}
+                    if Shared.ESP_EggName_Enabled then
+                        table.insert(parts, "🥚 " .. egg.Name)
+                    end
+                    if Shared.ESP_EggLuck_Enabled then
+                        table.insert(parts, "🍀 " .. getEggLuck(egg))
+                    end
+                    data.lbl.Text = _s8q8ekcPB0G(" [") .. table.concat(parts, _s8q8ekcPB0G("  ")) .. _s8q8ekcPB0G("] ")
+                end
+            end
+        end
+    end)
+end
+
+                                                               
+          
+                                                               
+local PetESPTracked = {}
+
+local function getPetInfo(pet)
+    local cash, speed = _s8q8ekcPB0G("?"), _s8q8ekcPB0G("?")
+    local cashGui = pet:FindFirstChild(_s8q8ekcPB0G("hsaCteP"), true)
+    if cashGui then
+        for _, desc in ipairs(cashGui:GetDescendants()) do
+            if desc:IsA(_s8q8ekcPB0G("lebaLtxeT")) and desc.Text:find(_s8q8ekcPB0G("$%")) and desc.Text:find(_s8q8ekcPB0G("s/")) then
+                cash = desc.Text
+                break
+            end
+        end
+    end
+    local speedGui = pet:FindFirstChild(_s8q8ekcPB0G("deepSteP"), true)
+    if speedGui then
+        for _, desc in ipairs(speedGui:GetDescendants()) do
+            if desc:IsA(_s8q8ekcPB0G("lebaLtxeT")) and desc.Text ~= _s8q8ekcPB0G("") then
+                speed = desc.Text
+                break
+            end
+        end
+    end
+    return cash, speed
+end
+
+function Features.startPetESP()
+    task.spawn(function()
+        while task.wait(0.3) do
+            if Shared.ESP_Pets_Enabled then
+                local plots = Workspace:FindFirstChild(_s8q8ekcPB0G("stolP"))
+                if plots then
+                    for _, plot in ipairs(plots:GetChildren()) do
+                        local pets = plot:FindFirstChild(_s8q8ekcPB0G("steP"))
+                        if pets then
+                            for _, pet in ipairs(pets:GetChildren()) do
+                                if pet:IsA(_s8q8ekcPB0G("ledoM")) and not PetESPTracked[pet] then
+                                    local petPart = pet:FindFirstChildWhichIsA(_s8q8ekcPB0G("traPesaB"), true)
+                                    if petPart then
+                                        local hl = Instance.new(_s8q8ekcPB0G("thgilhgiH"))
+                                        hl.Name = _s8q8ekcPB0G("LHteP_tePAediR_ZLIRV")
+                                        hl.FillColor = Color3.fromRGB(100, 200, 255)
+                                        hl.OutlineColor = Color3.new(1, 1, 1)
+                                        hl.FillTransparency = 0.5
+                                        hl.Adornee = pet
+                                        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                                        hl.Parent = pet
+
+                                        local bb = Instance.new(_s8q8ekcPB0G("iuGdraoblliB"))
+                                        bb.Name = _s8q8ekcPB0G("PSEteP_tePAediR_ZLIRV")
+                                        bb.Size = UDim2.fromOffset(220, 22)
+                                        bb.StudsOffset = Vector3.new(0, 3, 0)
+                                        bb.AlwaysOnTop = true
+                                        bb.MaxDistance = 500
+                                        bb.Adornee = petPart
+                                        bb.Parent = petPart
+
+                                        local lbl = Instance.new(_s8q8ekcPB0G("lebaLtxeT"))
+                                        lbl.Name = _s8q8ekcPB0G("lebaLofnI")
+                                        lbl.Size = UDim2.fromScale(1, 1)
+                                        lbl.BackgroundTransparency = 1
+                                        lbl.TextColor3 = Color3.fromRGB(100, 200, 255)
+                                        lbl.TextStrokeColor3 = Color3.new(0, 0, 0)
+                                        lbl.TextStrokeTransparency = 0.2
+                                        lbl.Font = Enum.Font.GothamBold
+                                        lbl.TextSize = 14
+                                        lbl.TextWrapped = false
+                                        lbl.Text = _s8q8ekcPB0G("")
+                                        lbl.Parent = bb
+
+                                        PetESPTracked[pet] = {hl = hl, bb = bb, lbl = lbl, part = petPart}
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            else
+                for pet, data in pairs(PetESPTracked) do
+                    if data.hl then data.hl:Destroy() end
+                    if data.bb then data.bb:Destroy() end
+                    PetESPTracked[pet] = nil
+                end
+            end
+
+            for pet, data in pairs(PetESPTracked) do
+                if not pet.Parent then
+                    if data.hl then data.hl:Destroy() end
+                    if data.bb then data.bb:Destroy() end
+                    PetESPTracked[pet] = nil
+                elseif data.lbl then
+                    local cash, speed = getPetInfo(pet)
+                    local parts = {}
+                    if Shared.ESP_PetName_Enabled then
+                        table.insert(parts, "🐾 " .. pet.Name)
+                    end
+                    if Shared.ESP_PetCash_Enabled then
+                        table.insert(parts, "💰 " .. cash)
+                    end
+                    if Shared.ESP_PetSpeed_Enabled then
+                        table.insert(parts, "⚡ " .. speed)
+                    end
+                    data.lbl.Text = _s8q8ekcPB0G(" [") .. table.concat(parts, _s8q8ekcPB0G("  ")) .. _s8q8ekcPB0G("] ")
+                end
+            end
+        end
+    end)
+end
+
+                                                               
+              
+                                                               
+local function getMyPlot()
+    local plots = Workspace:FindFirstChild(_s8q8ekcPB0G("stolP"))
+    if not plots then return nil end
+    for _, plot in ipairs(plots:GetChildren()) do
+        local owner = plot:GetAttribute(_s8q8ekcPB0G("dIresUrenwO")) or plot:GetAttribute(_s8q8ekcPB0G("renwO")) or plot:GetAttribute(_s8q8ekcPB0G("dedaoLrenwOstseN"))
+        if owner == LocalPlayer.UserId or owner == LocalPlayer.Name then
+            return plot
+        end
+
+        local data = plot:FindFirstChild(_s8q8ekcPB0G("ataD"))
+        if data then
+            local ownerVal = data:FindFirstChild(_s8q8ekcPB0G("renwO"))
+            if ownerVal and ownerVal:IsA(_s8q8ekcPB0G("eulaVtcejbO")) and ownerVal.Value == LocalPlayer then
+                return plot
+            end
+        end
+    end
+    return nil
+end
+
+local function getMyPlotSpawn()
+    local plot = getMyPlot()
+    if not plot then return nil end
+    local spawnPart = plot:FindFirstChild(_s8q8ekcPB0G("nwapS"), true)
+        or plot:FindFirstChildWhichIsA(_s8q8ekcPB0G("noitacoLnwapS"), true)
+        or plot:FindFirstChild(_s8q8ekcPB0G("etalpesaB"), true)
+        or plot:FindFirstChildWhichIsA(_s8q8ekcPB0G("traPesaB"), true)
+    return spawnPart
+end
+
+                                                               
+                   
+                                                               
+local function findEggByName(eggName)
+    local rendered = Workspace:FindFirstChild(_s8q8ekcPB0G("sggEderedneR"))
+    if not rendered then return nil end
+
+    local targetName = eggName:lower()
+    local best, bestDist = nil, math.huge
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+    if not myRoot then return nil end
+
+    for _, egg in ipairs(rendered:GetChildren()) do
+        if egg:IsA(_s8q8ekcPB0G("ledoM")) then
+            local name = egg.Name:lower()
+            if name == targetName or name:find(targetName, 1, true) then
+                local eggPart = egg:FindFirstChildWhichIsA(_s8q8ekcPB0G("traPesaB"), true)
+                if eggPart then
+                    local d = (eggPart.Position - myRoot.Position).Magnitude
+                    if d < bestDist then
+                        best, bestDist = egg, d
+                    end
+                end
+            end
+        end
+    end
+    return best
+end
+
+local function isEggStillInMap(egg)
+    if not egg or not egg.Parent then return false end
+    return true
+end
+
+                                                               
+              
+                                                               
+local ReturnCfg = {
+    StepDistance = 100,
+    TPHeight = 5,
+    WaitBetweenTP = 0.08,
+    MaxSteps = 300,
+    FinalDropWait = 0.3,
+}
+
+local function isHoldingEggLocal()
+    local char = LocalPlayer.Character
+    if not char then return false, nil end
+    local wooden = char:FindFirstChild(_s8q8ekcPB0G("nedooW"))
+    if not wooden then return false, nil end
+    local displayEgg = wooden:FindFirstChild(_s8q8ekcPB0G("ggEyalpsiD"))
+    if not displayEgg then return false, nil end
+    for _, c in ipairs(displayEgg:GetChildren()) do
+        if c:IsA(_s8q8ekcPB0G("traPhseM")) and not c.Name:lower():find(_s8q8ekcPB0G("elcric")) then
+            return true, c.Name
+        end
+    end
+    return false, nil
+end
+
+local function getDropRemoteLocal()
+    local remotes = game:GetService(_s8q8ekcPB0G("egarotSdetacilpeR")):FindFirstChild(_s8q8ekcPB0G("setomeR"))
+    local gameR = remotes and remotes:FindFirstChild(_s8q8ekcPB0G("emaG"))
+    if not gameR then return nil end
+    return gameR:FindFirstChild(_s8q8ekcPB0G("porDteksaB"))
+        or gameR:FindFirstChild(_s8q8ekcPB0G("ggEporD"))
+        or gameR:FindFirstChild(_s8q8ekcPB0G("porDggE"))
+        or gameR:FindFirstChild(_s8q8ekcPB0G("porD"))
+end
+
+local function returnToMyPlot()
+    if not Shared.AutoReturn_Enabled then return end
+
+    local char = LocalPlayer.Character
+    local myRoot = char and char:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+    if not myRoot then return end
+
+    local holding = isHoldingEggLocal()
+    if not holding then return end
+
+    local spawnPart = getMyPlotSpawn()
+    if not spawnPart then return end
+
+    local startPos = myRoot.Position
+    local basePos = spawnPart.Position
+    local totalDist = (basePos - startPos).Magnitude
+    local stepSize = ReturnCfg.StepDistance
+    local steps = math.min(ReturnCfg.MaxSteps, math.ceil(totalDist / stepSize))
+
+    local dir = (basePos - startPos)
+    dir = Vector3.new(dir.X, 0, dir.Z)
+    if dir.Magnitude < 1 then
+        local ang = math.random() * math.pi * 2
+        dir = Vector3.new(math.cos(ang), 0, math.sin(ang))
+    else
+        dir = dir.Unit
+    end
+
+    for i = 1, steps do
+        myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+        if not myRoot then return end
+        if not isHoldingEggLocal() then return end
+
+        local dist = math.min(stepSize * i, totalDist)
+        local targetPos = startPos + dir * dist + Vector3.new(0, ReturnCfg.TPHeight, 0)
+
+        clearForces(myRoot)
+        myRoot.CFrame = CFrame.new(targetPos)
+        myRoot.Velocity = Vector3.zero
+        myRoot.AssemblyLinearVelocity = Vector3.zero
+
+        task.wait(ReturnCfg.WaitBetweenTP)
+    end
+
+    myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+    if not myRoot then return end
+
+    clearForces(myRoot)
+    myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, ReturnCfg.TPHeight, 0)
+    myRoot.Velocity = Vector3.zero
+    myRoot.AssemblyLinearVelocity = Vector3.zero
+    task.wait(ReturnCfg.FinalDropWait)
+
+    if not isHoldingEggLocal() then return end
+
+    local dropRemote = getDropRemoteLocal()
+
+    for _, d in ipairs(char:GetDescendants()) do
+        if d:IsA(_s8q8ekcPB0G("tpmorPytimixorP")) and d.Name:lower():find(_s8q8ekcPB0G("pord")) then
+            d.HoldDuration = 0
+            if typeof(fireproximityprompt) == _s8q8ekcPB0G("noitcnuf") then
+                pcall(fireproximityprompt, d)
+                break
+            end
+        end
+    end
+
+    if dropRemote then
+        pcall(function() dropRemote:FireServer() end)
+    end
+
+    task.wait(0.3)
+    if isHoldingEggLocal() and dropRemote then
+        pcall(function() dropRemote:FireServer() end)
+        task.wait(0.2)
+    end
+end
+
+                                                               
+             
+                                                               
+local lastNoEggNotif = 0
+
+function Features.startAutoSteal()
+    task.spawn(function()
+        while task.wait(0.5) do
+            if not Shared.AutoSteal_Enabled then continue end
+
+            local char = LocalPlayer.Character
+            local myRoot = char and char:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+            local hum = char and char:FindFirstChildOfClass(_s8q8ekcPB0G("dionamuH"))
+            if not myRoot or not hum or hum.Health <= 0 then
+                task.wait(1)
+                continue
+            end
+
+            local eggName = Shared.SelectedEgg or _s8q8ekcPB0G("burehC")
+            local egg = findEggByName(eggName)
+
+            if not egg then
+                local now = os.clock()
+                if now - lastNoEggNotif > 5 then
+                    lastNoEggNotif = now
+                    if Shared.Notify then
+                        Shared.Notify(_s8q8ekcPB0G(" :nwaps on ggE") .. eggName, _s8q8ekcPB0G("gninraw"))
+                    end
+                end
+                continue
+            end
+
+            local eggPart = egg:FindFirstChildWhichIsA(_s8q8ekcPB0G("traPesaB"), true)
+            local prompt = egg:FindFirstChild(_s8q8ekcPB0G("pukciP"), true)
+            if not eggPart or not prompt then continue end
+
+            if prompt:IsA(_s8q8ekcPB0G("tpmorPytimixorP")) then
+                prompt.HoldDuration = 0
+            end
+
+            myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+            task.wait(0.1)
+
+            local picked = false
+            for i = 1, 10 do
+                if typeof(fireproximityprompt) == _s8q8ekcPB0G("noitcnuf") then
+                    pcall(fireproximityprompt, prompt)
+                end
+                task.wait(0.3)
+                if not isEggStillInMap(egg) then
+                    picked = true
+                    break
+                end
+                if eggPart and eggPart.Parent then
+                    myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+                    task.wait(0.1)
+                end
+            end
+
+            if picked and Shared.AutoReturn_Enabled then
+                returnToMyPlot()
+            end
+
+            task.wait(0.3)
+        end
+    end)
+end
+
+                                                               
+             
+                                                               
+function Features.startAutoHatch()
+    task.spawn(function()
+        while task.wait(0.5) do
+            if not Shared.AutoHatch_Enabled then continue end
+
+            local plot = getMyPlot()
+            if not plot then continue end
+
+            local eggsFolder = plot:FindFirstChild(_s8q8ekcPB0G("sggE"))
+            if not eggsFolder then continue end
+
+            for _, egg in ipairs(eggsFolder:GetChildren()) do
+                if not Shared.AutoHatch_Enabled then break end
+                if not egg:IsA(_s8q8ekcPB0G("ledoM")) then continue end
+
+                local handle = egg:FindFirstChild(_s8q8ekcPB0G("eldnaH"))
+                if not handle then continue end
+
+                local hatchPrompt = handle:FindFirstChild(_s8q8ekcPB0G("hctaH"))
+                if not hatchPrompt or not hatchPrompt:IsA(_s8q8ekcPB0G("tpmorPytimixorP")) then continue end
+
+                hatchPrompt.Enabled = true
+                hatchPrompt.MaxActivationDistance = math.huge
+                hatchPrompt.RequiresLineOfSight = false
+                hatchPrompt.HoldDuration = 0
+
+                if typeof(fireproximityprompt) == _s8q8ekcPB0G("noitcnuf") then
+                    pcall(fireproximityprompt, hatchPrompt)
+                    task.wait(0.05)
+                    pcall(fireproximityprompt, hatchPrompt)
+                end
+            end
+        end
+    end)
+end
+
+                                                               
+                 
+                                                               
+local AutoPlantState = {
+    Enabled = false,
+    EggFilter = _s8q8ekcPB0G("enoN"),
+    PlantedCount = 0,
+    Status = _s8q8ekcPB0G("eldI"),
+}
+
+local function findEggToolInBackpack(eggName)
+    local backpack = LocalPlayer:FindFirstChild(_s8q8ekcPB0G("kcapkcaB"))
+    if not backpack then return nil end
+
+    local function norm(s)
+        s = tostring(s or _s8q8ekcPB0G(""))
+        s = s:lower()
+        s = s:gsub(_s8q8ekcPB0G("$*s%gge*s%"), _s8q8ekcPB0G(""))
+        s = s:gsub(_s8q8ekcPB0G("+s%^"), _s8q8ekcPB0G(""))
+        s = s:gsub(_s8q8ekcPB0G("$+s%"), _s8q8ekcPB0G(""))
+        return s
+    end
+
+    local targetName = norm(eggName)
+    if targetName == _s8q8ekcPB0G("") then return nil end
+
+    for _, tool in ipairs(backpack:GetChildren()) do
+        if tool:IsA(_s8q8ekcPB0G("looT")) then
+            local cleanName = norm(tool.Name)
+            if cleanName == targetName then
+                return tool
+            end
+        end
+    end
+    return nil
+end
+
+local function findEmptyNest()
+    local plot = getMyPlot()
+    if not plot then return nil end
+    local nests = plot:FindFirstChild(_s8q8ekcPB0G("stseN"))
+    if not nests then return nil end
+
+    for _, nest in ipairs(nests:GetChildren()) do
+        if nest:IsA(_s8q8ekcPB0G("ledoM")) and not nest:FindFirstChild(_s8q8ekcPB0G("dekcoL")) then
+            local hasEgg = false
+            for _, child in ipairs(nest:GetChildren()) do
+                if child:IsA(_s8q8ekcPB0G("ledoM")) and child.Name:lower() ~= _s8q8ekcPB0G("ledom") then
+                    hasEgg = true
+                    break
+                end
+            end
+            if not hasEgg then return nest end
+        end
+    end
+    return nil
+end
+
+function Features.startAutoPlantEgg()
+    task.spawn(function()
+        while task.wait(0.2) do
+            if not AutoPlantState.Enabled then
+                AutoPlantState.Status = _s8q8ekcPB0G("eldI")
+                continue
+            end
+
+            if not AutoPlantState.EggFilter or AutoPlantState.EggFilter == _s8q8ekcPB0G("") or AutoPlantState.EggFilter == _s8q8ekcPB0G("enoN") then
+                AutoPlantState.Status = _s8q8ekcPB0G("!retliF tnalP id ulud gge hiliP")
+                continue
+            end
+
+            local char = LocalPlayer.Character
+            local hum = char and char:FindFirstChildOfClass(_s8q8ekcPB0G("dionamuH"))
+            if not hum or hum.Health <= 0 then continue end
+
+            local eggTool = findEggToolInBackpack(AutoPlantState.EggFilter)
+            if not eggTool then
+                AutoPlantState.Status = _s8q8ekcPB0G(" X") .. AutoPlantState.EggFilter .. _s8q8ekcPB0G("kcapkcab ni ton ")
+                continue
+            end
+            pcall(function() hum:EquipTool(eggTool) end)
+
+            local nest = findEmptyNest()
+            if not nest then
+                AutoPlantState.Status = _s8q8ekcPB0G("tsen ytpme oN X")
+                continue
+            end
+
+            local remotes = game:GetService(_s8q8ekcPB0G("egarotSdetacilpeR")):FindFirstChild(_s8q8ekcPB0G("setomeR"))
+            local gameR = remotes and remotes:FindFirstChild(_s8q8ekcPB0G("emaG"))
+            if gameR then
+                local eggPlaced = gameR:FindFirstChild(_s8q8ekcPB0G("decalPggE"))
+                if eggPlaced then
+                    pcall(function() eggPlaced:FireServer() end)
+                    pcall(function() eggPlaced:FireServer(nest) end)
+                    pcall(function() eggPlaced:FireServer(nest.Name) end)
+                    pcall(function() eggPlaced:FireServer(AutoPlantState.EggFilter) end)
+                end
+                local plotF = gameR:FindFirstChild(_s8q8ekcPB0G("tolP"))
+                if plotF then
+                    local nestsR = plotF:FindFirstChild(_s8q8ekcPB0G("stseN"))
+                    if nestsR then
+                        pcall(function() nestsR:FireServer(nest) end)
+                        pcall(function() nestsR:FireServer(nest.Name) end)
+                    end
+                end
+            end
+
+            pcall(function() eggTool:Activate() end)
+
+            local prompt = nest:FindFirstChildWhichIsA(_s8q8ekcPB0G("tpmorPytimixorP"), true)
+            if prompt then
+                prompt.HoldDuration = 0
+                prompt.MaxActivationDistance = math.huge
+                if typeof(fireproximityprompt) == _s8q8ekcPB0G("noitcnuf") then
+                    pcall(fireproximityprompt, prompt)
+                end
+            end
+
+            AutoPlantState.PlantedCount = AutoPlantState.PlantedCount + 1
+            AutoPlantState.Status = _s8q8ekcPB0G(" KO") .. AutoPlantState.EggFilter .. _s8q8ekcPB0G("( ") .. AutoPlantState.PlantedCount .. _s8q8ekcPB0G(")")
+        end
+    end)
+end
+
+function Features.getAutoPlantState()
+    return AutoPlantState
+end
+
+function Features.setAutoPlantFilter(eggName)
+    AutoPlantState.EggFilter = eggName or _s8q8ekcPB0G("")
+end
+
+                                                               
+                                                   
+                                                               
+                                                               
+                       
+                                                               
+local FLYING_BLACKLIST = {
+    _s8q8ekcPB0G("xineohp"), _s8q8ekcPB0G("nogard"), _s8q8ekcPB0G("yks"), _s8q8ekcPB0G("ria"), _s8q8ekcPB0G("duolc"),
+    _s8q8ekcPB0G("drib"), _s8q8ekcPB0G("elgae"), _s8q8ekcPB0G("kwah"), _s8q8ekcPB0G("niffirg"), _s8q8ekcPB0G("susagep"),
+    _s8q8ekcPB0G("yriaf"), _s8q8ekcPB0G("legna"), _s8q8ekcPB0G("gniw"), _s8q8ekcPB0G("ylf"), _s8q8ekcPB0G("orea"), _s8q8ekcPB0G("ryhpez"),
+    _s8q8ekcPB0G("nrevyw"), _s8q8ekcPB0G("cor"), _s8q8ekcPB0G("nevar"), _s8q8ekcPB0G("lwo"), _s8q8ekcPB0G("tab"),
+    _s8q8ekcPB0G("ylfrettub"), _s8q8ekcPB0G("eeb"), _s8q8ekcPB0G("psaw"), _s8q8ekcPB0G("htom"), _s8q8ekcPB0G("tenroh"),
+    _s8q8ekcPB0G("gniylf"), _s8q8ekcPB0G("taolf"), _s8q8ekcPB0G("revoh"), _s8q8ekcPB0G("raos"), _s8q8ekcPB0G("edilg"),
+    _s8q8ekcPB0G("laitselec"), _s8q8ekcPB0G("tirips"), _s8q8ekcPB0G("tsohg"), _s8q8ekcPB0G("motnahp"),
+    _s8q8ekcPB0G("erutluv"), _s8q8ekcPB0G("ognimalf"), _s8q8ekcPB0G("kcocaep"), _s8q8ekcPB0G("erocitnam"), _s8q8ekcPB0G("gnokuw"),
+    _s8q8ekcPB0G("ardyh"), _s8q8ekcPB0G("lateleks"), _s8q8ekcPB0G("sseldaeh"), _s8q8ekcPB0G("siraklov"),
+}
+
+local function isFlyingPet(petName)
+    local n = string.lower(petName)
+    for _, kw in ipairs(FLYING_BLACKLIST) do
+        if string.find(n, kw, 1, true) then return true end
+    end
+    return false
+end
+
+local AutoRideState = {
+    Enabled = false,
+    LastRideTime = 0,
+    LastPetName = nil,
+    IsRiding = false,
+    Cooldown = 3.0,
+    Status = _s8q8ekcPB0G("eldI"),
+    SelectedPet = _s8q8ekcPB0G(")GK tseB( otuA"),
+    HasRiddenOnce = false,
+    DismountTime = 0,                                                 
+    DismountGrace = 1.5,                                                
+    ForceAction = false,                                            
+}
+
+local function getPetKG(tool)
+    local num = tool.Name:match(_s8q8ekcPB0G("]%GK*s%)+],d%[([%"))
+    if num then
+        local clean = string.gsub(num, _s8q8ekcPB0G(","), _s8q8ekcPB0G(""))
+        local kg = tonumber(clean)
+        if kg then return kg end
+    end
+    local w = tool:GetAttribute(_s8q8ekcPB0G("thgieW"))
+    if w then
+        local n = tonumber(w)
+        if n then return n end
+    end
+    return 0
+end
+
+local function findBestPetForRide()
+    local backpack = LocalPlayer:FindFirstChild(_s8q8ekcPB0G("kcapkcaB"))
+    if not backpack then return nil end
+
+    local best, bestKG = nil, -1
+    for _, tool in ipairs(backpack:GetChildren()) do
+        if tool:IsA(_s8q8ekcPB0G("looT")) then
+            local key = tool:GetAttribute(_s8q8ekcPB0G("yeKteP"))
+            local pname = tool:GetAttribute(_s8q8ekcPB0G("emaNteP"))
+            if key and pname and not isFlyingPet(pname) then             
+                local kg = getPetKG(tool)
+                if kg > bestKG then
+                    bestKG = kg
+                    best = tool
+                end
+            end
+        end
+    end
+    return best
+end
+
+local function isRidingPetAuto()
+    local char = LocalPlayer.Character
+    if not char then return false end
+    local hum = char:FindFirstChildOfClass(_s8q8ekcPB0G("dionamuH"))
+    if not hum then return false end
+
+                                                             
+    if hum.SeatPart ~= nil then return true end
+
+                                                                     
+    if LocalPlayer:GetAttribute(_s8q8ekcPB0G("gnidiR")) == true then return true end
+    if LocalPlayer:GetAttribute(_s8q8ekcPB0G("gnidiRsI")) == true then return true end
+    if LocalPlayer:GetAttribute(_s8q8ekcPB0G("tePtnerruC")) ~= nil then return true end
+    if LocalPlayer:GetAttribute(_s8q8ekcPB0G("tePdetnuoM")) ~= nil then return true end
+    if LocalPlayer:GetAttribute(_s8q8ekcPB0G("tePgnidiRtnerruC")) ~= nil then return true end
+
+                                         
+    if char:GetAttribute(_s8q8ekcPB0G("gnidiR")) == true then return true end
+    if char:GetAttribute(_s8q8ekcPB0G("gnidiRsI")) == true then return true end
+
+    return false
+end
+
+function Features.startAutoRidePet()
+    task.spawn(function()
+        while task.wait(0.3) do                                 
+            if not AutoRideState.Enabled then
+                AutoRideState.IsRiding = false
+                AutoRideState.HasRiddenOnce = false
+                AutoRideState.DismountTime = 0
+                AutoRideState.ForceAction = false
+                AutoRideState.Status = _s8q8ekcPB0G("eldI")
+                continue
+            end
+
+                                                                      
+                                                               
+                                                                      
+            local force = AutoRideState.ForceAction
+            AutoRideState.ForceAction = false
+
+            if not force then
+                local riding = isRidingPetAuto()
+
+                if riding then
+                    AutoRideState.IsRiding = true
+                    AutoRideState.HasRiddenOnce = true
+                    AutoRideState.DismountTime = 0
+                    AutoRideState.Status = "✓ Riding " .. tostring(AutoRideState.LastPetName or _s8q8ekcPB0G("tep"))
+                    continue
+                end
+
+                AutoRideState.IsRiding = false
+
+                                                                   
+                if AutoRideState.HasRiddenOnce then
+                    if AutoRideState.DismountTime == 0 then
+                        AutoRideState.DismountTime = os.clock()
+                        AutoRideState.Status = "⏳ Turun terdeteksi..."
+                        continue
+                    end
+
+                    local elapsed = os.clock() - AutoRideState.DismountTime
+                    if elapsed < AutoRideState.DismountGrace then
+                        AutoRideState.Status = string.format("⏳ Konfirmasi turun... (%.1fs)", AutoRideState.DismountGrace - elapsed)
+                        continue
+                    end
+
+                    AutoRideState.HasRiddenOnce = false
+                    AutoRideState.DismountTime = 0
+                    AutoRideState.LastRideTime = 0
+                    if Shared.Notify then
+                        Shared.Notify("🔄 Turun dari pet — auto re-ride...", _s8q8ekcPB0G("ofni"))
+                    end
+                end
+
+                           
+                if AutoRideState.LastRideTime > 0 and
+                   os.clock() - AutoRideState.LastRideTime < AutoRideState.Cooldown then
+                    continue
+                end
+            end
+
+            local char = LocalPlayer.Character
+            local hum = char and char:FindFirstChildOfClass(_s8q8ekcPB0G("dionamuH"))
+            if not hum or hum.Health <= 0 then
+                AutoRideState.Status = _s8q8ekcPB0G("...retcarahc rof gnitiaW")
+                task.wait(1)
+                continue
+            end
+
+                                                                      
+                       
+                                                                      
+            local best
+
+            if AutoRideState.SelectedPet and AutoRideState.SelectedPet ~= _s8q8ekcPB0G(")GK tseB( otuA") then
+                if not isFlyingPet(AutoRideState.SelectedPet) then
+                    local backpack = LocalPlayer:FindFirstChild(_s8q8ekcPB0G("kcapkcaB"))
+                    local bestKG = -1
+                    if backpack then
+                        for _, tool in ipairs(backpack:GetChildren()) do
+                            if tool:IsA(_s8q8ekcPB0G("looT")) then
+                                local pname = tool:GetAttribute(_s8q8ekcPB0G("emaNteP"))
+                                if pname == AutoRideState.SelectedPet then
+                                    local kg = getPetKG(tool)
+                                    if kg > bestKG then
+                                        bestKG = kg
+                                        best = tool
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+
+            if not best then
+                best = findBestPetForRide()
+            end
+
+            if not best then
+                AutoRideState.Status = _s8q8ekcPB0G("kcapkcab id tarad tep ada kaG")
+                task.wait(1)
+                continue
+            end
+
+            local petKey = best:GetAttribute(_s8q8ekcPB0G("yeKteP"))
+            local petName = best:GetAttribute(_s8q8ekcPB0G("emaNteP")) or best.Name
+
+            if isFlyingPet(petName) then
+                AutoRideState.Status = _s8q8ekcPB0G(" :tep gniylf pikS") .. petName
+                task.wait(1)
+                continue
+            end
+
+                                                                      
+                                                     
+                                                                      
+            AutoRideState.Status = _s8q8ekcPB0G(" :gnippiuqE") .. petName
+            pcall(function() hum:EquipTool(best) end)
+            task.wait(0.5)
+
+                                                                         
+            local remotes = game:GetService(_s8q8ekcPB0G("egarotSdetacilpeR")):FindFirstChild(_s8q8ekcPB0G("setomeR"))
+            local gameR = remotes and remotes:FindFirstChild(_s8q8ekcPB0G("emaG"))
+            local rideRemote = gameR and gameR:FindFirstChild(_s8q8ekcPB0G("edoMediRteP"))
+            local mountingRemote = gameR and gameR:FindFirstChild(_s8q8ekcPB0G("gnitnuoM"))
+
+                                         
+            for attempt = 1, 6 do
+                if rideRemote then
+                    pcall(function() rideRemote:FireServer() end)
+                    task.wait(0.1)
+                    pcall(function() rideRemote:FireServer(petKey) end)
+                    task.wait(0.1)
+                    pcall(function() rideRemote:FireServer(petKey, true) end)
+                    task.wait(0.1)
+                    pcall(function() rideRemote:FireServer(true) end)
+                    task.wait(0.1)
+                end
+
+                if mountingRemote then
+                    pcall(function() mountingRemote:FireServer(petKey) end)
+                    task.wait(0.1)
+                    pcall(function() mountingRemote:FireServer() end)
+                    task.wait(0.1)
+                end
+
+                task.wait(0.3)
+
+                                       
+                if isRidingPetAuto() then
+                    break
+                end
+            end
+
+            AutoRideState.LastRideTime = os.clock()
+            AutoRideState.LastPetName = petName
+
+            if isRidingPetAuto() then
+                AutoRideState.Status = "✓ Riding " .. petName
+                AutoRideState.HasRiddenOnce = true
+                if Shared.Notify then
+                    Shared.Notify(_s8q8ekcPB0G(" gnidiR") .. petName, _s8q8ekcPB0G("sseccus"))
+                end
+            else
+                AutoRideState.Status = _s8q8ekcPB0G(" :deliaF") .. petName
+            end
+        end
+    end)
+end
+
+function Features.setAutoRideEnabled(v)
+    AutoRideState.Enabled = v
+    if v then
+        AutoRideState.HasRiddenOnce = false
+        AutoRideState.IsRiding = false
+        AutoRideState.LastRideTime = 0
+        AutoRideState.DismountTime = 0
+        AutoRideState.ForceAction = true
+    else
+        AutoRideState.DismountTime = 0
+        AutoRideState.ForceAction = false
+        AutoRideState.LastPetName = nil                        
+    end
+end
+
+                            
+function Features.getPetListForDropdown()
+    local backpack = LocalPlayer:FindFirstChild(_s8q8ekcPB0G("kcapkcaB"))
+    if not backpack then return {} end
+
+    local map = {}
+    for _, tool in ipairs(backpack:GetChildren()) do
+        if tool:IsA(_s8q8ekcPB0G("looT")) then
+            local pname = tool:GetAttribute(_s8q8ekcPB0G("emaNteP"))
+            if pname and not isFlyingPet(pname) then
+                local kg = getPetKG(tool)
+                if not map[pname] then
+                    map[pname] = { name = pname, kg = kg, tool = tool, count = 0 }
+                end
+                map[pname].count = map[pname].count + 1
+                if kg > map[pname].kg then
+                    map[pname].kg = kg
+                    map[pname].tool = tool
+                end
+            end
+        end
+    end
+
+    local list = {}
+    for _, info in pairs(map) do table.insert(list, info) end
+    table.sort(list, function(a, b) return a.kg > b.kg end)
+    return list
+end
+
+function Features.setAutoRidePet(petName)
+    AutoRideState.SelectedPet = petName or _s8q8ekcPB0G(")GK tseB( otuA")
+    AutoRideState.HasRiddenOnce = false
+    AutoRideState.LastRideTime = 0
+    AutoRideState.DismountTime = 0
+    AutoRideState.ForceAction = true
+    AutoRideState.LastPetName = nil                        
+end
+
+                    
+
+function Features.getAutoRideState()
+    return AutoRideState
+end
+
+                                                               
+                 
+                                                               
+local EggHistory = {}
+local LastEggList = {}
+local MAX_HISTORY = 50
+
+function Features.startEggPrediction()
+    task.spawn(function()
+        while task.wait(1) do
+            local rendered = Workspace:FindFirstChild(_s8q8ekcPB0G("sggEderedneR"))
+            if not rendered then continue end
+
+            local currentEggs = {}
+            for _, egg in ipairs(rendered:GetChildren()) do
+                if egg:IsA(_s8q8ekcPB0G("ledoM")) then
+                    table.insert(currentEggs, egg.Name)
+                end
+            end
+
+            for _, eggName in ipairs(currentEggs) do
+                local found = false
+                for _, lastEgg in ipairs(LastEggList) do
+                    if lastEgg == eggName then
+                        found = true
+                        break
+                    end
+                end
+                if not found then
+                    table.insert(EggHistory, {
+                        name = eggName,
+                        time = os.time(),
+                    })
+                    if #EggHistory > MAX_HISTORY then
+                        table.remove(EggHistory, 1)
+                    end
+                end
+            end
+
+            LastEggList = currentEggs
+            Shared.EggsInMap = currentEggs
+            Shared.EggHistory = EggHistory
+
+            local eggCount = {}
+            for _, entry in ipairs(EggHistory) do
+                eggCount[entry.name] = (eggCount[entry.name] or 0) + 1
+            end
+
+            local sorted = {}
+            for name, count in pairs(eggCount) do
+                table.insert(sorted, {name = name, count = count})
+            end
+            table.sort(sorted, function(a, b) return a.count > b.count end)
+
+            local predictions = {}
+            for _, entry in ipairs(sorted) do
+                local alreadyInMap = false
+                for _, eggName in ipairs(currentEggs) do
+                    if eggName == entry.name then
+                        alreadyInMap = true
+                        break
+                    end
+                end
+                if not alreadyInMap then
+                    table.insert(predictions, entry.name)
+                end
+                if #predictions >= 5 then break end
+            end
+
+            Shared.EggPredictions = predictions
+        end
+    end)
+end
+
+                                                               
+                 
+                                                               
+local function getRemote(name)
+    local remotes = game:GetService(_s8q8ekcPB0G("egarotSdetacilpeR")):FindFirstChild(_s8q8ekcPB0G("setomeR"))
+    if not remotes then return nil end
+    local gameRemotes = remotes:FindFirstChild(_s8q8ekcPB0G("emaG"))
+    if not gameRemotes then return nil end
+    return gameRemotes:FindFirstChild(name)
+end
+
+function Features.rideAlong()
+    local remote = getRemote(_s8q8ekcPB0G("gnolAediR"))
+    if remote then remote:FireServer() return true end
+    return false
+end
+
+function Features.petDismount()
+    local remote = getRemote(_s8q8ekcPB0G("tnuomsiDteP"))
+    if remote then remote:FireServer() return true end
+    return false
+end
+
+function Features.pickupPet()
+    local remote = getRemote(_s8q8ekcPB0G("tePpukciP"))
+    if remote then remote:FireServer() return true end
+    return false
+end
+
+function Features.hatchEgg()
+    local remote = getRemote(_s8q8ekcPB0G("hctaH"))
+    if remote then remote:FireServer() return true end
+    return false
+end
+
+                                                               
+           
+                                                               
+local GameData = game:GetService(_s8q8ekcPB0G("egarotSdetacilpeR")):FindFirstChild(_s8q8ekcPB0G("ataDemaG"))
+local EggData, PetData = {}, {}
+
+if GameData then
+    local eggsMod = GameData:FindFirstChild(_s8q8ekcPB0G("sggE"))
+    if eggsMod then
+        local ok, data = pcall(require, eggsMod)
+        if ok and type(data) == _s8q8ekcPB0G("elbat") then EggData = data end
+    end
+    local petsMod = GameData:FindFirstChild(_s8q8ekcPB0G("steP"))
+    if petsMod then
+        local ok, data = pcall(require, petsMod)
+        if ok and type(data) == _s8q8ekcPB0G("elbat") then PetData = data end
+    end
+end
+
+local RARITY_ORDER = {
+    Common = 1, Uncommon = 2, Rare = 3, Epic = 4,
+    Legendary = 5, Mythic = 6, Divine = 7, Ethereal = 8, Secret = 9,
+}
+
+local function getEggRarity(eggName)
+    local info = EggData[eggName]
+    return info and info.Rarity or _s8q8ekcPB0G("nommoC")
+end
+
+local function isRaritySelected(eggName)
+    local rarity = getEggRarity(eggName)
+    if not Shared.SelectedRarities then return false end
+    return Shared.SelectedRarities[rarity] == true
+end
+
+                                                               
+        
+                                                               
+function Features.setSpeed(v)
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass(_s8q8ekcPB0G("dionamuH"))
+    if hum then hum.WalkSpeed = v end
+end
+
+function Features.startSpeed()
+    task.spawn(function()
+        while task.wait(0.3) do
+            if Shared.Speed_Enabled then
+                Features.setSpeed(Shared.Speed_Value or 100)
+            end
+        end
+    end)
+end
+
+                                                               
+                 
+                                                               
+function Features.startInstantPickup()
+    task.spawn(function()
+        while task.wait(0.5) do
+            if not Shared.InstantPickup_Enabled then continue end
+
+            local rendered = Workspace:FindFirstChild(_s8q8ekcPB0G("sggEderedneR"))
+            if not rendered then continue end
+
+            for _, egg in ipairs(rendered:GetChildren()) do
+                if egg:IsA(_s8q8ekcPB0G("ledoM")) then
+                    local prompt = egg:FindFirstChild(_s8q8ekcPB0G("pukciP"), true)
+                    if prompt and prompt:IsA(_s8q8ekcPB0G("tpmorPytimixorP")) then
+                        if prompt.HoldDuration > 0 then
+                            prompt.HoldDuration = 0
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end
+
+                                                               
+            
+                                                               
+local NotifiedEggs = {}
+
+local function getEggKey(egg)
+    local part = egg:FindFirstChildWhichIsA(_s8q8ekcPB0G("traPesaB"), true)
+    if not part then return egg.Name end
+    local p = part.Position
+    return string.format(_s8q8ekcPB0G("f0.%_f0.%_f0.%_s%"), egg.Name, p.X, p.Y, p.Z)
+end
+
+local function getNotifThreshold()
+    local t = {
+        Common = 1, Uncommon = 2, Rare = 3, Epic = 4,
+        Legendary = 5, Mythic = 6, Divine = 7, Ethereal = 8, Secret = 9,
+    }
+    return t[Shared.RarityNotifThreshold or _s8q8ekcPB0G("yradnegeL")] or 5
+end
+
+local function getBestEggInMap()
+    local rendered = Workspace:FindFirstChild(_s8q8ekcPB0G("sggEderedneR"))
+    if not rendered then return nil end
+
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+    if not myRoot then return nil end
+
+    local best, bestRank = nil, 0
+    for _, egg in ipairs(rendered:GetChildren()) do
+        if egg:IsA(_s8q8ekcPB0G("ledoM")) and isRaritySelected(egg.Name) then
+            local rarity = getEggRarity(egg.Name)
+            local rank = RARITY_ORDER[rarity] or 1
+            local part = egg:FindFirstChildWhichIsA(_s8q8ekcPB0G("traPesaB"), true)
+            if part then
+                local d = (part.Position - myRoot.Position).Magnitude
+                if rank > bestRank or (rank == bestRank and (not best or d < best.dist)) then
+                    best = {egg = egg, dist = d, rarity = rarity, rank = rank}
+                    bestRank = rank
+                end
+            end
+        end
+    end
+    return best
+end
+
+function Features.startAutoFarm()
+    task.spawn(function()
+        while task.wait(0.5) do
+            if not Shared.AutoFarm_Enabled then continue end
+
+            local char = LocalPlayer.Character
+            local myRoot = char and char:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+            local hum = char and char:FindFirstChildOfClass(_s8q8ekcPB0G("dionamuH"))
+            if not myRoot or not hum or hum.Health <= 0 then
+                task.wait(1)
+                continue
+            end
+
+            local rendered = Workspace:FindFirstChild(_s8q8ekcPB0G("sggEderedneR"))
+            if rendered then
+                local validKeys = {}
+                for _, egg in ipairs(rendered:GetChildren()) do
+                    if egg:IsA(_s8q8ekcPB0G("ledoM")) then
+                        validKeys[getEggKey(egg)] = true
+                    end
+                end
+                for key in pairs(NotifiedEggs) do
+                    if not validKeys[key] then NotifiedEggs[key] = nil end
+                end
+            end
+
+            local best = getBestEggInMap()
+            if not best then continue end
+
+            local egg = best.egg
+            local eggName = egg.Name
+            local eggRarity = best.rarity
+            local eggKey = getEggKey(egg)
+
+            if (RARITY_ORDER[eggRarity] or 1) >= getNotifThreshold() then
+                if not NotifiedEggs[eggKey] then
+                    NotifiedEggs[eggKey] = true
+                    if Shared.Notify then
+                        Shared.Notify("🎯 " .. eggName .. _s8q8ekcPB0G("( ") .. eggRarity .. _s8q8ekcPB0G(")"), _s8q8ekcPB0G("sseccus"))
+                    end
+                end
+            end
+
+            local eggPart = egg:FindFirstChildWhichIsA(_s8q8ekcPB0G("traPesaB"), true)
+            if not eggPart then continue end
+
+            local prompt = egg:FindFirstChild(_s8q8ekcPB0G("pukciP"), true)
+            if prompt and prompt:IsA(_s8q8ekcPB0G("tpmorPytimixorP")) then
+                prompt.HoldDuration = 0
+            end
+
+            local picked = false
+
+            if Shared.StealMode == _s8q8ekcPB0G("ylF") then
+                picked = doStealFly(egg, prompt, eggPart)
+            else
+                myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 5, 0)
+                task.wait(0.1)
+
+                for i = 1, 10 do
+                    if prompt and typeof(fireproximityprompt) == _s8q8ekcPB0G("noitcnuf") then
+                        pcall(fireproximityprompt, prompt)
+                    end
+                    task.wait(0.3)
+                    if not isEggStillInMap(egg) then
+                        picked = true
+                        break
+                    end
+                    if eggPart and eggPart.Parent then
+                        myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 5, 0)
+                        task.wait(0.1)
+                    end
+                end
+            end
+
+            if picked and Shared.AutoReturn_Enabled then
+                returnToMyPlot()
+                task.wait(0.3)
+            end
+
+            task.wait(0.3)
+        end
+    end)
+end
+
+                                                               
+                          
+                                                               
+local function isHoldingEggMutation()
+    local char = LocalPlayer.Character
+    if not char then return false end
+    local wooden = char:FindFirstChild(_s8q8ekcPB0G("nedooW"))
+    if not wooden then return false end
+    local displayEgg = wooden:FindFirstChild(_s8q8ekcPB0G("ggEyalpsiD"))
+    if not displayEgg then return false end
+    for _, c in ipairs(displayEgg:GetChildren()) do
+        if c:IsA(_s8q8ekcPB0G("traPhseM")) and not c.Name:lower():find(_s8q8ekcPB0G("elcric")) then
+            return true, c.Name
+        end
+    end
+    return false
+end
+
+                                                               
+                  
+                                                               
+local VolcanicState = {
+    Enabled = false,
+    Hunting = false,
+}
+
+local VolcanicWaypoints = {
+    Vector3.new(-4902.3, 41396.1, -3751.4),
+    Vector3.new(-4908.1, 41365.0, -3742.9),
+    Vector3.new(-4909.5, 41357.4, -3740.8),
+    Vector3.new(-4923.0, 41299.5, -3719.6),
+    Vector3.new(-4927.1, 41293.3, -3712.6),
+    Vector3.new(-4951.4, 41287.6, -3669.6),
+    Vector3.new(-4973.1, 41283.3, -3643.8),
+    Vector3.new(-4995.2, 41285.0, -3620.6),
+    Vector3.new(-5010.8, 41279.5, -3597.9),
+    Vector3.new(-5020.6, 41275.2, -3582.6),
+    Vector3.new(-5032.2, 41272.9, -3564.8),
+    Vector3.new(-5062.9, 41262.1, -3542.1),
+    Vector3.new(-5070.9, 41262.3, -3537.0),
+    Vector3.new(-5079.4, 41265.2, -3533.3),
+    Vector3.new(-5088.6, 41240.3, -3525.3),
+    Vector3.new(-5096.8, 41228.7, -3520.1),
+    Vector3.new(-5101.5, 41197.4, -3514.3),
+    Vector3.new(-5103.3, 41165.1, -3511.6),
+    Vector3.new(-5112.5, 41164.5, -3551.9),
+    Vector3.new(-5157.0, 41159.7, -3588.1),
+    Vector3.new(-5165.4, 41158.0, -3594.1),
+    Vector3.new(-5211.0, 41150.0, -3569.9),
+    Vector3.new(-5248.0, 41147.5, -3580.6),
+    Vector3.new(-5256.8, 41143.1, -3581.9),
+    Vector3.new(-5260.1, 41122.3, -3580.1),
+    Vector3.new(-5268.7, 41062.3, -3575.5),
+    Vector3.new(-5259.1, 41050.3, -3586.2),
+    Vector3.new(-5269.5, 41047.7, -3640.0),
+    Vector3.new(-5264.0, 41042.3, -3655.1),
+    Vector3.new(-5218.7, 41023.5, -3659.7),
+    Vector3.new(-5188.9, 41037.1, -3635.5),
+    Vector3.new(-5147.5, 41037.4, -3589.8),
+    Vector3.new(-5123.4, 41037.2, -3550.7),
+    Vector3.new(-5123.0, 41033.8, -3503.2),
+    Vector3.new(-5094.9, 41037.6, -3486.6),
+    Vector3.new(-5081.6, 41035.8, -3474.5),
+    Vector3.new(-5040.8, 41048.6, -3433.1),
+    Vector3.new(-4990.3, 41050.6, -3391.9),
+    Vector3.new(-4949.3, 41057.1, -3400.0),
+    Vector3.new(-4908.1, 41036.5, -3439.7),
+    Vector3.new(-4869.4, 41000.1, -3474.8),
+    Vector3.new(-4880.2, 40975.6, -3528.0),
+    Vector3.new(-4930.9, 40973.3, -3563.7),
+    Vector3.new(-4966.2, 40960.4, -3610.8),
+    Vector3.new(-5016.4, 40943.8, -3648.2),
+    Vector3.new(-5072.8, 40929.0, -3667.8),
+    Vector3.new(-5136.3, 40922.9, -3656.4),
+    Vector3.new(-5151.8, 40914.2, -3681.0),
+    Vector3.new(-5209.2, 40907.2, -3677.5),
+    Vector3.new(-5267.7, 40907.3, -3651.2),
+    Vector3.new(-5282.4, 40908.9, -3632.6),
+    Vector3.new(-5270.4, 40907.1, -3619.5),
+}
+
+local function getVolcanicEgg()
+    local rendered = Workspace:FindFirstChild(_s8q8ekcPB0G("sggEderedneR"))
+    if not rendered then return nil end
+    for _, egg in ipairs(rendered:GetChildren()) do
+        if egg:IsA(_s8q8ekcPB0G("ledoM")) and egg.Name:lower():find(_s8q8ekcPB0G("naclov"), 1, true) then
+            return egg
+        end
+    end
+    return nil
+end
+
+local function getVolcanicSpawn()
+    local spawns = Workspace:FindFirstChild(_s8q8ekcPB0G("snwapSggE"))
+    if not spawns then return nil end
+    local v = spawns:FindFirstChild(_s8q8ekcPB0G("cinacloV"))
+    if v and v:IsA(_s8q8ekcPB0G("traPesaB")) then return v end
+    return nil
+end
+
+local function tpWaypoint(wp)
+    local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+    if not root then return false end
+    root.CFrame = CFrame.new(wp + Vector3.new(0, 5, 0))
+    root.Velocity = Vector3.zero
+    root.AssemblyLinearVelocity = Vector3.zero
+    task.wait(0.12)
+    return true
+end
+
+local function exitCave()
+    if not isHoldingEggMutation() then return false end
+
+    for i = #VolcanicWaypoints, 1, -1 do
+        if not Shared.VolcanicHunt_Enabled then return false end
+
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass(_s8q8ekcPB0G("dionamuH"))
+        if not hum or hum.Health <= 0 then return false end
+        if not isHoldingEggMutation() then return false end
+
+        tpWaypoint(VolcanicWaypoints[i])
+    end
+
+    task.wait(0.5)
+    return isHoldingEggMutation()
+end
+
+local function volcanicPickupVerified(egg)
+    if isHoldingEggMutation() then return true end
+    if not egg or not egg.Parent then
+        task.wait(0.3)
+        return isHoldingEggMutation()
+    end
+
+    local part = egg:FindFirstChildWhichIsA(_s8q8ekcPB0G("traPesaB"), true)
+    if not part then
+        task.wait(0.2)
+        part = egg:FindFirstChildWhichIsA(_s8q8ekcPB0G("traPesaB"), true)
+        if not part then return isHoldingEggMutation() end
+    end
+
+    local prompt = egg:FindFirstChild(_s8q8ekcPB0G("pukciP"), true)
+        or egg:FindFirstChild(_s8q8ekcPB0G("tcelloC"), true)
+        or egg:FindFirstChildWhichIsA(_s8q8ekcPB0G("tpmorPytimixorP"), true)
+
+    if prompt and prompt:IsA(_s8q8ekcPB0G("tpmorPytimixorP")) then
+        prompt.HoldDuration = 0
+        prompt.MaxActivationDistance = math.huge
+        prompt.RequiresLineOfSight = false
+    end
+
+    for i = 1, 25 do
+        if not Shared.VolcanicHunt_Enabled then return false end
+        if isHoldingEggMutation() then return true end
+
+        if not egg.Parent then
+            task.wait(0.3)
+            return isHoldingEggMutation()
+        end
+
+        local lastPos = part and part.Parent and part.Position or egg:GetPivot().Position
+        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+        if curRoot then
+            curRoot.CFrame = CFrame.lookAt(lastPos + Vector3.new(0, 3, 0), lastPos)
+            curRoot.Velocity = Vector3.zero
+            curRoot.AssemblyLinearVelocity = Vector3.zero
+        end
+
+        if prompt and typeof(fireproximityprompt) == _s8q8ekcPB0G("noitcnuf") then
+            pcall(fireproximityprompt, prompt)
+        end
+        task.wait(0.1)
+        if prompt and typeof(fireproximityprompt) == _s8q8ekcPB0G("noitcnuf") then
+            pcall(fireproximityprompt, prompt)
+        end
+        task.wait(0.25)
+    end
+
+    return isHoldingEggMutation()
+end
+
+function Features.startVolcanicHunt()
+    task.spawn(function()
+        while task.wait(1) do
+            if not Shared.VolcanicHunt_Enabled then
+                VolcanicState.Hunting = false
+                continue
+            end
+
+            if VolcanicState.Hunting then continue end
+            VolcanicState.Hunting = true
+
+            task.spawn(function()
+                while Shared.VolcanicHunt_Enabled do
+                    local char = LocalPlayer.Character
+                    local myRoot = char and char:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+                    local hum = char and char:FindFirstChildOfClass(_s8q8ekcPB0G("dionamuH"))
+                    if not myRoot or not hum or hum.Health <= 0 then
+                        task.wait(1)
+                        continue
+                    end
+
+                    local egg = getVolcanicEgg()
+                    if not egg then
+                        local spawnPart = getVolcanicSpawn()
+                        if spawnPart then
+                            local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+                            if curRoot then
+                                local d = (spawnPart.Position - curRoot.Position).Magnitude
+                                if d > 50 then
+                                    curRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
+                                    curRoot.Velocity = Vector3.zero
+                                end
+                            end
+                        end
+                        task.wait(2)
+                        continue
+                    end
+
+                    if Shared.Notify then
+                        Shared.Notify("🌋 Volcanic Egg spawn!", _s8q8ekcPB0G("sseccus"))
+                    end
+
+                    local eggPart = egg:FindFirstChildWhichIsA(_s8q8ekcPB0G("traPesaB"), true)
+                    local reachedEgg = false
+                    for i, wp in ipairs(VolcanicWaypoints) do
+                        if not Shared.VolcanicHunt_Enabled then break end
+                        tpWaypoint(wp)
+                        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+                        if curRoot and eggPart and eggPart.Parent then
+                            local d = (eggPart.Position - curRoot.Position).Magnitude
+                            if d <= 40 then
+                                reachedEgg = true
+                                break
+                            end
+                        end
+                    end
+
+                    if not reachedEgg then
+                        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+                        if curRoot and eggPart and eggPart.Parent then
+                            curRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
+                            curRoot.Velocity = Vector3.zero
+                            task.wait(0.3)
+                        end
+                    end
+
+                    local picked = false
+                    if egg.Parent then
+                        picked = volcanicPickupVerified(egg)
+                    else
+                        picked = isHoldingEggMutation()
+                    end
+
+                    if not picked or not isHoldingEggMutation() then
+                        task.wait(2)
+                        continue
+                    end
+
+                    local exited = exitCave()
+                    if not exited or not isHoldingEggMutation() then
+                        task.wait(2)
+                        continue
+                    end
+
+                    if Shared.VolcanicMutation_Enabled then
+                        task.wait(0.5)
+                        local safePos = findSafeVolcanoPos()
+                        if safePos then
+                            local rootLava = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+                            if rootLava then
+                                rootLava.CFrame = CFrame.new(safePos)
+                                rootLava.Velocity = Vector3.zero
+                            end
+                        end
+                        task.wait(1.5)
+
+                        if isHoldingEggMutation() then
+                            local dropWaited = 0
+                            local eggReleased = false
+                            while dropWaited < 15 do
+                                if not Shared.VolcanicHunt_Enabled then break end
+                                fireVolcanoDip()
+                                task.wait(1.5)
+                                dropWaited = dropWaited + 1.5
+                                if not isHoldingEggMutation() then
+                                    eggReleased = true
+                                    break
+                                end
+                            end
+
+                            if eggReleased then
+                                local waitStart = os.clock()
+                                while os.clock() - waitStart < 20 do
+                                    if not Shared.VolcanicHunt_Enabled then break end
+                                    task.wait(1)
+                                    if isHoldingEggMutation() then
+                                        if Shared.Notify then
+                                            Shared.Notify("🔥 Mutation selesai!", _s8q8ekcPB0G("sseccus"))
+                                        end
+                                        break
+                                    end
+                                end
+                            end
+                        end
+                    end
+
+                    if Shared.VolcanicReturn_Enabled then
+                        task.wait(0.4)
+                        local oldFlag = Shared.AutoReturn_Enabled
+                        Shared.AutoReturn_Enabled = true
+                        returnToMyPlot()
+                        Shared.AutoReturn_Enabled = oldFlag
+                    end
+
+                    task.wait(3)
+                end
+
+                VolcanicState.Hunting = false
+            end)
+        end
+    end)
+end
+
+                                                               
+                
+                                                               
+local MutationState = {
+    Running = false,
+    StealPaused = false,
+    BasketFull = false,
+    EggLocked = false,
+    LastFire = 0,
+}
+
+local MUT_CONFIG = {
+    DROP_TIMEOUT = 15,
+    RETURN_TIMEOUT = 13,
+    TP_ABOVE_TOP = 200,
+}
+
+local NetModule = nil
+task.spawn(function()
+    local packages = game:GetService(_s8q8ekcPB0G("egarotSdetacilpeR")):FindFirstChild(_s8q8ekcPB0G("segakcap"))
+    if packages then
+        local netMod = packages:FindFirstChild(_s8q8ekcPB0G("teN"))
+        if netMod then
+            local ok, result = pcall(require, netMod)
+            if ok then
+                NetModule = result
+            end
+        end
+    end
+end)
+
+local function getVolcanoDipRemote()
+    if NetModule then
+        local ok, remote = pcall(function() return NetModule:RemoteEvent(_s8q8ekcPB0G("piDonacloV")) end)
+        if ok and remote then return remote end
+    end
+    local remotes = game:GetService(_s8q8ekcPB0G("egarotSdetacilpeR")):FindFirstChild(_s8q8ekcPB0G("setomeR"))
+    local gameR = remotes and remotes:FindFirstChild(_s8q8ekcPB0G("emaG"))
+    if gameR then
+        local vd = gameR:FindFirstChild(_s8q8ekcPB0G("piDonacloV"))
+        if vd and vd:IsA(_s8q8ekcPB0G("tnevEetomeR")) then return vd end
+    end
+    return nil
+end
+
+local function findSafeVolcanoPos()
+    local volcano = Workspace:FindFirstChild(_s8q8ekcPB0G("onacloV"))
+    if not volcano then
+        return Vector3.new(-5102.84, 41700, -3489.11)
+    end
+    local bestTop, bestSize = nil, 0
+    for _, d in ipairs(volcano:GetDescendants()) do
+        if d:IsA(_s8q8ekcPB0G("traPesaB")) then
+            local n = d.Name:lower()
+            if n:find(_s8q8ekcPB0G("pot")) or n == _s8q8ekcPB0G("potonaclov") then
+                local size = d.Size.X * d.Size.Z
+                if size > bestSize then
+                    bestTop = d
+                    bestSize = size
+                end
+            end
+        end
+    end
+    if bestTop then
+        return bestTop.Position + Vector3.new(0, MUT_CONFIG.TP_ABOVE_TOP, 0)
+    end
+    local lavaTop = -math.huge
+    for _, d in ipairs(volcano:GetDescendants()) do
+        if d:IsA(_s8q8ekcPB0G("traPesaB")) then
+            local n = d.Name:lower()
+            if n:find(_s8q8ekcPB0G("aval")) or n:find(_s8q8ekcPB0G("amgam")) or n:find(_s8q8ekcPB0G("naclov")) then
+                local top = d.Position.Y + d.Size.Y / 2
+                if top > lavaTop then lavaTop = top end
+            end
+        end
+    end
+    if lavaTop > -math.huge then
+        return Vector3.new(-5102.84, lavaTop + MUT_CONFIG.TP_ABOVE_TOP, -3489.11)
+    end
+    return Vector3.new(-5102.84, 41700, -3489.11)
+end
+
+local function fireVolcanoDip()
+    local remote = getVolcanoDipRemote()
+    if remote then
+        local ok = pcall(function() remote:FireServer() end)
+        if ok then return true end
+    end
+    return false
+end
+
+local function fireBasketDrop()
+    local remotes = game:GetService(_s8q8ekcPB0G("egarotSdetacilpeR")):FindFirstChild(_s8q8ekcPB0G("setomeR"))
+    local gameR = remotes and remotes:FindFirstChild(_s8q8ekcPB0G("emaG"))
+    if not gameR then return false end
+    local bd = gameR:FindFirstChild(_s8q8ekcPB0G("porDteksaB"))
+    if not bd then return false end
+    return pcall(function() bd:FireServer() end)
+end
+
+local function tpToSafe(pos)
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+    if not myRoot then return false end
+
+    local highPos = pos + Vector3.new(0, 250, 0)
+    myRoot.CFrame = CFrame.new(highPos)
+    myRoot.Velocity = Vector3.zero
+    myRoot.AssemblyLinearVelocity = Vector3.zero
+    task.wait(0.8)
+
+    local root2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+    if not root2 then return false end
+    root2.CFrame = CFrame.new(pos)
+    root2.Velocity = Vector3.zero
+    root2.AssemblyLinearVelocity = Vector3.zero
+    task.wait(0.5)
+
+    local rootAfter = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+    if rootAfter and rootAfter.Position.Y < pos.Y - 50 then
+        rootAfter.CFrame = CFrame.new(pos + Vector3.new(0, 50, 0))
+        task.wait(0.4)
+    end
+
+    return true
+end
+
+local function runMutationOnce()
+    MutationState.Running = true
+
+    local holding, eggName = isHoldingEggMutation()
+    if not holding then
+        MutationState.Running = false
+        MutationState.EggLocked = false
+        return false
+    end
+
+    MutationState.StealPaused = true
+    task.wait(1.5)
+
+    local safePos = findSafeVolcanoPos()
+    tpToSafe(safePos)
+    task.wait(2)
+
+    local dropWaited = 0
+    local eggReleased = false
+    MutationState.LastFire = 0
+
+    while dropWaited < MUT_CONFIG.DROP_TIMEOUT do
+        if os.clock() - MutationState.LastFire > 2 then
+            local ok = fireVolcanoDip()
+            if not ok then fireBasketDrop() end
+            MutationState.LastFire = os.clock()
+        end
+        task.wait(0.5)
+        dropWaited = dropWaited + 0.5
+        if not isHoldingEggMutation() then
+            eggReleased = true
+            break
+        end
+    end
+
+    if not eggReleased then
+        MutationState.Running = false
+        MutationState.StealPaused = false
+        MutationState.EggLocked = false
+        return false
+    end
+
+    local retWaited = 0
+    while retWaited < MUT_CONFIG.RETURN_TIMEOUT do
+        task.wait(1)
+        retWaited = retWaited + 1
+        if isHoldingEggMutation() then break end
+    end
+
+    if Shared.MutationReturn_Enabled then
+        task.wait(0.5)
+        local oldFlag = Shared.AutoReturn_Enabled
+        Shared.AutoReturn_Enabled = true
+        returnToMyPlot()
+        Shared.AutoReturn_Enabled = oldFlag
+    end
+
+    task.wait(2)
+    MutationState.Running = false
+    MutationState.StealPaused = false
+    MutationState.EggLocked = false
+    return true
+end
+
+function Features.startAutoMutation()
+    task.spawn(function()
+        while task.wait(1) do
+            if not Shared.AutoMutation_Enabled then
+                MutationState.Running = false
+                continue
+            end
+            if MutationState.Running then continue end
+
+            local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass(_s8q8ekcPB0G("dionamuH"))
+            if not hum or hum.Health <= 0 then
+                task.wait(1)
+                continue
+            end
+
+            if isHoldingEggMutation() then
+                pcall(runMutationOnce)
+                task.wait(2)
+            end
+        end
+    end)
+end
+
+function Features.getMutationState()
+    return MutationState
+end
+
+function Features.isHoldingEgg()
+    return isHoldingEggMutation()
+end
+
+                                                               
+                 
+                                                               
+function Features.startMutationSteal()
+    task.spawn(function()
+        while task.wait(0.5) do
+            if not Shared.MutationSteal_Enabled then
+                Shared.MutationSteal_Active = false                        
+                continue
+            end
+
+            if Features.getMutationState and Features.getMutationState().Running then
+                task.wait(1)
+                continue
+            end
+
+            local char = LocalPlayer.Character
+            local myRoot = char and char:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+            local hum = char and char:FindFirstChildOfClass(_s8q8ekcPB0G("dionamuH"))
+            if not myRoot or not hum or hum.Health <= 0 then
+                task.wait(1)
+                continue
+            end
+
+            if Features.isHoldingEgg and Features.isHoldingEgg() then
+                task.wait(0.5)
+                continue
+            end
+
+            local basket = LocalPlayer:FindFirstChild(_s8q8ekcPB0G("teksaB"))
+            if basket and #basket:GetChildren() > 0 then
+                task.wait(0.5)
+                continue
+            end
+
+            local stealMode = Shared.MutationStealMode or _s8q8ekcPB0G("ytiraR")
+            local targetEgg = nil
+
+            if stealMode == _s8q8ekcPB0G("emaN") then
+                local rendered = Workspace:FindFirstChild(_s8q8ekcPB0G("sggEderedneR"))
+                if rendered then
+                    local myRoot2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+                    local bestDist = math.huge
+                    for _, egg in ipairs(rendered:GetChildren()) do
+                        if egg:IsA(_s8q8ekcPB0G("ledoM")) and Shared.MutationSelectedEggs[egg.Name] then
+                            local part = egg:FindFirstChildWhichIsA(_s8q8ekcPB0G("traPesaB"), true)
+                            if part and myRoot2 then
+                                local d = (part.Position - myRoot2.Position).Magnitude
+                                if d < bestDist then
+                                    bestDist = d
+                                    targetEgg = egg
+                                end
+                            end
+                        end
+                    end
+                end
+            else
+                local best = getBestEggInMap()
+                if best then targetEgg = best.egg end
+            end
+
+                        if not targetEgg then
+                Shared.MutationSteal_Active = false                                    
+                task.wait(0.5)
+                continue
+            end
+
+            Shared.MutationSteal_Active = true                                       
+
+            local egg = targetEgg
+            local eggPart = egg:FindFirstChildWhichIsA(_s8q8ekcPB0G("traPesaB"), true)
+            local prompt = egg:FindFirstChild(_s8q8ekcPB0G("pukciP"), true)
+            if not eggPart or not prompt then continue end
+
+            if prompt:IsA(_s8q8ekcPB0G("tpmorPytimixorP")) then
+                prompt.HoldDuration = 0
+            end
+
+            local picked = false
+
+            if Shared.StealMode == _s8q8ekcPB0G("ylF") then
+                picked = doStealFly(egg, prompt, eggPart)
+            else
+                myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+                task.wait(0.1)
+
+                for i = 1, 15 do
+                    if typeof(fireproximityprompt) == _s8q8ekcPB0G("noitcnuf") then
+                        pcall(fireproximityprompt, prompt)
+                    end
+                    task.wait(0.25)
+                    if not isEggStillInMap(egg) then
+                        picked = true
+                        break
+                    end
+                    if eggPart and eggPart.Parent then
+                        myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
+                        task.wait(0.1)
+                    end
+                end
+            end
+
+            task.wait(0.3)
+        end
+    end)
+end
+
+                                                               
+                  
+                                                               
+local HatchLuckState = {
+    Enabled = false,
+    Mode = _s8q8ekcPB0G("xaM"),
+    Cooldown = 2.0,
+    LastClick = 0,
+    MaxCount = 0,
+    CicilCount = 0,
+    LastError = nil,
+}
+
+local HatchLuckRS = game:GetService(_s8q8ekcPB0G("egarotSdetacilpeR"))
+local HatchLuckRemoteCache = nil
+local HatchLuckLastScan = 0
+
+local function findHatchLuckRemotes()
+    local found = {}
+    for _, d in ipairs(HatchLuckRS:GetDescendants()) do
+        if d:IsA(_s8q8ekcPB0G("tnevEetomeR")) or d:IsA(_s8q8ekcPB0G("noitcnuFetomeR")) then
+            local n = d.Name:lower()
+            if n:find(_s8q8ekcPB0G("edargpu")) or n:find(_s8q8ekcPB0G("kcul")) or n:find(_s8q8ekcPB0G("hctah")) then
+                table.insert(found, d)
+            end
+        end
+    end
+    return found
+end
+
+local function fireHatchLuckUpgrade(mode)
+    if not HatchLuckRemoteCache or #HatchLuckRemoteCache == 0 or (os.clock() - HatchLuckLastScan) > 60 then
+        HatchLuckRemoteCache = findHatchLuckRemotes()
+        HatchLuckLastScan = os.clock()
+    end
+
+    if #HatchLuckRemoteCache == 0 then
+        return false, _s8q8ekcPB0G("dnuof etomer on")
+    end
+
+    local payloads
+    if mode == _s8q8ekcPB0G("xaM") then
+        payloads = {
+            {_s8q8ekcPB0G("kcuLhctaH"), _s8q8ekcPB0G("xaM")},
+            {_s8q8ekcPB0G("kcuLhctaH"), true},
+            {_s8q8ekcPB0G("kcuLhctaH"), 0},
+            {_s8q8ekcPB0G("kcuLhctaHxaM")},
+            {_s8q8ekcPB0G("xaMkcuLhctaH")},
+            {_s8q8ekcPB0G("edargpU"), _s8q8ekcPB0G("kcuLhctaH"), _s8q8ekcPB0G("xaM")},
+            {_s8q8ekcPB0G("xaM")},
+            {Action = _s8q8ekcPB0G("xaM"), Type = _s8q8ekcPB0G("kcuLhctaH")},
+            {Type = _s8q8ekcPB0G("kcuLhctaH"), Max = true},
+        }
+    else
+        payloads = {
+            {_s8q8ekcPB0G("kcuLhctaH")},
+            {_s8q8ekcPB0G("kcuLhctaH"), 1},
+            {_s8q8ekcPB0G("edargpU"), _s8q8ekcPB0G("kcuLhctaH")},
+            {Type = _s8q8ekcPB0G("kcuLhctaH")},
+            {UpgradeType = _s8q8ekcPB0G("kcuLhctaH")},
+        }
+    end
+
+    for _, remote in ipairs(HatchLuckRemoteCache) do
+        for i, payload in ipairs(payloads) do
+            pcall(function()
+                if type(payload) == _s8q8ekcPB0G("elbat") and #payload > 0 then
+                    remote:FireServer(table.unpack(payload))
+                else
+                    remote:FireServer(payload)
+                end
+            end)
+            task.wait(0.05)
+        end
+    end
+
+    return true, _s8q8ekcPB0G("derif")
+end
+
+function Features.startAutoHatchLuck()
+    task.spawn(function()
+        while task.wait(0.3) do
+            if not HatchLuckState.Enabled then continue end
+            if os.clock() - HatchLuckState.LastClick < HatchLuckState.Cooldown then continue end
+            HatchLuckState.LastClick = os.clock()
+
+            local ok, reason = fireHatchLuckUpgrade(HatchLuckState.Mode)
+            if ok then
+                if HatchLuckState.Mode == _s8q8ekcPB0G("xaM") then
+                    HatchLuckState.MaxCount = HatchLuckState.MaxCount + 1
+                else
+                    HatchLuckState.CicilCount = HatchLuckState.CicilCount + 1
+                end
+            else
+                HatchLuckState.LastError = reason
+            end
+        end
+    end)
+end
+
+function Features.getHatchLuckState()
+    return HatchLuckState
+end
+
+function Features.setHatchLuckMode(mode)
+    HatchLuckState.Mode = mode
+    HatchLuckState.Cooldown = (mode == _s8q8ekcPB0G("xaM")) and 2.0 or 1.0
+end
+
+                                                               
+                                      
+                                                     
+                                                            
+                                                               
+local HalloweenState = {
+    Enabled = false,
+    Status = "⏸️ Idle",
+    Claimed = 0,
+    RareClaimed = 0,
+    CandyTypes = {},
+    TPMethod = _s8q8ekcPB0G("001PT"),                                           
+}
+
+                   
+local CANDY_RARITY = {
+    [_s8q8ekcPB0G("10_ydnaC")] = 1,                
+    [_s8q8ekcPB0G("20_ydnaC")] = 2,              
+    [_s8q8ekcPB0G("30_ydnaC")] = 3,              
+    [_s8q8ekcPB0G("40_ydnaC")] = 4,                   
+}
+
+local function getCandyRarity(candyName)
+    return CANDY_RARITY[candyName] or 0
+end
+
+                
+local OWNER_USERID = 5126297278
+local function isPremiumUser()
+    if LocalPlayer.UserId == OWNER_USERID then return true end
+    if Shared and Shared.KeyType then
+        local kt = tostring(Shared.KeyType):upper()
+        if kt == _s8q8ekcPB0G("MUIMERP") or kt == _s8q8ekcPB0G("RENWO") or kt == _s8q8ekcPB0G("PIV") then
+            return true
+        end
+    end
+    return false
+end
+
+local HalloweenCfg = {
+    TP_STEP_FREE = 55,
+    TP_STEP_PREMIUM = 85,
+    TP_HEIGHT = 5,
+    TP_WAIT = 0.08,
+    LOOP_WAIT = 0.3,
+    CLAIM_WAIT = 0.5,
+    RETURN_WAIT = 0.4,
+}
+
+local function getHalloweenBase()
+    local candidates = {
+        _s8q8ekcPB0G("rohcnAemoHneewollaH"), _s8q8ekcPB0G("esaBneewollaH"), _s8q8ekcPB0G("nwapSneewollaH"),
+        _s8q8ekcPB0G("etalpesaBneewollaH"), _s8q8ekcPB0G("tratSneewollaH"),
+    }
+    for _, name in ipairs(candidates) do
+        local part = Workspace:FindFirstChild(name, true)
+        if part and part:IsA(_s8q8ekcPB0G("traPesaB")) then return part end
+    end
+    local halloweenFolder = Workspace:FindFirstChild(_s8q8ekcPB0G("neewollaH"))
+    if halloweenFolder then
+        local spawn = halloweenFolder:FindFirstChildWhichIsA(_s8q8ekcPB0G("noitacoLnwapS"), true)
+        if spawn then return spawn end
+        local bp = halloweenFolder:FindFirstChildWhichIsA(_s8q8ekcPB0G("traPesaB"), true)
+        if bp then return bp end
+    end
+    return nil
+end
+
+local function isInHalloweenZone()
+    return LocalPlayer:GetAttribute(_s8q8ekcPB0G("enoZneewollaHnI")) == true
+end
+
+local function isCarryingCandy()
+                                                   
+    if LocalPlayer:GetAttribute(_s8q8ekcPB0G("ledoMydnaCdeirraC")) ~= nil then return true end
+    if LocalPlayer:GetAttribute(_s8q8ekcPB0G("ydnaCgniyrraC")) == true then return true end
+    if LocalPlayer:GetAttribute(_s8q8ekcPB0G("ydnaCdleH")) ~= nil then return true end
+    if LocalPlayer:GetAttribute(_s8q8ekcPB0G("ydnaCdeirraC")) ~= nil then return true end
+
+                                                   
+    local char = LocalPlayer.Character
+    if char then
+        for _, c in ipairs(char:GetChildren()) do
+            if (c:IsA(_s8q8ekcPB0G("ledoM")) or c:IsA(_s8q8ekcPB0G("looT"))) and c.Name:lower():find(_s8q8ekcPB0G("ydnac")) then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+local function getHalloweenRemote(name)
+    local remotes = game:GetService(_s8q8ekcPB0G("egarotSdetacilpeR")):FindFirstChild(_s8q8ekcPB0G("setomeR"))
+    local gameR = remotes and remotes:FindFirstChild(_s8q8ekcPB0G("emaG"))
+    if not gameR then return nil end
+    return gameR:FindFirstChild(name)
+end
+
+                                          
+                                            
+                               
+local CANDY_Y_MAX = 40400
+
+local function getHalloweenCandyList()
+    local f = Workspace:FindFirstChild(_s8q8ekcPB0G("ydnaCneewollaH"))
+    if not f then return {} end
+    local list = {}
+    for _, c in ipairs(f:GetChildren()) do
+        if c:IsA(_s8q8ekcPB0G("traPesaB")) and HalloweenState.CandyTypes[c.Name] then
+                                                            
+            if c.Position.Y < CANDY_Y_MAX then
+                table.insert(list, c)
+            end
+        end
+    end
+    table.sort(list, function(a, b)
+        local ra = getCandyRarity(a.Name)
+        local rb = getCandyRarity(b.Name)
+        return ra > rb
+    end)
+    return list
+end
+local function halloweenTpTo(pos)
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+    if not root then return false end
+    root.CFrame = CFrame.new(pos)
+    root.Velocity = Vector3.zero
+    root.AssemblyLinearVelocity = Vector3.zero
+    return true
+end
+
+                                        
+local function halloweenTpStep(targetPos, stepSize, waitTime)
+    waitTime = waitTime or HalloweenCfg.TP_WAIT
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+    if not root then return false end
+
+    local startPos = root.Position
+    local totalDist = (targetPos - startPos).Magnitude
+    local steps = math.ceil(totalDist / stepSize)
+
+    if steps <= 1 then
+        halloweenTpTo(targetPos + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0))
+        task.wait(0.15)
+        return true
+    end
+
+    local dir = (targetPos - startPos)
+    dir = Vector3.new(dir.X, 0, dir.Z)
+    if dir.Magnitude > 1 then
+        dir = dir.Unit
+    else
+        local ang = math.random() * math.pi * 2
+        dir = Vector3.new(math.cos(ang), 0, math.sin(ang))
+    end
+
+    for i = 1, steps do
+        local dist = math.min(stepSize * i, totalDist)
+        local pos = startPos + dir * dist + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
+        halloweenTpTo(pos)
+        task.wait(waitTime)                      
+    end
+    return true
+end
+
+                                    
+local function halloweenTpJumpTo(targetPos)
+    local method = HalloweenState.TPMethod or _s8q8ekcPB0G("001PT")
+
+    if method == _s8q8ekcPB0G("081PT") then
+        if not isPremiumUser() then
+                                           
+            return halloweenTpStep(targetPos, HalloweenCfg.TP_STEP_FREE, 0.08)
+        else
+                                                                       
+            return halloweenTpStep(targetPos, HalloweenCfg.TP_STEP_PREMIUM, 0.13)
+        end
+    end
+
+                              
+    return halloweenTpStep(targetPos, HalloweenCfg.TP_STEP_FREE, 0.08)
+end
+
+local function halloweenReturnToBase()
+    local base = getHalloweenBase()
+    if not base then return false end
+    halloweenTpJumpTo(base.Position)
+    task.wait(HalloweenCfg.RETURN_WAIT)
+    return true
+end
+
+local function halloweenClaimCandy(candy)
+    if not candy or not candy.Parent then return false end
+    local collectRemote = getHalloweenRemote(_s8q8ekcPB0G("ydnaCtcelloC"))
+    local stateRemote = getHalloweenRemote(_s8q8ekcPB0G("etatSydnaC"))
+    if not collectRemote then return false end
+
+                                                  
+    if isCarryingCandy() then return false end
+    
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+    if not root then return false end
+
+                                     
+    local d = (root.Position - candy.Position).Magnitude
+    if d > 30 then
+        root.CFrame = CFrame.new(candy.Position + Vector3.new(0, 3, 0))
+        task.wait(0.3)
+    end
+
+    local spawnId = candy:GetAttribute(_s8q8ekcPB0G("dInwapS")) or candy.Name
+
+                             
+    if stateRemote then
+        pcall(function() stateRemote:FireServer(spawnId) end)
+        task.wait(0.1)
+    end
+
+                                                           
+    pcall(function() collectRemote:FireServer(spawnId) end)
+    task.wait(0.15)
+    if isCarryingCandy() then return true end
+
+    pcall(function() collectRemote:FireServer(candy) end)
+    task.wait(0.15)
+    if isCarryingCandy() then return true end
+
+    pcall(function() collectRemote:FireServer() end)
+    task.wait(0.15)
+    if isCarryingCandy() then return true end
+
+        pcall(function() collectRemote:FireServer(spawnId, candy) end)
+    task.wait(0.3)
+
+    return isCarryingCandy()
+end
+
+local function halloweenEnterZone()
+    if isInHalloweenZone() then return true end
+    local map = Workspace:FindFirstChild(_s8q8ekcPB0G("paM"))
+    if map then
+        local portal = map:FindFirstChild(_s8q8ekcPB0G("latroP"), true)
+        if portal then
+            local part = portal:FindFirstChildWhichIsA(_s8q8ekcPB0G("traPesaB"), true)
+            if part then
+                halloweenTpTo(part.Position + Vector3.new(0, 5, 0))
+                task.wait(0.5)
+                local prompt = portal:FindFirstChild(_s8q8ekcPB0G("tpmorPlatroPneewollaH"), true)
+                if prompt and prompt:IsA(_s8q8ekcPB0G("tpmorPytimixorP")) then
+                    prompt.HoldDuration = 0
+                    prompt.MaxActivationDistance = math.huge
+                    pcall(function()
+                        if typeof(fireproximityprompt) == _s8q8ekcPB0G("noitcnuf") then
+                            fireproximityprompt(prompt)
+                        end
+                    end)
+                    task.wait(1.5)
+                end
+            end
+        end
+    end
+    return isInHalloweenZone()
+end
+
+function Features.startAutoHalloween()
+    task.spawn(function()
+        while task.wait(HalloweenCfg.LOOP_WAIT) do
+            if not HalloweenState.Enabled then
+                HalloweenState.Status = "⏸️ Idle"
+                continue
+            end
+
+                                           
+                        if Shared.MutationSteal_Active and Shared.MutationSteal_Enabled then
+                HalloweenState.Status = "⏳ Waiting for Mutation Steal to finish..."
+                task.wait(1)
+                continue
+            end
+                             
+
+            local char = LocalPlayer.Character
+            local root = char and char:FindFirstChild(_s8q8ekcPB0G("traPtooRdionamuH"))
+            if not root then task.wait(1) continue end
+
+                        if not isInHalloweenZone() then
+                HalloweenState.Status = "🚪 Entering area..."
+                if not halloweenEnterZone() then
+                    task.wait(2)
+                    continue
+                end
+            end
+
+                        if isCarryingCandy() then
+                HalloweenState.Status = "🎒 Carrying candy — processing..."
+                task.wait(1)
+                continue
+            end
+
+                        local candies = getHalloweenCandyList()
+            if #candies == 0 then
+                HalloweenState.Status = "⏳ Waiting for candy spawn... (" .. HalloweenState.Claimed .. _s8q8ekcPB0G(")demialc ")
+                task.wait(2)
+                continue
+            end
+
+            local highestRarity = getCandyRarity(candies[1].Name)
+            local topRarityCandies = {}
+            for _, c in ipairs(candies) do
+                local r = getCandyRarity(c.Name)
+                if r == highestRarity then
+                    table.insert(topRarityCandies, c)
+                end
+            end
+
+            if #topRarityCandies == 0 then
+                task.wait(0.5)
+                continue
+            end
+
+            local rarityName = ({
+                [1] = _s8q8ekcPB0G("nommoC"),
+                [2] = _s8q8ekcPB0G("eraR"),
+                [3] = _s8q8ekcPB0G("cipE"),
+                [4] = _s8q8ekcPB0G("yradnegeL"),
+            })[highestRarity] or (_s8q8ekcPB0G(" reiT") .. highestRarity)
+
+            local methodLabel = HalloweenState.TPMethod == _s8q8ekcPB0G("081PT") and _s8q8ekcPB0G("TSAF PT") or _s8q8ekcPB0G("EDILG PT")
+
+            HalloweenState.Status = string.format(
+                "🎯 %s [%s] — %d candy",
+                rarityName,
+                methodLabel,
+                #topRarityCandies
+            )
+
+                                               
+            local collectedThisRound = 0
+
+            for idx, candy in ipairs(topRarityCandies) do
+                if not HalloweenState.Enabled then break end
+                if not candy or not candy.Parent then continue end
+                if isCarryingCandy() then break end
+
+                HalloweenState.Status = string.format(
+                    "🍬 %s (%d/%d) — %s [%s]",
+                    candy.Name,
+                    idx,
+                    #topRarityCandies,
+                    rarityName,
+                    methodLabel
+                )
+
+                              
+                halloweenTpJumpTo(candy.Position)
+                task.wait(0.4)
+
+                                          
+                local ok = false
+                for attempt = 1, 3 do
+                    if not HalloweenState.Enabled then break end
+                    if isCarryingCandy() then break end
+                    if not candy.Parent then break end
+
+                    ok = halloweenClaimCandy(candy)
+                    if ok then break end
+
+                                       
+                    halloweenTpJumpTo(candy.Position)
+                    task.wait(0.5)
+                end
+
+                if ok then
+                    HalloweenState.Claimed = HalloweenState.Claimed + 1
+                    collectedThisRound = collectedThisRound + 1
+                    if highestRarity >= 3 then
+                        HalloweenState.RareClaimed = HalloweenState.RareClaimed + 1
+                    end
+
+                    if isCarryingCandy() then break end
+                end
+
+                task.wait(HalloweenCfg.CLAIM_WAIT)
+            end
+
+                                                                                   
+            if collectedThisRound == 0 and not isCarryingCandy() then
+                HalloweenState.Status = "⚠️ Failed to collect — retrying..."
+                task.wait(1.5)
+                continue
+            end
+
+                        HalloweenState.Status = "🏠 Returning to Halloween base..."
+            halloweenReturnToBase()
+            task.wait(HalloweenCfg.RETURN_WAIT)
+        end
+    end)
+end
+
+function Features.getHalloweenState()
+    return HalloweenState
+end
+
+                               
+function Features.isPremiumUser()
+    return isPremiumUser()
+end
+
+                                                               
+                
+                                                               
+function Features.Init(sharedState)
+    Shared = sharedState
+
+                              
+    if Shared.AntiAFK_Enabled == nil then Shared.AntiAFK_Enabled = true end
+    if Shared.MutationSteal_Active == nil then Shared.MutationSteal_Active = false end
+    if Shared.AutoRidePet_Enabled == nil then Shared.AutoRidePet_Enabled = true end
+
+    Features.startAntiAFK()
+    Features.startEggESP()
+    Features.startPetESP()
+    Features.startAutoSteal()
+    Features.startAutoHatch()
+    Features.startAutoPlantEgg()
+    Features.startAutoRidePet()
+    Features.startEggPrediction()
+    Features.startSpeed()
+    Features.startInstantPickup()
+    Features.startAutoFarm()
+    Features.startVolcanicHunt()
+    Features.startAutoMutation()
+    Features.startMutationSteal()
+    Features.startAutoHatchLuck()
+    Features.startAutoHalloween()
+
+                                                       
+    Shared.AutoRidePet_Enabled = true
+    Features.setAutoRideEnabled(true)
+
+    task.spawn(function()
+                                  
+        local timeout = 0
+        while not (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(_s8q8ekcPB0G("dionamuH"))) do
+            task.wait(0.2)
+            timeout = timeout + 0.2
+            if timeout > 10 then break end
+        end
+
+                                                          
+        local petTimeout = 0
+        while petTimeout < 15 do
+            local backpack = LocalPlayer:FindFirstChild(_s8q8ekcPB0G("kcapkcaB"))
+            if backpack then
+                local hasPet = false
+                for _, tool in ipairs(backpack:GetChildren()) do
+                    if tool:IsA(_s8q8ekcPB0G("looT")) and tool:GetAttribute(_s8q8ekcPB0G("emaNteP")) then
+                        hasPet = true
+                        break
+                    end
+                end
+                if hasPet then break end
+            end
+            task.wait(0.5)
+            petTimeout = petTimeout + 0.5
+        end
+
+        task.wait(0.3)
+        Shared.AutoRidePet_Enabled = true
+        Features.setAutoRideEnabled(true)
+        if Shared.Notify then
+            Shared.Notify("🐉 Auto Ride Pet: AUTO-ON", _s8q8ekcPB0G("sseccus"))
+        end
+    end)
+
+                               
+    LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(3)
+        AutoRideState.LastPetName = nil
+        if Shared and Shared.AutoRidePet_Enabled ~= false then
+            if Features.setAutoRideEnabled then
+                Features.setAutoRideEnabled(true)
+            end
+        end
+    end)
+    
+    _G.VRILZ_Features = Features
+    print(_s8q8ekcPB0G("dedaol 8.3v serutaeF teP a ediR ]BUHZLIRV["))
+end
+
+return Features
