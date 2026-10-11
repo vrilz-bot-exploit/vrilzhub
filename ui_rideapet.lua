@@ -2691,7 +2691,7 @@ local function buildMainWindow(parent)
                 ic.Position = UDim2.new(0.5, -11, 0.5, -11)
             end
             ic.BackgroundTransparency = 1
-            ic.Image = "rbxassetid://3926305904"
+            rbxassetid://6031280882
             ic.ImageColor3 = C.Accent
             ic.ImageTransparency = 0.2
             ic.ZIndex = 6
