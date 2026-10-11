@@ -2304,7 +2304,7 @@ local function halloweenTpJumpTo(targetPos)
             return halloweenTpStep(targetPos, HalloweenCfg.TP_STEP_FREE, 0.08)
         else
             -- PREMIUM: step 180, wait lebih cepat biar beda dari TP100
-            return halloweenTpStep(targetPos, HalloweenCfg.TP_STEP_PREMIUM, 0.11)
+            return halloweenTpStep(targetPos, HalloweenCfg.TP_STEP_PREMIUM, 0.13)
         end
     end
 
