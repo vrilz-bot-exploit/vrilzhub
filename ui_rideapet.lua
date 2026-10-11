@@ -1861,7 +1861,7 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     -- CARD 2: CANDY SELECT (tanpa angka priority)
     local eventCandyCard, eventCandyContent = makeCard(eventPage, "🍬 CANDY SELECT", 2)
     -- ============================================================
-    -- ⭐ DROPDOWN: PILIH METODE TP (TP100 free / TP180 premium)
+    -- ⭐ TP METHOD — PREMIUM LOCKED SYSTEM
     -- ============================================================
     local tpMethodLbl = Instance.new("TextLabel")
     tpMethodLbl.Size = UDim2.new(1, 0, 0, 16)
@@ -1876,13 +1876,6 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     tpMethodLbl.Parent = eventContent
     registerTheme(tpMethodLbl, "Muted", "TextColor3")
 
-    local tpMethodHolder = Instance.new("Frame")
-    tpMethodHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
-    tpMethodHolder.BackgroundTransparency = 1
-    tpMethodHolder.LayoutOrder = 12
-    tpMethodHolder.ZIndex = 3
-    tpMethodHolder.Parent = eventContent
-
     -- Cek premium
     local F_check = getFeatures()
     local isPrem = false
@@ -1890,53 +1883,123 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
         isPrem = F_check.isPremiumUser()
     end
 
-    -- Build list
-local tpMethodList = {
-    "TP 100 (Free)",
-    isPrem and "TP 180 Step (Premium)" or "🔒 TP 180 Step (Premium Locked)"
-}
+    if isPrem then
+        -- ============================================
+        -- PREMIUM USER — DROPDOWN NORMAL
+        -- ============================================
+        local tpMethodHolder = Instance.new("Frame")
+        tpMethodHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
+        tpMethodHolder.BackgroundTransparency = 1
+        tpMethodHolder.LayoutOrder = 12
+        tpMethodHolder.ZIndex = 3
+        tpMethodHolder.Parent = eventContent
 
-local currentMethod = "TP 100 (Free)"
-if Shared and Shared.TP_Method == "TP180" and isPrem then
-    currentMethod = "TP 180 Step (Premium)"
-end
+        local tpMethodList = {
+            "TP 100 (Free)",
+            "TP 180 Step (Premium)"
+        }
+
+        local currentMethod = "TP 100 (Free)"
+        if Shared and Shared.TP_Method == "TP180" then
+            currentMethod = "TP 180 Step (Premium)"
+        end
 
         makeDropdownGlobal(tpMethodHolder, tpMethodList, currentMethod, function(v)
-        local F = getFeatures()
-        if v:find("TP 180") then
-            if not isPrem then
-                notify("🔒 TP 180 Step cuma buat PREMIUM!", "error")    -- ← GANTI "Instant" jadi "Step"
-                return
+            local F = getFeatures()
+            if v:find("TP 180") then
+                if F and F.getHalloweenState then
+                    F.getHalloweenState().TPMethod = "TP180"
+                end
+                Shared.TP_Method = "TP180"
+                notify("⚡ TP Method: TP 180 STEP (Premium)", "success")
+            else
+                if F and F.getHalloweenState then
+                    F.getHalloweenState().TPMethod = "TP100"
+                end
+                Shared.TP_Method = "TP100"
+                notify("🆓 TP Method: TP 100 (Free)", "info")
             end
-            if F and F.getHalloweenState then
-                F.getHalloweenState().TPMethod = "TP180"
-            end
-            Shared.TP_Method = "TP180"
-            notify("⚡ TP Method: TP 180 STEP (Premium)", "success")    -- ← GANTI "INSTANT" jadi "STEP"
-        else
-            if F and F.getHalloweenState then
-                F.getHalloweenState().TPMethod = "TP100"
-            end
-            Shared.TP_Method = "TP100"
-            notify("🆓 TP Method: TP 100 (Free)", "info")
-        end
-    end)
-    
-    -- Note kecil
-    local tpMethodNote = Instance.new("TextLabel")
-    tpMethodNote.Size = UDim2.new(1, 0, 0, 28)
-    tpMethodNote.BackgroundTransparency = 1
-        tpMethodNote.Text = "TP 100 = semua user | TP 180 Step = premium only"
-    tpMethodNote.TextColor3 = C_local.Muted
-    tpMethodNote.Font = Enum.Font.GothamSemibold
-    tpMethodNote.TextSize = CFG.FONT_MUTED
-    tpMethodNote.TextWrapped = true
-    tpMethodNote.TextXAlignment = Enum.TextXAlignment.Left
-    tpMethodNote.TextYAlignment = Enum.TextYAlignment.Top
-    tpMethodNote.LayoutOrder = 13
-    tpMethodNote.ZIndex = 3
-    tpMethodNote.Parent = eventContent
-    registerTheme(tpMethodNote, "Muted", "TextColor3")
+        end)
+
+        local tpMethodNote = Instance.new("TextLabel")
+        tpMethodNote.Size = UDim2.new(1, 0, 0, 28)
+        tpMethodNote.BackgroundTransparency = 1
+        tpMethodNote.Text = "TP 100 = step 100 | TP 180 = step 180 (lebih cepat)"
+        tpMethodNote.TextColor3 = C_local.Muted
+        tpMethodNote.Font = Enum.Font.GothamSemibold
+        tpMethodNote.TextSize = CFG.FONT_MUTED
+        tpMethodNote.TextWrapped = true
+        tpMethodNote.TextXAlignment = Enum.TextXAlignment.Left
+        tpMethodNote.TextYAlignment = Enum.TextYAlignment.Top
+        tpMethodNote.LayoutOrder = 13
+        tpMethodNote.ZIndex = 3
+        tpMethodNote.Parent = eventContent
+        registerTheme(tpMethodNote, "Muted", "TextColor3")
+
+    else
+        -- ============================================
+        -- NON-PREMIUM — FRAME LOCKED (kayak custom title)
+        -- ============================================
+        local lockedFrame = Instance.new("Frame")
+        lockedFrame.Size = UDim2.new(1, 0, 0, 60)
+        lockedFrame.BackgroundColor3 = C_local.Surface3
+        lockedFrame.BackgroundTransparency = 0.5
+        lockedFrame.BorderSizePixel = 0
+        lockedFrame.LayoutOrder = 12
+        lockedFrame.ZIndex = 3
+        lockedFrame.Parent = eventContent
+        registerTheme(lockedFrame, "Surface3", "BackgroundColor3")
+
+        local lockedCorner = Instance.new("UICorner")
+        lockedCorner.CornerRadius = UDim.new(0, 8)
+        lockedCorner.Parent = lockedFrame
+
+        local lockedStroke = Instance.new("UIStroke")
+        lockedStroke.Color = C_local.Muted
+        lockedStroke.Thickness = 1
+        lockedStroke.Transparency = 0.6
+        lockedStroke.Parent = lockedFrame
+
+        local lockIcon = Instance.new("TextLabel")
+        lockIcon.Size = UDim2.fromOffset(28, 28)
+        lockIcon.Position = UDim2.fromOffset(10, 16)
+        lockIcon.BackgroundTransparency = 1
+        lockIcon.Text = "🔒"
+        lockIcon.TextColor3 = C_local.Muted
+        lockIcon.Font = Enum.Font.GothamBold
+        lockIcon.TextSize = 18
+        lockIcon.ZIndex = 4
+        lockIcon.Parent = lockedFrame
+        registerTheme(lockIcon, "Muted", "TextColor3")
+
+        local lockTitle = Instance.new("TextLabel")
+        lockTitle.Size = UDim2.new(1, -50, 0, 16)
+        lockTitle.Position = UDim2.fromOffset(42, 10)
+        lockTitle.BackgroundTransparency = 1
+        lockTitle.Text = "TP 180 STEP LOCKED"
+        lockTitle.TextColor3 = C_local.Muted
+        lockTitle.Font = Enum.Font.GothamBold
+        lockTitle.TextSize = CFG.FONT_MUTED
+        lockTitle.TextXAlignment = Enum.TextXAlignment.Left
+        lockTitle.ZIndex = 4
+        lockTitle.Parent = lockedFrame
+        registerTheme(lockTitle, "Muted", "TextColor3")
+
+        local lockDesc = Instance.new("TextLabel")
+        lockDesc.Size = UDim2.new(1, -50, 0, 28)
+        lockDesc.Position = UDim2.fromOffset(42, 28)
+        lockDesc.BackgroundTransparency = 1
+        lockDesc.Text = "Upgrade to Premium to unlock\nTP 180 (faster teleport step)"
+        lockDesc.TextColor3 = C_local.Muted
+        lockDesc.Font = Enum.Font.GothamSemibold
+        lockDesc.TextSize = CFG.FONT_MUTED
+        lockDesc.TextWrapped = true
+        lockDesc.TextXAlignment = Enum.TextXAlignment.Left
+        lockDesc.TextYAlignment = Enum.TextYAlignment.Top
+        lockDesc.ZIndex = 4
+        lockDesc.Parent = lockedFrame
+        registerTheme(lockDesc, "Muted", "TextColor3")
+    end
     
     local eventCandyLbl = Instance.new("TextLabel")
     eventCandyLbl.Size = UDim2.new(1, 0, 0, 16)
