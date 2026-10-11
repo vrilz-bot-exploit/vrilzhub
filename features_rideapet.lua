@@ -2403,8 +2403,8 @@ function Features.startAutoHalloween()
             end
 
             -- ⬇️ TAMBAH BLOK INI (6 baris)
-            if Shared.MutationSteal_Active and Shared.MutationSteal_Enabled then
-                HalloweenState.Status = "⏳ Nunggu Mutation Steal selesai..."
+                        if Shared.MutationSteal_Active and Shared.MutationSteal_Enabled then
+                HalloweenState.Status = "⏳ Waiting for Mutation Steal to finish..."
                 task.wait(1)
                 continue
             end
@@ -2414,23 +2414,23 @@ function Features.startAutoHalloween()
             local root = char and char:FindFirstChild("HumanoidRootPart")
             if not root then task.wait(1) continue end
 
-            if not isInHalloweenZone() then
-                HalloweenState.Status = "🚪 Masuk area..."
+                        if not isInHalloweenZone() then
+                HalloweenState.Status = "🚪 Entering area..."
                 if not halloweenEnterZone() then
                     task.wait(2)
                     continue
                 end
             end
 
-            if isCarryingCandy() then
-                HalloweenState.Status = "🎒 Bawa candy — nunggu proses..."
+                        if isCarryingCandy() then
+                HalloweenState.Status = "🎒 Carrying candy — processing..."
                 task.wait(1)
                 continue
             end
 
-            local candies = getHalloweenCandyList()
+                        local candies = getHalloweenCandyList()
             if #candies == 0 then
-                HalloweenState.Status = "⏳ Nunggu candy spawn... (" .. HalloweenState.Claimed .. " claimed)"
+                HalloweenState.Status = "⏳ Waiting for candy spawn... (" .. HalloweenState.Claimed .. " claimed)"
                 task.wait(2)
                 continue
             end
@@ -2514,14 +2514,14 @@ function Features.startAutoHalloween()
                 task.wait(HalloweenCfg.CLAIM_WAIT)
             end
 
-            -- ⭐ KALO GAK COLLECT APAPUN, JANGAN BALIK BASE — LOOP LAGI
+                        -- ⭐ KALO GAK COLLECT APAPUN, JANGAN BALIK BASE — LOOP LAGI
             if collectedThisRound == 0 and not isCarryingCandy() then
-                HalloweenState.Status = "⚠️ Gagal collect — coba lagi..."
+                HalloweenState.Status = "⚠️ Failed to collect — retrying..."
                 task.wait(1.5)
                 continue
             end
 
-            HalloweenState.Status = "🏠 Balik ke base Halloween..."
+                        HalloweenState.Status = "🏠 Returning to Halloween base..."
             halloweenReturnToBase()
             task.wait(HalloweenCfg.RETURN_WAIT)
         end
