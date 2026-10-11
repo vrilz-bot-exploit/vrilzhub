@@ -1891,28 +1891,28 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     end
 
     -- Build list
-    local tpMethodList = {
-        "TP 100 (Free)",
-        isPrem and "TP 180 Instant (Premium)" or "🔒 TP 180 Instant (Premium Locked)"
-    }
+local tpMethodList = {
+    "TP 100 (Free)",
+    isPrem and "TP 180 Step (Premium)" or "🔒 TP 180 Step (Premium Locked)"
+}
 
-    local currentMethod = "TP 100 (Free)"
-    if Shared and Shared.TP_Method == "TP180" and isPrem then
-        currentMethod = "TP 180 Instant (Premium)"
-    end
+local currentMethod = "TP 100 (Free)"
+if Shared and Shared.TP_Method == "TP180" and isPrem then
+    currentMethod = "TP 180 Step (Premium)"
+end
 
-    makeDropdownGlobal(tpMethodHolder, tpMethodList, currentMethod, function(v)
+        makeDropdownGlobal(tpMethodHolder, tpMethodList, currentMethod, function(v)
         local F = getFeatures()
         if v:find("TP 180") then
             if not isPrem then
-                notify("🔒 TP 180 Instant cuma buat PREMIUM!", "error")
+                notify("🔒 TP 180 Step cuma buat PREMIUM!", "error")    -- ← GANTI "Instant" jadi "Step"
                 return
             end
             if F and F.getHalloweenState then
                 F.getHalloweenState().TPMethod = "TP180"
             end
             Shared.TP_Method = "TP180"
-            notify("⚡ TP Method: TP 180 INSTANT (Premium)", "success")
+            notify("⚡ TP Method: TP 180 STEP (Premium)", "success")    -- ← GANTI "INSTANT" jadi "STEP"
         else
             if F and F.getHalloweenState then
                 F.getHalloweenState().TPMethod = "TP100"
@@ -1921,12 +1921,12 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
             notify("🆓 TP Method: TP 100 (Free)", "info")
         end
     end)
-
+    
     -- Note kecil
     local tpMethodNote = Instance.new("TextLabel")
     tpMethodNote.Size = UDim2.new(1, 0, 0, 28)
     tpMethodNote.BackgroundTransparency = 1
-    tpMethodNote.Text = "TP 100 = semua user | TP 180 Instant = premium only"
+        tpMethodNote.Text = "TP 100 = semua user | TP 180 Step = premium only"
     tpMethodNote.TextColor3 = C_local.Muted
     tpMethodNote.Font = Enum.Font.GothamSemibold
     tpMethodNote.TextSize = CFG.FONT_MUTED
