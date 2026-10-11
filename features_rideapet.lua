@@ -1612,7 +1612,10 @@ end
 function Features.startMutationSteal()
     task.spawn(function()
         while task.wait(0.5) do
-            if not Shared.MutationSteal_Enabled then continue end
+            if not Shared.MutationSteal_Enabled then
+                Shared.MutationSteal_Active = false   -- ← TAMBAH BARIS INI
+                continue
+            end
 
             if Features.getMutationState and Features.getMutationState().Running then
                 task.wait(1)
@@ -1664,10 +1667,13 @@ function Features.startMutationSteal()
                 if best then targetEgg = best.egg end
             end
 
-            if not targetEgg then
+                        if not targetEgg then
+                Shared.MutationSteal_Active = false   -- ← TAMBAH BARIS INI (egg habis)
                 task.wait(0.5)
                 continue
             end
+
+            Shared.MutationSteal_Active = true        -- ← TAMBAH BARIS INI (ada egg)
 
             local egg = targetEgg
             local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
@@ -2052,6 +2058,14 @@ function Features.startAutoHalloween()
                 continue
             end
 
+            -- ⬇️ TAMBAH BLOK INI (6 baris)
+            if Shared.MutationSteal_Active and Shared.MutationSteal_Enabled then
+                HalloweenState.Status = "⏳ Nunggu Mutation Steal selesai..."
+                task.wait(1)
+                continue
+            end
+            -- ⬆️ SAMPAI SINI
+
             local char = LocalPlayer.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             if not root then task.wait(1) continue end
@@ -2156,6 +2170,10 @@ end
 -- ============================================================
 function Features.Init(sharedState)
     Shared = sharedState
+
+    -- ⬇️ TAMBAH 2 BARIS INI
+    Shared.MutationSteal_Active = false
+    -- ⬆️ SAMPAI SINI
 
     Features.startAntiAFK()
 
