@@ -4034,13 +4034,13 @@ local function buildMainWindow(parent)
     
     -- Wrap semua variable dropdown di do...end biar gak numpuk local register
     do
-        makeToggle(autoContent, "Auto Ride Pet", false, function(v)
-            Shared.AutoRidePet_Enabled = v
-            local F = getFeatures()
-            if F and F.setAutoRideEnabled then F.setAutoRideEnabled(v) end
-            if v then notify("🐉 Auto Ride Pet: ON", "success")
-            else notify("🐉 Auto Ride Pet: OFF", "info") end
-        end)
+        makeToggle(autoContent, "Auto Ride Pet", true, function(v)
+    Shared.AutoRidePet_Enabled = v
+    local F = getFeatures()
+    if F and F.setAutoRideEnabled then F.setAutoRideEnabled(v) end
+    if v then notify("🐉 Auto Ride Pet: ON", "success")
+    else notify("🐉 Auto Ride Pet: OFF", "info") end
+end)
 
         local ridePetLbl = Instance.new("TextLabel")
         ridePetLbl.Size = UDim2.new(1, 0, 0, 16)
@@ -5727,7 +5727,7 @@ function UI.Init(sharedState)
     Shared.AutoHatch_Enabled = false
     Shared.AutoPlantEgg_Enabled = false
     Shared.AutoPlantEgg_Filter = "None"
-    Shared.AutoRidePet_Enabled = false
+    Shared.AutoRidePet_Enabled = true
     Shared.AutoRideSelectedPet = "Auto (Best KG)"
     Shared.AutoEquipBest_Enabled = false
     Shared.SelectedEgg = "Cherub"
