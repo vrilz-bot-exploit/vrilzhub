@@ -1905,13 +1905,21 @@ local function getHalloweenRemote(name)
     return gameR:FindFirstChild(name)
 end
 
+-- ⭐ Filter candy cave/backdoor (Y tinggi)
+-- Spawn biasa (area terbuka): Y 40345-40376
+-- Cave/backdoor: Y 40512-40514
+local CANDY_Y_MAX = 40400
+
 local function getHalloweenCandyList()
     local f = Workspace:FindFirstChild("HalloweenCandy")
     if not f then return {} end
     local list = {}
     for _, c in ipairs(f:GetChildren()) do
         if c:IsA("BasePart") and HalloweenState.CandyTypes[c.Name] then
-            table.insert(list, c)
+            -- ✅ Skip candy yang di cave/backdoor (Y tinggi)
+            if c.Position.Y < CANDY_Y_MAX then
+                table.insert(list, c)
+            end
         end
     end
     table.sort(list, function(a, b)
@@ -1921,7 +1929,6 @@ local function getHalloweenCandyList()
     end)
     return list
 end
-
 local function halloweenTpTo(pos)
     local char = LocalPlayer.Character
     local root = char and char:FindFirstChild("HumanoidRootPart")
