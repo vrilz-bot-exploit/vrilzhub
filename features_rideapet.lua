@@ -1825,7 +1825,7 @@ end
 -- ============================================================
 -- AUTO HALLOWEEN — PRIORITY BY RARITY
 -- Legendary (Candy_04) dulu, baru Epic, Rare, Common
--- TP 100 = FREE | TP 180 INSTANT = PREMIUM
+-- TP GLIDE = step 100 (free) | TP FAST = step 150 (premium)
 -- ============================================================
 local HalloweenState = {
     Enabled = false,
@@ -1863,7 +1863,7 @@ end
 
 local HalloweenCfg = {
     TP_STEP_FREE = 100,
-    TP_STEP_PREMIUM = 180,
+    TP_STEP_PREMIUM = 150,
     TP_HEIGHT = 5,
     TP_WAIT = 0.08,
     LOOP_WAIT = 0.3,
@@ -1939,7 +1939,7 @@ local function halloweenTpTo(pos)
     return true
 end
 
--- ⭐ TP STEP (glide, per step 100 / 180)
+-- ⭐ TP STEP (glide, per step 100 / 150)
 local function halloweenTpStep(targetPos, stepSize, waitTime)
     waitTime = waitTime or HalloweenCfg.TP_WAIT
     local char = LocalPlayer.Character
@@ -2119,7 +2119,7 @@ function Features.startAutoHalloween()
                 [4] = "Legendary",
             })[highestRarity] or ("Tier " .. highestRarity)
 
-            local methodLabel = HalloweenState.TPMethod == "TP180" and "TP180⭐" or "TP100"
+            local methodLabel = HalloweenState.TPMethod == "TP180" and "TP FAST" or "TP GLIDE"
 
             HalloweenState.Status = string.format(
                 "🎯 %s [%s] — %d candy",
