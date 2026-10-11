@@ -1800,7 +1800,7 @@ end
 local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti, notify)
     local C_local = C
 
-    -- Scan candy types dari workspace
+    -- Scan candy types from workspace
     local function scanCandyTypes()
         local set = {}
         local f = game:GetService("Workspace"):FindFirstChild("HalloweenCandy")
@@ -1839,14 +1839,14 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     makeToggle(eventContent, "Auto Claim Candy", false, function(v)
         local F = getFeatures()
         if F and F.getHalloweenState then F.getHalloweenState().Enabled = v end
-        if v then notify("🎃 Halloween Auto: ON", "success")
-        else notify("🎃 Halloween Auto: OFF", "info") end
+        if v then notify("Halloween Auto: ON", "success")
+        else notify("Halloween Auto: OFF", "info") end
     end)
 
     local eventNote = Instance.new("TextLabel")
     eventNote.Size = UDim2.new(1, 0, 0, 32)
     eventNote.BackgroundTransparency = 1
-    eventNote.Text = "Alur: Collect semua candy rarity tertinggi dulu\n(Legendary → Epic → Rare → Common)"
+    eventNote.Text = "Flow: collect all highest-rarity candy first\n(Legendary → Epic → Rare → Common)"
     eventNote.TextColor3 = C_local.Muted
     eventNote.Font = Enum.Font.GothamSemibold
     eventNote.TextSize = CFG.FONT_MUTED
@@ -1858,11 +1858,10 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     eventNote.Parent = eventContent
     registerTheme(eventNote, "Muted", "TextColor3")
 
-    -- CARD 2: CANDY SELECT (tanpa angka priority)
+    -- CARD 2: CANDY SELECT
     local eventCandyCard, eventCandyContent = makeCard(eventPage, "🍬 CANDY SELECT", 2)
-    -- ============================================================
-    -- ⭐ TP METHOD — PREMIUM LOCKED SYSTEM
-    -- ============================================================
+
+    -- TP Method section
     local tpMethodLbl = Instance.new("TextLabel")
     tpMethodLbl.Size = UDim2.new(1, 0, 0, 16)
     tpMethodLbl.BackgroundTransparency = 1
@@ -1876,7 +1875,6 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     tpMethodLbl.Parent = eventContent
     registerTheme(tpMethodLbl, "Muted", "TextColor3")
 
-    -- Cek premium
     local F_check = getFeatures()
     local isPrem = false
     if F_check and F_check.isPremiumUser then
@@ -1884,9 +1882,7 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     end
 
     if isPrem then
-        -- ============================================
-        -- PREMIUM USER — DROPDOWN NORMAL
-        -- ============================================
+        -- Premium user
         local tpMethodHolder = Instance.new("Frame")
         tpMethodHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
         tpMethodHolder.BackgroundTransparency = 1
@@ -1895,36 +1891,36 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
         tpMethodHolder.Parent = eventContent
 
         local tpMethodList = {
-            "TP 100 (Free)",
-            "TP 180 Step (Premium)"
+            "TP GLIDE",
+            "TP FAST"
         }
 
-        local currentMethod = "TP 100 (Free)"
+        local currentMethod = "TP GLIDE"
         if Shared and Shared.TP_Method == "TP180" then
-            currentMethod = "TP 180 Step (Premium)"
+            currentMethod = "TP FAST"
         end
 
         makeDropdownGlobal(tpMethodHolder, tpMethodList, currentMethod, function(v)
             local F = getFeatures()
-            if v:find("TP 180") then
+            if v:find("TP FAST") then
                 if F and F.getHalloweenState then
                     F.getHalloweenState().TPMethod = "TP180"
                 end
                 Shared.TP_Method = "TP180"
-                notify("⚡ TP Method: TP 180 STEP (Premium)", "success")
+                notify("TP Method: TP FAST", "success")
             else
                 if F and F.getHalloweenState then
                     F.getHalloweenState().TPMethod = "TP100"
                 end
                 Shared.TP_Method = "TP100"
-                notify("🆓 TP Method: TP 100 (Free)", "info")
+                notify("TP Method: TP GLIDE", "info")
             end
         end)
 
         local tpMethodNote = Instance.new("TextLabel")
         tpMethodNote.Size = UDim2.new(1, 0, 0, 28)
         tpMethodNote.BackgroundTransparency = 1
-        tpMethodNote.Text = "TP 100 = step 100 | TP 180 = step 180 (lebih cepat)"
+        tpMethodNote.Text = "TP GLIDE = 100 studs/step | TP FAST = 150 studs/step"
         tpMethodNote.TextColor3 = C_local.Muted
         tpMethodNote.Font = Enum.Font.GothamSemibold
         tpMethodNote.TextSize = CFG.FONT_MUTED
@@ -1937,9 +1933,7 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
         registerTheme(tpMethodNote, "Muted", "TextColor3")
 
     else
-        -- ============================================
-        -- NON-PREMIUM — FRAME LOCKED (kayak custom title)
-        -- ============================================
+        -- Non-premium: locked frame
         local lockedFrame = Instance.new("Frame")
         lockedFrame.Size = UDim2.new(1, 0, 0, 60)
         lockedFrame.BackgroundColor3 = C_local.Surface3
@@ -1972,39 +1966,40 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
         lockIcon.Parent = lockedFrame
         registerTheme(lockIcon, "Muted", "TextColor3")
 
-        local lockTitle = Instance.new("TextLabel")
-        lockTitle.Size = UDim2.new(1, -50, 0, 16)
-        lockTitle.Position = UDim2.fromOffset(42, 10)
+                local lockTitle = Instance.new("TextLabel")
+        lockTitle.Size = UDim2.new(1, -50, 0, 18)
+        lockTitle.Position = UDim2.fromOffset(42, 14)
         lockTitle.BackgroundTransparency = 1
-        lockTitle.Text = "TP 180 STEP LOCKED"
+        lockTitle.Text = "TP FAST LOCKED"
         lockTitle.TextColor3 = C_local.Muted
         lockTitle.Font = Enum.Font.GothamBold
-        lockTitle.TextSize = CFG.FONT_MUTED
+        lockTitle.TextSize = CFG.FONT_LABEL
         lockTitle.TextXAlignment = Enum.TextXAlignment.Left
         lockTitle.ZIndex = 4
         lockTitle.Parent = lockedFrame
         registerTheme(lockTitle, "Muted", "TextColor3")
 
         local lockDesc = Instance.new("TextLabel")
-        lockDesc.Size = UDim2.new(1, -50, 0, 28)
-        lockDesc.Position = UDim2.fromOffset(42, 28)
+        lockDesc.Size = UDim2.new(1, -50, 0, 16)
+        lockDesc.Position = UDim2.fromOffset(42, 32)
         lockDesc.BackgroundTransparency = 1
-        lockDesc.Text = "Upgrade to Premium to unlock\nTP 180 (faster teleport step)"
+        lockDesc.Text = "Premium only"
         lockDesc.TextColor3 = C_local.Muted
         lockDesc.Font = Enum.Font.GothamSemibold
         lockDesc.TextSize = CFG.FONT_MUTED
-        lockDesc.TextWrapped = true
+        lockDesc.TextWrapped = false
         lockDesc.TextXAlignment = Enum.TextXAlignment.Left
         lockDesc.TextYAlignment = Enum.TextYAlignment.Top
         lockDesc.ZIndex = 4
         lockDesc.Parent = lockedFrame
         registerTheme(lockDesc, "Muted", "TextColor3")
     end
-    
+        
+    -- Candy select label
     local eventCandyLbl = Instance.new("TextLabel")
     eventCandyLbl.Size = UDim2.new(1, 0, 0, 16)
     eventCandyLbl.BackgroundTransparency = 1
-    eventCandyLbl.Text = "Pilih candy yang mau di-collect (centang):"
+    eventCandyLbl.Text = "Pick candy to collect:"
     eventCandyLbl.TextColor3 = C_local.Muted
     eventCandyLbl.Font = Enum.Font.GothamSemibold
     eventCandyLbl.TextSize = CFG.FONT_MUTED
@@ -2052,7 +2047,7 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     eventStatusLbl.BackgroundColor3 = C_local.Surface3
     eventStatusLbl.BackgroundTransparency = 0.3
     eventStatusLbl.BorderSizePixel = 0
-    eventStatusLbl.Text = "⏸️ Idle"
+    eventStatusLbl.Text = "Idle"
     eventStatusLbl.TextColor3 = C_local.Text
     eventStatusLbl.Font = Enum.Font.Code
     eventStatusLbl.TextSize = CFG.FONT_MUTED
@@ -2077,11 +2072,12 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
             local F = getFeatures()
             if F and F.getHalloweenState then
                 local s = F.getHalloweenState()
-                eventStatusLbl.Text = s.Status .. "\n✅ Claimed: " .. s.Claimed .. " | ⭐ Rare: " .. s.RareClaimed
+                eventStatusLbl.Text = s.Status .. "\nClaimed: " .. s.Claimed .. " | Rare: " .. s.RareClaimed
             end
         end
     end)
 end
+
 -- ============================================================
 -- BUILD MAIN WINDOW
 -- ============================================================
