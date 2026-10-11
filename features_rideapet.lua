@@ -2166,7 +2166,7 @@ local function isPremiumUser()
 end
 
 local HalloweenCfg = {
-    TP_STEP_FREE = 100,
+    TP_STEP_FREE = 70,
     TP_STEP_PREMIUM = 150,
     TP_HEIGHT = 5,
     TP_WAIT = 0.08,
@@ -2199,7 +2199,23 @@ local function isInHalloweenZone()
 end
 
 local function isCarryingCandy()
-    return LocalPlayer:GetAttribute("CarriedCandyModel") ~= nil
+    -- Cek multiple attribute (biar gak salah baca)
+    if LocalPlayer:GetAttribute("CarriedCandyModel") ~= nil then return true end
+    if LocalPlayer:GetAttribute("CarryingCandy") == true then return true end
+    if LocalPlayer:GetAttribute("HeldCandy") ~= nil then return true end
+    if LocalPlayer:GetAttribute("CarriedCandy") ~= nil then return true end
+
+    -- Cek di character (kalo ada model/tool candy)
+    local char = LocalPlayer.Character
+    if char then
+        for _, c in ipairs(char:GetChildren()) do
+            if (c:IsA("Model") or c:IsA("Tool")) and c.Name:lower():find("candy") then
+                return true
+            end
+        end
+    end
+
+    return false
 end
 
 local function getHalloweenRemote(name)
@@ -2310,27 +2326,44 @@ local function halloweenClaimCandy(candy)
     local stateRemote = getHalloweenRemote("CandyState")
     if not collectRemote then return false end
 
+    -- Kalo udah bawa candy, gak bisa collect lagi
     if isCarryingCandy() then return false end
     
     local char = LocalPlayer.Character
     local root = char and char:FindFirstChild("HumanoidRootPart")
-    if root then
-        local d = (root.Position - candy.Position).Magnitude
-        if d > 30 then return false end
+    if not root then return false end
+
+    -- Cek jarak — kalo jauh, TP dulu
+    local d = (root.Position - candy.Position).Magnitude
+    if d > 30 then
+        root.CFrame = CFrame.new(candy.Position + Vector3.new(0, 3, 0))
+        task.wait(0.3)
     end
 
     local spawnId = candy:GetAttribute("SpawnId") or candy.Name
+
+    -- Fire state remote dulu
     if stateRemote then
         pcall(function() stateRemote:FireServer(spawnId) end)
         task.wait(0.1)
     end
 
+    -- ⭐ FIRE 4x dengan payload beda (biar salah satu kena)
     pcall(function() collectRemote:FireServer(spawnId) end)
-    task.wait(0.3)
+    task.wait(0.15)
     if isCarryingCandy() then return true end
 
     pcall(function() collectRemote:FireServer(candy) end)
+    task.wait(0.15)
+    if isCarryingCandy() then return true end
+
+    pcall(function() collectRemote:FireServer() end)
+    task.wait(0.15)
+    if isCarryingCandy() then return true end
+
+        pcall(function() collectRemote:FireServer(spawnId, candy) end)
     task.wait(0.3)
+
     return isCarryingCandy()
 end
 
@@ -2432,6 +2465,9 @@ function Features.startAutoHalloween()
                 #topRarityCandies
             )
 
+                        -- ⭐ RETRY 3x per candy
+            local collectedThisRound = 0
+
             for idx, candy in ipairs(topRarityCandies) do
                 if not HalloweenState.Enabled then break end
                 if not candy or not candy.Parent then continue end
@@ -2446,18 +2482,43 @@ function Features.startAutoHalloween()
                     methodLabel
                 )
 
+                -- TP ke candy
                 halloweenTpJumpTo(candy.Position)
-                task.wait(0.3)
+                task.wait(0.4)
 
-                local ok = halloweenClaimCandy(candy)
+                -- ⭐ COBA COLLECT SAMPE 3x
+                local ok = false
+                for attempt = 1, 3 do
+                    if not HalloweenState.Enabled then break end
+                    if isCarryingCandy() then break end
+                    if not candy.Parent then break end
+
+                    ok = halloweenClaimCandy(candy)
+                    if ok then break end
+
+                    -- Re-TP kalo gagal
+                    halloweenTpJumpTo(candy.Position)
+                    task.wait(0.5)
+                end
+
                 if ok then
                     HalloweenState.Claimed = HalloweenState.Claimed + 1
+                    collectedThisRound = collectedThisRound + 1
                     if highestRarity >= 3 then
                         HalloweenState.RareClaimed = HalloweenState.RareClaimed + 1
                     end
+
+                    if isCarryingCandy() then break end
                 end
 
                 task.wait(HalloweenCfg.CLAIM_WAIT)
+            end
+
+            -- ⭐ KALO GAK COLLECT APAPUN, JANGAN BALIK BASE — LOOP LAGI
+            if collectedThisRound == 0 and not isCarryingCandy() then
+                HalloweenState.Status = "⚠️ Gagal collect — coba lagi..."
+                task.wait(1.5)
+                continue
             end
 
             HalloweenState.Status = "🏠 Balik ke base Halloween..."
