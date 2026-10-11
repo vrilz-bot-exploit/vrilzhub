@@ -4844,35 +4844,38 @@ registerTab("Vulcanic", "🌋", "Vulcanic")
     navs.Info.ic.TextColor3 = Color3.new(1, 1, 1)
     if navs.Info.lbl then navs.Info.lbl.TextColor3 = Color3.new(1, 1, 1) end
 
-    local dragging, dragInput, dragStart, startPos
-    header.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            local mouseX = UserInputService:GetMouseLocation().X
-            if mouseX > (header.AbsolutePosition.X + header.AbsoluteSize.X - 90) then return end
-            dragging = true
-            dragStart = input.Position
-            startPos = main.Position
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-    header.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            dragInput = input
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            local delta = input.Position - dragStart
-            main.Position = UDim2.new(
-                startPos.X.Scale, startPos.X.Offset + delta.X,
-                startPos.Y.Scale, startPos.Y.Offset + delta.Y
-            )
-        end
-    end)
+        -- ⬇️ BUNGKUS DENGAN do...end BIAR VARIABEL DROP SETELAH BLOK INI
+    do
+        local dragging, dragInput, dragStart, startPos
+        header.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                local mouseX = UserInputService:GetMouseLocation().X
+                if mouseX > (header.AbsolutePosition.X + header.AbsoluteSize.X - 90) then return end
+                dragging = true
+                dragStart = input.Position
+                startPos = main.Position
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                    end
+                end)
+            end
+        end)
+        header.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                dragInput = input
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(input)
+            if input == dragInput and dragging then
+                local delta = input.Position - dragStart
+                main.Position = UDim2.new(
+                    startPos.X.Scale, startPos.X.Offset + delta.X,
+                    startPos.Y.Scale, startPos.Y.Offset + delta.Y
+                )
+            end
+        end)
+    end  -- ← TAMBAH PENUTUP do...end
 
     return main
 end
