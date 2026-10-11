@@ -4734,14 +4734,14 @@ registerTab("Vulcanic", "🌋", "Vulcanic")
     updateSections(Shared.MutationStealMode or "Rarity")
 
     -- CARD 1: AUTO MUTATION
-        local mutCard, mutContent = makeCard(mutPage, "♨ EGG MUTATION", 1)
+    local mutCard, mutContent = makeCard(mutPage, "🔥 EGG MUTATION", 1)
 
     makeToggle(mutContent, "Auto Mutation", false, function(v)
         Shared.AutoMutation_Enabled = v
-                if v then
-            notify("♨ Auto Mutation enabled", "success")
+        if v then
+            notify("🔥 Auto Mutation enabled", "success")
         else
-            notify("♨ Auto Mutation disabled", "info")
+            notify("🔥 Auto Mutation disabled", "info")
         end
     end)
 
@@ -4819,7 +4819,7 @@ registerTab("Vulcanic", "🌋", "Vulcanic")
         end
     end)
 
-                registerTab("EggMutation", "♨", "Egg Mutation")
+        registerTab("EggMutation", "🔥", "Egg Mutation")
 
     registerTab("Settings", "⚙", "Settings")
 
