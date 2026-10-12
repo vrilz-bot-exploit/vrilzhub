@@ -722,9 +722,6 @@ end
 -- ============================================================
 -- AUTO RIDE PET — Auto Equip Best KG → PetRideMode
 -- ============================================================
--- ============================================================
--- FLYING PET BLACKLIST
--- ============================================================
 local FLYING_BLACKLIST = {
     "phoenix", "dragon", "sky", "air", "cloud",
     "bird", "eagle", "hawk", "griffin", "pegasus",
@@ -754,9 +751,9 @@ local AutoRideState = {
     Status = "Idle",
     SelectedPet = "Auto (Best KG)",
     HasRiddenOnce = false,
-    DismountTime = 0,           -- ⭐ BARU: waktu terakhir detect turun
-    DismountGrace = 1.5,        -- ⭐ BARU: grace period konfirmasi turun
-    ForceAction = false,        -- ⭐ BARU: trigger langsung eksekusi
+    DismountTime = 0,
+    DismountGrace = 1.5,
+    ForceAction = false,
 }
 
 local function getPetKG(tool)
@@ -783,7 +780,7 @@ local function findBestPetForRide()
         if tool:IsA("Tool") then
             local key = tool:GetAttribute("PetKey")
             local pname = tool:GetAttribute("PetName")
-            if key and pname and not isFlyingPet(pname) then  -- ← FILTER
+            if key and pname and not isFlyingPet(pname) then
                 local kg = getPetKG(tool)
                 if kg > bestKG then
                     bestKG = kg
@@ -801,17 +798,12 @@ local function isRidingPetAuto()
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return false end
 
-    -- CARA 1: SeatPart (paling reliable kalo game pake Seat)
     if hum.SeatPart ~= nil then return true end
-
-    -- CARA 2: Cek attribute game (biasanya game Ride a Pet pake ini)
     if LocalPlayer:GetAttribute("Riding") == true then return true end
     if LocalPlayer:GetAttribute("IsRiding") == true then return true end
     if LocalPlayer:GetAttribute("CurrentPet") ~= nil then return true end
     if LocalPlayer:GetAttribute("MountedPet") ~= nil then return true end
     if LocalPlayer:GetAttribute("CurrentRidingPet") ~= nil then return true end
-
-    -- CARA 3: Cek attribute di character
     if char:GetAttribute("Riding") == true then return true end
     if char:GetAttribute("IsRiding") == true then return true end
 
@@ -820,7 +812,7 @@ end
 
 function Features.startAutoRidePet()
     task.spawn(function()
-        while task.wait(0.3) do   -- ⬅️ lebih responsif dari 0.5
+        while task.wait(0.3) do
             if not AutoRideState.Enabled then
                 AutoRideState.IsRiding = false
                 AutoRideState.HasRiddenOnce = false
@@ -830,9 +822,6 @@ function Features.startAutoRidePet()
                 continue
             end
 
-            -- ═══════════════════════════════════════════════════════
-            -- FORCE ACTION — skip semua cek, langsung eksekusi
-            -- ═══════════════════════════════════════════════════════
             local force = AutoRideState.ForceAction
             AutoRideState.ForceAction = false
 
@@ -849,7 +838,6 @@ function Features.startAutoRidePet()
 
                 AutoRideState.IsRiding = false
 
-                -- Udah pernah naik & sekarang turun → grace period
                 if AutoRideState.HasRiddenOnce then
                     if AutoRideState.DismountTime == 0 then
                         AutoRideState.DismountTime = os.clock()
@@ -871,7 +859,6 @@ function Features.startAutoRidePet()
                     end
                 end
 
-                -- Cooldown
                 if AutoRideState.LastRideTime > 0 and
                    os.clock() - AutoRideState.LastRideTime < AutoRideState.Cooldown then
                     continue
@@ -886,9 +873,6 @@ function Features.startAutoRidePet()
                 continue
             end
 
-            -- ═══════════════════════════════════════════════════════
-            -- CARI PET
-            -- ═══════════════════════════════════════════════════════
             local best
 
             if AutoRideState.SelectedPet and AutoRideState.SelectedPet ~= "Auto (Best KG)" then
@@ -931,20 +915,15 @@ function Features.startAutoRidePet()
                 continue
             end
 
-            -- ═══════════════════════════════════════════════════════
-            -- EQUIP + NAIKIN — FIRE MULTIPLE PAYLOAD
-            -- ═══════════════════════════════════════════════════════
             AutoRideState.Status = "Equipping: " .. petName
             pcall(function() hum:EquipTool(best) end)
             task.wait(0.5)
 
-            -- Fire remote dengan MULTIPLE payload (biar salah satu kena)
             local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
             local gameR = remotes and remotes:FindFirstChild("Game")
             local rideRemote = gameR and gameR:FindFirstChild("PetRideMode")
             local mountingRemote = gameR and gameR:FindFirstChild("Mounting")
 
-            -- Coba sampe 6x dengan delay
             for attempt = 1, 6 do
                 if rideRemote then
                     pcall(function() rideRemote:FireServer() end)
@@ -966,7 +945,6 @@ function Features.startAutoRidePet()
 
                 task.wait(0.3)
 
-                -- Cek apakah udah naik
                 if isRidingPetAuto() then
                     break
                 end
@@ -999,11 +977,10 @@ function Features.setAutoRideEnabled(v)
     else
         AutoRideState.DismountTime = 0
         AutoRideState.ForceAction = false
-        AutoRideState.LastPetName = nil   -- ⭐ tambah baris ini
+        AutoRideState.LastPetName = nil
     end
 end
 
--- ⬇️ TAMBAH 2 FUNGSI INI ⬇️
 function Features.getPetListForDropdown()
     local backpack = LocalPlayer:FindFirstChild("Backpack")
     if not backpack then return {} end
@@ -1038,10 +1015,8 @@ function Features.setAutoRidePet(petName)
     AutoRideState.LastRideTime = 0
     AutoRideState.DismountTime = 0
     AutoRideState.ForceAction = true
-    AutoRideState.LastPetName = nil   -- ⭐ tambah baris ini
+    AutoRideState.LastPetName = nil
 end
-
--- ⬆️ SAMPAI SINI ⬆️
 
 function Features.getAutoRideState()
     return AutoRideState
@@ -1917,7 +1892,7 @@ function Features.startMutationSteal()
     task.spawn(function()
         while task.wait(0.5) do
             if not Shared.MutationSteal_Enabled then
-                Shared.MutationSteal_Active = false   -- ← TAMBAH BARIS INI
+                Shared.MutationSteal_Active = false
                 continue
             end
 
@@ -1971,13 +1946,13 @@ function Features.startMutationSteal()
                 if best then targetEgg = best.egg end
             end
 
-                        if not targetEgg then
-                Shared.MutationSteal_Active = false   -- ← TAMBAH BARIS INI (egg habis)
+            if not targetEgg then
+                Shared.MutationSteal_Active = false
                 task.wait(0.5)
                 continue
             end
 
-            Shared.MutationSteal_Active = true        -- ← TAMBAH BARIS INI (ada egg)
+            Shared.MutationSteal_Active = true
 
             local egg = targetEgg
             local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
@@ -2127,9 +2102,7 @@ function Features.setHatchLuckMode(mode)
 end
 
 -- ============================================================
--- AUTO HALLOWEEN — PRIORITY BY RARITY
--- Legendary (Candy_04) dulu, baru Epic, Rare, Common
--- TP GLIDE = step 100 (free) | TP FAST = step 150 (premium)
+-- AUTO HALLOWEEN
 -- ============================================================
 local HalloweenState = {
     Enabled = false,
@@ -2137,22 +2110,20 @@ local HalloweenState = {
     Claimed = 0,
     RareClaimed = 0,
     CandyTypes = {},
-    TPMethod = "TP100",   -- "TP100" (free) atau "TP180" (premium)
+    TPMethod = "TP100",
 }
 
--- ⭐ RARITY MAPPING
 local CANDY_RARITY = {
-    ["Candy_01"] = 1,       -- Common
-    ["Candy_02"] = 2,       -- Rare
-    ["Candy_03"] = 3,       -- Epic
-    ["Candy_04"] = 4,       -- Legendary
+    ["Candy_01"] = 1,
+    ["Candy_02"] = 2,
+    ["Candy_03"] = 3,
+    ["Candy_04"] = 4,
 }
 
 local function getCandyRarity(candyName)
     return CANDY_RARITY[candyName] or 0
 end
 
--- ⭐ CEK PREMIUM
 local OWNER_USERID = 5126297278
 local function isPremiumUser()
     if LocalPlayer.UserId == OWNER_USERID then return true end
@@ -2199,13 +2170,11 @@ local function isInHalloweenZone()
 end
 
 local function isCarryingCandy()
-    -- Cek multiple attribute (biar gak salah baca)
     if LocalPlayer:GetAttribute("CarriedCandyModel") ~= nil then return true end
     if LocalPlayer:GetAttribute("CarryingCandy") == true then return true end
     if LocalPlayer:GetAttribute("HeldCandy") ~= nil then return true end
     if LocalPlayer:GetAttribute("CarriedCandy") ~= nil then return true end
 
-    -- Cek di character (kalo ada model/tool candy)
     local char = LocalPlayer.Character
     if char then
         for _, c in ipairs(char:GetChildren()) do
@@ -2225,9 +2194,6 @@ local function getHalloweenRemote(name)
     return gameR:FindFirstChild(name)
 end
 
--- ⭐ Filter candy cave/backdoor (Y tinggi)
--- Spawn biasa (area terbuka): Y 40345-40376
--- Cave/backdoor: Y 40512-40514
 local CANDY_Y_MAX = 40400
 
 local function getHalloweenCandyList()
@@ -2236,7 +2202,6 @@ local function getHalloweenCandyList()
     local list = {}
     for _, c in ipairs(f:GetChildren()) do
         if c:IsA("BasePart") and HalloweenState.CandyTypes[c.Name] then
-            -- ✅ Skip candy yang di cave/backdoor (Y tinggi)
             if c.Position.Y < CANDY_Y_MAX then
                 table.insert(list, c)
             end
@@ -2249,6 +2214,7 @@ local function getHalloweenCandyList()
     end)
     return list
 end
+
 local function halloweenTpTo(pos)
     local char = LocalPlayer.Character
     local root = char and char:FindFirstChild("HumanoidRootPart")
@@ -2259,7 +2225,6 @@ local function halloweenTpTo(pos)
     return true
 end
 
--- ⭐ TP STEP (glide, per step 100 / 150)
 local function halloweenTpStep(targetPos, stepSize, waitTime)
     waitTime = waitTime or HalloweenCfg.TP_WAIT
     local char = LocalPlayer.Character
@@ -2289,30 +2254,81 @@ local function halloweenTpStep(targetPos, stepSize, waitTime)
         local dist = math.min(stepSize * i, totalDist)
         local pos = startPos + dir * dist + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
         halloweenTpTo(pos)
-        task.wait(waitTime)   -- ✅ pakai waitTime
+        task.wait(waitTime)
     end
     return true
 end
 
--- ⭐ TP MAIN FUNCTION — pilih metode
 local function halloweenTpJumpTo(targetPos)
     local method = HalloweenState.TPMethod or "TP100"
 
     if method == "TP180" then
         if not isPremiumUser() then
-            -- Fallback kalau bukan premium
             return halloweenTpStep(targetPos, HalloweenCfg.TP_STEP_FREE, 0.08)
         else
-            -- PREMIUM: step 180, wait lebih cepat biar beda dari TP100
             return halloweenTpStep(targetPos, HalloweenCfg.TP_STEP_PREMIUM, 0.13)
         end
     end
 
-    -- FREE: TP 100 studs step
     return halloweenTpStep(targetPos, HalloweenCfg.TP_STEP_FREE, 0.08)
 end
 
--- ⭐ WRAPPER: loop sampe nyentuh base, baru panggil return lama
+-- ⭐ INI RETURN LAMA — DI ATAS
+local function halloweenReturnToBase()
+    local base = getHalloweenBase()
+    if not base then return false end
+
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+    if root and hum and hum.SeatPart then
+        local pet = hum.SeatPart:FindFirstAncestorOfClass("Model")
+        if pet then
+            local seat = hum.SeatPart
+            local offset = root.CFrame:ToObjectSpace(seat.CFrame)
+
+            local targetPos = base.Position + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
+            local startPos = root.Position
+            local totalDist = (targetPos - startPos).Magnitude
+            local stepSize = HalloweenCfg.TP_STEP_FREE
+            local steps = math.ceil(totalDist / stepSize)
+
+            for i = 1, steps do
+                local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if not r then break end
+
+                local dist = math.min(stepSize * i, totalDist)
+                local dir = (targetPos - startPos)
+                dir = Vector3.new(dir.X, 0, dir.Z)
+                if dir.Magnitude > 1 then dir = dir.Unit end
+
+                local newRootCF = CFrame.new(startPos + dir * dist + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0))
+
+                r.CFrame = newRootCF
+                r.Velocity = Vector3.zero
+                r.AssemblyLinearVelocity = Vector3.zero
+
+                local newSeatCF = newRootCF * offset
+
+                local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
+                local targetPivot = newSeatCF * pivotToSeat:Inverse()
+                pcall(function() pet:PivotTo(targetPivot) end)
+
+                task.wait(HalloweenCfg.TP_WAIT)
+            end
+
+            task.wait(HalloweenCfg.RETURN_WAIT)
+            return true
+        end
+    end
+
+    halloweenTpJumpTo(base.Position)
+    task.wait(HalloweenCfg.RETURN_WAIT)
+    return true
+end
+
+-- ⭐ WRAPPER — DI BAWAH RETURN LAMA
 local function halloweenReturnToBaseLoop()
     local base = getHalloweenBase()
     if not base then
@@ -2332,12 +2348,10 @@ local function halloweenReturnToBaseLoop()
 
         local dist = (root.Position - targetPos).Magnitude
 
-        -- ✅ UDAH NYENTUH → keluar loop
         if dist < 10 then
             break
         end
 
-        -- Detect stuck
         if math.abs(dist - lastDist) < 1 then
             noProgressCount = noProgressCount + 1
         else
@@ -2345,7 +2359,6 @@ local function halloweenReturnToBaseLoop()
         end
         lastDist = dist
 
-        -- Stuck 3x → teleport paksa
         if noProgressCount >= 3 then
             root.CFrame = CFrame.new(targetPos)
             root.Velocity = Vector3.zero
@@ -2368,7 +2381,6 @@ local function halloweenReturnToBaseLoop()
             task.wait(0.2)
             noProgressCount = 0
         else
-            -- TP step maju
             local dir = (targetPos - root.Position)
             local stepDist = math.min(150, dist)
             dir = dir.Unit * stepDist
@@ -2379,7 +2391,6 @@ local function halloweenReturnToBaseLoop()
             root.Velocity = Vector3.zero
             root.AssemblyLinearVelocity = Vector3.zero
 
-            -- Kalo naik pet, ikutin gerakin pet-nya
             local mountJoint = root:FindFirstChild("PetMountJoint")
             if mountJoint and mountJoint:IsA("Motor6D") and mountJoint.Part1 then
                 local petSeat = mountJoint.Part1
@@ -2398,70 +2409,7 @@ local function halloweenReturnToBaseLoop()
         end
     end
 
-    -- ⭐ BARU EKSEKUSI RETURN LAMA
     halloweenReturnToBase()
-    return true
-end
-
-local function halloweenReturnToBase()
-    local base = getHalloweenBase()
-    if not base then return false end
-
-    -- ⭐ Handle kalo lagi naik pet — TP pet sekalian biar gak nyangkut
-    local char = LocalPlayer.Character
-    local root = char and char:FindFirstChild("HumanoidRootPart")
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-
-    if root and hum and hum.SeatPart then
-        -- Player lagi naik pet — pake TP step yang handle vehicle
-        local pet = hum.SeatPart:FindFirstAncestorOfClass("Model")
-        if pet then
-            -- Hitung offset pet ke root
-            local seat = hum.SeatPart
-            local offset = root.CFrame:ToObjectSpace(seat.CFrame)
-
-            -- TP step by step
-            local targetPos = base.Position + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
-            local startPos = root.Position
-            local totalDist = (targetPos - startPos).Magnitude
-            local stepSize = HalloweenCfg.TP_STEP_FREE
-            local steps = math.ceil(totalDist / stepSize)
-
-            for i = 1, steps do
-                local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if not r then break end
-
-                local dist = math.min(stepSize * i, totalDist)
-                local dir = (targetPos - startPos)
-                dir = Vector3.new(dir.X, 0, dir.Z)
-                if dir.Magnitude > 1 then dir = dir.Unit end
-
-                local newRootCF = CFrame.new(startPos + dir * dist + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0))
-
-                -- Gerakin root
-                r.CFrame = newRootCF
-                r.Velocity = Vector3.zero
-                r.AssemblyLinearVelocity = Vector3.zero
-
-                                -- Gerakin pet model
-                local newSeatCF = newRootCF * offset
-
-                -- ⭐ Rumus bener: PivotTo harus pake PIVOT, bukan PrimaryPart
-                local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
-                local targetPivot = newSeatCF * pivotToSeat:Inverse()
-                pcall(function() pet:PivotTo(targetPivot) end)
-
-                task.wait(HalloweenCfg.TP_WAIT)
-            end
-
-            task.wait(HalloweenCfg.RETURN_WAIT)
-            return true
-        end
-    end
-
-    -- ⭐ Gak naik pet — pake cara lama (step TP biasa)
-    halloweenTpJumpTo(base.Position)
-    task.wait(HalloweenCfg.RETURN_WAIT)
     return true
 end
 
@@ -2471,14 +2419,12 @@ local function halloweenClaimCandy(candy)
     local stateRemote = getHalloweenRemote("CandyState")
     if not collectRemote then return false end
 
-    -- Kalo udah bawa candy, gak bisa collect lagi
     if isCarryingCandy() then return false end
-    
+
     local char = LocalPlayer.Character
     local root = char and char:FindFirstChild("HumanoidRootPart")
     if not root then return false end
 
-    -- Cek jarak — kalo jauh, TP dulu
     local d = (root.Position - candy.Position).Magnitude
     if d > 30 then
         root.CFrame = CFrame.new(candy.Position + Vector3.new(0, 3, 0))
@@ -2487,13 +2433,11 @@ local function halloweenClaimCandy(candy)
 
     local spawnId = candy:GetAttribute("SpawnId") or candy.Name
 
-    -- Fire state remote dulu
     if stateRemote then
         pcall(function() stateRemote:FireServer(spawnId) end)
         task.wait(0.1)
     end
 
-    -- ⭐ FIRE 4x dengan payload beda (biar salah satu kena)
     pcall(function() collectRemote:FireServer(spawnId) end)
     task.wait(0.15)
     if isCarryingCandy() then return true end
@@ -2506,7 +2450,7 @@ local function halloweenClaimCandy(candy)
     task.wait(0.15)
     if isCarryingCandy() then return true end
 
-        pcall(function() collectRemote:FireServer(spawnId, candy) end)
+    pcall(function() collectRemote:FireServer(spawnId, candy) end)
     task.wait(0.3)
 
     return isCarryingCandy()
@@ -2539,7 +2483,6 @@ local function halloweenEnterZone()
     return isInHalloweenZone()
 end
 
--- ⭐ HELPER: cari egg prioritas di luar Halloween (filter rarity / name)
 local function findPriorityEggOutside()
     local rendered = Workspace:FindFirstChild("RenderedEggs")
     if not rendered then return nil end
@@ -2581,7 +2524,6 @@ local function findPriorityEggOutside()
     return best
 end
 
--- ⭐ HELPER: keluar dari Halloween zone (portal di Workspace.HalloweenArea.Portal)
 local function halloweenLeaveZone()
     if not isInHalloweenZone() then return true end
 
@@ -2620,15 +2562,12 @@ function Features.startAutoHalloween()
                 continue
             end
 
-                        -- ⬇️ TAMBAH BLOK INI (6 baris)
             if Shared.MutationSteal_Active and Shared.MutationSteal_Enabled then
                 HalloweenState.Status = "⏳ Waiting for Mutation Steal to finish..."
                 task.wait(1)
                 continue
             end
-            -- ⬆️ SAMPAI SINI
 
-                        -- ⭐ LEAVE LOGIC: cuma leave kalau ADA fitur steal lain yang nyala
             local stealFeatureOn = Shared.AutoSteal_Enabled
                 or Shared.AutoFarm_Enabled
                 or Shared.MutationSteal_Enabled
@@ -2647,12 +2586,12 @@ function Features.startAutoHalloween()
                     continue
                 end
             end
-                
+
             local char = LocalPlayer.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             if not root then task.wait(1) continue end
 
-                        if not isInHalloweenZone() then
+            if not isInHalloweenZone() then
                 HalloweenState.Status = "🚪 Entering area..."
                 if not halloweenEnterZone() then
                     task.wait(2)
@@ -2660,13 +2599,13 @@ function Features.startAutoHalloween()
                 end
             end
 
-                        if isCarryingCandy() then
+            if isCarryingCandy() then
                 HalloweenState.Status = "🎒 Carrying candy — processing..."
                 task.wait(1)
                 continue
             end
 
-                        local candies = getHalloweenCandyList()
+            local candies = getHalloweenCandyList()
             if #candies == 0 then
                 HalloweenState.Status = "⏳ Waiting for candy spawn... (" .. HalloweenState.Claimed .. " claimed)"
                 task.wait(2)
@@ -2703,7 +2642,6 @@ function Features.startAutoHalloween()
                 #topRarityCandies
             )
 
-                        -- ⭐ RETRY 3x per candy
             local collectedThisRound = 0
 
             for idx, candy in ipairs(topRarityCandies) do
@@ -2720,11 +2658,9 @@ function Features.startAutoHalloween()
                     methodLabel
                 )
 
-                -- TP ke candy
                 halloweenTpJumpTo(candy.Position)
                 task.wait(0.4)
 
-                -- ⭐ COBA COLLECT SAMPE 3x
                 local ok = false
                 for attempt = 1, 3 do
                     if not HalloweenState.Enabled then break end
@@ -2734,7 +2670,6 @@ function Features.startAutoHalloween()
                     ok = halloweenClaimCandy(candy)
                     if ok then break end
 
-                    -- Re-TP kalo gagal
                     halloweenTpJumpTo(candy.Position)
                     task.wait(0.5)
                 end
@@ -2752,15 +2687,14 @@ function Features.startAutoHalloween()
                 task.wait(HalloweenCfg.CLAIM_WAIT)
             end
 
-                        -- ⭐ KALO GAK COLLECT APAPUN, JANGAN BALIK BASE — LOOP LAGI
             if collectedThisRound == 0 and not isCarryingCandy() then
                 HalloweenState.Status = "⚠️ Failed to collect — retrying..."
                 task.wait(1.5)
                 continue
             end
 
-                                    HalloweenState.Status = "🏠 Returning to Halloween base..."
-            halloweenReturnToBaseLoop()  -- ⭐ pake wrapper
+            HalloweenState.Status = "🏠 Returning to Halloween base..."
+            halloweenReturnToBaseLoop()
             task.wait(HalloweenCfg.RETURN_WAIT)
         end
     end)
@@ -2770,7 +2704,6 @@ function Features.getHalloweenState()
     return HalloweenState
 end
 
--- ⭐ Expose premium check ke UI
 function Features.isPremiumUser()
     return isPremiumUser()
 end
@@ -2781,7 +2714,6 @@ end
 function Features.Init(sharedState)
     Shared = sharedState
 
-    -- ⭐ SET DEFAULT BIAR AMAN
     if Shared.AntiAFK_Enabled == nil then Shared.AntiAFK_Enabled = true end
     if Shared.MutationSteal_Active == nil then Shared.MutationSteal_Active = false end
     if Shared.AutoRidePet_Enabled == nil then Shared.AutoRidePet_Enabled = true end
@@ -2803,12 +2735,10 @@ function Features.Init(sharedState)
     Features.startAutoHatchLuck()
     Features.startAutoHalloween()
 
-           -- ⭐ AUTO-ENABLE AUTO RIDE PET — LANGSUNG ON
     Shared.AutoRidePet_Enabled = true
     Features.setAutoRideEnabled(true)
 
     task.spawn(function()
-        -- Tunggu character loaded
         local timeout = 0
         while not (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")) do
             task.wait(0.2)
@@ -2816,7 +2746,6 @@ function Features.Init(sharedState)
             if timeout > 10 then break end
         end
 
-        -- Tunggu sampe ada pet di backpack (max 15 detik)
         local petTimeout = 0
         while petTimeout < 15 do
             local backpack = LocalPlayer:FindFirstChild("Backpack")
@@ -2842,7 +2771,6 @@ function Features.Init(sharedState)
         end
     end)
 
-    -- ⭐ RE-TRIGGER PAS RESPAWN
     LocalPlayer.CharacterAdded:Connect(function()
         task.wait(3)
         AutoRideState.LastPetName = nil
@@ -2852,7 +2780,7 @@ function Features.Init(sharedState)
             end
         end
     end)
-    
+
     _G.VRILZ_Features = Features
     print("[VRILZHUB] Ride a Pet Features v3.8 loaded")
 end
