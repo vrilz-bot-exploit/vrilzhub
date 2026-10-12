@@ -2312,6 +2312,97 @@ local function halloweenTpJumpTo(targetPos)
     return halloweenTpStep(targetPos, HalloweenCfg.TP_STEP_FREE, 0.08)
 end
 
+-- ⭐ WRAPPER: loop sampe nyentuh base, baru panggil return lama
+local function halloweenReturnToBaseLoop()
+    local base = getHalloweenBase()
+    if not base then
+        halloweenReturnToBase()
+        return false
+    end
+
+    local targetPos = base.Position + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
+    local timeout = tick() + 6
+    local noProgressCount = 0
+    local lastDist = math.huge
+
+    while tick() < timeout do
+        local char = LocalPlayer.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        if not root then break end
+
+        local dist = (root.Position - targetPos).Magnitude
+
+        -- ✅ UDAH NYENTUH → keluar loop
+        if dist < 10 then
+            break
+        end
+
+        -- Detect stuck
+        if math.abs(dist - lastDist) < 1 then
+            noProgressCount = noProgressCount + 1
+        else
+            noProgressCount = 0
+        end
+        lastDist = dist
+
+        -- Stuck 3x → teleport paksa
+        if noProgressCount >= 3 then
+            root.CFrame = CFrame.new(targetPos)
+            root.Velocity = Vector3.zero
+            root.AssemblyLinearVelocity = Vector3.zero
+
+            local mountJoint = root:FindFirstChild("PetMountJoint")
+            if mountJoint and mountJoint:IsA("Motor6D") and mountJoint.Part1 then
+                local petSeat = mountJoint.Part1
+                local petModel = petSeat:FindFirstAncestorOfClass("Model")
+                if petModel then
+                    pcall(function()
+                        local offsetFromRootToSeat = root.CFrame:ToObjectSpace(petSeat.CFrame)
+                        local newSeatCF = CFrame.new(targetPos) * offsetFromRootToSeat
+                        local pivotToSeat = petModel:GetPivot():ToObjectSpace(petSeat.CFrame)
+                        petModel:PivotTo(newSeatCF * pivotToSeat:Inverse())
+                    end)
+                end
+            end
+
+            task.wait(0.2)
+            noProgressCount = 0
+        else
+            -- TP step maju
+            local dir = (targetPos - root.Position)
+            local stepDist = math.min(150, dist)
+            dir = dir.Unit * stepDist
+            dir = Vector3.new(dir.X, 0, dir.Z)
+            local newPos = root.Position + dir + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
+
+            root.CFrame = CFrame.new(newPos)
+            root.Velocity = Vector3.zero
+            root.AssemblyLinearVelocity = Vector3.zero
+
+            -- Kalo naik pet, ikutin gerakin pet-nya
+            local mountJoint = root:FindFirstChild("PetMountJoint")
+            if mountJoint and mountJoint:IsA("Motor6D") and mountJoint.Part1 then
+                local petSeat = mountJoint.Part1
+                local petModel = petSeat:FindFirstAncestorOfClass("Model")
+                if petModel then
+                    pcall(function()
+                        local offsetFromRootToSeat = root.CFrame:ToObjectSpace(petSeat.CFrame)
+                        local newSeatCF = CFrame.new(newPos) * offsetFromRootToSeat
+                        local pivotToSeat = petModel:GetPivot():ToObjectSpace(petSeat.CFrame)
+                        petModel:PivotTo(newSeatCF * pivotToSeat:Inverse())
+                    end)
+                end
+            end
+
+            task.wait(0.1)
+        end
+    end
+
+    -- ⭐ BARU EKSEKUSI RETURN LAMA
+    halloweenReturnToBase()
+    return true
+end
+
 local function halloweenReturnToBase()
     local base = getHalloweenBase()
     if not base then return false end
@@ -2668,8 +2759,8 @@ function Features.startAutoHalloween()
                 continue
             end
 
-                        HalloweenState.Status = "🏠 Returning to Halloween base..."
-            halloweenReturnToBase()
+                                    HalloweenState.Status = "🏠 Returning to Halloween base..."
+            halloweenReturnToBaseLoop()  -- ⭐ pake wrapper
             task.wait(HalloweenCfg.RETURN_WAIT)
         end
     end)
