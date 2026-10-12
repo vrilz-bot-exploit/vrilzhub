@@ -2315,6 +2315,59 @@ end
 local function halloweenReturnToBase()
     local base = getHalloweenBase()
     if not base then return false end
+
+    -- ⭐ Handle kalo lagi naik pet — TP pet sekalian biar gak nyangkut
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+    if root and hum and hum.SeatPart then
+        -- Player lagi naik pet — pake TP step yang handle vehicle
+        local pet = hum.SeatPart:FindFirstAncestorOfClass("Model")
+        if pet then
+            -- Hitung offset pet ke root
+            local seat = hum.SeatPart
+            local offset = root.CFrame:ToObjectSpace(seat.CFrame)
+
+            -- TP step by step
+            local targetPos = base.Position + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
+            local startPos = root.Position
+            local totalDist = (targetPos - startPos).Magnitude
+            local stepSize = HalloweenCfg.TP_STEP_FREE
+            local steps = math.ceil(totalDist / stepSize)
+
+            for i = 1, steps do
+                local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if not r then break end
+
+                local dist = math.min(stepSize * i, totalDist)
+                local dir = (targetPos - startPos)
+                dir = Vector3.new(dir.X, 0, dir.Z)
+                if dir.Magnitude > 1 then dir = dir.Unit end
+
+                local newRootCF = CFrame.new(startPos + dir * dist + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0))
+
+                -- Gerakin root
+                r.CFrame = newRootCF
+                r.Velocity = Vector3.zero
+                r.AssemblyLinearVelocity = Vector3.zero
+
+                -- Gerakin pet model
+                local petPrimary = pet.PrimaryPart or pet:FindFirstChildWhichIsA("BasePart")
+                if petPrimary then
+                    local newSeatCF = newRootCF * offset
+                    pet:PivotTo(newSeatCF * petPrimary.CFrame:ToObjectSpace(seat.CFrame):Inverse())
+                end
+
+                task.wait(HalloweenCfg.TP_WAIT)
+            end
+
+            task.wait(HalloweenCfg.RETURN_WAIT)
+            return true
+        end
+    end
+
+    -- ⭐ Gak naik pet — pake cara lama (step TP biasa)
     halloweenTpJumpTo(base.Position)
     task.wait(HalloweenCfg.RETURN_WAIT)
     return true
