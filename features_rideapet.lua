@@ -2352,12 +2352,13 @@ local function halloweenReturnToBase()
                 r.Velocity = Vector3.zero
                 r.AssemblyLinearVelocity = Vector3.zero
 
-                -- Gerakin pet model
-                local petPrimary = pet.PrimaryPart or pet:FindFirstChildWhichIsA("BasePart")
-                if petPrimary then
-                    local newSeatCF = newRootCF * offset
-                    pet:PivotTo(newSeatCF * petPrimary.CFrame:ToObjectSpace(seat.CFrame):Inverse())
-                end
+                                -- Gerakin pet model
+                local newSeatCF = newRootCF * offset
+
+                -- ⭐ Rumus bener: PivotTo harus pake PIVOT, bukan PrimaryPart
+                local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
+                local targetPivot = newSeatCF * pivotToSeat:Inverse()
+                pcall(function() pet:PivotTo(targetPivot) end)
 
                 task.wait(HalloweenCfg.TP_WAIT)
             end
