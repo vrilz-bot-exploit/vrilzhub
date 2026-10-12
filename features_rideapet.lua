@@ -2483,20 +2483,26 @@ function Features.startAutoHalloween()
             end
             -- ⬆️ SAMPAI SINI
 
-            -- ⭐ LEAVE LOGIC: pas ada egg spawn di luar, keluar dulu
-            local outsideEgg = findPriorityEggOutside()
-            if outsideEgg and outsideEgg.Parent then
-                if isInHalloweenZone() then
-                    HalloweenState.Status = "🥚 Egg spawn: " .. outsideEgg.Name .. " — leaving Halloween..."
-                    halloweenLeaveZone()
-                    task.wait(1)
-                else
-                    HalloweenState.Status = "🥚 Egg spawn: " .. outsideEgg.Name .. " — waiting for steal..."
-                    task.wait(2)
-                end
-                continue
-            end
+                        -- ⭐ LEAVE LOGIC: cuma leave kalau ADA fitur steal lain yang nyala
+            local stealFeatureOn = Shared.AutoSteal_Enabled
+                or Shared.AutoFarm_Enabled
+                or Shared.MutationSteal_Enabled
 
+            if stealFeatureOn then
+                local outsideEgg = findPriorityEggOutside()
+                if outsideEgg and outsideEgg.Parent then
+                    if isInHalloweenZone() then
+                        HalloweenState.Status = "🥚 Egg spawn: " .. outsideEgg.Name .. " — leaving Halloween..."
+                        halloweenLeaveZone()
+                        task.wait(1)
+                    else
+                        HalloweenState.Status = "🥚 Egg spawn: " .. outsideEgg.Name .. " — waiting for steal..."
+                        task.wait(2)
+                    end
+                    continue
+                end
+            end
+                
             local char = LocalPlayer.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             if not root then task.wait(1) continue end
