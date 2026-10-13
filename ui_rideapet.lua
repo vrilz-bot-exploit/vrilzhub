@@ -1800,323 +1800,88 @@ end
 local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti, notify)
     local C_local = C
 
-    -- Scan candy types from workspace
-    local function scanCandyTypes()
-        local set = {}
-        local f = game:GetService("Workspace"):FindFirstChild("HalloweenCandy")
-        if f then
-            for _, c in ipairs(f:GetChildren()) do
-                if c:IsA("BasePart") then set[c.Name] = true end
-            end
-        end
-        pcall(function()
-            for _, obj in ipairs(game:GetService("Workspace"):GetDescendants()) do
-                if obj:IsA("BasePart") then
-                    local n = obj.Name
-                    if n:match("^Candy_%d+$") or n:lower():find("candy") then
-                        set[n] = true
-                    end
-                end
-            end
-        end)
-        if next(set) == nil then
-            set["Candy_01"] = true
-            set["Candy_02"] = true
-            set["Candy_03"] = true
-            set["Candy_04"] = true
-        end
-        local list = {}
-        for name, _ in pairs(set) do table.insert(list, name) end
-        table.sort(list)
-        return list
-    end
+    -- ═══════════════════════════════════════════════════════
+    -- CARD 1: AUTO EVENT (Halloween + Yin Ritual jadi 1)
+    -- ═══════════════════════════════════════════════════════
+    local eventCard, eventContent = makeCard(eventPage, "🎃 AUTO EVENT", 1)
 
-    local candyTypes = scanCandyTypes()
-
-    -- CARD 1: AUTO HALLOWEEN
-    local eventCard, eventContent = makeCard(eventPage, "🎃 AUTO HALLOWEEN", 1)
-
-    makeToggle(eventContent, "Auto Claim Candy", false, function(v)
+    -- === AUTO HALLOWEEN TOGGLE ===
+    makeToggle(eventContent, "Auto Halloween (Candy)", false, function(v)
         local F = getFeatures()
         if F and F.getHalloweenState then F.getHalloweenState().Enabled = v end
-        if v then notify("Halloween Auto: ON", "success")
-        else notify("Halloween Auto: OFF", "info") end
+        if v then notify("🎃 Halloween: ON", "success")
+        else notify("🎃 Halloween: OFF", "info") end
     end)
 
-    local eventNote = Instance.new("TextLabel")
-    eventNote.Size = UDim2.new(1, 0, 0, 32)
-    eventNote.BackgroundTransparency = 1
-    eventNote.Text = "Flow: collect all highest-rarity candy first\n(Legendary → Epic → Rare → Common)"
-    eventNote.TextColor3 = C_local.Muted
-    eventNote.Font = Enum.Font.GothamSemibold
-    eventNote.TextSize = CFG.FONT_MUTED
-    eventNote.TextWrapped = true
-    eventNote.TextXAlignment = Enum.TextXAlignment.Left
-    eventNote.TextYAlignment = Enum.TextYAlignment.Top
-    eventNote.LayoutOrder = 10
-    eventNote.ZIndex = 3
-    eventNote.Parent = eventContent
-    registerTheme(eventNote, "Muted", "TextColor3")
-
-    -- CARD 2: CANDY SELECT
-    local eventCandyCard, eventCandyContent = makeCard(eventPage, "🍬 CANDY SELECT", 2)
-
-    -- TP Method section
-    local tpMethodLbl = Instance.new("TextLabel")
-    tpMethodLbl.Size = UDim2.new(1, 0, 0, 16)
-    tpMethodLbl.BackgroundTransparency = 1
-    tpMethodLbl.Text = "TP Method:"
-    tpMethodLbl.TextColor3 = C_local.Muted
-    tpMethodLbl.Font = Enum.Font.GothamBold
-    tpMethodLbl.TextSize = CFG.FONT_MUTED
-    tpMethodLbl.TextXAlignment = Enum.TextXAlignment.Left
-    tpMethodLbl.LayoutOrder = 11
-    tpMethodLbl.ZIndex = 3
-    tpMethodLbl.Parent = eventContent
-    registerTheme(tpMethodLbl, "Muted", "TextColor3")
-
-    local F_check = getFeatures()
-    local isPrem = false
-    if F_check and F_check.isPremiumUser then
-        isPrem = F_check.isPremiumUser()
-    end
-
-    if isPrem then
-        -- Premium user
-        local tpMethodHolder = Instance.new("Frame")
-        tpMethodHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
-        tpMethodHolder.BackgroundTransparency = 1
-        tpMethodHolder.LayoutOrder = 12
-        tpMethodHolder.ZIndex = 3
-        tpMethodHolder.Parent = eventContent
-
-        local tpMethodList = {
-            "TP GLIDE",
-            "TP FAST"
-        }
-
-        local currentMethod = "TP GLIDE"
-        if Shared and Shared.TP_Method == "TP180" then
-            currentMethod = "TP FAST"
-        end
-
-        makeDropdownGlobal(tpMethodHolder, tpMethodList, currentMethod, function(v)
-            local F = getFeatures()
-            if v:find("TP FAST") then
-                if F and F.getHalloweenState then
-                    F.getHalloweenState().TPMethod = "TP180"
-                end
-                Shared.TP_Method = "TP180"
-                notify("TP Method: TP FAST", "success")
-            else
-                if F and F.getHalloweenState then
-                    F.getHalloweenState().TPMethod = "TP100"
-                end
-                Shared.TP_Method = "TP100"
-                notify("TP Method: TP GLIDE", "info")
-            end
-        end)
-
-    else
-        -- Non-premium: locked frame
-        local lockedFrame = Instance.new("Frame")
-        lockedFrame.Size = UDim2.new(1, 0, 0, 60)
-        lockedFrame.BackgroundColor3 = C_local.Surface3
-        lockedFrame.BackgroundTransparency = 0.5
-        lockedFrame.BorderSizePixel = 0
-        lockedFrame.LayoutOrder = 12
-        lockedFrame.ZIndex = 3
-        lockedFrame.Parent = eventContent
-        registerTheme(lockedFrame, "Surface3", "BackgroundColor3")
-
-        local lockedCorner = Instance.new("UICorner")
-        lockedCorner.CornerRadius = UDim.new(0, 8)
-        lockedCorner.Parent = lockedFrame
-
-        local lockedStroke = Instance.new("UIStroke")
-        lockedStroke.Color = C_local.Muted
-        lockedStroke.Thickness = 1
-        lockedStroke.Transparency = 0.6
-        lockedStroke.Parent = lockedFrame
-
-        local lockIcon = Instance.new("TextLabel")
-        lockIcon.Size = UDim2.fromOffset(28, 28)
-        lockIcon.Position = UDim2.fromOffset(10, 16)
-        lockIcon.BackgroundTransparency = 1
-        lockIcon.Text = "🔒"
-        lockIcon.TextColor3 = C_local.Muted
-        lockIcon.Font = Enum.Font.GothamBold
-        lockIcon.TextSize = 18
-        lockIcon.ZIndex = 4
-        lockIcon.Parent = lockedFrame
-        registerTheme(lockIcon, "Muted", "TextColor3")
-
-                local lockTitle = Instance.new("TextLabel")
-        lockTitle.Size = UDim2.new(1, -50, 0, 18)
-        lockTitle.Position = UDim2.fromOffset(42, 14)
-        lockTitle.BackgroundTransparency = 1
-        lockTitle.Text = "TP FAST LOCKED"
-        lockTitle.TextColor3 = C_local.Muted
-        lockTitle.Font = Enum.Font.GothamBold
-        lockTitle.TextSize = CFG.FONT_LABEL
-        lockTitle.TextXAlignment = Enum.TextXAlignment.Left
-        lockTitle.ZIndex = 4
-        lockTitle.Parent = lockedFrame
-        registerTheme(lockTitle, "Muted", "TextColor3")
-
-        local lockDesc = Instance.new("TextLabel")
-        lockDesc.Size = UDim2.new(1, -50, 0, 16)
-        lockDesc.Position = UDim2.fromOffset(42, 32)
-        lockDesc.BackgroundTransparency = 1
-        lockDesc.Text = "Premium only"
-        lockDesc.TextColor3 = C_local.Muted
-        lockDesc.Font = Enum.Font.GothamSemibold
-        lockDesc.TextSize = CFG.FONT_MUTED
-        lockDesc.TextWrapped = false
-        lockDesc.TextXAlignment = Enum.TextXAlignment.Left
-        lockDesc.TextYAlignment = Enum.TextYAlignment.Top
-        lockDesc.ZIndex = 4
-        lockDesc.Parent = lockedFrame
-        registerTheme(lockDesc, "Muted", "TextColor3")
-    end
-        
-    -- Candy select label
-    local eventCandyLbl = Instance.new("TextLabel")
-    eventCandyLbl.Size = UDim2.new(1, 0, 0, 16)
-    eventCandyLbl.BackgroundTransparency = 1
-    eventCandyLbl.Text = "Pick candy to collect:"
-    eventCandyLbl.TextColor3 = C_local.Muted
-    eventCandyLbl.Font = Enum.Font.GothamSemibold
-    eventCandyLbl.TextSize = CFG.FONT_MUTED
-    eventCandyLbl.TextXAlignment = Enum.TextXAlignment.Left
-    eventCandyLbl.ZIndex = 3
-    eventCandyLbl.Parent = eventCandyContent
-    registerTheme(eventCandyLbl, "Muted", "TextColor3")
-
-    local candyTable = {}
-    local F_init = getFeatures()
-    local st = nil
-    if F_init and F_init.getHalloweenState then
-        st = F_init.getHalloweenState()
-        for _, name in ipairs(candyTypes) do
-            if st.CandyTypes[name] == nil then st.CandyTypes[name] = true end
-            candyTable[name] = st.CandyTypes[name]
-        end
-    else
-        for _, name in ipairs(candyTypes) do candyTable[name] = true end
-    end
-
-    if #candyTypes == 0 then
-        candyTypes = {"Candy_01", "Candy_02", "Candy_03", "Candy_04"}
-        for _, name in ipairs(candyTypes) do candyTable[name] = true end
-    end
-
-    local candyDropHolder = Instance.new("Frame")
-    candyDropHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
-    candyDropHolder.BackgroundTransparency = 1
-    candyDropHolder.ZIndex = 3
-    candyDropHolder.Parent = eventCandyContent
-
-    makeDropdownMulti(candyDropHolder, candyTypes, candyTable, nil, function(t)
-        local F = getFeatures()
-        if F and F.getHalloweenState then
-            local s = F.getHalloweenState()
-            for name, on in pairs(t) do s.CandyTypes[name] = on end
-        end
-    end)
-
-    -- CARD 3: STATUS
-    local eventStatusCard, eventStatusContent = makeCard(eventPage, "📊 STATUS", 3)
-    local eventStatusLbl = Instance.new("TextLabel")
-    eventStatusLbl.Size = UDim2.new(1, 0, 0, 50)
-    eventStatusLbl.BackgroundColor3 = C_local.Surface3
-    eventStatusLbl.BackgroundTransparency = 0.3
-    eventStatusLbl.BorderSizePixel = 0
-    eventStatusLbl.Text = "Idle"
-    eventStatusLbl.TextColor3 = C_local.Text
-    eventStatusLbl.Font = Enum.Font.Code
-    eventStatusLbl.TextSize = CFG.FONT_MUTED
-    eventStatusLbl.TextXAlignment = Enum.TextXAlignment.Left
-    eventStatusLbl.TextYAlignment = Enum.TextYAlignment.Top
-    eventStatusLbl.ZIndex = 3
-    eventStatusLbl.Parent = eventStatusContent
-    registerTheme(eventStatusLbl, "Text", "TextColor3")
-
-    local esCorner = Instance.new("UICorner")
-    esCorner.CornerRadius = UDim.new(0, 6)
-    esCorner.Parent = eventStatusLbl
-
-    local esPad = Instance.new("UIPadding")
-    esPad.PaddingLeft = UDim.new(0, 8)
-    esPad.PaddingTop = UDim.new(0, 6)
-    esPad.Parent = eventStatusLbl
-
-        task.spawn(function()
-        while eventStatusLbl.Parent do
-            task.wait(0.5)
-            local F = getFeatures()
-            if F and F.getHalloweenState then
-                local s = F.getHalloweenState()
-                eventStatusLbl.Text = s.Status .. "\nClaimed: " .. s.Claimed .. " | Rare: " .. s.RareClaimed
-            end
-        end
-    end)
-
-    -- ⭐ CARD 4: AUTO YIN RITUAL
-    local yinCard, yinContent = makeCard(eventPage, "🔮 AUTO YIN RITUAL", 4)
-
-    makeToggle(yinContent, "Auto Yin Ritual", false, function(v)
+    -- === AUTO YIN RITUAL TOGGLE ===
+    makeToggle(eventContent, "Auto Yin Ritual", false, function(v)
         Shared.YinRitual_Enabled = v
         local F = getFeatures()
-        if F and F.setYinRitualEnabled then
-            F.setYinRitualEnabled(v)
-        end
-        if v then
-            notify("🔮 Auto Yin Ritual: ON", "success")
-        else
-            notify("🔮 Auto Yin Ritual: OFF", "info")
-        end
+        if F and F.setYinRitualEnabled then F.setYinRitualEnabled(v) end
+        if v then notify("🔮 Yin Ritual: ON", "success")
+        else notify("🔮 Yin Ritual: OFF", "info") end
     end)
 
-    local yinStatusLbl = Instance.new("TextLabel")
-    yinStatusLbl.Size = UDim2.new(1, 0, 0, 64)
-    yinStatusLbl.BackgroundColor3 = C_local.Surface3
-    yinStatusLbl.BackgroundTransparency = 0.3
-    yinStatusLbl.BorderSizePixel = 0
-    yinStatusLbl.Text = "⏸️ Idle"
-    yinStatusLbl.TextColor3 = C_local.Text
-    yinStatusLbl.Font = Enum.Font.Code
-    yinStatusLbl.TextSize = CFG.FONT_MUTED
-    yinStatusLbl.TextXAlignment = Enum.TextXAlignment.Left
-    yinStatusLbl.TextYAlignment = Enum.TextYAlignment.Top
-    yinStatusLbl.ZIndex = 3
-    yinStatusLbl.Parent = yinContent
-    registerTheme(yinStatusLbl, "Text", "TextColor3")
+    -- === STATUS GABUNGAN (1 label doang) ===
+    local statusTitle = Instance.new("TextLabel")
+    statusTitle.Size = UDim2.new(1, 0, 0, 16)
+    statusTitle.BackgroundTransparency = 1
+    statusTitle.Text = "📊 STATUS"
+    statusTitle.TextColor3 = C_local.Muted
+    statusTitle.Font = Enum.Font.GothamBold
+    statusTitle.TextSize = CFG.FONT_MUTED
+    statusTitle.TextXAlignment = Enum.TextXAlignment.Left
+    statusTitle.ZIndex = 3
+    statusTitle.Parent = eventContent
+    registerTheme(statusTitle, "Muted", "TextColor3")
 
-    local yinStatusCorner = Instance.new("UICorner")
-    yinStatusCorner.CornerRadius = UDim.new(0, 6)
-    yinStatusCorner.Parent = yinStatusLbl
+    local statusLbl = Instance.new("TextLabel")
+    statusLbl.Size = UDim2.new(1, 0, 0, 80)
+    statusLbl.BackgroundColor3 = C_local.Surface3
+    statusLbl.BackgroundTransparency = 0.3
+    statusLbl.BorderSizePixel = 0
+    statusLbl.Text = "⏸️ Idle"
+    statusLbl.TextColor3 = C_local.Text
+    statusLbl.Font = Enum.Font.Code
+    statusLbl.TextSize = CFG.FONT_MUTED
+    statusLbl.TextXAlignment = Enum.TextXAlignment.Left
+    statusLbl.TextYAlignment = Enum.TextYAlignment.Top
+    statusLbl.ZIndex = 3
+    statusLbl.Parent = eventContent
+    registerTheme(statusLbl, "Text", "TextColor3")
 
-    local yinStatusPad = Instance.new("UIPadding")
-    yinStatusPad.PaddingLeft = UDim.new(0, 8)
-    yinStatusPad.PaddingTop = UDim.new(0, 6)
-    yinStatusPad.Parent = yinStatusLbl
+    local statusCorner = Instance.new("UICorner")
+    statusCorner.CornerRadius = UDim.new(0, 6)
+    statusCorner.Parent = statusLbl
 
+    local statusPad = Instance.new("UIPadding")
+    statusPad.PaddingLeft = UDim.new(0, 8)
+    statusPad.PaddingTop = UDim.new(0, 6)
+    statusPad.Parent = statusLbl
+
+    -- Live update status (gabungan)
     task.spawn(function()
-        while yinStatusLbl.Parent do
+        while statusLbl.Parent do
             task.wait(0.5)
             local F = getFeatures()
+            local lines = {}
+
+            -- Yin Ritual status
             if F and F.getYinRitualState then
                 local s = F.getYinRitualState()
-                yinStatusLbl.Text = string.format(
-                    "Status: %s\n🔵 Yin: %d  |  🔴 Yang: %d\n🔮 Ritual: %d  |  🎁 Reward: %d",
-                    s.Status or "...",
-                    s.YinCount or 0,
-                    s.YangCount or 0,
-                    s.RitualCount or 0,
-                    s.RewardCount or 0
-                )
+                table.insert(lines, "🔮 Yin: " .. (s.Status or "..."))
+                table.insert(lines, string.format("   Yin:%d Yang:%d Ritual:%d Reward:%d",
+                    s.YinCount or 0, s.YangCount or 0, s.RitualCount or 0, s.RewardCount or 0))
             end
+
+            -- Halloween status
+            if F and F.getHalloweenState then
+                local s = F.getHalloweenState()
+                table.insert(lines, "🎃 Candy: " .. (s.Status or "..."))
+                table.insert(lines, string.format("   Claimed:%d Rare:%d", s.Claimed or 0, s.RareClaimed or 0))
+            end
+
+            statusLbl.Text = table.concat(lines, "\n")
         end
     end)
 end
