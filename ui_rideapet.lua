@@ -2034,10 +2034,10 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
         end
     end)
 
-    -- CARD 3: STATUS
+       -- CARD 3: STATUS (GABUNGAN HALLOWEEN + YIN)
     local eventStatusCard, eventStatusContent = makeCard(eventPage, "📊 STATUS", 3)
     local eventStatusLbl = Instance.new("TextLabel")
-    eventStatusLbl.Size = UDim2.new(1, 0, 0, 50)
+    eventStatusLbl.Size = UDim2.new(1, 0, 0, 110)     -- ⭐ dari 50 → 110
     eventStatusLbl.BackgroundColor3 = C_local.Surface3
     eventStatusLbl.BackgroundTransparency = 0.3
     eventStatusLbl.BorderSizePixel = 0
@@ -2060,14 +2060,29 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     esPad.PaddingTop = UDim.new(0, 6)
     esPad.Parent = eventStatusLbl
 
-        task.spawn(function()
+    task.spawn(function()
         while eventStatusLbl.Parent do
             task.wait(0.5)
             local F = getFeatures()
+            local lines = {}
+
+            -- 🎃 HALLOWEEN
             if F and F.getHalloweenState then
                 local s = F.getHalloweenState()
-                eventStatusLbl.Text = s.Status .. "\nClaimed: " .. s.Claimed .. " | Rare: " .. s.RareClaimed
+                table.insert(lines, "🎃 " .. (s.Status or "Idle"))
+                table.insert(lines, string.format("   Claimed:%d Rare:%d",
+                    s.Claimed or 0, s.RareClaimed or 0))
             end
+
+            -- 🔮 YIN RITUAL
+            if F and F.getYinRitualState then
+                local y = F.getYinRitualState()
+                table.insert(lines, "🔮 " .. (y.Status or "Idle"))
+                table.insert(lines, string.format("   Yin:%d Yang:%d Ritual:%d Reward:%d",
+                    y.YinCount or 0, y.YangCount or 0, y.RitualCount or 0, y.RewardCount or 0))
+            end
+
+            eventStatusLbl.Text = table.concat(lines, "\n")
         end
     end)
 end
