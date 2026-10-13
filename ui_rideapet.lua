@@ -1836,11 +1836,20 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     -- CARD 1: AUTO HALLOWEEN
     local eventCard, eventContent = makeCard(eventPage, "🎃 AUTO HALLOWEEN", 1)
 
-    makeToggle(eventContent, "Auto Claim Candy", false, function(v)
+        makeToggle(eventContent, "Auto Claim Candy", false, function(v)
         local F = getFeatures()
         if F and F.getHalloweenState then F.getHalloweenState().Enabled = v end
         if v then notify("Halloween Auto: ON", "success")
         else notify("Halloween Auto: OFF", "info") end
+    end)
+
+    -- ⭐ AUTO YIN RITUAL — dipindah ke card ini
+    makeToggle(eventContent, "Auto Yin Ritual", false, function(v)
+        Shared.YinRitual_Enabled = v
+        local F = getFeatures()
+        if F and F.setYinRitualEnabled then F.setYinRitualEnabled(v) end
+        if v then notify("🔮 Yin Ritual: ON", "success")
+        else notify("🔮 Yin Ritual: OFF", "info") end
     end)
 
     local eventNote = Instance.new("TextLabel")
@@ -2062,19 +2071,11 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
         end
     end)
 
-    -- ═══════════════════════════════════════════════════════
-    -- ⭐ CARD 4: AUTO YIN RITUAL (BARU — GABUNG STATUS)
+       -- ═══════════════════════════════════════════════════════
+    -- ⭐ CARD 4: AUTO YIN RITUAL (STATUS DOANG)
     -- ═══════════════════════════════════════════════════════
     local eventYinCard, eventYinContent = makeCard(eventPage, "🔮 AUTO YIN RITUAL", 4)
-
-    -- === TOGGLE AUTO YIN RITUAL ===
-    makeToggle(eventYinContent, "Auto Yin Ritual", false, function(v)
-        Shared.YinRitual_Enabled = v
-        local F = getFeatures()
-        if F and F.setYinRitualEnabled then F.setYinRitualEnabled(v) end
-        if v then notify("🔮 Yin Ritual: ON", "success")
-        else notify("🔮 Yin Ritual: OFF", "info") end
-    end)
+    -- === TOGGLE DIPINDAH KE CARD AUTO HALLOWEEN ===
 
     -- === STATUS GABUNGAN (YIN + HALLOWEEN JADI 1) ===
     local yinStatusLbl = Instance.new("TextLabel")
