@@ -12,35 +12,49 @@ local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
 -- ============================================================
--- ANTI-AFK
+-- ANTI-AFK (FIXED)
 -- ============================================================
 function Features.startAntiAFK()
     task.spawn(function()
-        local vu = game:GetService("VirtualUser")
+        local VirtualUser = game:GetService("VirtualUser")
 
-        LocalPlayer.Idled:Connect(function()
+        -- ⭐ Pasang Idled listener SEKALI SAJA, di luar loop
+        local idledConn = LocalPlayer.Idled:Connect(function()
             if Shared.AntiAFK_Enabled == false then return end
             pcall(function()
-                vu:CaptureController()
-                vu:ClickButton2(Vector2.new())
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton2(Vector2.new())
             end)
         end)
 
+        -- ⭐ Cek fungsi mousemoverel sekali di awal
+        local hasMouseMove = (type(mousemoverel) == "function")
+
         while task.wait(60) do
             if Shared.AntiAFK_Enabled == false then continue end
+
+            -- Capture + klik (aman kalau di-pcall)
             pcall(function()
-                vu:CaptureController()
-                vu:ClickButton2(Vector2.new())
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton2(Vector2.new())
             end)
-            pcall(function()
-                mousemoverel(1, 0)
+
+            -- Mouse move opsional
+            if hasMouseMove then
+                pcall(function()
+                    mousemoverel(1, 0)
+                end)
                 task.wait(0.05)
-                mousemoverel(-1, 0)
-            end)
+                pcall(function()
+                    mousemoverel(-1, 0)
+                end)
+            end
         end
+
+        -- Cleanup (sebenarnya gak akan kepanggil karena while true, tapi jaga-jaga)
+        if idledConn then idledConn:Disconnect() end
     end)
 end
-
 -- ============================================================
 -- FLY STEAL
 -- ============================================================
@@ -2695,7 +2709,12 @@ function Features.Init(sharedState)
     if Shared.MutationSteal_Active == nil then Shared.MutationSteal_Active = false end
     if Shared.AutoRidePet_Enabled == nil then Shared.AutoRidePet_Enabled = true end
 
-    Features.startAntiAFK()
+    -- ⭐ Guard: cegah double-start anti-AFK
+    if not Features._antiAFKStarted then
+        Features._antiAFKStarted = true
+        Features.startAntiAFK()
+    end
+
     Features.startEggESP()
     Features.startPetESP()
     Features.startAutoSteal()
