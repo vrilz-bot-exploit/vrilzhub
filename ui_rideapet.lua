@@ -2071,61 +2071,11 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
         end
     end)
 
-       -- ═══════════════════════════════════════════════════════
-    -- ⭐ CARD 4: AUTO YIN RITUAL (STATUS DOANG)
+          -- ═══════════════════════════════════════════════════════
+    -- ⭐ CARD 4: AUTO YIN RITUAL
     -- ═══════════════════════════════════════════════════════
     local eventYinCard, eventYinContent = makeCard(eventPage, "🔮 AUTO YIN RITUAL", 4)
     -- === TOGGLE DIPINDAH KE CARD AUTO HALLOWEEN ===
-
-    -- === STATUS GABUNGAN (YIN + HALLOWEEN JADI 1) ===
-    local yinStatusLbl = Instance.new("TextLabel")
-    yinStatusLbl.Size = UDim2.new(1, 0, 0, 80)
-    yinStatusLbl.BackgroundColor3 = C_local.Surface3
-    yinStatusLbl.BackgroundTransparency = 0.3
-    yinStatusLbl.BorderSizePixel = 0
-    yinStatusLbl.Text = "⏸️ Idle"
-    yinStatusLbl.TextColor3 = C_local.Text
-    yinStatusLbl.Font = Enum.Font.Code
-    yinStatusLbl.TextSize = CFG.FONT_MUTED
-    yinStatusLbl.TextXAlignment = Enum.TextXAlignment.Left
-    yinStatusLbl.TextYAlignment = Enum.TextYAlignment.Top
-    yinStatusLbl.ZIndex = 3
-    yinStatusLbl.Parent = eventYinContent
-    registerTheme(yinStatusLbl, "Text", "TextColor3")
-
-    local yinStatusCorner = Instance.new("UICorner")
-    yinStatusCorner.CornerRadius = UDim.new(0, 6)
-    yinStatusCorner.Parent = yinStatusLbl
-
-    local yinStatusPad = Instance.new("UIPadding")
-    yinStatusPad.PaddingLeft = UDim.new(0, 8)
-    yinStatusPad.PaddingTop = UDim.new(0, 6)
-    yinStatusPad.Parent = yinStatusLbl
-
-    task.spawn(function()
-        while yinStatusLbl.Parent do
-            task.wait(0.5)
-            local F = getFeatures()
-            local lines = {}
-
-            -- Halloween di ATAS
-            if F and F.getHalloweenState then
-                local s = F.getHalloweenState()
-                table.insert(lines, "🎃 Candy: " .. (s.Status or "..."))
-                table.insert(lines, string.format("   Claimed:%d Rare:%d", s.Claimed or 0, s.RareClaimed or 0))
-            end
-
-            -- Yin Ritual di BAWAH
-            if F and F.getYinRitualState then
-                local s = F.getYinRitualState()
-                table.insert(lines, "🔮 Yin: " .. (s.Status or "..."))
-                table.insert(lines, string.format("   Yin:%d Yang:%d Ritual:%d Reward:%d",
-                    s.YinCount or 0, s.YangCount or 0, s.RitualCount or 0, s.RewardCount or 0))
-            end
-
-            yinStatusLbl.Text = table.concat(lines, "\n")
-        end
-    end)
 end
 
 -- ============================================================
