@@ -2070,12 +2070,6 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
             end
         end
     end)
-
-          -- ═══════════════════════════════════════════════════════
-    -- ⭐ CARD 4: AUTO YIN RITUAL
-    -- ═══════════════════════════════════════════════════════
-    local eventYinCard, eventYinContent = makeCard(eventPage, "🔮 AUTO YIN RITUAL", 4)
-    -- === TOGGLE DIPINDAH KE CARD AUTO HALLOWEEN ===
 end
 
 -- ============================================================
