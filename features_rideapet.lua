@@ -12,49 +12,75 @@ local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
 -- ============================================================
--- ANTI-AFK (FIXED)
+-- ANTI-AFK (FIXED v2)
 -- ============================================================
 function Features.startAntiAFK()
-    task.spawn(function()
-        local VirtualUser = game:GetService("VirtualUser")
+    -- ⭐ Guard: cegah double-start
+    if Features._antiAFKStarted then return end
+    Features._antiAFKStarted = true
 
-        -- ⭐ Pasang Idled listener SEKALI SAJA, di luar loop
-        local idledConn = LocalPlayer.Idled:Connect(function()
-            if Shared.AntiAFK_Enabled == false then return end
-            pcall(function()
-                VirtualUser:CaptureController()
-                VirtualUser:ClickButton2(Vector2.new())
-            end)
+    local VirtualUser = game:GetService("VirtualUser")
+
+    -- ⭐ Pastikan Shared ada (fallback kalau nil)
+    if not Shared then Shared = {} end
+    if Shared.AntiAFK_Enabled == nil then Shared.AntiAFK_Enabled = true end
+
+    -- ⭐ Deteksi mousemoverel sekali
+    local hasMouseMove = (type(mousemoverel) == "function")
+
+    -- ⭐ Fungsi aksi anti-AFK (dipanggil dari 2 tempat)
+    local function doAntiAFKAction()
+        if Shared.AntiAFK_Enabled == false then return end
+
+        pcall(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new())
         end)
 
-        -- ⭐ Cek fungsi mousemoverel sekali di awal
-        local hasMouseMove = (type(mousemoverel) == "function")
+        if hasMouseMove then
+            pcall(function() mousemoverel(1, 0) end)
+            task.wait(0.05)
+            pcall(function() mousemoverel(-1, 0) end)
+        end
+    end
 
-        while task.wait(60) do
-            if Shared.AntiAFK_Enabled == false then continue end
+    -- ⭐ 1) Idled listener — RE-ARM otomatis kalau koneksi putus
+    task.spawn(function()
+        while true do
+            if not LocalPlayer or not LocalPlayer.Parent then
+                task.wait(1)
+                continue
+            end
 
-            -- Capture + klik (aman kalau di-pcall)
-            pcall(function()
-                VirtualUser:CaptureController()
-                VirtualUser:ClickButton2(Vector2.new())
+            local conn
+            local ok = pcall(function()
+                conn = LocalPlayer.Idled:Connect(function()
+                    if Shared.AntiAFK_Enabled == false then return end
+                    doAntiAFKAction()
+                end)
             end)
 
-            -- Mouse move opsional
-            if hasMouseMove then
-                pcall(function()
-                    mousemoverel(1, 0)
-                end)
-                task.wait(0.05)
-                pcall(function()
-                    mousemoverel(-1, 0)
-                end)
+            if ok and conn then
+                while conn.Connected do
+                    task.wait(1)
+                end
+                pcall(function() conn:Disconnect() end)
             end
-        end
 
-        -- Cleanup (sebenarnya gak akan kepanggil karena while true, tapi jaga-jaga)
-        if idledConn then idledConn:Disconnect() end
+            task.wait(1)
+        end
+    end)
+
+    -- ⭐ 2) Periodic tick — wait dulu, baru cek kondisi
+    task.spawn(function()
+        while true do
+            task.wait(60)
+            if Shared.AntiAFK_Enabled == false then continue end
+            doAntiAFKAction()
+        end
     end)
 end
+
 -- ============================================================
 -- FLY STEAL
 -- ============================================================
