@@ -2553,29 +2553,31 @@ if Shared.AutoMutation_Enabled then
     end
 end
 
--- ⭐ PRIORITY 2: Auto Yin Ritual — kalo ada Yin/Yang di Runtime
+-- ⭐ PRIORITY 2: Auto Yin Ritual — tunggu SAMPE SELESAI FULL
 if Shared.YinRitual_Enabled then
-    local hr = Workspace:FindFirstChild("HeadlessRitual")
-    local rt = hr and hr:FindFirstChild("Runtime")
-    local hasYinYang = false
-    
-    if rt then
-        for _, obj in ipairs(rt:GetChildren()) do
-            if obj:IsA("Model") and (obj.Name == "Yin" or obj.Name == "Yang") then
-                hasYinYang = true
-                break
-            end
-        end
-    end
-
     local yinState = Features.getYinRitualState and Features.getYinRitualState()
-    if hasYinYang or (yinState and yinState.Active) then
-        HalloweenState.Status = "⏸️ Waiting Yin Ritual..."
+
+    -- Cek apakah Yin lagi aktif (scanning / collect / place / reward)
+    if yinState and yinState.Active then
+        HalloweenState.Status = "⏸️ Waiting Yin Ritual selesai..."
         task.wait(1)
         continue
     end
-end
 
+    -- Double-check: masih ada Yin/Yang di runtime = belum selesai
+    local hr = Workspace:FindFirstChild("HeadlessRitual")
+    local rt = hr and hr:FindFirstChild("Runtime")
+    if rt then
+        for _, obj in ipairs(rt:GetChildren()) do
+            if obj:IsA("Model") and (obj.Name == "Yin" or obj.Name == "Yang") then
+                HalloweenState.Status = "⏸️ Waiting Yin Ritual (masih ada item)..."
+                task.wait(1)
+                continue
+            end
+        end
+    end
+end
+                
 -- ⭐ PRIORITY 3: Mutation Steal
 if Shared.MutationSteal_Active and Shared.MutationSteal_Enabled then
     HalloweenState.Status = "⏳ Waiting for Mutation Steal..."
@@ -2603,27 +2605,37 @@ end
                 end
             end
                 
-            local char = LocalPlayer.Character
-            local root = char and char:FindFirstChild("HumanoidRootPart")
-            if not root then task.wait(1) continue end
+            -- ⭐ SET FLAG GLOBAL kalo Halloween lagi aktif
+_G.VRILZ_HalloweenBusy = true
 
-                        if not isInHalloweenZone() then
+local char = LocalPlayer.Character
+local root = char and char:FindFirstChild("HumanoidRootPart")
+if not root then 
+    _G.VRILZ_HalloweenBusy = false
+    task.wait(1) 
+    continue 
+end
+
+                                    if not isInHalloweenZone() then
                 HalloweenState.Status = "🚪 Entering area..."
                 if not halloweenEnterZone() then
+                    _G.VRILZ_HalloweenBusy = false
                     task.wait(2)
                     continue
                 end
             end
 
-                        if isCarryingCandy() then
+            if isCarryingCandy() then
                 HalloweenState.Status = "🎒 Carrying candy — processing..."
+                _G.VRILZ_HalloweenBusy = false
                 task.wait(1)
                 continue
             end
 
-                        local candies = getHalloweenCandyList()
+            local candies = getHalloweenCandyList()
             if #candies == 0 then
                 HalloweenState.Status = "⏳ Waiting for candy spawn... (" .. HalloweenState.Claimed .. " claimed)"
+                _G.VRILZ_HalloweenBusy = false
                 task.wait(2)
                 continue
             end
@@ -2715,8 +2727,10 @@ end
             end
 
                         HalloweenState.Status = "🏠 Returning to Halloween base..."
-            halloweenReturnToBase()
-            task.wait(HalloweenCfg.RETURN_WAIT)
+halloweenReturnToBase()
+task.wait(HalloweenCfg.RETURN_WAIT)
+
+_G.VRILZ_HalloweenBusy = false   -- ⭐ RESET FLAG
         end
     end)
 end
@@ -2978,16 +2992,32 @@ function Features.startAutoYinRitual()
                 continue
             end
 
-            -- PRIORITY: Auto Mutation lebih utama
-            if Shared.AutoMutation_Enabled then
-                local mutState = Features.getMutationState and Features.getMutationState()
-                if mutState and (mutState.Running or mutState.EggLocked or mutState.StealPaused) then
-                    YinRitualState.Status = "⏸️ Waiting for Auto Mutation..."
-                    YinRitualState.Active = false
-                    task.wait(1)
-                    continue
-                end
-            end
+            -- PRIORITY 1: Auto Mutation
+if Shared.AutoMutation_Enabled then
+    local mutState = Features.getMutationState and Features.getMutationState()
+    if mutState and (mutState.Running or mutState.EggLocked or mutState.StealPaused) then
+        YinRitualState.Status = "⏸️ Waiting for Auto Mutation..."
+        YinRitualState.Active = false
+        task.wait(1)
+        continue
+    end
+end
+
+-- ⭐ PRIORITY 2: Auto Halloween — tunggu sampe dia selesai
+if _G.VRILZ_HalloweenBusy then
+    YinRitualState.Status = "⏸️ Waiting Auto Halloween selesai..."
+    YinRitualState.Active = false
+    task.wait(1)
+    continue
+end
+
+-- ⭐ PRIORITY 3: Mutation Steal
+if Shared.MutationSteal_Active and Shared.MutationSteal_Enabled then
+    YinRitualState.Status = "⏳ Waiting for Mutation Steal..."
+    YinRitualState.Active = false
+    task.wait(1)
+    continue
+end
 
             local char = LocalPlayer.Character
             local hum = char and char:FindFirstChildOfClass("Humanoid")
@@ -3072,6 +3102,7 @@ function Features.setYinRitualEnabled(v)
     YinRitualState.Enabled = v
     if v then
         YinRitualState.Status = "▶️ Starting..."
+        YinRitualState.Active = true   -- ⭐ TAMBAH INI
     else
         YinRitualState.Status = "⏸️ Idle"
         YinRitualState.Active = false
