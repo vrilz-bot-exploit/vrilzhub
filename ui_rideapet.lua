@@ -4007,39 +4007,7 @@ local function buildMainWindow(parent)
     ipNote.LayoutOrder = 2
     ipNote.Parent = ipContent
 
-    local farmCard, farmContent = makeCard(autoPage, "AUTO FARM", 3)
-    makeToggle(farmContent, "Activate Auto Farm", false, function(v) Shared.AutoFarm_Enabled = v end)
-    makeToggle(farmContent, "Auto Return to Plot", false, function(v) Shared.AutoReturn_Enabled = v end)
-
-    local rarTitle = Instance.new("TextLabel")
-    rarTitle.Size = UDim2.new(1, 0, 0, 16)
-    rarTitle.BackgroundTransparency = 1
-    rarTitle.Text = "Select Rarity Egg:"
-    rarTitle.TextColor3 = C.Muted
-    rarTitle.Font = Enum.Font.GothamSemibold
-    rarTitle.TextSize = CFG.FONT_MUTED
-    rarTitle.TextXAlignment = Enum.TextXAlignment.Left
-    rarTitle.LayoutOrder = 3
-    rarTitle.Parent = farmContent
-
-    makeDropdownMulti(farmContent, RarityList, Shared.SelectedRarities, nil, function(t) end)
-
-    local notifTitle = Instance.new("TextLabel")
-    notifTitle.Size = UDim2.new(1, 0, 0, 16)
-    notifTitle.BackgroundTransparency = 1
-    notifTitle.Text = "Notify only for rarity:"
-    notifTitle.TextColor3 = C.Muted
-    notifTitle.Font = Enum.Font.GothamSemibold
-    notifTitle.TextSize = CFG.FONT_MUTED
-    notifTitle.TextXAlignment = Enum.TextXAlignment.Left
-    notifTitle.LayoutOrder = 20
-    notifTitle.Parent = farmContent
-
-    makeDropdownGlobal(farmContent, RarityList, "Legendary", function(v)
-        Shared.RarityNotifThreshold = v
-    end)
-
-                local autoCard, autoContent = makeCard(autoPage, "OTHER AUTO", 4)
+                local autoCard, autoContent = makeCard(autoPage, "OTHER AUTO", 3)
     
     -- Wrap semua variable dropdown di do...end biar gak numpuk local register
     do
@@ -4560,57 +4528,6 @@ end)
         buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti, notify)
         registerTab("Event", "🎃", "Event")
     end
-   -- TAB VOLCANIC
-local volcanicPage = createPage("Vulcanic")
-pages.Vulcanic = volcanicPage
-
-local volcanicHuntCard, volcanicHuntContent = makeCard(volcanicPage, "🌋 VOLCANIC HUNTER", 1)
-
-makeToggle(volcanicHuntContent, "Auto Hunt Volcanic", false, function(v)
-    Shared.VolcanicHunt_Enabled = v
-    if v then
-        notify("🌋 Volcanic Hunt enabled", "success")
-    else
-        notify("🌋 Volcanic Hunt disabled", "info")
-    end
-end)
-
-makeToggle(volcanicHuntContent, "Auto Return to Plot", false, function(v)
-    Shared.VolcanicReturn_Enabled = v
-    if v then
-        notify("🏠 Auto Return enabled", "success")
-    end
-end)
-
-makeToggle(volcanicHuntContent, "Auto Mutation in Lava", false, function(v)
-    Shared.VolcanicMutation_Enabled = v
-    if v then
-        notify("🔥 Auto Mutation enabled", "success")
-    else
-        notify("🔥 Auto Mutation disabled", "info")
-    end
-end)
-
-makeToggle(volcanicHuntContent, "Instant Collect", false, function(v)
-    Shared.InstantPickup_Enabled = v
-end)
-
-local volcanicNote = Instance.new("TextLabel")
-volcanicNote.Size = UDim2.new(1, 0, 0, 96)
-volcanicNote.BackgroundTransparency = 1
-volcanicNote.Text = "⚠️ IMPORTANT: Turn OFF Auto Farm & Auto Steal first!\n\n✅ Then enable 'Auto Hunt Volcanic'\n✅ Enable 'Auto Return' to come back to base\n✅ Optional: Enable 'Auto Mutation' if you want mutation"
-volcanicNote.TextColor3 = C.Muted
-volcanicNote.Font = Enum.Font.GothamSemibold
-volcanicNote.TextSize = CFG.FONT_MUTED
-volcanicNote.TextWrapped = true
-volcanicNote.TextXAlignment = Enum.TextXAlignment.Left
-volcanicNote.TextYAlignment = Enum.TextYAlignment.Top
-volcanicNote.LayoutOrder = 10
-volcanicNote.ZIndex = 3
-volcanicNote.Parent = volcanicHuntContent
-registerTheme(volcanicNote, "Muted", "TextColor3")
-
-registerTab("Vulcanic", "🌋", "Vulcanic")
 
     -- ============================================================
     -- TAB EGG MUTATION (BARU)
