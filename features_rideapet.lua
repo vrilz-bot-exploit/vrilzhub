@@ -1925,17 +1925,28 @@ function Features.isHoldingEgg()
 end
 
 -- ============================================================
--- MUTATION STEAL
+-- MUTATION STEAL — VOLCANIC PRIORITY + STEAL BIASA
+-- Volcanic Egg spawn → waypoint cave → magma → return
+-- Egg biasa → TP langsung (by Rarity/Name filter)
 -- ============================================================
 function Features.startMutationSteal()
     task.spawn(function()
         while task.wait(0.5) do
             if not Shared.MutationSteal_Enabled then
-                Shared.MutationSteal_Active = false   -- ← TAMBAH BARIS INI
+                Shared.MutationSteal_Active = false
                 continue
             end
 
+            -- Kalo Auto Mutation lagi jalan, tunggu
             if Features.getMutationState and Features.getMutationState().Running then
+                Shared.MutationSteal_Active = false
+                task.wait(1)
+                continue
+            end
+
+            -- Kalo Auto Volcanic Hunt aktif, skip (biar gak bentrok)
+            if Shared.VolcanicHunt_Enabled then
+                Shared.MutationSteal_Active = false
                 task.wait(1)
                 continue
             end
@@ -1948,17 +1959,151 @@ function Features.startMutationSteal()
                 continue
             end
 
+            -- Kalo udah bawa egg, tunggu
             if Features.isHoldingEgg and Features.isHoldingEgg() then
+                Shared.MutationSteal_Active = false
                 task.wait(0.5)
                 continue
             end
 
             local basket = LocalPlayer:FindFirstChild("Basket")
             if basket and #basket:GetChildren() > 0 then
+                Shared.MutationSteal_Active = false
                 task.wait(0.5)
                 continue
             end
 
+            -- ⭐ PRIORITY 1: CEK VOLCANIC EGG DULUAN
+            local volcanicEgg = getVolcanicEgg()
+
+            if volcanicEgg and volcanicEgg.Parent then
+                Shared.MutationSteal_Active = true
+
+                local eggPart = volcanicEgg:FindFirstChildWhichIsA("BasePart", true)
+                if not eggPart then
+                    Shared.MutationSteal_Active = false
+                    task.wait(1)
+                    continue
+                end
+
+                -- Step 1: TP ke spawn Volcanic (kalo jauh)
+                local spawnPart = getVolcanicSpawn()
+                if spawnPart then
+                    local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if curRoot then
+                        local d = (spawnPart.Position - curRoot.Position).Magnitude
+                        if d > 50 then
+                            curRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
+                            curRoot.Velocity = Vector3.zero
+                            curRoot.AssemblyLinearVelocity = Vector3.zero
+                            task.wait(0.5)
+                        end
+                    end
+                end
+
+                -- Step 2: Masuk cave pake waypoint
+                local reachedEgg = false
+                for i, wp in ipairs(VolcanicWaypoints) do
+                    if not Shared.MutationSteal_Enabled then break end
+                    tpWaypoint(wp)
+                    local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if curRoot and eggPart and eggPart.Parent then
+                        local d = (eggPart.Position - curRoot.Position).Magnitude
+                        if d <= 40 then
+                            reachedEgg = true
+                            break
+                        end
+                    end
+                end
+
+                -- Step 3: Kalo belum sampe, TP langsung ke egg
+                if not reachedEgg then
+                    local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if curRoot and eggPart and eggPart.Parent then
+                        curRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
+                        curRoot.Velocity = Vector3.zero
+                        curRoot.AssemblyLinearVelocity = Vector3.zero
+                        task.wait(0.3)
+                    end
+                end
+
+                -- Step 4: Ambil egg (pake volcanicPickupVerified)
+                local picked = false
+                if volcanicEgg.Parent then
+                    picked = volcanicPickupVerified(volcanicEgg)
+                else
+                    picked = isHoldingEggMutation()
+                end
+
+                if not picked or not isHoldingEggMutation() then
+                    Shared.MutationSteal_Active = false
+                    task.wait(2)
+                    continue
+                end
+
+                -- Step 5: Keluar cave (reverse waypoint)
+                local exited = exitCave()
+                if not exited or not isHoldingEggMutation() then
+                    Shared.MutationSteal_Active = false
+                    task.wait(2)
+                    continue
+                end
+
+                -- Step 6: KE MAGMA (drop)
+                if isHoldingEggMutation() then
+                    task.wait(0.5)
+                    local safePos = findSafeVolcanoPos()
+                    if safePos then
+                        local rootLava = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                        if rootLava then
+                            rootLava.CFrame = CFrame.new(safePos)
+                            rootLava.Velocity = Vector3.zero
+                            rootLava.AssemblyLinearVelocity = Vector3.zero
+                        end
+                    end
+                    task.wait(1.5)
+
+                    local dropWaited = 0
+                    local eggReleased = false
+                    while dropWaited < 15 do
+                        if not Shared.MutationSteal_Enabled then break end
+                        fireVolcanoDip()
+                        task.wait(1.5)
+                        dropWaited = dropWaited + 1.5
+                        if not isHoldingEggMutation() then
+                            eggReleased = true
+                            break
+                        end
+                    end
+
+                    if eggReleased then
+                        local waitStart = os.clock()
+                        while os.clock() - waitStart < 20 do
+                            if not Shared.MutationSteal_Enabled then break end
+                            task.wait(1)
+                            if isHoldingEggMutation() then
+                                if Shared.Notify then
+                                    Shared.Notify("🔥 Mutation selesai!", "success")
+                                end
+                                break
+                            end
+                        end
+                    end
+                end
+
+                -- Step 7: AUTO RETURN ke plot
+                task.wait(0.4)
+                local oldFlag = Shared.AutoReturn_Enabled
+                Shared.AutoReturn_Enabled = true
+                returnToMyPlot()
+                Shared.AutoReturn_Enabled = oldFlag
+
+                Shared.MutationSteal_Active = false
+                task.wait(3)
+                continue  -- ⭐ Lanjut loop, cek volcanic lagi
+            end
+
+            -- ⭐ PRIORITY 2: KALO GAK ADA VOLCANIC → STEAL EGG BIASA (by Rarity/Name)
             local stealMode = Shared.MutationStealMode or "Rarity"
             local targetEgg = nil
 
@@ -1985,18 +2130,22 @@ function Features.startMutationSteal()
                 if best then targetEgg = best.egg end
             end
 
-                        if not targetEgg then
-                Shared.MutationSteal_Active = false   -- ← TAMBAH BARIS INI (egg habis)
+            if not targetEgg then
+                Shared.MutationSteal_Active = false
                 task.wait(0.5)
                 continue
             end
 
-            Shared.MutationSteal_Active = true        -- ← TAMBAH BARIS INI (ada egg)
+            Shared.MutationSteal_Active = true
 
             local egg = targetEgg
             local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
             local prompt = egg:FindFirstChild("Pickup", true)
-            if not eggPart or not prompt then continue end
+            if not eggPart or not prompt then
+                Shared.MutationSteal_Active = false
+                task.wait(0.5)
+                continue
+            end
 
             if prompt:IsA("ProximityPrompt") then
                 prompt.HoldDuration = 0
@@ -2026,11 +2175,11 @@ function Features.startMutationSteal()
                 end
             end
 
+            Shared.MutationSteal_Active = false
             task.wait(0.3)
         end
     end)
 end
-
 -- ============================================================
 -- AUTO HATCH LUCK
 -- ============================================================
