@@ -2051,13 +2051,71 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     esPad.PaddingTop = UDim.new(0, 6)
     esPad.Parent = eventStatusLbl
 
-    task.spawn(function()
+        task.spawn(function()
         while eventStatusLbl.Parent do
             task.wait(0.5)
             local F = getFeatures()
             if F and F.getHalloweenState then
                 local s = F.getHalloweenState()
                 eventStatusLbl.Text = s.Status .. "\nClaimed: " .. s.Claimed .. " | Rare: " .. s.RareClaimed
+            end
+        end
+    end)
+
+    -- ⭐ CARD 4: AUTO YIN RITUAL
+    local yinCard, yinContent = makeCard(eventPage, "🔮 AUTO YIN RITUAL", 4)
+
+    makeToggle(yinContent, "Auto Yin Ritual", false, function(v)
+        Shared.YinRitual_Enabled = v
+        local F = getFeatures()
+        if F and F.setYinRitualEnabled then
+            F.setYinRitualEnabled(v)
+        end
+        if v then
+            notify("🔮 Auto Yin Ritual: ON", "success")
+        else
+            notify("🔮 Auto Yin Ritual: OFF", "info")
+        end
+    end)
+
+    local yinStatusLbl = Instance.new("TextLabel")
+    yinStatusLbl.Size = UDim2.new(1, 0, 0, 64)
+    yinStatusLbl.BackgroundColor3 = C_local.Surface3
+    yinStatusLbl.BackgroundTransparency = 0.3
+    yinStatusLbl.BorderSizePixel = 0
+    yinStatusLbl.Text = "⏸️ Idle"
+    yinStatusLbl.TextColor3 = C_local.Text
+    yinStatusLbl.Font = Enum.Font.Code
+    yinStatusLbl.TextSize = CFG.FONT_MUTED
+    yinStatusLbl.TextXAlignment = Enum.TextXAlignment.Left
+    yinStatusLbl.TextYAlignment = Enum.TextYAlignment.Top
+    yinStatusLbl.ZIndex = 3
+    yinStatusLbl.Parent = yinContent
+    registerTheme(yinStatusLbl, "Text", "TextColor3")
+
+    local yinStatusCorner = Instance.new("UICorner")
+    yinStatusCorner.CornerRadius = UDim.new(0, 6)
+    yinStatusCorner.Parent = yinStatusLbl
+
+    local yinStatusPad = Instance.new("UIPadding")
+    yinStatusPad.PaddingLeft = UDim.new(0, 8)
+    yinStatusPad.PaddingTop = UDim.new(0, 6)
+    yinStatusPad.Parent = yinStatusLbl
+
+    task.spawn(function()
+        while yinStatusLbl.Parent do
+            task.wait(0.5)
+            local F = getFeatures()
+            if F and F.getYinRitualState then
+                local s = F.getYinRitualState()
+                yinStatusLbl.Text = string.format(
+                    "Status: %s\n🔵 Yin: %d  |  🔴 Yang: %d\n🔮 Ritual: %d  |  🎁 Reward: %d",
+                    s.Status or "...",
+                    s.YinCount or 0,
+                    s.YangCount or 0,
+                    s.RitualCount or 0,
+                    s.RewardCount or 0
+                )
             end
         end
     end)
@@ -5761,8 +5819,9 @@ function UI.Init(sharedState)
         ["Flaming Egg"] = false, ["Mushroom Egg"] = false, ["Asteroid Egg"] = false,
         ["Giant Egg"] = false, ["Diamond Egg"] = false, ["Dragon Egg"] = false,
     }
-        Shared.FPSBoost_Enabled = false
+            Shared.FPSBoost_Enabled = false
     Shared.HD4K_Enabled = false
+    Shared.YinRitual_Enabled = false
 
     -- Live Chat state
     Shared.LiveChat_Messages = {}
