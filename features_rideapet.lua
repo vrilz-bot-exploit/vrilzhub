@@ -2543,13 +2543,45 @@ function Features.startAutoHalloween()
                 continue
             end
 
-                        -- ⬇️ TAMBAH BLOK INI (6 baris)
-            if Shared.MutationSteal_Active and Shared.MutationSteal_Enabled then
-                HalloweenState.Status = "⏳ Waiting for Mutation Steal to finish..."
-                task.wait(1)
-                continue
+                        -- ⭐ PRIORITY 1: Auto Mutation — paling utama
+if Shared.AutoMutation_Enabled then
+    local mutState = Features.getMutationState and Features.getMutationState()
+    if mutState and (mutState.Running or mutState.EggLocked or mutState.StealPaused) then
+        HalloweenState.Status = "⏸️ Waiting Auto Mutation..."
+        task.wait(1)
+        continue
+    end
+end
+
+-- ⭐ PRIORITY 2: Auto Yin Ritual — kalo ada Yin/Yang di Runtime
+if Shared.YinRitual_Enabled then
+    local hr = Workspace:FindFirstChild("HeadlessRitual")
+    local rt = hr and hr:FindFirstChild("Runtime")
+    local hasYinYang = false
+    
+    if rt then
+        for _, obj in ipairs(rt:GetChildren()) do
+            if obj:IsA("Model") and (obj.Name == "Yin" or obj.Name == "Yang") then
+                hasYinYang = true
+                break
             end
-            -- ⬆️ SAMPAI SINI
+        end
+    end
+
+    local yinState = Features.getYinRitualState and Features.getYinRitualState()
+    if hasYinYang or (yinState and yinState.Active) then
+        HalloweenState.Status = "⏸️ Waiting Yin Ritual..."
+        task.wait(1)
+        continue
+    end
+end
+
+-- ⭐ PRIORITY 3: Mutation Steal
+if Shared.MutationSteal_Active and Shared.MutationSteal_Enabled then
+    HalloweenState.Status = "⏳ Waiting for Mutation Steal..."
+    task.wait(1)
+    continue
+end
 
                         -- ⭐ LEAVE LOGIC: cuma leave kalau ADA fitur steal lain yang nyala
             local stealFeatureOn = Shared.AutoSteal_Enabled
@@ -2699,6 +2731,354 @@ function Features.isPremiumUser()
 end
 
 -- ============================================================
+-- AUTO YIN RITUAL — COLLECT YIN/YANG → PLACE → REWARD → BASE
+-- Priority: Auto Mutation > Yin Ritual > Halloween
+-- ============================================================
+local YinRitualState = {
+    Enabled = false,
+    Status = "⏸️ Idle",
+    YinCount = 0,
+    YangCount = 0,
+    RitualCount = 0,
+    RewardCount = 0,
+    Active = false,
+}
+
+local YinRitualCfg = {
+    SCAN_INTERVAL = 0.5,
+    TP_HEIGHT = 3,
+    COLLECT_TIMEOUT = 5,
+    PLACE_WAIT = 0.5,
+    RITUAL_WAIT = 3,
+    REWARD_WAIT = 2,
+}
+
+local function findRitualItem(itemName)
+    local hr = Workspace:FindFirstChild("HeadlessRitual")
+    if not hr then return nil end
+    local rt = hr:FindFirstChild("Runtime")
+    if not rt then return nil end
+    for _, obj in ipairs(rt:GetChildren()) do
+        if obj:IsA("Model") and obj.Name:lower() == itemName:lower() then
+            local root = obj:FindFirstChild("Root")
+            if root then
+                local p = root:FindFirstChild("RitualPrompt")
+                if p and p:IsA("ProximityPrompt") then
+                    return obj
+                end
+            end
+        end
+    end
+    return nil
+end
+
+local function yinTp(pos)
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return false end
+    root.CFrame = CFrame.new(pos + Vector3.new(0, YinRitualCfg.TP_HEIGHT, 0))
+    root.Velocity = Vector3.zero
+    root.AssemblyLinearVelocity = Vector3.zero
+    return true
+end
+
+local function yinFirePrompt(prompt)
+    if not prompt then return false end
+    pcall(function()
+        prompt.Enabled = true
+        prompt.HoldDuration = 0
+        prompt.MaxActivationDistance = math.huge
+        prompt.RequiresLineOfSight = false
+    end)
+
+    if typeof(fireproximityprompt) == "function" then
+        local ok = pcall(fireproximityprompt, prompt)
+        if ok then return true end
+    end
+
+    local ok2 = pcall(function()
+        prompt:InputHoldBegin()
+        task.wait(0.1)
+        prompt:InputHoldEnd()
+    end)
+    return ok2
+end
+
+local function yinCollect(name)
+    local item = findRitualItem(name)
+    if not item then return false end
+
+    local startTime = os.clock()
+    while os.clock() - startTime < YinRitualCfg.COLLECT_TIMEOUT do
+        if not YinRitualState.Enabled then return false end
+
+        item = findRitualItem(name)
+        if not item then return true end
+
+        local root = item:FindFirstChild("Root")
+        local prompt = root and root:FindFirstChild("RitualPrompt")
+        if root then yinTp(root.Position) end
+        if prompt then yinFirePrompt(prompt) end
+
+        task.wait(0.25)
+    end
+    return findRitualItem(name) == nil
+end
+
+local function yinPlace(name)
+    local hr = Workspace:FindFirstChild("HeadlessRitual")
+    if not hr then return false end
+    local altar = hr:FindFirstChild("Altar")
+    if not altar then return false end
+    local slot = altar:FindFirstChild(name .. "Placement")
+    if not slot then return false end
+
+    local prompt = slot:FindFirstChild("RitualPrompt")
+    if not prompt then return false end
+
+    local pos
+    if slot:IsA("Attachment") then
+        pos = slot.WorldPosition
+    else
+        pos = slot.Position
+    end
+
+    yinTp(pos)
+    task.wait(0.2)
+    yinFirePrompt(prompt)
+    task.wait(YinRitualCfg.PLACE_WAIT)
+    return true
+end
+
+local function yinCollectReward()
+    local hr = Workspace:FindFirstChild("HeadlessRitual")
+    if not hr then return false end
+
+    for _, obj in ipairs(hr:GetDescendants()) do
+        if obj:IsA("ProximityPrompt") then
+            local text = (obj.ActionText .. " " .. obj.ObjectText):lower()
+            if text:find("reward") or text:find("claim") or text:find("collect")
+               or text:find("take") or text:find("open") then
+                local parent = obj.Parent
+                if parent then
+                    local pos = nil
+                    if parent:IsA("BasePart") then
+                        pos = parent.Position
+                    elseif parent:IsA("Attachment") then
+                        pos = parent.WorldPosition
+                    elseif parent:IsA("Model") then
+                        local ok, pivot = pcall(function() return parent:GetPivot().Position end)
+                        if ok then pos = pivot end
+                    end
+                    if pos then
+                        yinTp(pos)
+                        task.wait(0.3)
+                        yinFirePrompt(obj)
+                        task.wait(0.5)
+                        return true
+                    end
+                end
+            end
+        end
+    end
+
+    local rsv = Workspace:FindFirstChild("RitualSealVisuals")
+    if rsv then
+        for _, obj in ipairs(rsv:GetDescendants()) do
+            if obj:IsA("ProximityPrompt") then
+                local text = (obj.ActionText .. " " .. obj.ObjectText):lower()
+                if text:find("reward") or text:find("claim") or text:find("collect") then
+                    local parent = obj.Parent
+                    if parent then
+                        local pos = nil
+                        if parent:IsA("BasePart") then
+                            pos = parent.Position
+                        elseif parent:IsA("Attachment") then
+                            pos = parent.WorldPosition
+                        end
+                        if pos then
+                            yinTp(pos)
+                            task.wait(0.3)
+                            yinFirePrompt(obj)
+                            task.wait(0.5)
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return false
+end
+
+local function yinReturnToBase()
+    local base = nil
+    local candidates = {
+        "HalloweenHomeAnchor", "HalloweenBase", "HalloweenSpawn",
+        "HalloweenBaseplate", "HalloweenStart",
+    }
+    for _, name in ipairs(candidates) do
+        local part = Workspace:FindFirstChild(name, true)
+        if part and part:IsA("BasePart") then
+            base = part
+            break
+        end
+    end
+
+    if not base then
+        local halloweenFolder = Workspace:FindFirstChild("Halloween")
+        if halloweenFolder then
+            local spawn = halloweenFolder:FindFirstChildWhichIsA("SpawnLocation", true)
+            if spawn then base = spawn end
+            if not base then
+                local bp = halloweenFolder:FindFirstChildWhichIsA("BasePart", true)
+                if bp then base = bp end
+            end
+        end
+    end
+
+    if not base then return false end
+
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return false end
+
+    local startPos = root.Position
+    local targetPos = base.Position + Vector3.new(0, 5, 0)
+    local totalDist = (targetPos - startPos).Magnitude
+    local stepSize = 100
+    local steps = math.ceil(totalDist / stepSize)
+
+    for i = 1, steps do
+        local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if not r then break end
+
+        local dist = math.min(stepSize * i, totalDist)
+        local dir = (targetPos - startPos)
+        dir = Vector3.new(dir.X, 0, dir.Z)
+        if dir.Magnitude > 1 then dir = dir.Unit end
+
+        r.CFrame = CFrame.new(startPos + dir * dist + Vector3.new(0, 5, 0))
+        r.Velocity = Vector3.zero
+        r.AssemblyLinearVelocity = Vector3.zero
+        task.wait(0.08)
+    end
+
+    task.wait(0.3)
+    return true
+end
+
+function Features.startAutoYinRitual()
+    task.spawn(function()
+        while task.wait(YinRitualCfg.SCAN_INTERVAL) do
+            if not YinRitualState.Enabled then
+                YinRitualState.Status = "⏸️ Idle"
+                YinRitualState.Active = false
+                continue
+            end
+
+            -- PRIORITY: Auto Mutation lebih utama
+            if Shared.AutoMutation_Enabled then
+                local mutState = Features.getMutationState and Features.getMutationState()
+                if mutState and (mutState.Running or mutState.EggLocked or mutState.StealPaused) then
+                    YinRitualState.Status = "⏸️ Waiting for Auto Mutation..."
+                    YinRitualState.Active = false
+                    task.wait(1)
+                    continue
+                end
+            end
+
+            local char = LocalPlayer.Character
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if not hum or hum.Health <= 0 then
+                YinRitualState.Status = "⏳ Waiting character..."
+                task.wait(1)
+                continue
+            end
+
+            local yin = findRitualItem("Yin")
+            local yang = findRitualItem("Yang")
+
+            -- STEP 1: COLLECT + PLACE YIN
+            if yin then
+                YinRitualState.Active = true
+                YinRitualState.Status = "🔵 Collecting Yin..."
+                if yinCollect("Yin") then
+                    YinRitualState.YinCount = YinRitualState.YinCount + 1
+                    YinRitualState.Status = "🔮 Placing Yin..."
+                    task.wait(0.3)
+                    yinPlace("Yin")
+                    YinRitualState.Status = "✅ Yin placed!"
+                    task.wait(0.5)
+                end
+                continue
+            end
+
+            -- STEP 2: COLLECT + PLACE YANG
+            if yang then
+                YinRitualState.Active = true
+                YinRitualState.Status = "🔴 Collecting Yang..."
+                if yinCollect("Yang") then
+                    YinRitualState.YangCount = YinRitualState.YangCount + 1
+                    YinRitualState.Status = "🔮 Placing Yang..."
+                    task.wait(0.3)
+                    yinPlace("Yang")
+                    YinRitualState.Status = "✅ Yang placed!"
+                    task.wait(0.5)
+                end
+                continue
+            end
+
+            -- STEP 3: RITUAL SELESAI → COLLECT REWARD
+            local rsv = Workspace:FindFirstChild("RitualSealVisuals")
+            local yinPlaced = rsv and rsv:FindFirstChild("Yin")
+            local yangPlaced = rsv and rsv:FindFirstChild("Yang")
+
+            if yinPlaced and yangPlaced then
+                YinRitualState.Active = true
+                YinRitualState.Status = "🎁 Collecting reward..."
+                task.wait(1.5)
+
+                if yinCollectReward() then
+                    YinRitualState.RewardCount = YinRitualState.RewardCount + 1
+                end
+
+                YinRitualState.RitualCount = YinRitualState.RitualCount + 1
+                task.wait(YinRitualCfg.RITUAL_WAIT)
+
+                YinRitualState.Status = "🏠 Returning to base..."
+                yinReturnToBase()
+                task.wait(YinRitualCfg.REWARD_WAIT)
+
+                YinRitualState.Status = "✅ Ritual #" .. YinRitualState.RitualCount .. " done!"
+                task.wait(1)
+                YinRitualState.Status = "🔍 Scanning Yin & Yang..."
+                continue
+            end
+
+            YinRitualState.Active = false
+            YinRitualState.Status = "🔍 Scanning Yin & Yang..."
+            task.wait(1)
+        end
+    end)
+end
+
+function Features.getYinRitualState()
+    return YinRitualState
+end
+
+function Features.setYinRitualEnabled(v)
+    YinRitualState.Enabled = v
+    if v then
+        YinRitualState.Status = "▶️ Starting..."
+    else
+        YinRitualState.Status = "⏸️ Idle"
+        YinRitualState.Active = false
+    end
+end
+
+-- ============================================================
 -- FEATURES.INIT
 -- ============================================================
 function Features.Init(sharedState)
@@ -2708,6 +3088,7 @@ function Features.Init(sharedState)
     if Shared.AntiAFK_Enabled == nil then Shared.AntiAFK_Enabled = true end
     if Shared.MutationSteal_Active == nil then Shared.MutationSteal_Active = false end
     if Shared.AutoRidePet_Enabled == nil then Shared.AutoRidePet_Enabled = true end
+    if Shared.YinRitual_Enabled == nil then Shared.YinRitual_Enabled = false end
 
     -- ⭐ Guard: cegah double-start anti-AFK
     if not Features._antiAFKStarted then
@@ -2730,6 +3111,7 @@ function Features.Init(sharedState)
     Features.startMutationSteal()
     Features.startAutoHatchLuck()
     Features.startAutoHalloween()
+    Features.startAutoYinRitual()
 
            -- ⭐ AUTO-ENABLE AUTO RIDE PET — LANGSUNG ON
     Shared.AutoRidePet_Enabled = true
