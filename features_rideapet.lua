@@ -2262,7 +2262,7 @@ end
                 prompt.HoldDuration = 0
             end
 
-            local picked = false
+                        local picked = false
 
             if Shared.StealMode == "Fly" then
                 picked = doStealFly(egg, prompt, eggPart)
@@ -2286,11 +2286,68 @@ end
                 end
             end
 
+            -- ⭐ FIX: Kalo gagal pickup, skip
+            if not picked or not isHoldingEggMutation() then
+                Shared.MutationSteal_Active = false
+                task.wait(1)
+                continue
+            end
+
+            -- ⭐ STEP: TP KE LAVA (sama kayak Volcanic Step 6)
+            task.wait(0.5)
+            local safePos = findSafeVolcanoPos()
+            if safePos then
+                local rootLava = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if rootLava then
+                    rootLava.CFrame = CFrame.new(safePos)
+                    rootLava.Velocity = Vector3.zero
+                    rootLava.AssemblyLinearVelocity = Vector3.zero
+                end
+            end
+            task.wait(1.5)
+
+            -- ⭐ STEP: DIP SAMPE EGG RELEASED
+            local dropWaited = 0
+            local eggReleased = false
+            while dropWaited < 15 do
+                if not Shared.MutationSteal_Enabled then break end
+                fireVolcanoDip()
+                task.wait(1.5)
+                dropWaited = dropWaited + 1.5
+                if not isHoldingEggMutation() then
+                    eggReleased = true
+                    break
+                end
+            end
+
+            -- ⭐ STEP: TUNGGU EGG BALIK (mutation selesai)
+            if eggReleased then
+                local waitStart = os.clock()
+                while os.clock() - waitStart < 20 do
+                    if not Shared.MutationSteal_Enabled then break end
+                    task.wait(1)
+                    if isHoldingEggMutation() then
+                        if Shared.Notify then
+                            Shared.Notify("🔥 Mutation selesai!", "success")
+                        end
+                        break
+                    end
+                end
+            end
+
+            -- ⭐ STEP: RETURN KE PLOT
+            task.wait(0.4)
+            local oldFlag = Shared.AutoReturn_Enabled
+            Shared.AutoReturn_Enabled = true
+            returnToMyPlot()
+            Shared.AutoReturn_Enabled = oldFlag
+
             Shared.MutationSteal_Active = false
-            task.wait(0.3)
+            task.wait(3)
         end
     end)
 end
+
 -- ============================================================
 -- AUTO HATCH LUCK
 -- ============================================================
