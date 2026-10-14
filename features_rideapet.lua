@@ -12,39 +12,77 @@ local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
 -- ============================================================
--- ANTI-AFK (FIXED v2)
+-- ANTI-AFK (FINAL v4) — Aman buat semua fitur
 -- ============================================================
 function Features.startAntiAFK()
-    -- ⭐ Guard: cegah double-start
     if Features._antiAFKStarted then return end
     Features._antiAFKStarted = true
 
     local VirtualUser = game:GetService("VirtualUser")
 
-    -- ⭐ Pastikan Shared ada (fallback kalau nil)
     if not Shared then Shared = {} end
     if Shared.AntiAFK_Enabled == nil then Shared.AntiAFK_Enabled = true end
 
-    -- ⭐ Deteksi mousemoverel sekali
     local hasMouseMove = (type(mousemoverel) == "function")
 
-    -- ⭐ Fungsi aksi anti-AFK (dipanggil dari 2 tempat)
+    -- ⭐ Cek apakah ada fitur lain yang lagi jalan
+    local function isAnyFeatureBusy()
+        if Shared.AutoFarm_Enabled then return true end
+        if Shared.AutoSteal_Enabled then return true end
+        if Shared.MutationSteal_Active then return true end
+        if Shared.VolcanicHunt_Enabled then return true end
+        if Shared.AutoMutation_Enabled then return true end
+        if _G.VRILZ_HalloweenBusy then return true end
+        if Shared.YinRitual_Enabled then
+            local ys = Features.getYinRitualState and Features.getYinRitualState()
+            if ys and ys.Active then return true end
+        end
+        return false
+    end
+
     local function doAntiAFKAction()
         if Shared.AntiAFK_Enabled == false then return end
 
-        pcall(function()
+        -- 1) Capture controller
+        local captured = pcall(function()
             VirtualUser:CaptureController()
-            VirtualUser:ClickButton2(Vector2.new())
         end)
 
-        if hasMouseMove then
-            pcall(function() mousemoverel(1, 0) end)
+        -- 2) Button2 down/up
+        if captured then
+            pcall(function()
+                VirtualUser:Button2Down(Vector2.new(0, 0))
+            end)
             task.wait(0.05)
-            pcall(function() mousemoverel(-1, 0) end)
+            pcall(function()
+                VirtualUser:Button2Up(Vector2.new(0, 0))
+            end)
         end
+
+        -- 3) Gerak karakter — CUMA kalo gak ada fitur aktif & gak naik pet
+        if not isAnyFeatureBusy() then
+            local char = LocalPlayer.Character
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if hum and hum.Health > 0 and not hum.SeatPart then
+                pcall(function()
+                    hum:Move(Vector3.new(0, 0, -1), false)
+                    task.wait(0.1)
+                    hum:Move(Vector3.new(0, 0, 0), false)
+                end)
+            end
+        end
+
+        -- 4) Mousemoverel
+        if hasMouseMove then
+            pcall(function() mousemoverel(5, 5) end)
+            task.wait(0.05)
+            pcall(function() mousemoverel(-5, -5) end)
+        end
+
+        -- ⭐ 5) Kamera — DIHAPUS (bisa bikin glitch, gak perlu)
     end
 
-    -- ⭐ 1) Idled listener — RE-ARM otomatis kalau koneksi putus
+    -- ⭐ 1) IDLED LISTENER
     task.spawn(function()
         while true do
             if not LocalPlayer or not LocalPlayer.Parent then
@@ -71,12 +109,32 @@ function Features.startAntiAFK()
         end
     end)
 
-    -- ⭐ 2) Periodic tick — wait dulu, baru cek kondisi
+    -- ⭐ 2) PERIODIC 60s
     task.spawn(function()
         while true do
             task.wait(60)
             if Shared.AntiAFK_Enabled == false then continue end
             doAntiAFKAction()
+        end
+    end)
+
+    -- ⭐ 3) EXTRA SAFETY 5 MENIT — skip kalo ada fitur aktif
+    task.spawn(function()
+        while true do
+            task.wait(300)
+            if Shared.AntiAFK_Enabled == false then continue end
+            if isAnyFeatureBusy() then continue end
+
+            local char = LocalPlayer.Character
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if hum and hum.Health > 0 and not hum.SeatPart then
+                pcall(function()
+                    hum:Move(Vector3.new(0, 0, -1), true)
+                    task.wait(0.5)
+                    hum:Move(Vector3.new(0, 0, 0), false)
+                    hum.Jump = true
+                end)
+            end
         end
     end)
 end
@@ -1519,7 +1577,11 @@ local function exitCave()
     if not isHoldingEggMutation() then return false end
 
     for i = #VolcanicWaypoints, 1, -1 do
-        if not Shared.VolcanicHunt_Enabled then return false end
+        -- ⭐ FIX: cek 3 flag — kalo salah satu on, tetep jalan
+        local stillActive = Shared.VolcanicHunt_Enabled
+                          or Shared.MutationSteal_Enabled
+                          or Shared.AutoMutation_Enabled
+        if not stillActive then return false end
 
         local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if not hum or hum.Health <= 0 then return false end
@@ -1556,8 +1618,12 @@ local function volcanicPickupVerified(egg)
         prompt.RequiresLineOfSight = false
     end
 
-    for i = 1, 25 do
-        if not Shared.VolcanicHunt_Enabled then return false end
+   for i = 1, 25 do
+    -- ⭐ FIX: cek 3 flag
+    local stillActive = Shared.VolcanicHunt_Enabled
+                      or Shared.MutationSteal_Enabled
+                      or Shared.AutoMutation_Enabled
+    if not stillActive then return false end
         if isHoldingEggMutation() then return true end
 
         if not egg.Parent then
@@ -1926,6 +1992,15 @@ function Features.startAutoMutation()
                 MutationState.Running = false
                 continue
             end
+
+            -- ⭐ FIX: SKIP kalo Mutation Steal lagi aktif
+            -- Biar Auto Mutation gak ganggu proses pickup + keluar cave
+            if Shared.MutationSteal_Active and Shared.MutationSteal_Enabled then
+                MutationState.Running = false
+                task.wait(1)
+                continue
+            end
+
             if MutationState.Running then continue end
 
             local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
@@ -1934,7 +2009,17 @@ function Features.startAutoMutation()
                 continue
             end
 
+            -- ⭐ Cek egg di tangan
             if isHoldingEggMutation() then
+                -- ⭐ Cek tambahan: kalo lagi di dalam cave, JANGAN dip dulu
+                -- Tunggu sampe keluar cave (posisi Y > 41000 = di luar cave)
+                local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if myRoot and myRoot.Position.Y < 41000 then
+                    -- Masih di dalam cave → tunggu
+                    task.wait(1)
+                    continue
+                end
+
                 pcall(runMutationOnce)
                 task.wait(2)
             end
@@ -2042,16 +2127,16 @@ function Features.startMutationSteal()
                     end
                 end
 
-                -- Step 3: Kalo belum sampe, TP langsung ke egg
-                if not reachedEgg then
-                    local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    if curRoot and eggPart and eggPart.Parent then
-                        curRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
-                        curRoot.Velocity = Vector3.zero
-                        curRoot.AssemblyLinearVelocity = Vector3.zero
-                        task.wait(0.3)
-                    end
-                end
+                -- Step 3: SELALU TP langsung ke egg
+do
+    local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if curRoot and eggPart and eggPart.Parent then
+        curRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
+        curRoot.Velocity = Vector3.zero
+        curRoot.AssemblyLinearVelocity = Vector3.zero
+        task.wait(0.3)
+    end
+end
 
                 -- Step 4: Ambil egg (pake volcanicPickupVerified)
                 local picked = false
