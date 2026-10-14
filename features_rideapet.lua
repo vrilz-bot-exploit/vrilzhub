@@ -540,40 +540,6 @@ local function instantReturnToPlot()
     task.wait(0.3)
 end
 
--- ⭐ WRAPPER — Auto pilih Step / Instant
-local function doReturnToPlot()
-    if not Shared.MutationReturn_Enabled then return end
-
-    local mode = Shared.ReturnMode or "Step"
-
-    if mode == "Instant" then
-        -- Cek Premium
-        local isPrem = false
-        if Shared.KeyType then
-            local kt = tostring(Shared.KeyType):upper()
-            if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
-                isPrem = true
-            end
-        end
-        if LocalPlayer.UserId == 5126297278 then isPrem = true end
-
-        if isPrem then
-            instantReturnToPlot()
-        else
-            -- Fallback: free user → step
-            local oldFlag = Shared.AutoReturn_Enabled
-            Shared.AutoReturn_Enabled = true
-            returnToMyPlot()
-            Shared.AutoReturn_Enabled = oldFlag
-        end
-    else
-        local oldFlag = Shared.AutoReturn_Enabled
-        Shared.AutoReturn_Enabled = true
-        returnToMyPlot()
-        Shared.AutoReturn_Enabled = oldFlag
-    end
-end
-
 local function returnToMyPlot()
     if not Shared.AutoReturn_Enabled then return end
 
@@ -649,6 +615,40 @@ local function returnToMyPlot()
     if isHoldingEggLocal() and dropRemote then
         pcall(function() dropRemote:FireServer() end)
         task.wait(0.2)
+    end
+end
+
+-- ⭐ WRAPPER — Auto pilih Step / Instant
+local function doReturnToPlot()
+    if not Shared.MutationReturn_Enabled then return end
+
+    local mode = Shared.ReturnMode or "Step"
+
+    if mode == "Instant" then
+        -- Cek Premium
+        local isPrem = false
+        if Shared.KeyType then
+            local kt = tostring(Shared.KeyType):upper()
+            if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
+                isPrem = true
+            end
+        end
+        if LocalPlayer.UserId == 5126297278 then isPrem = true end
+
+        if isPrem then
+            instantReturnToPlot()
+        else
+            -- Fallback: free user → step
+            local oldFlag = Shared.AutoReturn_Enabled
+            Shared.AutoReturn_Enabled = true
+            returnToMyPlot()
+            Shared.AutoReturn_Enabled = oldFlag
+        end
+    else
+        local oldFlag = Shared.AutoReturn_Enabled
+        Shared.AutoReturn_Enabled = true
+        returnToMyPlot()
+        Shared.AutoReturn_Enabled = oldFlag
     end
 end
 
