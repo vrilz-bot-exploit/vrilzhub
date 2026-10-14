@@ -4770,21 +4770,6 @@ else
     registerTheme(lkLbl, "Muted", "TextColor3")
 end
 
-    local mutNote = Instance.new("TextLabel")
-    mutNote.Size = UDim2.new(1, 0, 0, 60)
-    mutNote.BackgroundTransparency = 1
-    mutNote.Text = "Auto drop egg to volcano (VolcanoDip)\n→ wait egg return (max 45s)\n→ return to plot"
-    mutNote.TextColor3 = C.Muted
-    mutNote.Font = Enum.Font.GothamSemibold
-    mutNote.TextSize = CFG.FONT_MUTED
-    mutNote.TextWrapped = true
-    mutNote.TextXAlignment = Enum.TextXAlignment.Left
-    mutNote.TextYAlignment = Enum.TextYAlignment.Top
-    mutNote.LayoutOrder = 10
-    mutNote.ZIndex = 3
-    mutNote.Parent = mutContent
-    registerTheme(mutNote, "Muted", "TextColor3")
-
     -- CARD 2: INFO PANEL (state live)
     local infoCard, infoContent = makeCard(mutPage, "📊 STATUS MUTATION", 2)
 
