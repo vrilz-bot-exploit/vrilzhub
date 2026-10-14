@@ -4693,6 +4693,83 @@ end)
         end
     end)
 
+-- ⭐ RETURN MODE — Step / Instant
+local returnModeLbl = Instance.new("TextLabel")
+returnModeLbl.Size = UDim2.new(1, 0, 0, 16)
+returnModeLbl.BackgroundTransparency = 1
+returnModeLbl.Text = "Return Mode:"
+returnModeLbl.TextColor3 = C.Muted
+returnModeLbl.Font = Enum.Font.GothamSemibold
+returnModeLbl.TextSize = CFG.FONT_MUTED
+returnModeLbl.TextXAlignment = Enum.TextXAlignment.Left
+returnModeLbl.LayoutOrder = 5
+returnModeLbl.ZIndex = 3
+returnModeLbl.Parent = mutContent
+registerTheme(returnModeLbl, "Muted", "TextColor3")
+
+local returnModeHolder = Instance.new("Frame")
+returnModeHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
+returnModeHolder.BackgroundTransparency = 1
+returnModeHolder.LayoutOrder = 6
+returnModeHolder.ZIndex = 3
+returnModeHolder.Parent = mutContent
+
+-- Cek apakah user premium
+local isPremUser = false
+pcall(function()
+    if LocalPlayer.UserId == OWNER_USERID then
+        isPremUser = true
+    elseif Shared and Shared.KeyType then
+        local kt = tostring(Shared.KeyType):upper()
+        if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
+            isPremUser = true
+        end
+    end
+end)
+
+if isPremUser then
+    -- Premium: bisa pilih Step / Instant
+    makeDropdownGlobal(returnModeHolder, {"Step", "Instant"}, Shared.ReturnMode or "Step", function(v)
+        Shared.ReturnMode = v
+        if v == "Instant" then
+            notify("⚡ Return: INSTANT", "success")
+        else
+            notify("🚶 Return: Step", "info")
+        end
+    end)
+else
+    -- Free: locked (gaya sama kaya candy)
+    local lockedFrame = Instance.new("Frame")
+    lockedFrame.Size = UDim2.new(1, 0, 1, 0)
+    lockedFrame.BackgroundColor3 = C.Surface3
+    lockedFrame.BackgroundTransparency = 0.5
+    lockedFrame.BorderSizePixel = 0
+    lockedFrame.Parent = returnModeHolder
+    registerTheme(lockedFrame, "Surface3", "BackgroundColor3")
+
+    local lkCorner = Instance.new("UICorner")
+    lkCorner.CornerRadius = UDim.new(0, 9)
+    lkCorner.Parent = lockedFrame
+
+    local lkStroke = Instance.new("UIStroke")
+    lkStroke.Color = C.Muted
+    lkStroke.Thickness = 1
+    lkStroke.Transparency = 0.6
+    lkStroke.Parent = lockedFrame
+
+    local lkLbl = Instance.new("TextLabel")
+    lkLbl.Size = UDim2.new(1, -20, 1, 0)
+    lkLbl.Position = UDim2.fromOffset(12, 0)
+    lkLbl.BackgroundTransparency = 1
+    lkLbl.Text = "🔒 Instant (Premium only)"
+    lkLbl.TextColor3 = C.Muted
+    lkLbl.Font = Enum.Font.GothamSemibold
+    lkLbl.TextSize = CFG.FONT_LABEL
+    lkLbl.TextXAlignment = Enum.TextXAlignment.Left
+    lkLbl.Parent = lockedFrame
+    registerTheme(lkLbl, "Muted", "TextColor3")
+end
+
     local mutNote = Instance.new("TextLabel")
     mutNote.Size = UDim2.new(1, 0, 0, 60)
     mutNote.BackgroundTransparency = 1
@@ -5687,8 +5764,9 @@ function UI.Init(sharedState)
     Shared.VolcanicHunt_Enabled = false
     Shared.VolcanicReturn_Enabled = false
     Shared.VolcanicMutation_Enabled = false
-        Shared.AutoMutation_Enabled = false
+    Shared.AutoMutation_Enabled = false
     Shared.MutationReturn_Enabled = false
+    Shared.ReturnMode = "Step"
     Shared.MutationStealMode = "Rarity"   -- "Rarity" atau "Name"
         Shared.MutationSelectedEggs = {
         ["Cherub Egg"] = false, ["Volcanic Egg"] = false, ["Blackhole Egg"] = false,
