@@ -499,6 +499,81 @@ local function getDropRemoteLocal()
         or gameR:FindFirstChild("Drop")
 end
 
+-- ⭐ INSTANT RETURN — TP langsung ke plot
+local function instantReturnToPlot()
+    if not Shared.MutationReturn_Enabled then return end
+
+    local char = LocalPlayer.Character
+    local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return end
+    if not isHoldingEggLocal() then return end
+
+    local spawnPart = getMyPlotSpawn()
+    if not spawnPart then return end
+
+    clearForces(myRoot)
+    myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
+    myRoot.Velocity = Vector3.zero
+    myRoot.AssemblyLinearVelocity = Vector3.zero
+    task.wait(0.3)
+
+    if isHoldingEggLocal() then
+        for _, d in ipairs(char:GetDescendants()) do
+            if d:IsA("ProximityPrompt") and d.Name:lower():find("drop") then
+                d.HoldDuration = 0
+                if typeof(fireproximityprompt) == "function" then
+                    pcall(fireproximityprompt, d)
+                end
+                break
+            end
+        end
+
+        local dropRemote = getDropRemoteLocal()
+        if dropRemote then
+            pcall(function() dropRemote:FireServer() end)
+            task.wait(0.2)
+            if isHoldingEggLocal() then
+                pcall(function() dropRemote:FireServer() end)
+            end
+        end
+    end
+    task.wait(0.3)
+end
+
+-- ⭐ WRAPPER — Auto pilih Step / Instant
+local function doReturnToPlot()
+    if not Shared.MutationReturn_Enabled then return end
+
+    local mode = Shared.ReturnMode or "Step"
+
+    if mode == "Instant" then
+        -- Cek Premium
+        local isPrem = false
+        if Shared.KeyType then
+            local kt = tostring(Shared.KeyType):upper()
+            if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
+                isPrem = true
+            end
+        end
+        if LocalPlayer.UserId == 5126297278 then isPrem = true end
+
+        if isPrem then
+            instantReturnToPlot()
+        else
+            -- Fallback: free user → step
+            local oldFlag = Shared.AutoReturn_Enabled
+            Shared.AutoReturn_Enabled = true
+            returnToMyPlot()
+            Shared.AutoReturn_Enabled = oldFlag
+        end
+    else
+        local oldFlag = Shared.AutoReturn_Enabled
+        Shared.AutoReturn_Enabled = true
+        returnToMyPlot()
+        Shared.AutoReturn_Enabled = oldFlag
+    end
+end
+
 local function returnToMyPlot()
     if not Shared.AutoReturn_Enabled then return end
 
@@ -2202,12 +2277,9 @@ end
                     end
                 end
 
-                -- Step 7: AUTO RETURN ke plot
-                task.wait(0.4)
-                local oldFlag = Shared.AutoReturn_Enabled
-                Shared.AutoReturn_Enabled = true
-                returnToMyPlot()
-                Shared.AutoReturn_Enabled = oldFlag
+                -- Step 7: AUTO RETURN ke plot (Step/Instant)
+task.wait(0.4)
+doReturnToPlot()
 
                 Shared.MutationSteal_Active = false
                 task.wait(3)
@@ -2335,12 +2407,9 @@ end
                 end
             end
 
-            -- ⭐ STEP: RETURN KE PLOT
-            task.wait(0.4)
-            local oldFlag = Shared.AutoReturn_Enabled
-            Shared.AutoReturn_Enabled = true
-            returnToMyPlot()
-            Shared.AutoReturn_Enabled = oldFlag
+            -- ⭐ STEP: RETURN KE PLOT (Step/Instant)
+task.wait(0.4)
+doReturnToPlot()
 
             Shared.MutationSteal_Active = false
             task.wait(3)
@@ -3512,7 +3581,9 @@ function Features.Init(sharedState)
     end)
     
     _G.VRILZ_Features = Features
-    print("[VRILZHUB] Ride a Pet Features v3.8 loaded")
+_G.VRILZ_Shared = Shared
+_G.VRILZ_UI_Shared = Shared
+print("[VRILZHUB] Ride a Pet Features v3.8 loaded")
 end
 
 return Features
