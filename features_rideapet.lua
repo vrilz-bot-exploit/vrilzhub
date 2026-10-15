@@ -203,7 +203,6 @@ local function doStealGlide(egg, prompt, eggPart)
     local GLIDE_STEP = 150
     local GLIDE_WAIT = 0.08
 
-    -- Step 1: Glide ke egg
     local targetPos = eggPart.Position + Vector3.new(0, 3, 0)
     local startPos = myRoot.Position
     local totalDist = (targetPos - startPos).Magnitude
@@ -226,7 +225,6 @@ local function doStealGlide(egg, prompt, eggPart)
         task.wait(GLIDE_WAIT)
     end
 
-    -- Step 2: Fire prompt
     myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not myRoot then return false end
 
@@ -1557,8 +1555,10 @@ function Features.startAutoFarm()
 
             local picked = false
 
-            if Shared.StealMode == "Fly" then
+                        if Shared.StealMode == "Fly" then
                 picked = doStealFly(egg, prompt, eggPart)
+            elseif Shared.StealMode == "TP GLIDE" then
+                picked = doStealGlide(egg, prompt, eggPart)
             else
                 myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 5, 0)
                 task.wait(0.1)
@@ -2359,38 +2359,6 @@ doReturnToPlot()
                         end
                     end
                 end
-            elseif stealMode == "TP GLIDE" then
-                -- ⭐ TP GLIDE: support BOTH — Rarity ATAU Name
-                local rendered = Workspace:FindFirstChild("RenderedEggs")
-                if rendered then
-                    local myRoot2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    local bestDist = math.huge
-                    for _, egg in ipairs(rendered:GetChildren()) do
-                        if egg:IsA("Model") then
-                            local pass = false
-                            -- Cek by rarity
-                            local rarity = getEggRarity(egg.Name)
-                            if Shared.SelectedRarities and Shared.SelectedRarities[rarity] == true then
-                                pass = true
-                            end
-                            -- Cek by name
-                            if not pass and Shared.MutationSelectedEggs and Shared.MutationSelectedEggs[egg.Name] == true then
-                                pass = true
-                            end
-
-                            if pass then
-                                local part = egg:FindFirstChildWhichIsA("BasePart", true)
-                                if part and myRoot2 then
-                                    local d = (part.Position - myRoot2.Position).Magnitude
-                                    if d < bestDist then
-                                        bestDist = d
-                                        targetEgg = egg
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
             else
                 local best = getBestEggInMap()
                 if best then targetEgg = best.egg end
@@ -2417,11 +2385,11 @@ doReturnToPlot()
                 prompt.HoldDuration = 0
             end
 
-                                                local picked = false
+                        local picked = false
 
-            if Shared.StealMode == "Fly" then
+                        if Shared.StealMode == "Fly" then
                 picked = doStealFly(egg, prompt, eggPart)
-            elseif Shared.MutationStealMode == "TP GLIDE" then
+            elseif Shared.StealMode == "TP GLIDE" then
                 picked = doStealGlide(egg, prompt, eggPart)
             else
                 myRoot.CFrame = eggPart.CFrame + Vector3.new(0, 3, 0)
