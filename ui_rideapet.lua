@@ -4431,20 +4431,22 @@ end)
     stealModeLbl.Parent = stealModeContent
     registerTheme(stealModeLbl, "Muted", "TextColor3")
 
-    local stealModeList = {"TP", "Fly"}
-    makeDropdownGlobal(stealModeContent, stealModeList, Shared.StealMode or "TP", function(v)
+    local stealModeList = {"TP", "TP GLIDE", "Fly"}
+        makeDropdownGlobal(stealModeContent, stealModeList, Shared.StealMode or "TP", function(v)
         Shared.StealMode = v
         if v == "Fly" then
             notify(" Steal Mode: Fly (height 350)", "success")
+        elseif v == "TP GLIDE" then
+            notify(" Steal Mode: TP GLIDE (step 150)", "success")
         else
             notify(" Steal Mode: TP", "info")
         end
     end)
 
     local stealModeNote = Instance.new("TextLabel")
-    stealModeNote.Size = UDim2.new(1, 0, 0, 30)
+    stealModeNote.Size = UDim2.new(1, 0, 0, 42)
     stealModeNote.BackgroundTransparency = 1
-    stealModeNote.Text = "TP = teleport directly to egg\nFly = go up 350 studs first, then TP to egg"
+    stealModeNote.Text = "TP = teleport langsung ke egg\nTP GLIDE = step-by-step 150 studs\nFly = naik 350 studs dulu, abis itu TP"
     stealModeNote.TextColor3 = C.Muted
     stealModeNote.Font = Enum.Font.GothamSemibold
     stealModeNote.TextSize = CFG.FONT_MUTED
