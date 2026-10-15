@@ -4567,13 +4567,20 @@ end)
     nameLayout.Parent = nameSection
 
     -- === SHOW/HIDE FUNCTION ===
-    local function updateSections(mode)
+        local function updateSections(mode)
         if mode == "Rarity" then
             raritySection.Visible = true
             nameSection.Visible = false
-        else
+        elseif mode == "Name" then
             raritySection.Visible = false
             nameSection.Visible = true
+        elseif mode == "TP GLIDE" then
+            -- TP GLIDE: show BOTH (rarity + name) biar user bisa pilih filter sekaligus
+            raritySection.Visible = true
+            nameSection.Visible = true
+        else
+            raritySection.Visible = true
+            nameSection.Visible = false
         end
     end
 
@@ -4598,12 +4605,14 @@ end)
     modeHolder.ZIndex = 3
     modeHolder.Parent = mutStealContent
 
-    makeDropdownGlobal(modeHolder, {"Rarity", "Name"}, Shared.MutationStealMode or "Rarity", function(v)
+        makeDropdownGlobal(modeHolder, {"Rarity", "Name", "TP GLIDE"}, Shared.MutationStealMode or "Rarity", function(v)
         Shared.MutationStealMode = v
         if v == "Rarity" then
             notify("🎯 Mode: Steal by Rarity", "info")
-        else
+        elseif v == "Name" then
             notify("🎯 Mode: Steal by Name", "info")
+        elseif v == "TP GLIDE" then
+            notify("🎯 Mode: TP GLIDE (step 150)", "success")
         end
         updateSections(v)
     end)
