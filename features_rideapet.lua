@@ -3290,16 +3290,21 @@ local function isYinPlaced()
     local yinSlot = altar:FindFirstChild("YinPlacement")
     if not yinSlot then return false end
 
-    -- Cek apakah ada anak (Model/Part) selain prompt
+    -- Cek Model/Part
     for _, child in ipairs(yinSlot:GetChildren()) do
         if child:IsA("Model") or child:IsA("BasePart") then
             return true
         end
     end
 
-    -- Alternatif: cek attribute di slot
-    local attr = yinSlot:GetAttribute("Placed")
-    if attr == true then return true end
+    -- Cek attribute
+    if yinSlot:GetAttribute("Placed") == true then return true end
+
+    -- ⭐ FALLBACK: prompt Enabled = false = udah ke-place
+    local prompt = yinSlot:FindFirstChild("RitualPrompt")
+    if prompt and prompt:IsA("ProximityPrompt") and prompt.Enabled == false then
+        return true
+    end
 
     return false
 end
@@ -3319,8 +3324,13 @@ local function isYangPlaced()
         end
     end
 
-    local attr = yangSlot:GetAttribute("Placed")
-    if attr == true then return true end
+    if yangSlot:GetAttribute("Placed") == true then return true end
+
+    -- ⭐ FALLBACK: prompt Enabled = false = udah ke-place
+    local prompt = yangSlot:FindFirstChild("RitualPrompt")
+    if prompt and prompt:IsA("ProximityPrompt") and prompt.Enabled == false then
+        return true
+    end
 
     return false
 end
@@ -3379,91 +3389,89 @@ local function yinPlace(name)
 end
 
 -- ═══════════════════════════════════════════════
--- AUTO COLLECT REWARD — TP ke marker + cek backpack
--- Sampe reward masuk ke tangan baru return
+-- AUTO COLLECT REWARD — Cari prompt Pickup enabled
+-- Lokasi: Runtime.Rewards_<UUID>.Pot1.Pickup
 -- ═══════════════════════════════════════════════
 local function yinCollectReward()
     local hr = Workspace:FindFirstChild("HeadlessRitual")
-    if not hr then
-        warn("[YIN REWARD] HeadlessRitual ga ada")
-        return false
+    if not hr then return false end
+
+    local runtime = hr:FindFirstChild("Runtime")
+    if not runtime then return false end
+
+    -- Cari prompt Pickup yang enabled
+    local targetPrompt = nil
+    for _, obj in ipairs(runtime:GetDescendants()) do
+        if obj:IsA("ProximityPrompt")
+           and obj.Enabled
+           and obj.ActionText:lower():find("pick") then
+            targetPrompt = obj
+            break
+        end
     end
 
-    local rp = hr:FindFirstChild("RewardPoints")
-    if not rp then
-        warn("[YIN REWARD] RewardPoints ga ada")
-        return false
+    if not targetPrompt then return false end
+
+    -- Cari posisi prompt
+    local pos = nil
+    local p = targetPrompt.Parent
+    while p and not pos do
+        if p:IsA("BasePart") then
+            pos = p.Position
+        elseif p:IsA("Model") then
+            local ok, pivot = pcall(function() return p:GetPivot().Position end)
+            if ok then pos = pivot end
+        end
+        p = p.Parent
     end
 
-    -- Hitung item reward di backpack + character
-    local function countRewardItems()
-        local count = 0
-        local char = LocalPlayer.Character
-        local bp = LocalPlayer:FindFirstChild("Backpack")
+    if not pos then return false end
 
-        if char then
-            for _, item in ipairs(char:GetChildren()) do
-                if item:IsA("Tool") then
-                    local name = item.Name:lower()
-                    if name:find("yin") or name:find("yang") or name:find("half")
-                       or name:find("reward") or name:find("ritual") then
-                        count = count + 1
-                    end
-                end
+    -- Setup prompt
+    targetPrompt.HoldDuration = 0
+    targetPrompt.MaxActivationDistance = math.huge
+    targetPrompt.RequiresLineOfSight = false
+
+    -- Coba sampe 15x, cek apakah prompt masih ada
+    for attempt = 1, 15 do
+        if not YinRitualState.Enabled then return false end
+
+        -- Re-scan prompt (kalo ilang = reward keambil)
+        local stillThere = false
+        for _, obj in ipairs(runtime:GetDescendants()) do
+            if obj:IsA("ProximityPrompt")
+               and obj.Enabled
+               and obj.ActionText:lower():find("pick") then
+                targetPrompt = obj
+                stillThere = true
+                break
             end
         end
 
-        if bp then
-            for _, item in ipairs(bp:GetChildren()) do
-                if item:IsA("Tool") then
-                    local name = item.Name:lower()
-                    if name:find("yin") or name:find("yang") or name:find("half")
-                       or name:find("reward") or name:find("ritual") then
-                        count = count + 1
-                    end
-                end
-            end
+        -- Kalo prompt ilang = SUKSES
+        if not stillThere then
+            print("[YIN REWARD] ✅ Reward ke-tangan!")
+            return true
         end
 
-        return count
-    end
-
-    local beforeCount = countRewardItems()
-    print("[YIN REWARD] Reward items before:", beforeCount)
-
-    -- Coba 5x TP ke marker sampe reward masuk
-    local markers = {"Egg", "Pot1", "Pot2"}
-    local maxAttempts = 5
-
-    for attempt = 1, maxAttempts do
-        print("[YIN REWARD] Attempt " .. attempt .. "/" .. maxAttempts)
-
-        for _, name in ipairs(markers) do
-            local part = rp:FindFirstChild(name)
-            if part and part:IsA("BasePart") then
-                yinTp(part.Position)
-                task.wait(0.5)
-
-                local afterCount = countRewardItems()
-                if afterCount > beforeCount then
-                    print("[YIN REWARD] ✅ Reward masuk! Total:", afterCount)
-                    return true
-                end
-            end
-        end
-
+        yinTp(pos)
+        task.wait(0.15)
+        yinFirePrompt(targetPrompt)
         task.wait(0.3)
     end
 
     -- Final check
-    local finalCount = countRewardItems()
-    if finalCount > beforeCount then
-        print("[YIN REWARD] ✅ Reward masuk (final)!")
-        return true
+    for _, obj in ipairs(runtime:GetDescendants()) do
+        if obj:IsA("ProximityPrompt")
+           and obj.Enabled
+           and obj.ActionText:lower():find("pick") then
+            warn("[YIN REWARD] ❌ Gagal collect reward")
+            return false
+        end
     end
 
-    warn("[YIN REWARD] ❌ Reward ga masuk setelah " .. maxAttempts .. " attempt")
-    return false
+    print("[YIN REWARD] ✅ Reward ke-tangan (final check)!")
+    return true
 end
 
 local function yinReturnToBase()
