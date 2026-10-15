@@ -3282,6 +3282,9 @@ end
 -- CEK APAKAH ITEM UDAH KE-PLACE DI ALTAR
 -- ═══════════════════════════════════════════════
 local function isYinPlaced()
+    -- ⭐ CARA 1: cek attribute PLAYER (paling reliable)
+    if LocalPlayer:GetAttribute("RitualYin") == true then return true end
+
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then return false end
     local altar = hr:FindFirstChild("Altar")
@@ -3290,26 +3293,23 @@ local function isYinPlaced()
     local yinSlot = altar:FindFirstChild("YinPlacement")
     if not yinSlot then return false end
 
-    -- Cek Model/Part
+    -- CARA 2: cek attribute slot
+    if yinSlot:GetAttribute("Placed") == true then return true end
+
+    -- CARA 3: cek Model/Part anak slot
     for _, child in ipairs(yinSlot:GetChildren()) do
         if child:IsA("Model") or child:IsA("BasePart") then
             return true
         end
     end
 
-    -- Cek attribute
-    if yinSlot:GetAttribute("Placed") == true then return true end
-
-    -- ⭐ FALLBACK: prompt Enabled = false = udah ke-place
-    local prompt = yinSlot:FindFirstChild("RitualPrompt")
-    if prompt and prompt:IsA("ProximityPrompt") and prompt.Enabled == false then
-        return true
-    end
-
     return false
 end
 
 local function isYangPlaced()
+    -- ⭐ CARA 1: cek attribute PLAYER (paling reliable)
+    if LocalPlayer:GetAttribute("RitualYang") == true then return true end
+
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then return false end
     local altar = hr:FindFirstChild("Altar")
@@ -3318,18 +3318,14 @@ local function isYangPlaced()
     local yangSlot = altar:FindFirstChild("YangPlacement")
     if not yangSlot then return false end
 
+    -- CARA 2: cek attribute slot
+    if yangSlot:GetAttribute("Placed") == true then return true end
+
+    -- CARA 3: cek Model/Part anak slot
     for _, child in ipairs(yangSlot:GetChildren()) do
         if child:IsA("Model") or child:IsA("BasePart") then
             return true
         end
-    end
-
-    if yangSlot:GetAttribute("Placed") == true then return true end
-
-    -- ⭐ FALLBACK: prompt Enabled = false = udah ke-place
-    local prompt = yangSlot:FindFirstChild("RitualPrompt")
-    if prompt and prompt:IsA("ProximityPrompt") and prompt.Enabled == false then
-        return true
     end
 
     return false
