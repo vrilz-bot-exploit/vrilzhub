@@ -1,5 +1,5 @@
 -- ============================================================
--- VRILZHUB UI — RIDE A PET v1.9 (AUTO-DETECT PC & MOBILE)
+-- VRILZHUB UI — RIDE A PET v2.0 (AUTO-DETECT PC & MOBILE)
 -- PC: 800x580 | Mobile: 88% x 78% viewport
 -- ============================================================
 
@@ -2242,7 +2242,7 @@ local function buildMainWindow(parent)
     subtitle.Size = UDim2.new(0, 300, 0, 14)
     subtitle.Position = UDim2.fromOffset(IS_MOBILE and 48 or 58, IS_MOBILE and 26 or 28)
     subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Ride a Pet · v1.9"
+    subtitle.Text = "Ride a Pet · v2.0"
     subtitle.TextColor3 = C.Muted
     subtitle.Font = Enum.Font.GothamSemibold
     subtitle.TextSize = IS_MOBILE and 9 or 10
@@ -2944,11 +2944,11 @@ local function buildMainWindow(parent)
     local updateCard, updateContent = makeCard(infoPage, "📢 UPDATE INFORMATION", 2)
 
     local infoLines = {
-        "Version        : 1.9",
+        "Version        : 2.0",
         "Last Update    : 29 Sept 2026",
         "Status         : Online ✅",
         "Changelog      : Live Chat, Tp Mode, Auto Hatch",
-        "                 Auto Event, Farm Name, Fps Boost",
+        "                 Auto Event, Auto Yin, Fps Boost",
     }
     for i, line in ipairs(infoLines) do
         local lbl = Instance.new("TextLabel")
