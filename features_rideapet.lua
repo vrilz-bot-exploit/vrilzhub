@@ -3278,6 +3278,56 @@ local function yinCollect(name)
     return findRitualItem(name) == nil
 end
 
+-- ═══════════════════════════════════════════════
+-- CEK APAKAH ITEM UDAH KE-PLACE DI ALTAR
+-- ═══════════════════════════════════════════════
+local function isYinPlaced()
+    local hr = Workspace:FindFirstChild("HeadlessRitual")
+    if not hr then return false end
+    local altar = hr:FindFirstChild("Altar")
+    if not altar then return false end
+
+    local yinSlot = altar:FindFirstChild("YinPlacement")
+    if not yinSlot then return false end
+
+    -- Cek apakah ada anak (Model/Part) selain prompt
+    for _, child in ipairs(yinSlot:GetChildren()) do
+        if child:IsA("Model") or child:IsA("BasePart") then
+            return true
+        end
+    end
+
+    -- Alternatif: cek attribute di slot
+    local attr = yinSlot:GetAttribute("Placed")
+    if attr == true then return true end
+
+    return false
+end
+
+local function isYangPlaced()
+    local hr = Workspace:FindFirstChild("HeadlessRitual")
+    if not hr then return false end
+    local altar = hr:FindFirstChild("Altar")
+    if not altar then return false end
+
+    local yangSlot = altar:FindFirstChild("YangPlacement")
+    if not yangSlot then return false end
+
+    for _, child in ipairs(yangSlot:GetChildren()) do
+        if child:IsA("Model") or child:IsA("BasePart") then
+            return true
+        end
+    end
+
+    local attr = yangSlot:GetAttribute("Placed")
+    if attr == true then return true end
+
+    return false
+end
+
+-- ═══════════════════════════════════════════════
+-- PLACE YIN/YANG — cek dulu sebelum place
+-- ═══════════════════════════════════════════════
 local function yinPlace(name)
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then return false end
@@ -3285,6 +3335,14 @@ local function yinPlace(name)
     if not altar then return false end
     local slot = altar:FindFirstChild(name .. "Placement")
     if not slot then return false end
+
+    -- ⭐ CEK DULU: kalo udah ke-place, skip
+    if name == "Yin" and isYinPlaced() then
+        return true
+    end
+    if name == "Yang" and isYangPlaced() then
+        return true
+    end
 
     local prompt = slot:FindFirstChild("RitualPrompt")
     if not prompt then return false end
@@ -3296,72 +3354,115 @@ local function yinPlace(name)
         pos = slot.Position
     end
 
+    -- TP ke slot
     yinTp(pos)
-    task.wait(0.2)
+    task.wait(0.3)
+
+    -- Fire prompt (bisa 2x biar yakin)
     yinFirePrompt(prompt)
-    task.wait(YinRitualCfg.PLACE_WAIT)
-    return true
+    task.wait(0.4)
+    yinFirePrompt(prompt)
+    task.wait(0.4)
+
+    -- ⭐ VERIFIKASI: cek apakah ke-place
+    if name == "Yin" and isYinPlaced() then
+        print("[YIN PLACE] ✅ Yin berhasil ke-place")
+        return true
+    end
+    if name == "Yang" and isYangPlaced() then
+        print("[YIN PLACE] ✅ Yang berhasil ke-place")
+        return true
+    end
+
+    print("[YIN PLACE] ⚠️ " .. name .. " belum ke-place")
+    return false
 end
 
+-- ═══════════════════════════════════════════════
+-- AUTO COLLECT REWARD — TP ke marker + cek backpack
+-- Sampe reward masuk ke tangan baru return
+-- ═══════════════════════════════════════════════
 local function yinCollectReward()
     local hr = Workspace:FindFirstChild("HeadlessRitual")
-    if not hr then return false end
+    if not hr then
+        warn("[YIN REWARD] HeadlessRitual ga ada")
+        return false
+    end
 
-    for _, obj in ipairs(hr:GetDescendants()) do
-        if obj:IsA("ProximityPrompt") then
-            local text = (obj.ActionText .. " " .. obj.ObjectText):lower()
-            if text:find("reward") or text:find("claim") or text:find("collect")
-               or text:find("take") or text:find("open") then
-                local parent = obj.Parent
-                if parent then
-                    local pos = nil
-                    if parent:IsA("BasePart") then
-                        pos = parent.Position
-                    elseif parent:IsA("Attachment") then
-                        pos = parent.WorldPosition
-                    elseif parent:IsA("Model") then
-                        local ok, pivot = pcall(function() return parent:GetPivot().Position end)
-                        if ok then pos = pivot end
-                    end
-                    if pos then
-                        yinTp(pos)
-                        task.wait(0.3)
-                        yinFirePrompt(obj)
-                        task.wait(0.5)
-                        return true
+    local rp = hr:FindFirstChild("RewardPoints")
+    if not rp then
+        warn("[YIN REWARD] RewardPoints ga ada")
+        return false
+    end
+
+    -- Hitung item reward di backpack + character
+    local function countRewardItems()
+        local count = 0
+        local char = LocalPlayer.Character
+        local bp = LocalPlayer:FindFirstChild("Backpack")
+
+        if char then
+            for _, item in ipairs(char:GetChildren()) do
+                if item:IsA("Tool") then
+                    local name = item.Name:lower()
+                    if name:find("yin") or name:find("yang") or name:find("half")
+                       or name:find("reward") or name:find("ritual") then
+                        count = count + 1
                     end
                 end
             end
         end
-    end
 
-    local rsv = Workspace:FindFirstChild("RitualSealVisuals")
-    if rsv then
-        for _, obj in ipairs(rsv:GetDescendants()) do
-            if obj:IsA("ProximityPrompt") then
-                local text = (obj.ActionText .. " " .. obj.ObjectText):lower()
-                if text:find("reward") or text:find("claim") or text:find("collect") then
-                    local parent = obj.Parent
-                    if parent then
-                        local pos = nil
-                        if parent:IsA("BasePart") then
-                            pos = parent.Position
-                        elseif parent:IsA("Attachment") then
-                            pos = parent.WorldPosition
-                        end
-                        if pos then
-                            yinTp(pos)
-                            task.wait(0.3)
-                            yinFirePrompt(obj)
-                            task.wait(0.5)
-                            return true
-                        end
+        if bp then
+            for _, item in ipairs(bp:GetChildren()) do
+                if item:IsA("Tool") then
+                    local name = item.Name:lower()
+                    if name:find("yin") or name:find("yang") or name:find("half")
+                       or name:find("reward") or name:find("ritual") then
+                        count = count + 1
                     end
                 end
             end
         end
+
+        return count
     end
 
+    local beforeCount = countRewardItems()
+    print("[YIN REWARD] Reward items before:", beforeCount)
+
+    -- Coba 5x TP ke marker sampe reward masuk
+    local markers = {"Egg", "Pot1", "Pot2"}
+    local maxAttempts = 5
+
+    for attempt = 1, maxAttempts do
+        print("[YIN REWARD] Attempt " .. attempt .. "/" .. maxAttempts)
+
+        for _, name in ipairs(markers) do
+            local part = rp:FindFirstChild(name)
+            if part and part:IsA("BasePart") then
+                yinTp(part.Position)
+                task.wait(0.5)
+
+                local afterCount = countRewardItems()
+                if afterCount > beforeCount then
+                    print("[YIN REWARD] ✅ Reward masuk! Total:", afterCount)
+                    return true
+                end
+            end
+        end
+
+        task.wait(0.3)
+    end
+
+    -- Final check
+    local finalCount = countRewardItems()
+    if finalCount > beforeCount then
+        print("[YIN REWARD] ✅ Reward masuk (final)!")
+        return true
+    end
+
+    warn("[YIN REWARD] ❌ Reward ga masuk setelah " .. maxAttempts .. " attempt")
     return false
 end
 
@@ -3469,60 +3570,79 @@ end
             local yin = findRitualItem("Yin")
             local yang = findRitualItem("Yang")
 
-            -- STEP 1: COLLECT + PLACE YIN
-            if yin then
-                YinRitualState.Active = true
-                YinRitualState.Status = "🔵 Collecting Yin..."
-                if yinCollect("Yin") then
-                    YinRitualState.YinCount = YinRitualState.YinCount + 1
-                    YinRitualState.Status = "🔮 Placing Yin..."
-                    task.wait(0.3)
-                    yinPlace("Yin")
-                    YinRitualState.Status = "✅ Yin placed!"
-                    task.wait(0.5)
+                        -- ⭐ CEK STATUS PLACE DI ALTAR
+            local yinAlreadyPlaced = isYinPlaced()
+            local yangAlreadyPlaced = isYangPlaced()
+
+            -- STEP 1: COLLECT + PLACE YIN (kalo belum ke-place)
+            if not yinAlreadyPlaced then
+                local yin = findRitualItem("Yin")
+                if yin then
+                    YinRitualState.Active = true
+                    YinRitualState.Status = "🔵 Collecting Yin..."
+                    if yinCollect("Yin") then
+                        YinRitualState.YinCount = YinRitualState.YinCount + 1
+                        YinRitualState.Status = "🔮 Placing Yin..."
+                        task.wait(0.3)
+                        if yinPlace("Yin") then
+                            YinRitualState.Status = "✅ Yin placed!"
+                        else
+                            YinRitualState.Status = "⚠️ Yin gagal place, retry..."
+                        end
+                        task.wait(0.5)
+                    end
+                    continue
                 end
-                continue
             end
 
-            -- STEP 2: COLLECT + PLACE YANG
-            if yang then
-                YinRitualState.Active = true
-                YinRitualState.Status = "🔴 Collecting Yang..."
-                if yinCollect("Yang") then
-                    YinRitualState.YangCount = YinRitualState.YangCount + 1
-                    YinRitualState.Status = "🔮 Placing Yang..."
-                    task.wait(0.3)
-                    yinPlace("Yang")
-                    YinRitualState.Status = "✅ Yang placed!"
-                    task.wait(0.5)
+            -- STEP 2: COLLECT + PLACE YANG (kalo belum ke-place)
+            if not yangAlreadyPlaced then
+                local yang = findRitualItem("Yang")
+                if yang then
+                    YinRitualState.Active = true
+                    YinRitualState.Status = "🔴 Collecting Yang..."
+                    if yinCollect("Yang") then
+                        YinRitualState.YangCount = YinRitualState.YangCount + 1
+                        YinRitualState.Status = "🔮 Placing Yang..."
+                        task.wait(0.3)
+                        if yinPlace("Yang") then
+                            YinRitualState.Status = "✅ Yang placed!"
+                        else
+                            YinRitualState.Status = "⚠️ Yang gagal place, retry..."
+                        end
+                        task.wait(0.5)
+                    end
+                    continue
                 end
-                continue
             end
 
-            -- STEP 3: RITUAL SELESAI → COLLECT REWARD
-            local rsv = Workspace:FindFirstChild("RitualSealVisuals")
-            local yinPlaced = rsv and rsv:FindFirstChild("Yin")
-            local yangPlaced = rsv and rsv:FindFirstChild("Yang")
-
-            if yinPlaced and yangPlaced then
+            -- STEP 3: KEDUANYA UDAH KE-PLACE → COLLECT REWARD
+            if yinAlreadyPlaced and yangAlreadyPlaced then
                 YinRitualState.Active = true
                 YinRitualState.Status = "🎁 Collecting reward..."
                 task.wait(1.5)
 
-                if yinCollectReward() then
+                local gotReward = yinCollectReward()
+
+                if gotReward then
                     YinRitualState.RewardCount = YinRitualState.RewardCount + 1
+                    YinRitualState.RitualCount = YinRitualState.RitualCount + 1
+                    YinRitualState.Status = "✅ Reward #" .. YinRitualState.RewardCount .. " ke-tangan!"
+
+                    -- ⭐ RETURN CUMA KALO REWARD UDAH DI TANGAN
+                    task.wait(0.5)
+                    YinRitualState.Status = "🏠 Returning to base..."
+                    yinReturnToBase()
+                    task.wait(YinRitualCfg.REWARD_WAIT)
+                else
+                    -- Reward gagal — JANGAN return, retry scan
+                    YinRitualState.Status = "⚠️ Reward belum ke-tangan, retry..."
+                    task.wait(1)
+                    continue
                 end
 
-                YinRitualState.RitualCount = YinRitualState.RitualCount + 1
-                task.wait(YinRitualCfg.RITUAL_WAIT)
-
-                YinRitualState.Status = "🏠 Returning to base..."
-                yinReturnToBase()
-                task.wait(YinRitualCfg.REWARD_WAIT)
-
-                YinRitualState.Status = "✅ Ritual #" .. YinRitualState.RitualCount .. " done!"
-                task.wait(1)
                 YinRitualState.Status = "🔍 Scanning Yin & Yang..."
+                task.wait(1)
                 continue
             end
 
