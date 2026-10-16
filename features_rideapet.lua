@@ -27,7 +27,25 @@ local PLATINUM_COLORS = {
     info    = 3447003,    -- blue
 }
 
--- ⭐ Helper: ambil Weight & Luck dari GameData
+-- ⭐ Normalize egg name dari MeshPart (display) ke nama asli
+local function normalizeEggName(rawName)
+    if not rawName then return "?" end
+    local n = tostring(rawName)
+    -- Hapus suffix umum
+    n = n:gsub("_Model$", "")
+    n = n:gsub("_Preview$", "")
+    n = n:gsub("%s*Egg%s*$", "")
+    n = n:gsub("_", " ")
+    n = n:gsub("^%s+", ""):gsub("%s+$", "")
+    -- Kapitalisasi awal
+    n = n:gsub("^%l", string.upper)
+    -- Kalo kosong, return raw
+    if n == "" then return rawName end
+    return n .. " Egg"
+end
+
+
+-- ⭐ Helper: ambil Weight & Luck — PRIORITAS dari EGG YANG DI-STEAL (instance real)
 local function getEggInfoForWebhook(eggName)
     local info = {
         weight = "?",
@@ -37,35 +55,118 @@ local function getEggInfoForWebhook(eggName)
         price = "?",
     }
 
+    -- ═══ PRIORITY 1: Ambil dari EGG YANG DI-TANGAN (DisplayEgg) ═══
     pcall(function()
-        local RS = game:GetService("ReplicatedStorage")
-        local GameData = RS:FindFirstChild("GameData")
-        if not GameData then return end
+        local char = LocalPlayer.Character
+        if not char then return end
+        local wooden = char:FindFirstChild("Wooden")
+        if not wooden then return end
+        local displayEgg = wooden:FindFirstChild("DisplayEgg")
+        if not displayEgg then return end
 
-        local eggsMod = GameData:FindFirstChild("Eggs")
-        if not eggsMod then return end
+        for _, eggPart in ipairs(displayEgg:GetChildren()) do
+            if eggPart:IsA("MeshPart") and not eggPart.Name:lower():find("circle") then
+                -- Coba ambil dari attribute
+                local kg = eggPart:GetAttribute("KG")
+                       or eggPart:GetAttribute("Weight")
+                       or eggPart:GetAttribute("Mass")
+                if kg then info.weight = tostring(kg) end
 
-        local ok, eggData = pcall(require, eggsMod)
-        if not ok or type(eggData) ~= "table" then return end
+                local lk = eggPart:GetAttribute("Luck")
+                if lk then info.luck = tostring(lk) end
 
-        -- Coba beberapa cara akses data
-        local eggInfo = eggData[eggName]
-            or eggData[eggName:gsub(" Egg$", "")]
-            or eggData[eggName:gsub(" Egg$", "") .. "Egg"]
+                local rar = eggPart:GetAttribute("Rarity")
+                if rar then info.rarity = tostring(rar) end
 
-        if not eggInfo or type(eggInfo) ~= "table" then return end
+                -- Coba ambil dari TextLabel (UI di atas egg)
+                for _, d in ipairs(eggPart:GetDescendants()) do
+                    if d:IsA("TextLabel") then
+                        local t = d.Text or ""
+                        -- format "123.45KG" / "123 KG" / "KG: 123"
+                        local m = t:match("([%d%.]+)%s*[Kk][Gg]")
+                            or t:match("[Kk][Gg]%s*:?%s*([%d%.]+)")
+                        if m and info.weight == "?" then
+                            info.weight = m .. "KG"
+                        end
+                        local lm = t:match("[Ll]uck%s*:?%s*([%d%.x]+)")
+                        if lm and info.luck == "?" then
+                            info.luck = lm
+                        end
+                    end
+                end
 
-        -- Weight
-        info.weight = tostring(eggInfo.Weight or eggInfo.weight or eggInfo.Mass or eggInfo.mass or eggInfo.KG or "?")
-        -- Luck
-        info.luck = tostring(eggInfo.Luck or eggInfo.luck or "?")
-        -- Rarity
-        info.rarity = tostring(eggInfo.Rarity or eggInfo.rarity or "?")
-        -- Chance
-        info.chance = tostring(eggInfo.Chance or eggInfo.chance or eggInfo.SpawnChance or "?")
-        -- Price
-        info.price = tostring(eggInfo.Price or eggInfo.price or eggInfo.Cost or "?")
+                -- Kalo udah dapet semua, break
+                if info.weight ~= "?" and info.luck ~= "?" then break end
+            end
+        end
     end)
+
+    -- ═══ PRIORITY 2: Ambil dari RenderedEggs (egg di map yang lagi di-steal) ═══
+    pcall(function()
+        local rendered = game:GetService("Workspace"):FindFirstChild("RenderedEggs")
+        if not rendered then return end
+        local egg = rendered:FindFirstChild(eggName)
+        if not egg then return end
+
+        -- Attribute
+        local kg = egg:GetAttribute("KG")
+               or egg:GetAttribute("Weight")
+               or egg:GetAttribute("Mass")
+        if kg and info.weight == "?" then info.weight = tostring(kg) end
+
+        local lk = egg:GetAttribute("Luck")
+        if lk and info.luck == "?" then info.luck = tostring(lk) end
+
+        -- TextLabel (EggLuck GUI di atas egg)
+        local luckGui = egg:FindFirstChild("EggLuck", true)
+        if luckGui then
+            local luckLabel = luckGui:FindFirstChild("Luck")
+            if luckLabel and luckLabel:IsA("TextLabel") and info.luck == "?" then
+                info.luck = luckLabel.Text
+            end
+            local weightLabel = luckGui:FindFirstChild("Weight")
+            if weightLabel and weightLabel:IsA("TextLabel") and info.weight == "?" then
+                info.weight = weightLabel.Text
+            end
+        end
+    end)
+
+    -- ═══ PRIORITY 3: Fallback ke GameData (statik) ═══
+    if info.weight == "?" then
+        pcall(function()
+            local RS = game:GetService("ReplicatedStorage")
+            local GameData = RS:FindFirstChild("GameData")
+            if not GameData then return end
+
+            local eggsMod = GameData:FindFirstChild("Eggs")
+            if not eggsMod then return end
+
+            local ok, eggData = pcall(require, eggsMod)
+            if not ok or type(eggData) ~= "table" then return end
+
+            local eggInfo = eggData[eggName]
+                or eggData[eggName:gsub(" Egg$", "")]
+                or eggData[eggName:gsub(" Egg$", "") .. "Egg"]
+
+            if not eggInfo or type(eggInfo) ~= "table" then return end
+
+            if info.weight == "?" then
+                info.weight = tostring(eggInfo.Weight or eggInfo.weight or eggInfo.Mass or eggInfo.mass or eggInfo.KG or "?")
+            end
+            if info.luck == "?" then
+                info.luck = tostring(eggInfo.Luck or eggInfo.luck or "?")
+            end
+            if info.rarity == "?" then
+                info.rarity = tostring(eggInfo.Rarity or eggInfo.rarity or "?")
+            end
+            if info.chance == "?" then
+                info.chance = tostring(eggInfo.Chance or eggInfo.chance or eggInfo.SpawnChance or "?")
+            end
+            if info.price == "?" then
+                info.price = tostring(eggInfo.Price or eggInfo.price or eggInfo.Cost or "?")
+            end
+        end)
+    end
 
     return info
 end
@@ -2373,15 +2474,16 @@ local function runMutationOnce()
         if isHoldingEggMutation() then break end
     end
 
-       -- 🏆 PLATINUM WEBHOOK TRIGGER
+              -- 🏆 PLATINUM WEBHOOK TRIGGER
     if _G.VRILZ_SendWebhook then
-        local eggInfo = _G.VRILZ_GetEggInfo and _G.VRILZ_GetEggInfo(eggName or "") or {}
-
+        local cleanEggName = normalizeEggName(eggName)
+        local eggInfo = _G.VRILZ_GetEggInfo and _G.VRILZ_GetEggInfo(cleanEggName) or {}
+        
         _G.VRILZ_SendWebhook("mutation", {
             title = "MUTATION COMPLETE",
             description = "Egg berhasil di-mutasi! 🎉\n*Reward telah diklaim*",
             details = {
-                { name = "🥚  **EGG NAME**", value = "```yaml\n" .. tostring(eggName or "Unknown") .. "\n```", inline = true },
+                { name = "🥚  **EGG NAME**", value = "```yaml\n" .. tostring(cleanEggName or "Unknown") .. "\n```", inline = true },
                 { name = "⚖️  **WEIGHT**", value = "```yaml\n" .. (eggInfo.weight or "?") .. "\n```", inline = true },
                 { name = "🍀  **LUCK**", value = "```yaml\n" .. (eggInfo.luck or "?") .. "\n```", inline = true },
                 { name = "🔥  **MUTATION INFO**", value = "```yaml\nSource: Auto Mutation\nStatus: SUCCESS\nMethod: " .. tostring(Shared.StealMode or "TP") .. "\n```", inline = false },
@@ -2749,14 +2851,15 @@ doReturnToPlot()
                             Shared.Notify("🔥 Mutation selesai!", "success")
                         end
                                                 -- 🏆 PLATINUM WEBHOOK TRIGGER
-                        if _G.VRILZ_SendWebhook then
-                            local eggInfo = _G.VRILZ_GetEggInfo and _G.VRILZ_GetEggInfo(egg.Name or "") or {}
+                                                if _G.VRILZ_SendWebhook then
+                            local cleanEggName = normalizeEggName(egg.Name)
+                            local eggInfo = _G.VRILZ_GetEggInfo and _G.VRILZ_GetEggInfo(cleanEggName) or {}
 
                             _G.VRILZ_SendWebhook("mutation", {
                                 title = "MUTATION COMPLETE",
                                 description = "Egg dari steal berhasil di-mutasi! 🔥",
                                 details = {
-                                    { name = "🥚  **EGG NAME**", value = "```yaml\n" .. tostring(egg.Name or "Unknown") .. "\n```", inline = true },
+                                    { name = "🥚  **EGG NAME**", value = "```yaml\n" .. tostring(cleanEggName or "Unknown") .. "\n```", inline = true },
                                     { name = "⚖️  **WEIGHT**", value = "```yaml\n" .. (eggInfo.weight or "?") .. "\n```", inline = true },
                                     { name = "🍀  **LUCK**", value = "```yaml\n" .. (eggInfo.luck or "?") .. "\n```", inline = true },
                                     { name = "🔥  **MUTATION INFO**", value = "```yaml\nSource: Mutation Steal\nStatus: SUCCESS\n```", inline = false },
