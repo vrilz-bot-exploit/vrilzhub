@@ -4069,149 +4069,272 @@ end)
 
     registerTab("Auto", "▶", "Auto")
 
-           -- ============================================================
-    -- TAB WEBHOOK — PREMIUM UI v2
-    -- ============================================================
+      -- ═══════════════════════════════════════════════════════════
+    -- 🏆 TAB WEBHOOK — PLATINUM EDITION
+    -- ═══════════════════════════════════════════════════════════
     do
         local webhookPage = createPage("Webhook")
         pages.Webhook = webhookPage
 
-        -- ═══════════════════════════════════════════════════════
-        -- CARD 1: STATUS PANEL (Premium Look)
-        -- ═══════════════════════════════════════════════════════
-        local statusCard, statusContent = makeCard(webhookPage, "🔔 WEBHOOK STATUS", 1)
+        -- ╔═══════════════════════════════════════════════════════╗
+        -- ║  PLATINUM HERO PANEL — Big Status Display              ║
+        -- ╚═══════════════════════════════════════════════════════╝
+        local heroFrame = Instance.new("Frame")
+        heroFrame.Size = UDim2.new(1, 0, 0, 140)
+        heroFrame.BackgroundColor3 = Color3.fromRGB(8, 10, 14)
+        heroFrame.BorderSizePixel = 0
+        heroFrame.LayoutOrder = 1
+        heroFrame.ClipsDescendants = true
+        heroFrame.ZIndex = 3
+        heroFrame.Parent = webhookPage
 
-        -- Big status panel
-        local statusPanel = Instance.new("Frame")
-        statusPanel.Size = UDim2.new(1, 0, 0, 76)
-        statusPanel.BackgroundColor3 = C.Surface3
-        statusPanel.BackgroundTransparency = 0.2
-        statusPanel.BorderSizePixel = 0
-        statusPanel.ZIndex = 3
-        statusPanel.Parent = statusContent
-        registerTheme(statusPanel, "Surface3", "BackgroundColor3")
+        local heroCorner = Instance.new("UICorner")
+        heroCorner.CornerRadius = UDim.new(0, 18)
+        heroCorner.Parent = heroFrame
 
-        local spCorner = Instance.new("UICorner")
-        spCorner.CornerRadius = UDim.new(0, 14)
-        spCorner.Parent = statusPanel
-
-        local spGradient = Instance.new("UIGradient")
-        spGradient.Rotation = 90
-        spGradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 36)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 20)),
+        -- Hero gradient (platinum metallic)
+        local heroGradient = Instance.new("UIGradient")
+        heroGradient.Rotation = 135
+        heroGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 22, 28)),
+            ColorSequenceKeypoint.new(0.4, Color3.fromRGB(32, 34, 42)),
+            ColorSequenceKeypoint.new(0.6, Color3.fromRGB(24, 26, 32)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 12, 16)),
         })
-        spGradient.Parent = statusPanel
+        heroGradient.Parent = heroFrame
 
-        local spStroke = Instance.new("UIStroke")
-        spStroke.Color = C.Error
-        spStroke.Thickness = 2
-        spStroke.Transparency = 0.2
-        spStroke.Parent = statusPanel
+        -- Platinum shine strip
+        local heroShine = Instance.new("Frame")
+        heroShine.Size = UDim2.new(0, 120, 2, 0)
+        heroShine.Position = UDim2.new(-0.5, 0, -0.5, 0)
+        heroShine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        heroShine.BackgroundTransparency = 0.92
+        heroShine.BorderSizePixel = 0
+        heroShine.Rotation = 25
+        heroShine.ZIndex = 4
+        heroShine.Parent = heroFrame
 
-        -- Big dot indicator
+        task.spawn(function()
+            while heroShine.Parent do
+                task.wait(4)
+                heroShine.Position = UDim2.new(-0.5, 0, -0.5, 0)
+                TweenService:Create(heroShine, TweenInfo.new(1.2, Enum.EasingStyle.Quad), {
+                    Position = UDim2.new(1.5, 0, 1.5, 0)
+                }):Play()
+                task.wait(1.3)
+            end
+        end)
+
+        -- Platinum border glow
+        local heroStroke = Instance.new("UIStroke")
+        heroStroke.Color = Color3.fromRGB(200, 210, 225)
+        heroStroke.Thickness = 1.8
+        heroStroke.Transparency = 0.4
+        heroStroke.Parent = heroFrame
+
+        -- Sparkle dots (platinum effect)
+        for i = 1, 5 do
+            local sparkle = Instance.new("Frame")
+            sparkle.Size = UDim2.fromOffset(2, 2)
+            sparkle.Position = UDim2.fromScale(math.random(), math.random())
+            sparkle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            sparkle.BackgroundTransparency = 0.3
+            sparkle.BorderSizePixel = 0
+            sparkle.ZIndex = 5
+            sparkle.Parent = heroFrame
+            local sc = Instance.new("UICorner")
+            sc.CornerRadius = UDim.new(1, 0)
+            sc.Parent = sparkle
+
+            task.spawn(function()
+                while sparkle.Parent do
+                    task.wait(math.random(1, 3))
+                    sparkle.BackgroundTransparency = 0.2
+                    task.wait(0.3)
+                    sparkle.BackgroundTransparency = 0.9
+                    task.wait(0.3)
+                    sparkle.BackgroundTransparency = 0.3
+                    task.wait(1)
+                    sparkle.BackgroundTransparency = 1
+                end
+            end)
+        end
+
+        -- Platinum Logo/Badge
+        local platBadge = Instance.new("Frame")
+        platBadge.Size = UDim2.fromOffset(48, 48)
+        platBadge.Position = UDim2.fromOffset(20, 20)
+        platBadge.BackgroundColor3 = Color3.fromRGB(30, 33, 40)
+        platBadge.BorderSizePixel = 0
+        platBadge.ZIndex = 6
+        platBadge.Parent = heroFrame
+
+        local pbCorner = Instance.new("UICorner")
+        pbCorner.CornerRadius = UDim.new(0, 12)
+        pbCorner.Parent = platBadge
+
+        local pbGradient = Instance.new("UIGradient")
+        pbGradient.Rotation = 135
+        pbGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(230, 235, 245)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(180, 190, 205)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(120, 130, 150)),
+        })
+        pbGradient.Parent = platBadge
+
+        local pbStroke = Instance.new("UIStroke")
+        pbStroke.Color = Color3.fromRGB(220, 225, 235)
+        pbStroke.Thickness = 1.5
+        pbStroke.Transparency = 0.2
+        pbStroke.Parent = platBadge
+
+        local pbIcon = Instance.new("TextLabel")
+        pbIcon.Size = UDim2.fromScale(1, 1)
+        pbIcon.BackgroundTransparency = 1
+        pbIcon.Text = "🔔"
+        pbIcon.TextSize = 24
+        pbIcon.Font = Enum.Font.GothamBold
+        pbIcon.TextColor3 = Color3.fromRGB(20, 22, 28)
+        pbIcon.ZIndex = 7
+        pbIcon.Parent = platBadge
+
+        -- Title
+        local heroTitle = Instance.new("TextLabel")
+        heroTitle.Size = UDim2.new(1, -90, 0, 26)
+        heroTitle.Position = UDim2.fromOffset(80, 24)
+        heroTitle.BackgroundTransparency = 1
+        heroTitle.Text = "WEBHOOK SYSTEM"
+        heroTitle.TextColor3 = Color3.fromRGB(245, 248, 255)
+        heroTitle.Font = Enum.Font.GothamBlack
+        heroTitle.TextSize = 16
+        heroTitle.TextXAlignment = Enum.TextXAlignment.Left
+        heroTitle.ZIndex = 6
+        heroTitle.Parent = heroFrame
+
+        local heroSubtitle = Instance.new("TextLabel")
+        heroSubtitle.Size = UDim2.new(1, -90, 0, 16)
+        heroSubtitle.Position = UDim2.fromOffset(80, 48)
+        heroSubtitle.BackgroundTransparency = 1
+        heroSubtitle.Text = "◆ PLATINUM EDITION ◆"
+        heroSubtitle.TextColor3 = Color3.fromRGB(180, 190, 205)
+        heroSubtitle.Font = Enum.Font.GothamBold
+        heroSubtitle.TextSize = 10
+        heroSubtitle.TextXAlignment = Enum.TextXAlignment.Left
+        heroSubtitle.ZIndex = 6
+        heroSubtitle.Parent = heroFrame
+
+        -- Status Row (bottom of hero)
+        local statusRow = Instance.new("Frame")
+        statusRow.Size = UDim2.new(1, -40, 0, 40)
+        statusRow.Position = UDim2.new(0, 20, 1, -55)
+        statusRow.BackgroundColor3 = Color3.fromRGB(15, 17, 22)
+        statusRow.BackgroundTransparency = 0.3
+        statusRow.BorderSizePixel = 0
+        statusRow.ZIndex = 6
+        statusRow.Parent = heroFrame
+
+        local srCorner = Instance.new("UICorner")
+        srCorner.CornerRadius = UDim.new(0, 10)
+        srCorner.Parent = statusRow
+
+        local srStroke = Instance.new("UIStroke")
+        srStroke.Color = Color3.fromRGB(200, 210, 225)
+        srStroke.Thickness = 1
+        srStroke.Transparency = 0.6
+        srStroke.Parent = statusRow
+
+        -- Status dot
         local statusDot = Instance.new("Frame")
-        statusDot.Size = UDim2.fromOffset(16, 16)
-        statusDot.Position = UDim2.new(0, 20, 0.5, -8)
+        statusDot.Size = UDim2.fromOffset(10, 10)
+        statusDot.Position = UDim2.new(0, 14, 0.5, -5)
         statusDot.BackgroundColor3 = C.Error
         statusDot.BorderSizePixel = 0
-        statusDot.ZIndex = 5
-        statusDot.Parent = statusPanel
+        statusDot.ZIndex = 7
+        statusDot.Parent = statusRow
 
-        local dotCorner = Instance.new("UICorner")
-        dotCorner.CornerRadius = UDim.new(1, 0)
-        dotCorner.Parent = statusDot
+        local sdc = Instance.new("UICorner")
+        sdc.CornerRadius = UDim.new(1, 0)
+        sdc.Parent = statusDot
 
-        -- Glow ring
-        local dotGlow = Instance.new("Frame")
-        dotGlow.Size = UDim2.fromOffset(24, 24)
-        dotGlow.Position = UDim2.new(0, 16, 0.5, -12)
-        dotGlow.BackgroundColor3 = C.Error
-        dotGlow.BackgroundTransparency = 0.8
-        dotGlow.BorderSizePixel = 0
-        dotGlow.ZIndex = 4
-        dotGlow.Parent = statusPanel
+        local dotRing = Instance.new("Frame")
+        dotRing.Size = UDim2.fromOffset(10, 10)
+        dotRing.Position = UDim2.new(0, 14, 0.5, -5)
+        dotRing.BackgroundTransparency = 1
+        dotRing.BorderSizePixel = 0
+        dotRing.ZIndex = 6
+        dotRing.Parent = statusRow
 
-        local dgCorner = Instance.new("UICorner")
-        dgCorner.CornerRadius = UDim.new(1, 0)
-        dgCorner.Parent = dotGlow
+        local drc = Instance.new("UICorner")
+        drc.CornerRadius = UDim.new(1, 0)
+        drc.Parent = dotRing
 
-        -- Pulse animation
+        local drStroke = Instance.new("UIStroke")
+        drStroke.Color = C.Error
+        drStroke.Thickness = 1.5
+        drStroke.Transparency = 0.5
+        drStroke.Parent = dotRing
+
+        -- Ring pulse
         task.spawn(function()
-            while dotGlow.Parent do
-                task.wait(0.6)
-                TweenService:Create(dotGlow, TweenInfo.new(0.6), {
-                    Size = UDim2.fromOffset(34, 34),
-                    Position = UDim2.new(0, 11, 0.5, -17),
-                    BackgroundTransparency = 1,
+            while dotRing.Parent do
+                task.wait(0.4)
+                dotRing.Size = UDim2.fromOffset(10, 10)
+                dotRing.Position = UDim2.new(0, 14, 0.5, -5)
+                TweenService:Create(dotRing, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    Size = UDim2.fromOffset(26, 26),
+                    Position = UDim2.new(0, 6, 0.5, -13),
                 }):Play()
-                task.wait(0.6)
-                dotGlow.Size = UDim2.fromOffset(24, 24)
-                dotGlow.Position = UDim2.new(0, 16, 0.5, -12)
-                dotGlow.BackgroundTransparency = 0.8
+                TweenService:Create(drStroke, TweenInfo.new(0.8), { Transparency = 1 }):Play()
+                task.wait(0.5)
+                drStroke.Transparency = 0.5
             end
         end)
 
-        local statusTitle = Instance.new("TextLabel")
-        statusTitle.Size = UDim2.new(1, -60, 0, 22)
-        statusTitle.Position = UDim2.fromOffset(52, 14)
-        statusTitle.BackgroundTransparency = 1
-        statusTitle.Text = "WEBHOOK OFFLINE"
-        statusTitle.TextColor3 = C.Error
-        statusTitle.Font = Enum.Font.GothamBlack
-        statusTitle.TextSize = CFG.FONT_LABEL + 2
-        statusTitle.TextXAlignment = Enum.TextXAlignment.Left
-        statusTitle.ZIndex = 5
-        statusTitle.Parent = statusPanel
+        local statusText = Instance.new("TextLabel")
+        statusText.Size = UDim2.new(1, -60, 1, 0)
+        statusText.Position = UDim2.fromOffset(34, 0)
+        statusText.BackgroundTransparency = 1
+        statusText.Text = "OFFLINE — Enable webhook to start"
+        statusText.TextColor3 = Color3.fromRGB(200, 210, 225)
+        statusText.Font = Enum.Font.GothamBold
+        statusText.TextSize = CFG.FONT_LABEL
+        statusText.TextXAlignment = Enum.TextXAlignment.Left
+        statusText.TextTruncate = Enum.TextTruncate.AtEnd
+        statusText.ZIndex = 7
+        statusText.Parent = statusRow
 
-        local statusSub = Instance.new("TextLabel")
-        statusSub.Size = UDim2.new(1, -60, 0, 16)
-        statusSub.Position = UDim2.fromOffset(52, 36)
-        statusSub.BackgroundTransparency = 1
-        statusSub.Text = "Enable webhook to start receiving notifications"
-        statusSub.TextColor3 = C.Muted
-        statusSub.Font = Enum.Font.GothamSemibold
-        statusSub.TextSize = CFG.FONT_MUTED
-        statusSub.TextXAlignment = Enum.TextXAlignment.Left
-        statusSub.TextTruncate = Enum.TextTruncate.AtEnd
-        statusSub.ZIndex = 5
-        statusSub.Parent = statusPanel
-        registerTheme(statusSub, "Muted", "TextColor3")
+        -- ╔═══════════════════════════════════════════════════════╗
+        -- ║  TOGGLE ENABLE WEBHOOK                                 ║
+        -- ╚═══════════════════════════════════════════════════════╝
+        local toggleCard, toggleContent = makeCard(webhookPage, "⚡ SYSTEM CONTROL", 2)
 
-        -- ═══════════════════════════════════════════════════════
-        -- TOGGLE ENABLE WEBHOOK
-        -- ═══════════════════════════════════════════════════════
-        makeToggle(statusContent, "Enable Webhook", Shared.WebhookEnabled or false, function(v)
+        makeToggle(toggleContent, "Enable Webhook System", Shared.WebhookEnabled or false, function(v)
             Shared.WebhookEnabled = v
             if v then
-                statusTitle.Text = "WEBHOOK ONLINE"
-                statusTitle.TextColor3 = C.Success
-                spStroke.Color = C.Success
+                statusText.Text = "ONLINE — Listening for notifications"
                 statusDot.BackgroundColor3 = C.Success
-                dotGlow.BackgroundColor3 = C.Success
-                statusSub.Text = "Listening for rare eggs & mutations"
-                notify("🔔 Webhook: ON", "success")
+                drStroke.Color = C.Success
+                heroStroke.Color = C.Success
+                notify("🔔 Webhook: ONLINE", "success")
             else
-                statusTitle.Text = "WEBHOOK OFFLINE"
-                statusTitle.TextColor3 = C.Error
-                spStroke.Color = C.Error
+                statusText.Text = "OFFLINE — Enable webhook to start"
                 statusDot.BackgroundColor3 = C.Error
-                dotGlow.BackgroundColor3 = C.Error
-                statusSub.Text = "Enable webhook to start receiving notifications"
-                notify("🔔 Webhook: OFF", "info")
+                drStroke.Color = C.Error
+                heroStroke.Color = Color3.fromRGB(200, 210, 225)
+                notify("🔔 Webhook: OFFLINE", "info")
             end
         end)
 
-        -- ═══════════════════════════════════════════════════════
-        -- CARD 2: WEBHOOK URL (Auto-Save & Clean)
-        -- ═══════════════════════════════════════════════════════
-        local urlCard, urlContent = makeCard(webhookPage, "🔗 DISCORD WEBHOOK URL", 2)
+        -- ╔═══════════════════════════════════════════════════════╗
+        -- ║  URL INPUT — Platinum Style                            ║
+        -- ╚═══════════════════════════════════════════════════════╝
+        local urlCard, urlContent = makeCard(webhookPage, "🔗 WEBHOOK ENDPOINT", 3)
 
         local urlHint = Instance.new("TextLabel")
         urlHint.Size = UDim2.new(1, 0, 0, 14)
         urlHint.BackgroundTransparency = 1
-        urlHint.Text = "Paste your Discord webhook URL here"
-        urlHint.TextColor3 = C.Muted
+        urlHint.Text = "◆ Paste your Discord webhook URL below"
+        urlHint.TextColor3 = Color3.fromRGB(160, 170, 185)
         urlHint.Font = Enum.Font.GothamSemibold
         urlHint.TextSize = CFG.FONT_MUTED
         urlHint.TextXAlignment = Enum.TextXAlignment.Left
@@ -4219,90 +4342,92 @@ end)
         urlHint.Parent = urlContent
         registerTheme(urlHint, "Muted", "TextColor3")
 
-        -- URL Input Premium (URL tetap di dalam!)
-        local inputWrapper = Instance.new("Frame")
-        inputWrapper.Size = UDim2.new(1, 0, 0, 44)
-        inputWrapper.BackgroundColor3 = Color3.fromRGB(12, 12, 16)
-        inputWrapper.BorderSizePixel = 0
-        inputWrapper.ClipsDescendants = true -- ⭐ PENTING: URL gak keluar
-        inputWrapper.ZIndex = 3
-        inputWrapper.Parent = urlContent
+        -- Input Wrapper (anti-overflow)
+        local inputWrap = Instance.new("Frame")
+        inputWrap.Size = UDim2.new(1, 0, 0, 46)
+        inputWrap.BackgroundColor3 = Color3.fromRGB(10, 12, 16)
+        inputWrap.BorderSizePixel = 0
+        inputWrap.ClipsDescendants = true
+        inputWrap.ZIndex = 3
+        inputWrap.Parent = urlContent
 
-        local iwCorner = Instance.new("UICorner")
-        iwCorner.CornerRadius = UDim.new(0, 12)
-        iwCorner.Parent = inputWrapper
+        local iwc = Instance.new("UICorner")
+        iwc.CornerRadius = UDim.new(0, 12)
+        iwc.Parent = inputWrap
 
-        local iwGradient = Instance.new("UIGradient")
-        iwGradient.Rotation = 0
-        iwGradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(18, 18, 24)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 10, 14)),
+        local iwGrad = Instance.new("UIGradient")
+        iwGrad.Rotation = 135
+        iwGrad.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 25, 32)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(14, 16, 22)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 9, 13)),
         })
-        iwGradient.Parent = inputWrapper
+        iwGrad.Parent = inputWrap
 
         local iwStroke = Instance.new("UIStroke")
-        iwStroke.Color = C.Accent
+        iwStroke.Color = Color3.fromRGB(200, 210, 225)
         iwStroke.Thickness = 1.5
-        iwStroke.Transparency = 0.4
-        iwStroke.Parent = inputWrapper
-        registerTheme(iwStroke, "Accent", "Color")
+        iwStroke.Transparency = 0.5
+        iwStroke.Parent = inputWrap
 
-        -- Left accent bar (glow)
+        -- Left accent bar (platinum)
         local accentBar = Instance.new("Frame")
-        accentBar.Size = UDim2.new(0, 3, 1, -12)
-        accentBar.Position = UDim2.new(0, 0, 0, 6)
-        accentBar.BackgroundColor3 = C.Accent
+        accentBar.Size = UDim2.new(0, 3, 1, -16)
+        accentBar.Position = UDim2.new(0, 0, 0, 8)
+        accentBar.BackgroundColor3 = Color3.fromRGB(220, 230, 245)
         accentBar.BorderSizePixel = 0
         accentBar.ZIndex = 5
-        accentBar.Parent = inputWrapper
-        registerTheme(accentBar, "Accent", "BackgroundColor3")
+        accentBar.Parent = inputWrap
+
+        local ac = Instance.new("UICorner")
+        ac.CornerRadius = UDim.new(0, 2)
+        ac.Parent = accentBar
 
         -- Icon
         local urlIcon = Instance.new("TextLabel")
-        urlIcon.Size = UDim2.fromOffset(28, 28)
-        urlIcon.Position = UDim2.new(0, 14, 0.5, -14)
+        urlIcon.Size = UDim2.fromOffset(32, 32)
+        urlIcon.Position = UDim2.new(0, 12, 0.5, -16)
         urlIcon.BackgroundTransparency = 1
         urlIcon.Text = "🔗"
-        urlIcon.TextSize = 14
+        urlIcon.TextSize = 15
         urlIcon.Font = Enum.Font.GothamBold
         urlIcon.ZIndex = 5
-        urlIcon.Parent = inputWrapper
+        urlIcon.Parent = inputWrap
 
-        -- TextBox (URL tetap di dalam dengan TextTruncate)
+        -- TextBox
         local urlBox = Instance.new("TextBox")
-        urlBox.Size = UDim2.new(1, -58, 1, 0)
-        urlBox.Position = UDim2.fromOffset(48, 0)
+        urlBox.Size = UDim2.new(1, -60, 1, 0)
+        urlBox.Position = UDim2.fromOffset(50, 0)
         urlBox.BackgroundTransparency = 1
         urlBox.Text = Shared.WebhookURL or ""
         urlBox.PlaceholderText = "https://discord.com/api/webhooks/..."
-        urlBox.PlaceholderColor3 = C.Muted
-        urlBox.TextColor3 = C.Text
+        urlBox.PlaceholderColor3 = Color3.fromRGB(110, 120, 135)
+        urlBox.TextColor3 = Color3.fromRGB(235, 240, 250)
         urlBox.Font = Enum.Font.GothamSemibold
         urlBox.TextSize = CFG.FONT_MUTED
         urlBox.TextXAlignment = Enum.TextXAlignment.Left
-        urlBox.TextTruncate = Enum.TextTruncate.AtEnd -- ⭐ FIX: URL gak overflow
+        urlBox.TextTruncate = Enum.TextTruncate.AtEnd
         urlBox.ClearTextOnFocus = false
         urlBox.ZIndex = 5
-        urlBox.Parent = inputWrapper
-        registerTheme(urlBox, "Text", "TextColor3")
+        urlBox.Parent = inputWrap
 
-        -- Auto-save on focus lost
+        -- Auto-save
         urlBox.FocusLost:Connect(function()
             local url = urlBox.Text:gsub("^%s+", ""):gsub("%s+$", "")
             if url ~= "" and (url:find("discord.com/api/webhooks") or url:find("discordapp.com/api/webhooks")) then
                 Shared.WebhookURL = url
                 saveWebhookURL(url)
                 iwStroke.Color = C.Success
-                iwStroke.Transparency = 0.1
+                iwStroke.Transparency = 0.2
                 accentBar.BackgroundColor3 = C.Success
-                notify("✅ URL saved automatically", "success")
+                notify("✅ URL saved", "success")
                 task.delay(2, function()
-                    TweenService:Create(iwStroke, TweenInfo.new(0.5), { Transparency = 0.4 }):Play()
+                    TweenService:Create(iwStroke, TweenInfo.new(0.5), { Transparency = 0.5 }):Play()
                 end)
             elseif url ~= "" then
                 iwStroke.Color = C.Error
                 accentBar.BackgroundColor3 = C.Error
-                notify("❌ Invalid Discord webhook URL", "error")
+                notify("❌ Invalid URL", "error")
             end
         end)
 
@@ -4312,26 +4437,24 @@ end)
                 iwStroke.Color = C.Success
                 accentBar.BackgroundColor3 = C.Success
                 if Shared.WebhookEnabled then
-                    statusTitle.Text = "WEBHOOK ONLINE"
-                    statusTitle.TextColor3 = C.Success
-                    spStroke.Color = C.Success
+                    statusText.Text = "ONLINE — Listening for notifications"
                     statusDot.BackgroundColor3 = C.Success
-                    dotGlow.BackgroundColor3 = C.Success
-                    statusSub.Text = "Listening for rare eggs & mutations"
+                    drStroke.Color = C.Success
+                    heroStroke.Color = C.Success
                 end
             end
         end)
 
-        -- ═══════════════════════════════════════════════════════
-        -- CARD 3: TEST NOTIFICATION (Premium Button)
-        -- ═══════════════════════════════════════════════════════
-        local testCard, testContent = makeCard(webhookPage, "🧪 TEST CONNECTION", 3)
+        -- ╔═══════════════════════════════════════════════════════╗
+        -- ║  TEST BUTTON — Platinum Shine                          ║
+        -- ╚═══════════════════════════════════════════════════════╝
+        local testCard, testContent = makeCard(webhookPage, "🧪 TEST CONNECTION", 4)
 
         local testDesc = Instance.new("TextLabel")
-        testDesc.Size = UDim2.new(1, 0, 0, 28)
+        testDesc.Size = UDim2.new(1, 0, 0, 30)
         testDesc.BackgroundTransparency = 1
-        testDesc.Text = "Kirim test embed ke Discord untuk verify koneksi webhook kamu."
-        testDesc.TextColor3 = C.Muted
+        testDesc.Text = "◆ Verify your webhook connection by sending a test notification to Discord."
+        testDesc.TextColor3 = Color3.fromRGB(160, 170, 185)
         testDesc.Font = Enum.Font.GothamSemibold
         testDesc.TextSize = CFG.FONT_MUTED
         testDesc.TextWrapped = true
@@ -4341,79 +4464,82 @@ end)
         testDesc.Parent = testContent
         registerTheme(testDesc, "Muted", "TextColor3")
 
-        -- Premium Test Button
+        -- Platinum Test Button
         local testBtn = Instance.new("TextButton")
-        testBtn.Size = UDim2.new(1, 0, 0, 46)
-        testBtn.BackgroundColor3 = C.Accent
+        testBtn.Size = UDim2.new(1, 0, 0, 50)
+        testBtn.BackgroundColor3 = Color3.fromRGB(25, 28, 35)
         testBtn.Text = ""
         testBtn.BorderSizePixel = 0
         testBtn.AutoButtonColor = false
         testBtn.ZIndex = 4
         testBtn.Parent = testContent
-        registerTheme(testBtn, "Accent", "BackgroundColor3")
 
-        local tbCorner = Instance.new("UICorner")
-        tbCorner.CornerRadius = UDim.new(0, 12)
-        tbCorner.Parent = testBtn
+        local tbc = Instance.new("UICorner")
+        tbc.CornerRadius = UDim.new(0, 14)
+        tbc.Parent = testBtn
 
-        local tbGradient = Instance.new("UIGradient")
-        tbGradient.Rotation = 0
-        tbGradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, C.Accent),
-            ColorSequenceKeypoint.new(0.5, C.Accent2),
-            ColorSequenceKeypoint.new(1, C.Accent),
+        local tbGrad = Instance.new("UIGradient")
+        tbGrad.Rotation = 135
+        tbGrad.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(240, 245, 255)),
+            ColorSequenceKeypoint.new(0.35, Color3.fromRGB(200, 210, 225)),
+            ColorSequenceKeypoint.new(0.65, Color3.fromRGB(160, 175, 200)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 115, 140)),
         })
-        tbGradient.Parent = testBtn
+        tbGrad.Parent = testBtn
+
+        local tbStroke = Instance.new("UIStroke")
+        tbStroke.Color = Color3.fromRGB(255, 255, 255)
+        tbStroke.Thickness = 1.8
+        tbStroke.Transparency = 0.3
+        tbStroke.Parent = testBtn
 
         -- Shine effect
         local shine = Instance.new("Frame")
-        shine.Size = UDim2.new(0, 60, 1, 0)
+        shine.Size = UDim2.new(0, 80, 1, 0)
         shine.Position = UDim2.new(-1, 0, 0, 0)
         shine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        shine.BackgroundTransparency = 0.75
+        shine.BackgroundTransparency = 0.6
         shine.BorderSizePixel = 0
         shine.ZIndex = 5
         shine.Parent = testBtn
 
-        -- Shine animation loop
+        local shineCorner = Instance.new("UICorner")
+        shineCorner.CornerRadius = UDim.new(0, 14)
+        shineCorner.Parent = shine
+
         task.spawn(function()
             while shine.Parent do
-                task.wait(3)
+                task.wait(3.5)
                 shine.Position = UDim2.new(-1, 0, 0, 0)
-                TweenService:Create(shine, TweenInfo.new(0.8, Enum.EasingStyle.Quad), {
-                    Position = UDim2.new(1, 0, 0, 0)
+                TweenService:Create(shine, TweenInfo.new(1, Enum.EasingStyle.Quad), {
+                    Position = UDim2.new(2, 0, 0, 0)
                 }):Play()
-                task.wait(0.9)
+                task.wait(1.1)
             end
         end)
 
         local tbLabel = Instance.new("TextLabel")
         tbLabel.Size = UDim2.fromScale(1, 1)
         tbLabel.BackgroundTransparency = 1
-        tbLabel.Text = "🚀 SEND TEST NOTIFICATION"
-        tbLabel.TextColor3 = Color3.new(1, 1, 1)
+        tbLabel.Text = "🚀  SEND TEST NOTIFICATION"
+        tbLabel.TextColor3 = Color3.fromRGB(20, 22, 28)
         tbLabel.Font = Enum.Font.GothamBlack
-        tbLabel.TextSize = CFG.FONT_LABEL
+        tbLabel.TextSize = CFG.FONT_LABEL + 1
         tbLabel.ZIndex = 6
         tbLabel.Parent = testBtn
 
-        local tbStroke = Instance.new("UIStroke")
-        tbStroke.Color = C.Accent2
-        tbStroke.Thickness = 2
-        tbStroke.Transparency = 0.4
-        tbStroke.Parent = testBtn
-
-        -- Hover
+        -- Hover effect
         testBtn.MouseEnter:Connect(function()
             TweenService:Create(tbStroke, TweenInfo.new(0.2), { Transparency = 0 }):Play()
-            TweenService:Create(tbLabel, TweenInfo.new(0.2), { TextSize = CFG.FONT_LABEL + 1 }):Play()
+            TweenService:Create(tbLabel, TweenInfo.new(0.2), { TextSize = CFG.FONT_LABEL + 2 }):Play()
         end)
         testBtn.MouseLeave:Connect(function()
-            TweenService:Create(tbStroke, TweenInfo.new(0.2), { Transparency = 0.4 }):Play()
-            TweenService:Create(tbLabel, TweenInfo.new(0.2), { TextSize = CFG.FONT_LABEL }):Play()
+            TweenService:Create(tbStroke, TweenInfo.new(0.2), { Transparency = 0.3 }):Play()
+            TweenService:Create(tbLabel, TweenInfo.new(0.2), { TextSize = CFG.FONT_LABEL + 1 }):Play()
         end)
 
-        -- Click
+        -- Click handler
         testBtn.MouseButton1Click:Connect(function()
             if not Shared.WebhookURL or Shared.WebhookURL == "" then
                 notify("❌ Set webhook URL first!", "error")
@@ -4422,28 +4548,28 @@ end)
 
             -- Click animation
             TweenService:Create(testBtn, TweenInfo.new(0.08), {
-                Size = UDim2.new(0.97, 0, 0, 44)
+                Size = UDim2.new(0.97, 0, 0, 48)
             }):Play()
             task.delay(0.12, function()
                 TweenService:Create(testBtn, TweenInfo.new(0.15), {
-                    Size = UDim2.new(1, 0, 0, 46)
+                    Size = UDim2.new(1, 0, 0, 50)
                 }):Play()
             end)
 
-            tbLabel.Text = "⏳ SENDING..."
+            tbLabel.Text = "⏳  SENDING..."
             task.spawn(function()
                 local HttpService = game:GetService("HttpService")
                 local payload = HttpService:JSONEncode({
-                    username = "🌈 VRILZHUB",
+                    username = "🏆 VRILZHUB PLATINUM",
                     avatar_url = "https://i.imgur.com/your-logo.png",
                     embeds = {{
                         author = {
-                            name = "VRILZHUB · Ride a Pet",
+                            name = "VRILZHUB · Platinum Edition",
                             icon_url = "https://i.imgur.com/your-logo.png",
                         },
-                        title = "🎯  WEBHOOK CONNECTED",
-                        description = "Koneksi webhook kamu **berhasil**!\n\n*Semua notifikasi rare egg & mutation bakal masuk ke channel ini.*",
-                        color = 16747520,
+                        title = "🏆  WEBHOOK CONNECTED",
+                        description = "Platinum webhook system **successfully connected**!\n\n*All notifications will arrive in this channel.*",
+                        color = 15859455,
                         fields = {
                             {
                                 name = "👤  **PLAYER**",
@@ -4462,7 +4588,7 @@ end)
                             },
                         },
                         footer = {
-                            text = "🌈 VRILZHUB  •  Webhook Online",
+                            text = "🏆 VRILZHUB PLATINUM  •  v2.0",
                         },
                         timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
                     }}
@@ -4490,63 +4616,109 @@ end)
                 end
 
                 if success then
-                    tbLabel.Text = "✅ CONNECTED!"
+                    tbLabel.Text = "✅  CONNECTED!"
                     notify("✅ Test sent to Discord!", "success")
                 else
-                    tbLabel.Text = "❌ FAILED"
+                    tbLabel.Text = "❌  FAILED"
                     notify("❌ Webhook failed! Check URL", "error")
                 end
 
                 task.wait(2.5)
-                tbLabel.Text = "🚀 SEND TEST NOTIFICATION"
+                tbLabel.Text = "🚀  SEND TEST NOTIFICATION"
             end)
         end)
 
-        -- ═══════════════════════════════════════════════════════
-        -- CARD 4: INFO (Clean)
-        -- ═══════════════════════════════════════════════════════
-        local infoCard, infoContent = makeCard(webhookPage, "💡 WEBHOOK INFO", 4)
+        -- ╔═══════════════════════════════════════════════════════╗
+        -- ║  INFO PANEL — Platinum List                            ║
+        -- ╚═══════════════════════════════════════════════════════╝
+        local infoCard, infoContent = makeCard(webhookPage, "💎 PLATINUM FEATURES", 5)
 
-        local infoItems = {
-            { icon = "🎯", text = "Rare egg spawn → rainbow notif" },
-            { icon = "🔥", text = "Mutation complete → fire notif" },
-            { icon = "💾", text = "URL auto-save on paste" },
-            { icon = "🔒", text = "Koneksi aman & private" },
+        local features = {
+            { icon = "🎯", title = "Rare Egg Alerts",  desc = "Auto-notify saat rare egg spawn",     color = C.Accent },
+            { icon = "🔥", title = "Mutation Alerts",  desc = "Notify saat mutation complete",       color = C.Accent2 },
+            { icon = "💾", title = "Auto-Save System", desc = "URL tersimpan otomatis",              color = C.Success },
+            { icon = "🔒", title = "Secure Connect",   desc = "Koneksi aman & private",              color = C.Accent3 },
         }
-        for i, item in ipairs(infoItems) do
+
+        for i, feat in ipairs(features) do
             local row = Instance.new("Frame")
-            row.Size = UDim2.new(1, 0, 0, 22)
-            row.BackgroundTransparency = 1
+            row.Size = UDim2.new(1, 0, 0, 46)
+            row.BackgroundColor3 = Color3.fromRGB(18, 20, 26)
+            row.BackgroundTransparency = 0.4
+            row.BorderSizePixel = 0
             row.LayoutOrder = i
             row.ZIndex = 3
             row.Parent = infoContent
 
-            local iconLbl = Instance.new("TextLabel")
-            iconLbl.Size = UDim2.fromOffset(24, 22)
-            iconLbl.BackgroundTransparency = 1
-            iconLbl.Text = item.icon
-            iconLbl.TextSize = 12
-            iconLbl.Font = Enum.Font.GothamBold
-            iconLbl.TextXAlignment = Enum.TextXAlignment.Left
-            iconLbl.ZIndex = 4
-            iconLbl.Parent = row
+            local rc = Instance.new("UICorner")
+            rc.CornerRadius = UDim.new(0, 10)
+            rc.Parent = row
 
-            local textLbl = Instance.new("TextLabel")
-            textLbl.Size = UDim2.new(1, -26, 1, 0)
-            textLbl.Position = UDim2.fromOffset(26, 0)
-            textLbl.BackgroundTransparency = 1
-            textLbl.Text = item.text
-            textLbl.TextColor3 = C.Muted
-            textLbl.Font = Enum.Font.GothamSemibold
-            textLbl.TextSize = CFG.FONT_MUTED
-            textLbl.TextXAlignment = Enum.TextXAlignment.Left
-            textLbl.TextTruncate = Enum.TextTruncate.AtEnd
-            textLbl.ZIndex = 4
-            textLbl.Parent = row
-            registerTheme(textLbl, "Muted", "TextColor3")
+            local rs = Instance.new("UIStroke")
+            rs.Color = Color3.fromRGB(80, 90, 110)
+            rs.Thickness = 1
+            rs.Transparency = 0.7
+            rs.Parent = row
+
+            -- Icon container
+            local iconBox = Instance.new("Frame")
+            iconBox.Size = UDim2.fromOffset(32, 32)
+            iconBox.Position = UDim2.new(0, 8, 0.5, -16)
+            iconBox.BackgroundColor3 = feat.color
+            iconBox.BackgroundTransparency = 0.8
+            iconBox.BorderSizePixel = 0
+            iconBox.ZIndex = 4
+            iconBox.Parent = row
+
+            local ibc = Instance.new("UICorner")
+            ibc.CornerRadius = UDim.new(0, 8)
+            ibc.Parent = iconBox
+
+            local ibs = Instance.new("UIStroke")
+            ibs.Color = feat.color
+            ibs.Thickness = 1
+            ibs.Transparency = 0.4
+            ibs.Parent = iconBox
+
+            local iconLbl = Instance.new("TextLabel")
+            iconLbl.Size = UDim2.fromScale(1, 1)
+            iconLbl.BackgroundTransparency = 1
+            iconLbl.Text = feat.icon
+            iconLbl.TextSize = 14
+            iconLbl.Font = Enum.Font.GothamBold
+            iconLbl.ZIndex = 5
+            iconLbl.Parent = iconBox
+
+            -- Title
+            local titleLbl = Instance.new("TextLabel")
+            titleLbl.Size = UDim2.new(1, -60, 0, 16)
+            titleLbl.Position = UDim2.fromOffset(50, 8)
+            titleLbl.BackgroundTransparency = 1
+            titleLbl.Text = feat.title
+            titleLbl.TextColor3 = Color3.fromRGB(235, 240, 250)
+            titleLbl.Font = Enum.Font.GothamBold
+            titleLbl.TextSize = CFG.FONT_LABEL
+            titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+            titleLbl.TextTruncate = Enum.TextTruncate.AtEnd
+            titleLbl.ZIndex = 4
+            titleLbl.Parent = row
+
+            -- Desc
+            local descLbl = Instance.new("TextLabel")
+            descLbl.Size = UDim2.new(1, -60, 0, 14)
+            descLbl.Position = UDim2.fromOffset(50, 24)
+            descLbl.BackgroundTransparency = 1
+            descLbl.Text = feat.desc
+            descLbl.TextColor3 = Color3.fromRGB(150, 160, 175)
+            descLbl.Font = Enum.Font.GothamSemibold
+            descLbl.TextSize = CFG.FONT_MUTED
+            descLbl.TextXAlignment = Enum.TextXAlignment.Left
+            descLbl.TextTruncate = Enum.TextTruncate.AtEnd
+            descLbl.ZIndex = 4
+            descLbl.Parent = row
         end
 
-        -- Register tab
+                -- Register tab
         registerTab("Webhook", "🔔", "Webhook")
     end
 
