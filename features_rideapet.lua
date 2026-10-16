@@ -13,90 +13,155 @@ local LocalPlayer = Players.LocalPlayer
 
 
 -- ============================================================
--- 🌈 RAINBOW HOLOGRAM WEBHOOK — Premium Multi-Embed
+-- 🏆 PLATINUM WEBHOOK — Premium Discord Notifications
 -- ============================================================
 local HttpService = game:GetService("HttpService")
 
-local HOLOGRAM_COLORS = {
-    fire    = { 16727040, 16747520, 16766720 },
-    ice     = { 5814783, 8839167, 14811135 },
-    rainbow = { 15548997, 16766720, 3066993, 3447003, 10181046 },
-    elite   = { 16766720, 16747520, 16727040 },
-    mutation = { 15548997, 16747520, 16766720, 3066993 },
+-- Platinum color palette
+local PLATINUM_COLORS = {
+    hero    = 15859455,   -- platinum silver
+    gold    = 16766720,   -- gold accent
+    success = 5763719,    -- green
+    fire    = 16747520,   -- orange
+    danger  = 15548997,   -- red
+    info    = 3447003,    -- blue
 }
 
-local HOLOGRAM_EMOJIS = {
-    rare_egg = { "🎯", "🥚", "💎" },
-    mutation = { "🔥", "⚗️", "✨" },
-    hatch    = { "🥚", "🐾", "🎉" },
-    elite    = { "⚜", "👑", "💠" },
-    rainbow  = { "🌈", "✨", "💫" },
-}
+-- ⭐ Helper: ambil Weight & Luck dari GameData
+local function getEggInfoForWebhook(eggName)
+    local info = {
+        weight = "?",
+        luck = "?",
+        rarity = "?",
+        chance = "?",
+        price = "?",
+    }
 
-local function sendHologramWebhook(eventType, data)
+    pcall(function()
+        local RS = game:GetService("ReplicatedStorage")
+        local GameData = RS:FindFirstChild("GameData")
+        if not GameData then return end
+
+        local eggsMod = GameData:FindFirstChild("Eggs")
+        if not eggsMod then return end
+
+        local ok, eggData = pcall(require, eggsMod)
+        if not ok or type(eggData) ~= "table" then return end
+
+        -- Coba beberapa cara akses data
+        local eggInfo = eggData[eggName]
+            or eggData[eggName:gsub(" Egg$", "")]
+            or eggData[eggName:gsub(" Egg$", "") .. "Egg"]
+
+        if not eggInfo or type(eggInfo) ~= "table" then return end
+
+        -- Weight
+        info.weight = tostring(eggInfo.Weight or eggInfo.weight or eggInfo.Mass or eggInfo.mass or eggInfo.KG or "?")
+        -- Luck
+        info.luck = tostring(eggInfo.Luck or eggInfo.luck or "?")
+        -- Rarity
+        info.rarity = tostring(eggInfo.Rarity or eggInfo.rarity or "?")
+        -- Chance
+        info.chance = tostring(eggInfo.Chance or eggInfo.chance or eggInfo.SpawnChance or "?")
+        -- Price
+        info.price = tostring(eggInfo.Price or eggInfo.price or eggInfo.Cost or "?")
+    end)
+
+    return info
+end
+
+-- ⭐ Helper: ambil Luck realtime dari DisplayEgg di game
+local function getRealtimeEggLuck(eggName)
+    local result = nil
+    pcall(function()
+        local rendered = game:GetService("Workspace"):FindFirstChild("RenderedEggs")
+        if not rendered then return end
+        local egg = rendered:FindFirstChild(eggName)
+        if not egg then return end
+
+        local luckGui = egg:FindFirstChild("EggLuck", true)
+        if luckGui then
+            local luckLabel = luckGui:FindFirstChild("Luck")
+            if luckLabel and luckLabel:IsA("TextLabel") then
+                result = luckLabel.Text
+            end
+        end
+    end)
+    return result
+end
+
+-- ⭐ FUNGSI UTAMA — PLATINUM WEBHOOK
+local function sendPlatinumWebhook(eventType, data)
     if not Shared or not Shared.WebhookURL or Shared.WebhookURL == "" then return end
     if not Shared.WebhookEnabled then return end
 
     local now = os.clock()
-    if Shared.WebhookLastSend and (now - Shared.WebhookLastSend) < 3 then return end
+    if Shared.WebhookLastSend and (now - Shared.WebhookLastSend) < 2 then return end
     Shared.WebhookLastSend = now
 
-    local colors = HOLOGRAM_COLORS[eventType] or HOLOGRAM_COLORS.rainbow
-    local icons = HOLOGRAM_EMOJIS[eventType] or HOLOGRAM_EMOJIS.rainbow
+    -- Emoji set per event
+    local ICONS = {
+        rare_egg = { "💎", "🥚", "⚖️" },
+        mutation = { "🔥", "⚗️", "✨" },
+        hatch    = { "🥚", "🐾", "🎉" },
+    }
+    local icons = ICONS[eventType] or { "ℹ️", "📌", "⚙️" }
 
     local embeds = {}
 
+    -- ═══ EMBED 1: HERO HEADER ═══
     table.insert(embeds, {
         author = {
-            name = "VRILZHUB · Ride a Pet",
+            name = "VRILZHUB · Platinum Edition",
             icon_url = "https://i.imgur.com/your-logo.png",
         },
         title = icons[1] .. "  " .. data.title,
-        description = data.description or "​",
-        color = colors[1],
+        description = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" .. (data.description or "​"),
+        color = PLATINUM_COLORS.hero,
     })
 
+    -- ═══ EMBED 2: PLAYER INFO ═══
     table.insert(embeds, {
-        description = "​",
-        color = colors[2] or colors[1],
+        color = PLATINUM_COLORS.hero,
         fields = {
             {
-                name = icons[2] .. "  **PLAYER**",
-                value = "```\n" .. LocalPlayer.DisplayName .. "\n@" .. LocalPlayer.Name .. "\n```",
+                name = "👤  **PLAYER**",
+                value = "```yaml\n" .. LocalPlayer.DisplayName .. "\n@" .. LocalPlayer.Name .. "\n```",
                 inline = true,
             },
             {
                 name = "🎮  **GAME**",
-                value = "```\nPlace: " .. game.PlaceId .. "\nKey: " .. tostring(Shared.KeyType or "FREE") .. "\n```",
+                value = "```yaml\nPlace: " .. game.PlaceId .. "\nKey: " .. tostring(Shared.KeyType or "FREE") .. "\n```",
                 inline = true,
             },
             {
                 name = "⏰  **TIME**",
-                value = "```\n" .. os.date("%H:%M:%S") .. "\n" .. os.date("%d/%m/%Y") .. "\n```",
+                value = "```yaml\n" .. os.date("%H:%M:%S") .. "\n" .. os.date("%d/%m/%Y") .. "\n```",
                 inline = true,
             },
         },
     })
 
+    -- ═══ EMBED 3: DETAILS (Weight / Luck / Rarity) ═══
     if data.details and #data.details > 0 then
         table.insert(embeds, {
-            description = "​",
-            color = colors[3] or colors[2] or colors[1],
+            color = PLATINUM_COLORS.gold,
             fields = data.details,
         })
     end
 
+    -- ═══ EMBED 4: FOOTER ═══
     table.insert(embeds, {
-        description = "​",
-        color = colors[#colors] or colors[1],
+        color = PLATINUM_COLORS.hero,
+        description = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
         footer = {
-            text = "🌈 VRILZHUB HOLOGRAM  •  v2.0  •  Ride a Pet",
+            text = "🏆 VRILZHUB PLATINUM  •  v2.0  •  Ride a Pet",
         },
         timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
     })
 
     local payload = HttpService:JSONEncode({
-        username = "🌈 VRILZHUB",
+        username = "🏆 VRILZHUB PLATINUM",
         avatar_url = "https://i.imgur.com/your-logo.png",
         embeds = embeds,
     })
@@ -114,7 +179,14 @@ local function sendHologramWebhook(eventType, data)
     end)
 end
 
-_G.VRILZ_SendWebhook = sendHologramWebhook
+-- Compatibility — biar trigger lama tetap jalan
+_G.VRILZ_SendWebhook = function(eventType, data)
+    sendPlatinumWebhook(eventType, data)
+end
+
+-- Expose helper ke _G
+_G.VRILZ_GetEggInfo = getEggInfoForWebhook
+_G.VRILZ_GetRealtimeLuck = getRealtimeEggLuck
 
 -- ============================================================
 -- ANTI-AFK (FINAL v4) — Aman buat semua fitur
@@ -1679,21 +1751,28 @@ function Features.startAutoFarm()
             local eggRarity = best.rarity
             local eggKey = getEggKey(egg)
 
-                        if (RARITY_ORDER[eggRarity] or 1) >= getNotifThreshold() then
+                                    if (RARITY_ORDER[eggRarity] or 1) >= getNotifThreshold() then
                 if not NotifiedEggs[eggKey] then
                     NotifiedEggs[eggKey] = true
                     if Shared.Notify then
                         Shared.Notify("🎯 " .. eggName .. " (" .. eggRarity .. ")", "success")
                     end
-                    -- 🌈 WEBHOOK TRIGGER
+                    -- 🏆 PLATINUM WEBHOOK TRIGGER
                     if _G.VRILZ_SendWebhook then
-                        _G.VRILZ_SendWebhook("rainbow", {
-                            title = "RARE EGG SPAWNED",
-                            description = "**" .. eggName .. "** muncul di server!\n*Auto-steal akan segera dijalankan...*",
+                        local eggInfo = _G.VRILZ_GetEggInfo and _G.VRILZ_GetEggInfo(eggName) or {}
+                        local realtimeLuck = _G.VRILZ_GetRealtimeLuck and _G.VRILZ_GetRealtimeLuck(eggName) or nil
+                        local luckValue = realtimeLuck or eggInfo.luck or "?"
+
+                        _G.VRILZ_SendWebhook("rare_egg", {
+                            title = "RARE EGG DETECTED",
+                            description = "**" .. eggName .. "** telah muncul di server!\n*Auto-steal akan segera dijalankan...*",
                             details = {
-                                { name = "🥚  **EGG NAME**", value = "```\n" .. eggName .. "\n```", inline = true },
-                                { name = "💎  **RARITY**", value = "```\n" .. eggRarity .. "\n```", inline = true },
-                                { name = "📏  **DISTANCE**", value = "```\n" .. math.floor(best.dist) .. " studs\n```", inline = true },
+                                { name = "🥚  **EGG NAME**", value = "```yaml\n" .. eggName .. "\n```", inline = true },
+                                { name = "💎  **RARITY**", value = "```yaml\n" .. eggRarity .. "\n```", inline = true },
+                                { name = "⚖️  **WEIGHT**", value = "```yaml\n" .. (eggInfo.weight or "?") .. "\n```", inline = true },
+                                { name = "🍀  **LUCK**", value = "```yaml\n" .. luckValue .. "\n```", inline = true },
+                                { name = "🎲  **CHANCE**", value = "```yaml\n" .. (eggInfo.chance or "?") .. "\n```", inline = true },
+                                { name = "📏  **DISTANCE**", value = "```yaml\n" .. math.floor(best.dist) .. " studs\n```", inline = true },
                             },
                         })
                     end
@@ -2251,13 +2330,18 @@ local function runMutationOnce()
         if isHoldingEggMutation() then break end
     end
 
-    -- 🌈 WEBHOOK TRIGGER
+       -- 🏆 PLATINUM WEBHOOK TRIGGER
     if _G.VRILZ_SendWebhook then
+        local eggInfo = _G.VRILZ_GetEggInfo and _G.VRILZ_GetEggInfo(eggName or "") or {}
+
         _G.VRILZ_SendWebhook("mutation", {
             title = "MUTATION COMPLETE",
             description = "Egg berhasil di-mutasi! 🎉\n*Reward telah diklaim*",
             details = {
-                { name = "🔥  **MUTATION INFO**", value = "```\nSource: Auto Mutation\nStatus: SUCCESS\nMethod: " .. tostring(Shared.StealMode or "TP") .. "\n```", inline = false },
+                { name = "🥚  **EGG NAME**", value = "```yaml\n" .. tostring(eggName or "Unknown") .. "\n```", inline = true },
+                { name = "⚖️  **WEIGHT**", value = "```yaml\n" .. (eggInfo.weight or "?") .. "\n```", inline = true },
+                { name = "🍀  **LUCK**", value = "```yaml\n" .. (eggInfo.luck or "?") .. "\n```", inline = true },
+                { name = "🔥  **MUTATION INFO**", value = "```yaml\nSource: Auto Mutation\nStatus: SUCCESS\nMethod: " .. tostring(Shared.StealMode or "TP") .. "\n```", inline = false },
             },
         })
     end
@@ -2621,13 +2705,18 @@ doReturnToPlot()
                         if Shared.Notify then
                             Shared.Notify("🔥 Mutation selesai!", "success")
                         end
-                        -- 🌈 WEBHOOK TRIGGER
+                                                -- 🏆 PLATINUM WEBHOOK TRIGGER
                         if _G.VRILZ_SendWebhook then
+                            local eggInfo = _G.VRILZ_GetEggInfo and _G.VRILZ_GetEggInfo(egg.Name or "") or {}
+
                             _G.VRILZ_SendWebhook("mutation", {
                                 title = "MUTATION COMPLETE",
                                 description = "Egg dari steal berhasil di-mutasi! 🔥",
                                 details = {
-                                    { name = "🔥  **MUTATION INFO**", value = "```\nSource: Mutation Steal\nStatus: SUCCESS\nEgg: " .. tostring(egg.Name or "Unknown") .. "\n```", inline = false },
+                                    { name = "🥚  **EGG NAME**", value = "```yaml\n" .. tostring(egg.Name or "Unknown") .. "\n```", inline = true },
+                                    { name = "⚖️  **WEIGHT**", value = "```yaml\n" .. (eggInfo.weight or "?") .. "\n```", inline = true },
+                                    { name = "🍀  **LUCK**", value = "```yaml\n" .. (eggInfo.luck or "?") .. "\n```", inline = true },
+                                    { name = "🔥  **MUTATION INFO**", value = "```yaml\nSource: Mutation Steal\nStatus: SUCCESS\n```", inline = false },
                                 },
                             })
                         end
