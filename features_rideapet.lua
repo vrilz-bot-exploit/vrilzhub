@@ -11,6 +11,111 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
+
+-- ============================================================
+-- 🌈 RAINBOW HOLOGRAM WEBHOOK — Premium Multi-Embed
+-- ============================================================
+local HttpService = game:GetService("HttpService")
+
+local HOLOGRAM_COLORS = {
+    fire    = { 16727040, 16747520, 16766720 },
+    ice     = { 5814783, 8839167, 14811135 },
+    rainbow = { 15548997, 16766720, 3066993, 3447003, 10181046 },
+    elite   = { 16766720, 16747520, 16727040 },
+    mutation = { 15548997, 16747520, 16766720, 3066993 },
+}
+
+local HOLOGRAM_EMOJIS = {
+    rare_egg = { "🎯", "🥚", "💎" },
+    mutation = { "🔥", "⚗️", "✨" },
+    hatch    = { "🥚", "🐾", "🎉" },
+    elite    = { "⚜", "👑", "💠" },
+    rainbow  = { "🌈", "✨", "💫" },
+}
+
+local function sendHologramWebhook(eventType, data)
+    if not Shared or not Shared.WebhookURL or Shared.WebhookURL == "" then return end
+    if not Shared.WebhookEnabled then return end
+
+    local now = os.clock()
+    if Shared.WebhookLastSend and (now - Shared.WebhookLastSend) < 3 then return end
+    Shared.WebhookLastSend = now
+
+    local colors = HOLOGRAM_COLORS[eventType] or HOLOGRAM_COLORS.rainbow
+    local icons = HOLOGRAM_EMOJIS[eventType] or HOLOGRAM_EMOJIS.rainbow
+
+    local embeds = {}
+
+    table.insert(embeds, {
+        author = {
+            name = "VRILZHUB · Ride a Pet",
+            icon_url = "https://i.imgur.com/your-logo.png",
+        },
+        title = icons[1] .. "  " .. data.title,
+        description = data.description or "​",
+        color = colors[1],
+    })
+
+    table.insert(embeds, {
+        description = "​",
+        color = colors[2] or colors[1],
+        fields = {
+            {
+                name = icons[2] .. "  **PLAYER**",
+                value = "```\n" .. LocalPlayer.DisplayName .. "\n@" .. LocalPlayer.Name .. "\n```",
+                inline = true,
+            },
+            {
+                name = "🎮  **GAME**",
+                value = "```\nPlace: " .. game.PlaceId .. "\nKey: " .. tostring(Shared.KeyType or "FREE") .. "\n```",
+                inline = true,
+            },
+            {
+                name = "⏰  **TIME**",
+                value = "```\n" .. os.date("%H:%M:%S") .. "\n" .. os.date("%d/%m/%Y") .. "\n```",
+                inline = true,
+            },
+        },
+    })
+
+    if data.details and #data.details > 0 then
+        table.insert(embeds, {
+            description = "​",
+            color = colors[3] or colors[2] or colors[1],
+            fields = data.details,
+        })
+    end
+
+    table.insert(embeds, {
+        description = "​",
+        color = colors[#colors] or colors[1],
+        footer = {
+            text = "🌈 VRILZHUB HOLOGRAM  •  v2.0  •  Ride a Pet",
+        },
+        timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
+    })
+
+    local payload = HttpService:JSONEncode({
+        username = "🌈 VRILZHUB",
+        avatar_url = "https://i.imgur.com/your-logo.png",
+        embeds = embeds,
+    })
+
+    pcall(function()
+        local req = (syn and syn.request) or (http and http.request) or http_request or request
+        if req then
+            req({
+                Url = Shared.WebhookURL,
+                Method = "POST",
+                Headers = { ["Content-Type"] = "application/json" },
+                Body = payload,
+            })
+        end
+    end)
+end
+
+_G.VRILZ_SendWebhook = sendHologramWebhook
+
 -- ============================================================
 -- ANTI-AFK (FINAL v4) — Aman buat semua fitur
 -- ============================================================
@@ -1574,15 +1679,27 @@ function Features.startAutoFarm()
             local eggRarity = best.rarity
             local eggKey = getEggKey(egg)
 
-            if (RARITY_ORDER[eggRarity] or 1) >= getNotifThreshold() then
+                        if (RARITY_ORDER[eggRarity] or 1) >= getNotifThreshold() then
                 if not NotifiedEggs[eggKey] then
                     NotifiedEggs[eggKey] = true
                     if Shared.Notify then
                         Shared.Notify("🎯 " .. eggName .. " (" .. eggRarity .. ")", "success")
                     end
+                    -- 🌈 WEBHOOK TRIGGER
+                    if _G.VRILZ_SendWebhook then
+                        _G.VRILZ_SendWebhook("rainbow", {
+                            title = "RARE EGG SPAWNED",
+                            description = "**" .. eggName .. "** muncul di server!\n*Auto-steal akan segera dijalankan...*",
+                            details = {
+                                { name = "🥚  **EGG NAME**", value = "```\n" .. eggName .. "\n```", inline = true },
+                                { name = "💎  **RARITY**", value = "```\n" .. eggRarity .. "\n```", inline = true },
+                                { name = "📏  **DISTANCE**", value = "```\n" .. math.floor(best.dist) .. " studs\n```", inline = true },
+                            },
+                        })
+                    end
                 end
             end
-
+                
             local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
             if not eggPart then continue end
 
@@ -2127,11 +2244,22 @@ local function runMutationOnce()
         return false
     end
 
-    local retWaited = 0
+       local retWaited = 0
     while retWaited < MUT_CONFIG.RETURN_TIMEOUT do
         task.wait(1)
         retWaited = retWaited + 1
         if isHoldingEggMutation() then break end
+    end
+
+    -- 🌈 WEBHOOK TRIGGER
+    if _G.VRILZ_SendWebhook then
+        _G.VRILZ_SendWebhook("mutation", {
+            title = "MUTATION COMPLETE",
+            description = "Egg berhasil di-mutasi! 🎉\n*Reward telah diklaim*",
+            details = {
+                { name = "🔥  **MUTATION INFO**", value = "```\nSource: Auto Mutation\nStatus: SUCCESS\nMethod: " .. tostring(Shared.StealMode or "TP") .. "\n```", inline = false },
+            },
+        })
     end
 
     if Shared.MutationReturn_Enabled then
@@ -2483,7 +2611,7 @@ doReturnToPlot()
                 end
             end
 
-            -- ⭐ STEP: TUNGGU EGG BALIK (mutation selesai)
+                        -- ⭐ STEP: TUNGGU EGG BALIK (mutation selesai)
             if eggReleased then
                 local waitStart = os.clock()
                 while os.clock() - waitStart < 20 do
@@ -2492,6 +2620,16 @@ doReturnToPlot()
                     if isHoldingEggMutation() then
                         if Shared.Notify then
                             Shared.Notify("🔥 Mutation selesai!", "success")
+                        end
+                        -- 🌈 WEBHOOK TRIGGER
+                        if _G.VRILZ_SendWebhook then
+                            _G.VRILZ_SendWebhook("mutation", {
+                                title = "MUTATION COMPLETE",
+                                description = "Egg dari steal berhasil di-mutasi! 🔥",
+                                details = {
+                                    { name = "🔥  **MUTATION INFO**", value = "```\nSource: Mutation Steal\nStatus: SUCCESS\nEgg: " .. tostring(egg.Name or "Unknown") .. "\n```", inline = false },
+                                },
+                            })
                         end
                         break
                     end
