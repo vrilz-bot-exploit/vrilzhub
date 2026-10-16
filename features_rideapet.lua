@@ -3185,12 +3185,14 @@ local function halloweenReturnToBase()
     local root = char and char:FindFirstChild("HumanoidRootPart")
     local hum = char and char:FindFirstChildOfClass("Humanoid")
 
-    -- ⭐ JUMP 1x DULU sebelum return (biar gak nyangkut di tempat candy)
-    if hum and hum.Health > 0 then
-        pcall(function()
-            hum.Jump = true
-        end)
-        task.wait(0.3)
+        -- ⭐ JUMP 5x DULU sebelum return (biar gak nyangkut di tempat candy)
+    if hum and hum.Health > 0 and not hum.SeatPart then
+        for i = 1, 5 do
+            pcall(function()
+                hum.Jump = true
+            end)
+            task.wait(0.3)
+        end
     end
 
     if root and hum and hum.SeatPart then
