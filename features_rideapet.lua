@@ -3662,33 +3662,78 @@ local function findRewardPrompt()
     return nil
 end
 
--- ⭐ CEK YIN UDAH KE-PLACE (multi-source)
+-- ⭐ CEK YIN UDAH KE-PLACE (MULTI-CHECK, LEBIH KUAT)
 local function isYinPlaced()
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then return false end
     local rt = hr:FindFirstChild("Runtime")
 
-    -- Cara 1: Yin GAK ADA di runtime = udah ke-place
+    -- ═══ CARA 1: Cek attribute player (paling reliable) ═══
+    if LocalPlayer:GetAttribute("RitualYin") == true then return true end
+    if LocalPlayer:GetAttribute("YinPlaced") == true then return true end
+    if LocalPlayer:GetAttribute("HasYin") == true then return true end
+
+    -- ═══ CARA 2: Yin gak ada di Runtime = udah ke-place ═══
     if rt then
         local yinInRT = rt:FindFirstChild("Yin")
         if not yinInRT then
+            -- Double-check: Yin ada di tangan?
+            if isHoldingRitualItem("Yin") then
+                return false   -- masih di tangan
+            end
             return true
         end
     end
 
-    -- Cara 2: attribute player
-    if LocalPlayer:GetAttribute("RitualYin") == true then return true end
-
-    -- Cara 3: attribute slot
-    local altar = hr:FindFirstChild("Altar")
+    -- ═══ CARA 3: Cek SEMUA kemungkinan slot di Altar ═══
+    local altar = hr:FindFirstChild("Altar") or hr:FindFirstChild("altar")
     if altar then
-        local slot = altar:FindFirstChild("YinPlacement")
-        if slot then
-            if slot:GetAttribute("Placed") == true then return true end
-            for _, c in ipairs(slot:GetChildren()) do
-                if c:IsA("Model") or c:IsA("BasePart") then
+        -- Cek banyak nama slot
+        local slotNames = {
+            "YinPlacement", "YinSlot", "Slot_Yin", "Yin", 
+            "Placement_Yin", "YinSpot", "YinHolder"
+        }
+        for _, slotName in ipairs(slotNames) do
+            local slot = altar:FindFirstChild(slotName)
+            if not slot then
+                slot = altar:FindFirstChild(slotName, true)
+            end
+            if slot then
+                -- Cek attribute
+                if slot:GetAttribute("Placed") == true then return true end
+                if slot:GetAttribute("Occupied") == true then return true end
+                if slot:GetAttribute("HasItem") == true then return true end
+                if slot:GetAttribute("Item") ~= nil then return true end
+
+                -- Cek children
+                for _, c in ipairs(slot:GetChildren()) do
+                    if c:IsA("Model") or c:IsA("BasePart") or c:IsA("MeshPart") then
+                        local n = c.Name:lower()
+                        if n:find("yin") or n:find("egg") or not n:find("circle") then
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+
+        -- Cek semua descendants Altar yang ada Yin
+        for _, d in ipairs(altar:GetDescendants()) do
+            if d:IsA("Model") then
+                local n = d.Name:lower()
+                if n == "yin" or n:find("yin_") or n:find("_yin") then
                     return true
                 end
+            end
+        end
+    end
+
+    -- ═══ CARA 4: Cek descendants HeadlessRitual ═══
+    for _, d in ipairs(hr:GetDescendants()) do
+        if d:IsA("Model") and d.Name:lower() == "yin" then
+            -- Kalo Yin ada di luar Runtime (di altar)
+            if not d:IsDescendantOf(rt) then
+                return true
             end
         end
     end
@@ -3696,30 +3741,72 @@ local function isYinPlaced()
     return false
 end
 
--- ⭐ CEK YANG UDAH KE-PLACE (multi-source)
+-- ⭐ CEK YANG UDAH KE-PLACE (MULTI-CHECK, LEBIH KUAT)
 local function isYangPlaced()
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then return false end
     local rt = hr:FindFirstChild("Runtime")
 
+    -- ═══ CARA 1: Cek attribute player ═══
+    if LocalPlayer:GetAttribute("RitualYang") == true then return true end
+    if LocalPlayer:GetAttribute("YangPlaced") == true then return true end
+    if LocalPlayer:GetAttribute("HasYang") == true then return true end
+
+    -- ═══ CARA 2: Yang gak ada di Runtime = udah ke-place ═══
     if rt then
         local yangInRT = rt:FindFirstChild("Yang")
         if not yangInRT then
+            if isHoldingRitualItem("Yang") then
+                return false
+            end
             return true
         end
     end
 
-    if LocalPlayer:GetAttribute("RitualYang") == true then return true end
-
-    local altar = hr:FindFirstChild("Altar")
+    -- ═══ CARA 3: Cek SEMUA kemungkinan slot di Altar ═══
+    local altar = hr:FindFirstChild("Altar") or hr:FindFirstChild("altar")
     if altar then
-        local slot = altar:FindFirstChild("YangPlacement")
-        if slot then
-            if slot:GetAttribute("Placed") == true then return true end
-            for _, c in ipairs(slot:GetChildren()) do
-                if c:IsA("Model") or c:IsA("BasePart") then
+        local slotNames = {
+            "YangPlacement", "YangSlot", "Slot_Yang", "Yang",
+            "Placement_Yang", "YangSpot", "YangHolder"
+        }
+        for _, slotName in ipairs(slotNames) do
+            local slot = altar:FindFirstChild(slotName)
+            if not slot then
+                slot = altar:FindFirstChild(slotName, true)
+            end
+            if slot then
+                if slot:GetAttribute("Placed") == true then return true end
+                if slot:GetAttribute("Occupied") == true then return true end
+                if slot:GetAttribute("HasItem") == true then return true end
+                if slot:GetAttribute("Item") ~= nil then return true end
+
+                for _, c in ipairs(slot:GetChildren()) do
+                    if c:IsA("Model") or c:IsA("BasePart") or c:IsA("MeshPart") then
+                        local n = c.Name:lower()
+                        if n:find("yang") or n:find("egg") or not n:find("circle") then
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+
+        for _, d in ipairs(altar:GetDescendants()) do
+            if d:IsA("Model") then
+                local n = d.Name:lower()
+                if n == "yang" or n:find("yang_") or n:find("_yang") then
                     return true
                 end
+            end
+        end
+    end
+
+    -- ═══ CARA 4: Cek descendants HeadlessRitual ═══
+    for _, d in ipairs(hr:GetDescendants()) do
+        if d:IsA("Model") and d.Name:lower() == "yang" then
+            if not d:IsDescendantOf(rt) then
+                return true
             end
         end
     end
