@@ -4069,6 +4069,199 @@ end)
 
     registerTab("Auto", "▶", "Auto")
 
+    -- ============================================================
+    -- TAB WEBHOOK — di atas Settings
+    -- ============================================================
+    local webhookPage = createPage("Webhook")
+    pages.Webhook = webhookPage
+
+    -- CARD 1: DISCORD WEBHOOK INPUT
+    local webhookCard, webhookContent = makeCard(webhookPage, "🔔 DISCORD WEBHOOK", 1)
+
+    local webhookLbl = Instance.new("TextLabel")
+    webhookLbl.Size = UDim2.new(1, 0, 0, 16)
+    webhookLbl.BackgroundTransparency = 1
+    webhookLbl.Text = "Paste Discord Webhook URL:"
+    webhookLbl.TextColor3 = C.Muted
+    webhookLbl.Font = Enum.Font.GothamSemibold
+    webhookLbl.TextSize = CFG.FONT_MUTED
+    webhookLbl.TextXAlignment = Enum.TextXAlignment.Left
+    webhookLbl.LayoutOrder = 1
+    webhookLbl.ZIndex = 3
+    webhookLbl.Parent = webhookContent
+    registerTheme(webhookLbl, "Muted", "TextColor3")
+
+    local urlBox = Instance.new("TextBox")
+    urlBox.Size = UDim2.new(1, 0, 0, 34)
+    urlBox.BackgroundColor3 = C.Surface3
+    urlBox.BorderSizePixel = 0
+    urlBox.Text = Shared.WebhookURL or ""
+    urlBox.PlaceholderText = "https://discord.com/api/webhooks/..."
+    urlBox.PlaceholderColor3 = C.Muted
+    urlBox.TextColor3 = C.Text
+    urlBox.Font = Enum.Font.GothamMedium
+    urlBox.TextSize = CFG.FONT_MUTED
+    urlBox.TextXAlignment = Enum.TextXAlignment.Left
+    urlBox.ClearTextOnFocus = false
+    urlBox.LayoutOrder = 2
+    urlBox.ZIndex = 3
+    urlBox.Parent = webhookContent
+    registerTheme(urlBox, "Surface3", "BackgroundColor3")
+    registerTheme(urlBox, "Text", "TextColor3")
+
+    local urlCorner = Instance.new("UICorner")
+    urlCorner.CornerRadius = UDim.new(0, 8)
+    urlCorner.Parent = urlBox
+
+    local urlPad = Instance.new("UIPadding")
+    urlPad.PaddingLeft = UDim.new(0, 10)
+    urlPad.PaddingRight = UDim.new(0, 10)
+    urlPad.Parent = urlBox
+
+    local urlStroke = Instance.new("UIStroke")
+    urlStroke.Color = C.Accent
+    urlStroke.Thickness = 1
+    urlStroke.Transparency = 0.4
+    urlStroke.Parent = urlBox
+    registerTheme(urlStroke, "Accent", "Color")
+
+    urlBox.FocusLost:Connect(function()
+        Shared.WebhookURL = urlBox.Text
+        if Shared.WebhookURL ~= "" then
+            notify("✅ Webhook URL saved", "success")
+        else
+            notify("🗑 Webhook URL cleared", "info")
+        end
+    end)
+
+    local webhookToggleHolder = Instance.new("Frame")
+    webhookToggleHolder.Size = UDim2.new(1, 0, 0, CFG.TOGGLE_H)
+    webhookToggleHolder.BackgroundTransparency = 1
+    webhookToggleHolder.LayoutOrder = 3
+    webhookToggleHolder.ZIndex = 3
+    webhookToggleHolder.Parent = webhookContent
+
+    makeToggle(webhookToggleHolder, "Enable Webhook", false, function(v)
+        Shared.WebhookEnabled = v
+        if v then
+            notify("🔔 Webhook: ON", "success")
+        else
+            notify("🔔 Webhook: OFF", "info")
+        end
+    end)
+
+    -- BUTTON ROW
+    local whBtnRow = Instance.new("Frame")
+    whBtnRow.Size = UDim2.new(1, 0, 0, 34)
+    whBtnRow.BackgroundTransparency = 1
+    whBtnRow.LayoutOrder = 4
+    whBtnRow.ZIndex = 3
+    whBtnRow.Parent = webhookContent
+
+    local testBtn = Instance.new("TextButton")
+    testBtn.Size = UDim2.new(0.48, 0, 1, 0)
+    testBtn.Position = UDim2.new(0, 0, 0, 0)
+    testBtn.BackgroundColor3 = C.Accent
+    testBtn.Text = "🔔 TEST"
+    testBtn.TextColor3 = Color3.new(1, 1, 1)
+    testBtn.Font = Enum.Font.GothamBold
+    testBtn.TextSize = CFG.FONT_LABEL
+    testBtn.BorderSizePixel = 0
+    testBtn.ZIndex = 4
+    testBtn.Parent = whBtnRow
+    registerTheme(testBtn, "Accent", "BackgroundColor3")
+
+    local tbc = Instance.new("UICorner")
+    tbc.CornerRadius = UDim.new(0, 8)
+    tbc.Parent = testBtn
+
+    testBtn.MouseButton1Click:Connect(function()
+        if not Shared.WebhookURL or Shared.WebhookURL == "" then
+            notify("❌ URL webhook kosong!", "error")
+            return
+        end
+        if not _G.VRILZ_SendWebhook then
+            notify("❌ Webhook function gak ada", "error")
+            return
+        end
+        _G.VRILZ_SendWebhook({
+            author = {
+                name = "VRILZHUB · SYSTEM",
+                icon_url = "https://cdn.discordapp.com/embed/avatars/0.png",
+            },
+            title = "🔔 WEBHOOK CONNECTED",
+            description = "Webhook berhasil terhubung dengan **VRILZHUB**.\nNotifikasi egg steal bakal dikirim ke channel ini.",
+            color = 5763719,
+            fields = {
+                { name = "👤 User", value = "```" .. LocalPlayer.Name .. "```", inline = true },
+                { name = "⚡ Executor", value = "```" .. (identifyexecutor and identifyexecutor() or "Unknown") .. "```", inline = true },
+                { name = "📅 Date", value = "```" .. os.date("%d/%m/%Y") .. "```", inline = true },
+            },
+            footer = {
+                text = "⚡ VRILZHUB v3.8 · Premium Webhook",
+            },
+            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
+        })
+        notify("🔔 Test sent! Cek Discord", "success")
+    end)
+
+    local clearWhBtn = Instance.new("TextButton")
+    clearWhBtn.Size = UDim2.new(0.48, 0, 1, 0)
+    clearWhBtn.Position = UDim2.new(0.52, 0, 0, 0)
+    clearWhBtn.BackgroundColor3 = C.Error
+    clearWhBtn.Text = "🗑 CLEAR"
+    clearWhBtn.TextColor3 = Color3.new(1, 1, 1)
+    clearWhBtn.Font = Enum.Font.GothamBold
+    clearWhBtn.TextSize = CFG.FONT_LABEL
+    clearWhBtn.BorderSizePixel = 0
+    clearWhBtn.ZIndex = 4
+    clearWhBtn.Parent = whBtnRow
+    registerTheme(clearWhBtn, "Error", "BackgroundColor3")
+
+    local cwc = Instance.new("UICorner")
+    cwc.CornerRadius = UDim.new(0, 8)
+    cwc.Parent = clearWhBtn
+
+    clearWhBtn.MouseButton1Click:Connect(function()
+        Shared.WebhookURL = ""
+        urlBox.Text = ""
+        notify("🗑 Webhook URL cleared", "info")
+    end)
+
+    -- CARD 2: INFO
+    local whInfoCard, whInfoContent = makeCard(webhookPage, "📖 CARA PAKAI", 2)
+
+    local whInfoLines = {
+        "1. Buka Discord → Server Settings",
+        "2. Integrations → Webhooks",
+        "3. New Webhook → Copy URL",
+        "4. Paste URL di textbox atas",
+        "5. Klik TEST buat cek",
+        "6. Toggle ON buat aktifin",
+        "",
+        "📌 Notif yang dikirim:",
+        "  • Egg ke-steal",
+        "  • Nama, rarity, KG, value egg",
+    }
+
+    for i, line in ipairs(whInfoLines) do
+        local lbl = Instance.new("TextLabel")
+        lbl.Size = UDim2.new(1, 0, 0, 14)
+        lbl.BackgroundTransparency = 1
+        lbl.Text = line
+        lbl.TextColor3 = C.Muted
+        lbl.Font = Enum.Font.GothamSemibold
+        lbl.TextSize = CFG.FONT_MUTED
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+        lbl.LayoutOrder = i
+        lbl.ZIndex = 3
+        lbl.Parent = whInfoContent
+        registerTheme(lbl, "Muted", "TextColor3")
+    end
+
+    -- REGISTER TAB
+    registerTab("Webhook", "🔔", "Webhook")
+
     -- TAB SETTINGS
     local setPage = createPage("Settings")
     pages.Settings = setPage
@@ -5770,6 +5963,10 @@ function UI.Init(sharedState)
         Shared.FPSBoost_Enabled = false
     Shared.HD4K_Enabled = false
     Shared.YinRitual_Enabled = false
+    -- ⭐ WEBHOOK STATE
+    Shared.WebhookURL = ""
+    Shared.WebhookEnabled = false
+    Shared.WebhookLastSend = 0
 
     -- Live Chat state
     Shared.LiveChat_Messages = {}
