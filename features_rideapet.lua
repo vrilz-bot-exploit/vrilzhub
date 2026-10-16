@@ -155,14 +155,14 @@ local function sendPlatinumWebhook(eventType, data)
         color = PLATINUM_COLORS.hero,
         description = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
         footer = {
-            text = "🏆 VRILZHUB PLATINUM  •  v2.0  •  Ride a Pet",
+            text = "🏆 VRILZHUB KING  •  v2.0  •  Ride a Pet",
         },
         timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
     })
 
     local payload = HttpService:JSONEncode({
-        username = "🏆 VRILZHUB PLATINUM",
-        avatar_url = "https://i.imgur.com/your-logo.png",
+        username = "🏆 VRILZHUB KING",
+                avatar_url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2018.56.22.jpeg",
         embeds = embeds,
     })
 
