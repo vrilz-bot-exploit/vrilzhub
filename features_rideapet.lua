@@ -3487,21 +3487,40 @@ local function yinCollect(itemName)
     return isHoldingRitualItem(itemName) or findRitualItem(itemName) == nil
 end
 
--- ⭐ PLACE YIN/YANG KE ALTAR (step 80 + verifikasi)
+-- ⭐ PLACE YIN/YANG KE ALTAR — FIXED FINAL
 local function yinPlace(itemName)
     local hr = Workspace:FindFirstChild("HeadlessRitual")
-    if not hr then return false end
+    if not hr then
+        print("[YIN PLACE] ❌ HeadlessRitual gak ada")
+        return false
+    end
     local altar = hr:FindFirstChild("Altar")
-    if not altar then return false end
+    if not altar then
+        print("[YIN PLACE] ❌ Altar gak ada")
+        return false
+    end
     local slot = altar:FindFirstChild(itemName .. "Placement")
-    if not slot then return false end
+    if not slot then
+        print("[YIN PLACE] ❌ Slot " .. itemName .. "Placement gak ada")
+        return false
+    end
 
+    -- Cari prompt
     local prompt = slot:FindFirstChild("RitualPrompt")
     if not prompt then
         prompt = slot:FindFirstChildWhichIsA("ProximityPrompt", true)
     end
-    if not prompt then return false end
+    if not prompt then
+        print("[YIN PLACE] ❌ RitualPrompt gak ketemu")
+        return false
+    end
 
+    print("[YIN PLACE] 🎯 Try place " .. itemName)
+    print("[YIN PLACE] 📍 Prompt ActionText:", prompt.ActionText)
+    print("[YIN PLACE] 📍 Prompt Enabled:", prompt.Enabled)
+    print("[YIN PLACE] 📏 Prompt MaxActivationDistance:", prompt.MaxActivationDistance)
+
+    -- Cari posisi slot
     local pos
     if slot:IsA("Attachment") then
         pos = slot.WorldPosition
@@ -3511,39 +3530,106 @@ local function yinPlace(itemName)
         local ok, pivot = pcall(function() return slot:GetPivot().Position end)
         if ok then pos = pivot end
     end
-    if not pos then return false end
+    if not pos then
+        print("[YIN PLACE] ❌ Posisi slot gak ketemu")
+        return false
+    end
+    print("[YIN PLACE] 📍 Slot posisi:", tostring(pos))
 
     local startTime = os.clock()
+    local fireCount = 0
 
     while os.clock() - startTime < YinRitualCfg.PLACE_TIMEOUT do
         if not YinRitualState.Enabled then return false end
 
         -- Cek udah ke-place
         if itemName == "Yin" and isYinPlaced() then
-            print("[YIN PLACE] ✅ Yin placed!")
+            print("[YIN PLACE] ✅ Yin placed! (setelah " .. fireCount .. " fire)")
             return true
         end
         if itemName == "Yang" and isYangPlaced() then
-            print("[YIN PLACE] ✅ Yang placed!")
+            print("[YIN PLACE] ✅ Yang placed! (setelah " .. fireCount .. " fire)")
             return true
         end
 
-        -- TP step 80 ke slot
-        yinTp(pos)
-        task.wait(0.15)
+        -- ⭐ TP LANGSUNG ke slot, gak pake step
+        local char = LocalPlayer.Character
+        if not char then return false end
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if not root then return false end
 
-        -- Fire prompt 3x
-        for fire = 1, 3 do
+        -- TP langsung ke atas slot, biar prompt detect
+        root.CFrame = CFrame.new(pos + Vector3.new(0, 2, 0))
+        root.Velocity = Vector3.zero
+        root.AssemblyLinearVelocity = Vector3.zero
+
+        task.wait(0.1)
+
+        -- ⭐ FORCE ENABLE PROMPT
+        pcall(function()
+            prompt.Enabled = true
+            prompt.HoldDuration = 0
+            prompt.MaxActivationDistance = math.huge
+            prompt.RequiresLineOfSight = false
+        end)
+
+        -- ⭐ FIRE PROMPT BANYAK CARA
+        for fire = 1, 5 do
             if not YinRitualState.Enabled then return false end
+
+            -- Cek udah ke-place
+            if itemName == "Yin" and isYinPlaced() then
+                print("[YIN PLACE] ✅ Yin placed! (setelah " .. fireCount .. " fire)")
+                return true
+            end
+            if itemName == "Yang" and isYangPlaced() then
+                print("[YIN PLACE] ✅ Yang placed! (setelah " .. fireCount .. " fire)")
+                return true
+            end
+
+            -- Fire 1: fireproximityprompt biasa
+            if typeof(fireproximityprompt) == "function" then
+                pcall(fireproximityprompt, prompt)
+            end
+            fireCount = fireCount + 1
+            task.wait(0.05)
+
+            -- Fire 2: yinFirePrompt
             yinFirePrompt(prompt)
-            task.wait(0.15)
+            fireCount = fireCount + 1
+            task.wait(0.05)
+
+            -- Fire 3: InputHold
+            pcall(function()
+                prompt:InputHoldBegin()
+                task.wait(0.05)
+                prompt:InputHoldEnd()
+            end)
+            fireCount = fireCount + 1
+            task.wait(0.1)
         end
 
+        -- Re-TP kalo belum ke-place
+        root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if root then
+            root.CFrame = CFrame.new(pos + Vector3.new(0, 2, 0))
+            root.Velocity = Vector3.zero
+            root.AssemblyLinearVelocity = Vector3.zero
+        end
         task.wait(0.15)
     end
 
-    if itemName == "Yin" then return isYinPlaced() end
-    if itemName == "Yang" then return isYangPlaced() end
+    -- Timeout
+    if itemName == "Yin" then
+        local r = isYinPlaced()
+        print("[YIN PLACE] ⚠️ Timeout. isYinPlaced() = " .. tostring(r) .. " | Total fire: " .. fireCount)
+        return r
+    end
+    if itemName == "Yang" then
+        local r = isYangPlaced()
+        print("[YIN PLACE] ⚠️ Timeout. isYangPlaced() = " .. tostring(r) .. " | Total fire: " .. fireCount)
+        return r
+    end
     return false
 end
 
