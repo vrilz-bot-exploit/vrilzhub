@@ -150,14 +150,26 @@ local function sendPlatinumWebhook(eventType, data)
         })
     end
 
-    -- ═══ EMBED 4: FOOTER ═══
+        -- ═══ EMBED 4: FOOTER ═══
     table.insert(embeds, {
         color = PLATINUM_COLORS.hero,
         description = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
         footer = {
             text = "🏆 VRILZHUB KING  •  v2.0  •  Ride a Pet",
+            icon_url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2018.56.22.jpeg",
         },
         timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
+    })
+
+    -- ═══ EMBED 5: BANNER — VRILZHUB KING ═══
+    table.insert(embeds, {
+        color = PLATINUM_COLORS.gold,
+        image = {
+            url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2018.56.22.jpeg",
+        },
+        footer = {
+            text = "👑 VRILZHUB KING — Premium Script",
+        },
     })
 
     local payload = HttpService:JSONEncode({
