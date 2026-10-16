@@ -107,50 +107,97 @@ local function sendPlatinumWebhook(eventType, data)
     }
     local icons = ICONS[eventType] or { "ℹ️", "📌", "⚙️" }
 
-        local embeds = {}
+            local embeds = {}
 
-    -- ═══ SINGLE EMBED — ALL IN ONE ═══
+    -- ═══ SINGLE EMBED — CLEAN PREMIUM ═══
+    -- ⭐ Sensor nama player
+    local function censorName(name)
+        name = tostring(name or "?")
+        if #name <= 3 then
+            return name:sub(1, 1) .. string.rep("*", math.max(#name - 1, 1))
+        elseif #name <= 6 then
+            return name:sub(1, 2) .. string.rep("*", #name - 2)
+        else
+            return name:sub(1, 3) .. string.rep("*", math.min(#name - 3, 4))
+        end
+    end
+
+    local safeDisplay = censorName(LocalPlayer.DisplayName)
+    local safeName = censorName(LocalPlayer.Name)
+
     table.insert(embeds, {
         author = {
-            name = "VRILZHUB · King R A P",
+            name = "VRILZHUB  ·  King R A P",
             icon_url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2018.56.22.jpeg",
         },
         title = icons[1] .. "  " .. data.title,
-        description = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-            .. (data.description or "")
-            .. "\n\n👑 **VRILZHUB KING — Premium Script**",
+        description = table.concat({
+            "**─────────────────────────**",
+            "",
+            (data.description or "Event trigger"),
+            "",
+            "**─────────────────────────**",
+        }, "\n"),
         color = PLATINUM_COLORS.hero,
         image = {
             url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2019.12.33.jpeg",
         },
         fields = (function()
-            local f = {
-                {
-                    name = "👤  **PLAYER**",
-                    value = "```yaml\n" .. LocalPlayer.DisplayName .. "\n@" .. LocalPlayer.Name .. "\n```",
-                    inline = true,
-                },
-                {
-                    name = "🎮  **GAME**",
-                    value = "```yaml\nPlace: " .. game.PlaceId .. "\nKey: " .. tostring(Shared.KeyType or "FREE") .. "\n```",
-                    inline = true,
-                },
-                {
-                    name = "⏰  **TIME**",
-                    value = "```yaml\n" .. os.date("%H:%M:%S") .. "\n" .. os.date("%d/%m/%Y") .. "\n```",
-                    inline = true,
-                },
-            }
+            local f = {}
+
+            -- ─── Section: USER ───
+            table.insert(f, {
+                name = "👤   ` PLAYER `",
+                value = table.concat({
+                    "**Name**  : `" .. safeDisplay .. "`",
+                    "**User**  : `@" .. safeName .. "`",
+                }, "\n"),
+                inline = true,
+            })
+
+            -- ─── Section: GAME ───
+            table.insert(f, {
+                name = "🎮   ` SERVER `",
+                value = table.concat({
+                    "**Place** : `" .. game.PlaceId .. "`",
+                    "**Key**   : `" .. tostring(Shared.KeyType or "FREE") .. "`",
+                }, "\n"),
+                inline = true,
+            })
+
+            -- ─── Section: TIME ───
+            table.insert(f, {
+                name = "⏰   ` TIME `",
+                value = table.concat({
+                    "**Clock** : `" .. os.date("%H:%M:%S") .. "`",
+                    "**Date**  : `" .. os.date("%d/%m/%Y") .. "`",
+                }, "\n"),
+                inline = true,
+            })
+
+            -- ─── Divider ───
+            table.insert(f, {
+                name = "​",
+                value = "**━━━━━━━━━━━━━━━━━━━━━━━━━**",
+                inline = false,
+            })
+
+            -- ─── Details ───
             if data.details and #data.details > 0 then
                 for i, d in ipairs(data.details) do
                     if i > 20 then break end
-                    table.insert(f, d)
+                    table.insert(f, {
+                        name = d.name,
+                        value = d.value,
+                        inline = d.inline ~= false,
+                    })
                 end
             end
+
             return f
         end)(),
         footer = {
-            text = "🏆 VRILZHUB KING  •  v2.0  •  Ride a Pet",
+            text = "🏆  VRILZHUB KING  ×  v2.0  ×  Ride a Pet      discord.gg/c6MG68gwA",
             icon_url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2018.56.22.jpeg",
         },
         timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
