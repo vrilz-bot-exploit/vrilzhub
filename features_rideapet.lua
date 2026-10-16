@@ -3302,62 +3302,121 @@ local function isYangPlaced()
     return false
 end
 
--- ⭐ TP KE POSISI (handle naik pet)
+-- ⭐ TP KE POSISI (STEP 80 STUDs + handle naik pet)
 local function yinTp(pos)
     local char = LocalPlayer.Character
     if not char then return false end
     local root = char:FindFirstChild("HumanoidRootPart")
     if not root then return false end
 
-    local targetCF = CFrame.new(pos + Vector3.new(0, YinRitualCfg.TP_HEIGHT, 0))
+    local targetPos = pos + Vector3.new(0, YinRitualCfg.TP_HEIGHT, 0)
 
+    -- ═══════════════════════════════════════════════
+    -- Helper: TP step-by-step per 80 studs
+    -- ═══════════════════════════════════════════════
+    local function tpStep80(finalPos)
+        local startPos = root.Position
+        local totalDist = (finalPos - startPos).Magnitude
+
+        -- Kalo jarak deket (< 80), langsung TP
+        if totalDist <= 80 then
+            root.CFrame = CFrame.new(finalPos)
+            root.Velocity = Vector3.zero
+            root.AssemblyLinearVelocity = Vector3.zero
+            return
+        end
+
+        -- Step 80 studs
+        local steps = math.ceil(totalDist / 80)
+        local dir = (finalPos - startPos)
+        dir = Vector3.new(dir.X, 0, dir.Z)
+        if dir.Magnitude > 1 then dir = dir.Unit end
+
+        for i = 1, steps do
+            local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if not r then return end
+
+            local dist = math.min(80 * i, totalDist)
+            local stepPos = startPos + dir * dist
+            stepPos = Vector3.new(stepPos.X, finalPos.Y, stepPos.Z)
+
+            r.CFrame = CFrame.new(stepPos)
+            r.Velocity = Vector3.zero
+            r.AssemblyLinearVelocity = Vector3.zero
+            task.wait(0.06)
+        end
+
+        -- Final TP ke target
+        local r2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if r2 then
+            r2.CFrame = CFrame.new(finalPos)
+            r2.Velocity = Vector3.zero
+            r2.AssemblyLinearVelocity = Vector3.zero
+        end
+    end
+
+    -- ═══════════════════════════════════════════════
     -- Kalo lagi naik pet → gerakin pet sekalian
+    -- ═══════════════════════════════════════════════
     local hum = char:FindFirstChildOfClass("Humanoid")
     if hum and hum.SeatPart then
         local pet = hum.SeatPart:FindFirstAncestorOfClass("Model")
         if pet then
             local seat = hum.SeatPart
             local offset = root.CFrame:ToObjectSpace(seat.CFrame)
+            local startPos = root.Position
+            local totalDist = (targetPos - startPos).Magnitude
 
-            root.CFrame = targetCF
-            root.Velocity = Vector3.zero
-            root.AssemblyLinearVelocity = Vector3.zero
-            task.wait(0.05)
+            -- Kalo deket, langsung TP (root + pet)
+            if totalDist <= 80 then
+                root.CFrame = CFrame.new(targetPos)
+                root.Velocity = Vector3.zero
+                root.AssemblyLinearVelocity = Vector3.zero
+                task.wait(0.05)
 
-            local newSeatCF = targetCF * offset
-            local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
-            local targetPivot = newSeatCF * pivotToSeat:Inverse()
-            pcall(function() pet:PivotTo(targetPivot) end)
+                local newSeatCF = CFrame.new(targetPos) * offset
+                local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
+                local targetPivot = newSeatCF * pivotToSeat:Inverse()
+                pcall(function() pet:PivotTo(targetPivot) end)
+                return true
+            end
+
+            -- Step 80 studs (root + pet sekaligus)
+            local steps = math.ceil(totalDist / 80)
+            local dir = (targetPos - startPos)
+            dir = Vector3.new(dir.X, 0, dir.Z)
+            if dir.Magnitude > 1 then dir = dir.Unit end
+
+            for i = 1, steps do
+                local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if not r then return false end
+
+                local dist = math.min(80 * i, totalDist)
+                local stepPos = startPos + dir * dist
+                stepPos = Vector3.new(stepPos.X, targetPos.Y, stepPos.Z)
+                local stepCF = CFrame.new(stepPos)
+
+                r.CFrame = stepCF
+                r.Velocity = Vector3.zero
+                r.AssemblyLinearVelocity = Vector3.zero
+
+                -- Gerakin pet sekalian
+                local newSeatCF = stepCF * offset
+                local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
+                local targetPivot = newSeatCF * pivotToSeat:Inverse()
+                pcall(function() pet:PivotTo(targetPivot) end)
+
+                task.wait(0.06)
+            end
+
             return true
         end
     end
 
-    root.CFrame = targetCF
-    root.Velocity = Vector3.zero
-    root.AssemblyLinearVelocity = Vector3.zero
-    return true
-end
-
--- ⭐ FIRE PROMPT (paksa)
-local function yinFirePrompt(prompt)
-    if not prompt then return false end
-    pcall(function()
-        prompt.Enabled = true
-        prompt.HoldDuration = 0
-        prompt.MaxActivationDistance = math.huge
-        prompt.RequiresLineOfSight = false
-    end)
-
-    if typeof(fireproximityprompt) == "function" then
-        pcall(fireproximityprompt, prompt)
-    end
-
-    pcall(function()
-        prompt:InputHoldBegin()
-        task.wait(0.1)
-        prompt:InputHoldEnd()
-    end)
-
+    -- ═══════════════════════════════════════════════
+    -- Normal (gak naik pet)
+    -- ═══════════════════════════════════════════════
+    tpStep80(targetPos)
     return true
 end
 
