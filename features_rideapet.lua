@@ -3188,76 +3188,99 @@ local function halloweenReturnToBase()
     local base = getHalloweenBase()
     if not base then return false end
 
-    -- ⭐ Handle kalo lagi naik pet — TP pet sekalian biar gak nyangkut
     local char = LocalPlayer.Character
     local root = char and char:FindFirstChild("HumanoidRootPart")
     local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if not root then return false end
 
-        -- ⭐ JUMP 5x DULU sebelum return (biar gak nyangkut di tempat candy)
-    if hum and hum.Health > 0 and not hum.SeatPart then
-        for i = 1, 5 do
-            pcall(function()
-                hum.Jump = true
-            end)
-            task.wait(0.3)
-        end
-    end
+    -- ⭐ Config
+    local JUMP_STEP = 30          -- jarak per step (studs)
+    local STEP_HEIGHT = 5         -- tinggi TP di atas ground
+    local STEP_WAIT = 0.08        -- delay per step
 
-    if root and hum and hum.SeatPart then
-        -- Player lagi naik pet — pake TP step yang handle vehicle
+    -- ⭐ Kalau lagi naik pet → TP pet bareng
+    if hum and hum.SeatPart then
         local pet = hum.SeatPart:FindFirstAncestorOfClass("Model")
         if pet then
-            -- Hitung offset pet ke root
             local seat = hum.SeatPart
             local offset = root.CFrame:ToObjectSpace(seat.CFrame)
 
-            -- TP step by step
-            local targetPos = base.Position + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
+            local targetPos = base.Position + Vector3.new(0, STEP_HEIGHT, 0)
             local startPos = root.Position
             local totalDist = (targetPos - startPos).Magnitude
-            local stepSize = HalloweenCfg.TP_STEP_FREE
-            local steps = math.ceil(totalDist / stepSize)
+            local steps = math.ceil(totalDist / JUMP_STEP)
 
-                       for i = 1, steps do
+            for i = 1, steps do
                 local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                 if not r then break end
 
-                -- ⭐ JUMP 1x tiap step (sebelum TP)
+                -- ⭐ JUMP 1x tiap step
                 local curHum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
                 if curHum and curHum.Health > 0 and not curHum.SeatPart then
                     pcall(function() curHum.Jump = true end)
-                    task.wait(0.08)
+                    task.wait(0.05)
                 end
 
-                local dist = math.min(stepSize * i, totalDist)
+                local dist = math.min(JUMP_STEP * i, totalDist)
                 local dir = (targetPos - startPos)
                 dir = Vector3.new(dir.X, 0, dir.Z)
                 if dir.Magnitude > 1 then dir = dir.Unit end
 
-                local newRootCF = CFrame.new(startPos + dir * dist + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0))
+                local newRootCF = CFrame.new(startPos + dir * dist + Vector3.new(0, STEP_HEIGHT, 0))
 
-                -- Gerakin root
                 r.CFrame = newRootCF
                 r.Velocity = Vector3.zero
                 r.AssemblyLinearVelocity = Vector3.zero
 
-                                -- Gerakin pet model
                 local newSeatCF = newRootCF * offset
-
-                -- ⭐ Rumus bener: PivotTo harus pake PIVOT, bukan PrimaryPart
                 local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
                 local targetPivot = newSeatCF * pivotToSeat:Inverse()
                 pcall(function() pet:PivotTo(targetPivot) end)
-                task.wait(HalloweenCfg.TP_WAIT)
+
+                task.wait(STEP_WAIT)
             end
 
             task.wait(HalloweenCfg.RETURN_WAIT)
             return true
         end
     end
-    
-    -- ⭐ Gak naik pet — pake cara lama (step TP biasa)
-    halloweenTpJumpTo(base.Position)
+
+    -- ⭐ Gak naik pet — JUMP by step 30 studs
+    local targetPos = base.Position + Vector3.new(0, STEP_HEIGHT, 0)
+    local startPos = root.Position
+    local totalDist = (targetPos - startPos).Magnitude
+    local steps = math.ceil(totalDist / JUMP_STEP)
+
+    local dir = (targetPos - startPos)
+    dir = Vector3.new(dir.X, 0, dir.Z)
+    if dir.Magnitude < 1 then
+        local ang = math.random() * math.pi * 2
+        dir = Vector3.new(math.cos(ang), 0, math.sin(ang))
+    else
+        dir = dir.Unit
+    end
+
+    for i = 1, steps do
+        local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if not r then break end
+
+        -- ⭐ JUMP 1x tiap step
+        local curHum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if curHum and curHum.Health > 0 and not curHum.SeatPart then
+            pcall(function() curHum.Jump = true end)
+            task.wait(0.05)
+        end
+
+        local dist = math.min(JUMP_STEP * i, totalDist)
+        local pos = startPos + dir * dist + Vector3.new(0, STEP_HEIGHT, 0)
+
+        r.CFrame = CFrame.new(pos)
+        r.Velocity = Vector3.zero
+        r.AssemblyLinearVelocity = Vector3.zero
+
+        task.wait(STEP_WAIT)
+    end
+
     task.wait(HalloweenCfg.RETURN_WAIT)
     return true
 end
