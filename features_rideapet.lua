@@ -107,69 +107,53 @@ local function sendPlatinumWebhook(eventType, data)
     }
     local icons = ICONS[eventType] or { "ℹ️", "📌", "⚙️" }
 
-    local embeds = {}
+        local embeds = {}
 
-    -- ═══ EMBED 1: HERO HEADER ═══
+    -- ═══ SINGLE EMBED — ALL IN ONE ═══
     table.insert(embeds, {
         author = {
             name = "VRILZHUB · King R A P",
-                        icon_url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2018.56.22.jpeg",
+            icon_url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2018.56.22.jpeg",
         },
         title = icons[1] .. "  " .. data.title,
-        description = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" .. (data.description or "​"),
+        description = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            .. (data.description or "")
+            .. "\n\n👑 **VRILZHUB KING — Premium Script**",
         color = PLATINUM_COLORS.hero,
-    })
-
-    -- ═══ EMBED 2: PLAYER INFO ═══
-    table.insert(embeds, {
-        color = PLATINUM_COLORS.hero,
-        fields = {
-            {
-                name = "👤  **PLAYER**",
-                value = "```yaml\n" .. LocalPlayer.DisplayName .. "\n@" .. LocalPlayer.Name .. "\n```",
-                inline = true,
-            },
-            {
-                name = "🎮  **GAME**",
-                value = "```yaml\nPlace: " .. game.PlaceId .. "\nKey: " .. tostring(Shared.KeyType or "FREE") .. "\n```",
-                inline = true,
-            },
-            {
-                name = "⏰  **TIME**",
-                value = "```yaml\n" .. os.date("%H:%M:%S") .. "\n" .. os.date("%d/%m/%Y") .. "\n```",
-                inline = true,
-            },
+        image = {
+            url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2019.12.33.jpeg",
         },
-    })
-
-    -- ═══ EMBED 3: DETAILS (Weight / Luck / Rarity) ═══
-    if data.details and #data.details > 0 then
-        table.insert(embeds, {
-            color = PLATINUM_COLORS.gold,
-            fields = data.details,
-        })
-    end
-
-        -- ═══ EMBED 4: FOOTER ═══
-    table.insert(embeds, {
-        color = PLATINUM_COLORS.hero,
-        description = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        fields = (function()
+            local f = {
+                {
+                    name = "👤  **PLAYER**",
+                    value = "```yaml\n" .. LocalPlayer.DisplayName .. "\n@" .. LocalPlayer.Name .. "\n```",
+                    inline = true,
+                },
+                {
+                    name = "🎮  **GAME**",
+                    value = "```yaml\nPlace: " .. game.PlaceId .. "\nKey: " .. tostring(Shared.KeyType or "FREE") .. "\n```",
+                    inline = true,
+                },
+                {
+                    name = "⏰  **TIME**",
+                    value = "```yaml\n" .. os.date("%H:%M:%S") .. "\n" .. os.date("%d/%m/%Y") .. "\n```",
+                    inline = true,
+                },
+            }
+            if data.details and #data.details > 0 then
+                for i, d in ipairs(data.details) do
+                    if i > 20 then break end
+                    table.insert(f, d)
+                end
+            end
+            return f
+        end)(),
         footer = {
             text = "🏆 VRILZHUB KING  •  v2.0  •  Ride a Pet",
             icon_url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2018.56.22.jpeg",
         },
         timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
-    })
-
-    -- ═══ EMBED 5: BANNER — VRILZHUB KING ═══
-    table.insert(embeds, {
-        color = PLATINUM_COLORS.gold,
-        image = {
-            url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2019.12.33.jpeg",
-        },
-        footer = {
-            text = "👑 VRILZHUB KING — Premium Script",
-        },
     })
 
     local payload = HttpService:JSONEncode({
