@@ -3149,14 +3149,19 @@ local function halloweenTpStep(targetPos, stepSize, waitTime)
         dir = Vector3.new(math.cos(ang), 0, math.sin(ang))
     end
 
-    for i = 1, steps do
+       for i = 1, steps do
+        -- ⭐ JUMP 1x tiap step
+        local curHum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if curHum and curHum.Health > 0 and not curHum.SeatPart then
+            pcall(function() curHum.Jump = true end)
+            task.wait(0.08)
+        end
+
         local dist = math.min(stepSize * i, totalDist)
         local pos = startPos + dir * dist + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
         halloweenTpTo(pos)
         task.wait(waitTime)   -- ✅ pakai waitTime
     end
-    return true
-end
 
 -- ⭐ TP MAIN FUNCTION — pilih metode
 local function halloweenTpJumpTo(targetPos)
@@ -3210,9 +3215,16 @@ local function halloweenReturnToBase()
             local stepSize = HalloweenCfg.TP_STEP_FREE
             local steps = math.ceil(totalDist / stepSize)
 
-            for i = 1, steps do
+                       for i = 1, steps do
                 local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                 if not r then break end
+
+                -- ⭐ JUMP 1x tiap step (sebelum TP)
+                local curHum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                if curHum and curHum.Health > 0 and not curHum.SeatPart then
+                    pcall(function() curHum.Jump = true end)
+                    task.wait(0.08)
+                end
 
                 local dist = math.min(stepSize * i, totalDist)
                 local dir = (targetPos - startPos)
@@ -3236,12 +3248,7 @@ local function halloweenReturnToBase()
 
                 task.wait(HalloweenCfg.TP_WAIT)
             end
-
-            task.wait(HalloweenCfg.RETURN_WAIT)
-            return true
-        end
-    end
-
+                
     -- ⭐ Gak naik pet — pake cara lama (step TP biasa)
     halloweenTpJumpTo(base.Position)
     task.wait(HalloweenCfg.RETURN_WAIT)
