@@ -3248,10 +3248,14 @@ local function halloweenReturnToBase()
                 local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
                 local targetPivot = newSeatCF * pivotToSeat:Inverse()
                 pcall(function() pet:PivotTo(targetPivot) end)
-
                 task.wait(HalloweenCfg.TP_WAIT)
             end
-                
+
+            task.wait(HalloweenCfg.RETURN_WAIT)
+            return true
+        end
+    end
+    
     -- ⭐ Gak naik pet — pake cara lama (step TP biasa)
     halloweenTpJumpTo(base.Position)
     task.wait(HalloweenCfg.RETURN_WAIT)
