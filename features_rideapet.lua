@@ -3376,20 +3376,78 @@ local function yinTp(pos)
 end
 
 -- ⭐ COLLECT YIN/YANG (step 80 + verifikasi)
+-- ⭐ CEK ITEM UDAH DI TANGAN (character)
+local function isHoldingRitualItem(itemName)
+    local char = LocalPlayer.Character
+    if not char then return false end
+
+    -- Cek di character (model/tool)
+    for _, obj in ipairs(char:GetChildren()) do
+        if (obj:IsA("Model") or obj:IsA("Tool")) then
+            local name = obj.Name:lower()
+            if name:find(itemName:lower()) then
+                return true
+            end
+        end
+    end
+
+    -- Cek attribute player
+    if itemName == "Yin" and LocalPlayer:GetAttribute("HoldingYin") == true then
+        return true
+    end
+    if itemName == "Yang" and LocalPlayer:GetAttribute("HoldingYang") == true then
+        return true
+    end
+
+    return false
+end
+
+-- ⭐ CEK ITEM UDAH DI TANGAN ATAU UDAH KE-PLACE
+local function isItemHandled(itemName)
+    -- Kalo udah di tangan
+    if isHoldingRitualItem(itemName) then return true end
+
+    -- Kalo udah ke-place di altar
+    if itemName == "Yin" and isYinPlaced() then return true end
+    if itemName == "Yang" and isYangPlaced() then return true end
+
+    return false
+end
+
+-- ⭐ COLLECT YIN/YANG (step 80 + verifikasi + SKIP kalo udah di tangan)
 local function yinCollect(itemName)
+    -- ⭐ CEK DULU: kalo udah di tangan atau udah ke-place → SKIP
+    if isItemHandled(itemName) then
+        print("[YIN] ⏭️ " .. itemName .. " udah di tangan / udah ke-place — SKIP")
+        return true
+    end
+
     local item = findRitualItem(itemName)
-    if not item then return false end
+    if not item then
+        -- Gak ada di runtime & gak di tangan → gak ada apa-apa
+        return false
+    end
 
     local startTime = os.clock()
 
     while os.clock() - startTime < YinRitualCfg.COLLECT_TIMEOUT do
         if not YinRitualState.Enabled then return false end
 
-        -- Cek udah ke-collect
-        item = findRitualItem(itemName)
-        if not item then
+        -- ⭐ Cek lagi: kalo udah di tangan → SUKSES
+        if isHoldingRitualItem(itemName) then
             print("[YIN] ✅ " .. itemName .. " ke-tangan!")
             return true
+        end
+
+        -- Cek masih ada di runtime
+        item = findRitualItem(itemName)
+        if not item then
+            -- Gak ada di runtime. Cek di tangan
+            if isHoldingRitualItem(itemName) then
+                print("[YIN] ✅ " .. itemName .. " ke-tangan!")
+                return true
+            end
+            return false
         end
 
         -- Cari root part
@@ -3416,7 +3474,8 @@ local function yinCollect(itemName)
         if prompt then
             for fire = 1, 3 do
                 if not YinRitualState.Enabled then return false end
-                if not item.Parent then return true end
+                if isHoldingRitualItem(itemName) then return true end
+                if not item.Parent then break end
                 yinFirePrompt(prompt)
                 task.wait(0.15)
             end
@@ -3425,7 +3484,7 @@ local function yinCollect(itemName)
         task.wait(0.15)
     end
 
-    return findRitualItem(itemName) == nil
+    return isHoldingRitualItem(itemName) or findRitualItem(itemName) == nil
 end
 
 -- ⭐ PLACE YIN/YANG KE ALTAR (step 80 + verifikasi)
@@ -3647,11 +3706,18 @@ function Features.startAutoYinRitual()
                 continue
             end
 
-            -- ═══════════════════════════════════════════════
-            -- STEP 2: YIN
+                        -- ═══════════════════════════════════════════════
+            -- STEP 2: PRIORITAS YANG BELUM DI-HANDLE
             -- ═══════════════════════════════════════════════
             local yinItem = findRitualItem("Yin")
-            if yinItem then
+            local yangItem = findRitualItem("Yang")
+            local yinPlaced = isYinPlaced()
+            local yangPlaced = isYangPlaced()
+            local yinHolding = isHoldingRitualItem("Yin")
+            local yangHolding = isHoldingRitualItem("Yang")
+
+            -- Yin: handle kalo BELUM di-place DAN BELUM di tangan
+            if yinItem and not yinPlaced and not yinHolding then
                 YinRitualState.Active = true
                 YinRitualState.Status = "🔵 Collecting Yin..."
                 if yinCollect("Yin") then
@@ -3668,11 +3734,21 @@ function Features.startAutoYinRitual()
                 continue
             end
 
-            -- ═══════════════════════════════════════════════
-            -- STEP 3: YANG
-            -- ═══════════════════════════════════════════════
-            local yangItem = findRitualItem("Yang")
-            if yangItem then
+            -- Yin udah di tangan tapi belum ke-place → place
+            if yinHolding and not yinPlaced then
+                YinRitualState.Active = true
+                YinRitualState.Status = "🔮 Placing Yin (udah di tangan)..."
+                if yinPlace("Yin") then
+                    YinRitualState.Status = "✅ Yin placed!"
+                else
+                    YinRitualState.Status = "⚠️ Yin place gagal"
+                end
+                task.wait(0.5)
+                continue
+            end
+
+            -- Yang: handle kalo BELUM di-place DAN BELUM di tangan
+            if yangItem and not yangPlaced and not yangHolding then
                 YinRitualState.Active = true
                 YinRitualState.Status = "🔴 Collecting Yang..."
                 if yinCollect("Yang") then
@@ -3689,6 +3765,18 @@ function Features.startAutoYinRitual()
                 continue
             end
 
+            -- Yang udah di tangan tapi belum ke-place → place
+            if yangHolding and not yangPlaced then
+                YinRitualState.Active = true
+                YinRitualState.Status = "🔮 Placing Yang (udah di tangan)..."
+                if yinPlace("Yang") then
+                    YinRitualState.Status = "✅ Yang placed!"
+                else
+                    YinRitualState.Status = "⚠️ Yang place gagal"
+                end
+                task.wait(0.5)
+                continue
+            end
             -- ═══════════════════════════════════════════════
             -- STEP 4: SCAN LAGI
             -- ═══════════════════════════════════════════════
