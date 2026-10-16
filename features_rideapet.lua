@@ -3194,8 +3194,8 @@ local function halloweenReturnToBase()
     if not root then return false end
 
     -- ⭐ Config
-    local FLY_HEIGHT = 30        -- terbang naik 30 studs dari tanah
-    local FLY_STEP = 30          -- jarak per step terbang (studs)
+    local FLY_HEIGHT = 40        -- terbang naik 30 studs dari tanah
+    local FLY_STEP = 75         -- jarak per step terbang (studs)
     local FLY_WAIT = 0.08        -- delay per step
 
     -- ⭐ STEP 1: Terbang naik 30 studs dulu
@@ -3206,7 +3206,7 @@ local function halloweenReturnToBase()
         local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if not r then break end
 
-        r.CFrame = r.CFrame + Vector3.new(0, 5, 0)
+        r.CFrame = r.CFrame + Vector3.new(0, 15, 0)
         r.Velocity = Vector3.zero
         r.AssemblyLinearVelocity = Vector3.zero
         task.wait(0.03)
