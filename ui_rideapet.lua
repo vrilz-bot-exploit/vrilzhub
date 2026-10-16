@@ -4069,49 +4069,148 @@ end)
 
     registerTab("Auto", "▶", "Auto")
 
-    -- ============================================================
-    -- TAB WEBHOOK — di atas Settings
+        -- ============================================================
+    -- TAB WEBHOOK — PREMIUM REDESIGN
     -- ============================================================
     do
         local webhookPage = createPage("Webhook")
         pages.Webhook = webhookPage
 
-        -- CARD 1: DISCORD WEBHOOK INPUT
-        local webhookCard, webhookContent = makeCard(webhookPage, "🔔 DISCORD WEBHOOK", 1)
+        -- ═══════════════════════════════════════════
+        -- CARD 1: WEBHOOK CONTROL (Enable + Status)
+        -- ═══════════════════════════════════════════
+        local ctrlCard, ctrlContent = makeCard(webhookPage, "🔔 WEBHOOK CONTROL", 1)
 
-        -- Status label
+        -- Status indicator premium
+        local statusFrame = Instance.new("Frame")
+        statusFrame.Size = UDim2.new(1, 0, 0, 40)
+        statusFrame.BackgroundColor3 = C.Surface3
+        statusFrame.BackgroundTransparency = 0.3
+        statusFrame.BorderSizePixel = 0
+        statusFrame.ZIndex = 3
+        statusFrame.Parent = ctrlContent
+        registerTheme(statusFrame, "Surface3", "BackgroundColor3")
+
+        local statusCorner = Instance.new("UICorner")
+        statusCorner.CornerRadius = UDim.new(0, 10)
+        statusCorner.Parent = statusFrame
+
+        local statusStroke = Instance.new("UIStroke")
+        statusStroke.Color = C.Error
+        statusStroke.Thickness = 1.5
+        statusStroke.Transparency = 0.3
+        statusStroke.Parent = statusFrame
+
+        -- Dot indicator
+        local statusDot = Instance.new("Frame")
+        statusDot.Size = UDim2.fromOffset(10, 10)
+        statusDot.Position = UDim2.new(0, 14, 0.5, -5)
+        statusDot.BackgroundColor3 = C.Error
+        statusDot.BorderSizePixel = 0
+        statusDot.ZIndex = 4
+        statusDot.Parent = statusFrame
+
+        local dotCorner = Instance.new("UICorner")
+        dotCorner.CornerRadius = UDim.new(1, 0)
+        dotCorner.Parent = statusDot
+
+        -- Pulse dot animation
+        task.spawn(function()
+            while statusDot.Parent do
+                task.wait(0.8)
+                TweenService:Create(statusDot, TweenInfo.new(0.4), {
+                    BackgroundTransparency = 0.5
+                }):Play()
+                task.wait(0.4)
+                TweenService:Create(statusDot, TweenInfo.new(0.4), {
+                    BackgroundTransparency = 0
+                }):Play()
+            end
+        end)
+
         local statusLbl = Instance.new("TextLabel")
-        statusLbl.Size = UDim2.new(1, 0, 0, 16)
+        statusLbl.Size = UDim2.new(1, -50, 1, 0)
+        statusLbl.Position = UDim2.fromOffset(36, 0)
         statusLbl.BackgroundTransparency = 1
-        statusLbl.Text = "Status: ❌ Not configured"
+        statusLbl.Text = "WEBHOOK DISABLED"
         statusLbl.TextColor3 = C.Error
         statusLbl.Font = Enum.Font.GothamBold
-        statusLbl.TextSize = CFG.FONT_MUTED
+        statusLbl.TextSize = CFG.FONT_LABEL
         statusLbl.TextXAlignment = Enum.TextXAlignment.Left
-        statusLbl.LayoutOrder = 1
-        statusLbl.ZIndex = 3
-        statusLbl.Parent = webhookContent
-        registerTheme(statusLbl, "Error", "TextColor3")
+        statusLbl.ZIndex = 4
+        statusLbl.Parent = statusFrame
 
-        -- URL Label
+        -- ═══════════════════════════════════════════
+        -- TOGGLE ENABLE WEBHOOK
+        -- ═══════════════════════════════════════════
+        makeToggle(ctrlContent, "Enable Webhook", Shared.WebhookEnabled or false, function(v)
+            Shared.WebhookEnabled = v
+            if v then
+                statusLbl.Text = "WEBHOOK ENABLED"
+                statusLbl.TextColor3 = C.Success
+                statusStroke.Color = C.Success
+                statusDot.BackgroundColor3 = C.Success
+                notify("🔔 Webhook: ON", "success")
+            else
+                statusLbl.Text = "WEBHOOK DISABLED"
+                statusLbl.TextColor3 = C.Error
+                statusStroke.Color = C.Error
+                statusDot.BackgroundColor3 = C.Error
+                notify("🔔 Webhook: OFF", "info")
+            end
+        end)
+
+        -- ═══════════════════════════════════════════
+        -- CARD 2: WEBHOOK URL
+        -- ═══════════════════════════════════════════
+        local urlCard, urlContent = makeCard(webhookPage, "🔗 WEBHOOK URL", 2)
+
         local urlLbl = Instance.new("TextLabel")
         urlLbl.Size = UDim2.new(1, 0, 0, 16)
         urlLbl.BackgroundTransparency = 1
-        urlLbl.Text = "Webhook URL:"
+        urlLbl.Text = "Paste Discord webhook link below:"
         urlLbl.TextColor3 = C.Muted
         urlLbl.Font = Enum.Font.GothamSemibold
         urlLbl.TextSize = CFG.FONT_MUTED
         urlLbl.TextXAlignment = Enum.TextXAlignment.Left
-        urlLbl.LayoutOrder = 2
         urlLbl.ZIndex = 3
-        urlLbl.Parent = webhookContent
+        urlLbl.Parent = urlContent
         registerTheme(urlLbl, "Muted", "TextColor3")
 
-        -- URL Input
+        -- Input container dengan icon
+        local inputWrapper = Instance.new("Frame")
+        inputWrapper.Size = UDim2.new(1, 0, 0, 42)
+        inputWrapper.BackgroundColor3 = C.Surface3
+        inputWrapper.BorderSizePixel = 0
+        inputWrapper.ZIndex = 3
+        inputWrapper.Parent = urlContent
+        registerTheme(inputWrapper, "Surface3", "BackgroundColor3")
+
+        local iwCorner = Instance.new("UICorner")
+        iwCorner.CornerRadius = UDim.new(0, 10)
+        iwCorner.Parent = inputWrapper
+
+        local iwStroke = Instance.new("UIStroke")
+        iwStroke.Color = C.Accent
+        iwStroke.Thickness = 1.5
+        iwStroke.Transparency = 0.4
+        iwStroke.Parent = inputWrapper
+        registerTheme(iwStroke, "Accent", "Color")
+
+        local urlIcon = Instance.new("TextLabel")
+        urlIcon.Size = UDim2.fromOffset(30, 30)
+        urlIcon.Position = UDim2.new(0, 8, 0.5, -15)
+        urlIcon.BackgroundTransparency = 1
+        urlIcon.Text = "🔗"
+        urlIcon.TextSize = 16
+        urlIcon.Font = Enum.Font.GothamBold
+        urlIcon.ZIndex = 4
+        urlIcon.Parent = inputWrapper
+
         local urlBox = Instance.new("TextBox")
-        urlBox.Size = UDim2.new(1, 0, 0, 36)
-        urlBox.BackgroundColor3 = C.Surface3
-        urlBox.BorderSizePixel = 0
+        urlBox.Size = UDim2.new(1, -50, 1, 0)
+        urlBox.Position = UDim2.fromOffset(42, 0)
+        urlBox.BackgroundTransparency = 1
         urlBox.Text = Shared.WebhookURL or ""
         urlBox.PlaceholderText = "https://discord.com/api/webhooks/..."
         urlBox.PlaceholderColor3 = C.Muted
@@ -4120,113 +4219,160 @@ end)
         urlBox.TextSize = CFG.FONT_MUTED
         urlBox.TextXAlignment = Enum.TextXAlignment.Left
         urlBox.ClearTextOnFocus = false
-        urlBox.LayoutOrder = 3
-        urlBox.ZIndex = 3
-        urlBox.Parent = webhookContent
-        registerTheme(urlBox, "Surface3", "BackgroundColor3")
+        urlBox.ZIndex = 4
+        urlBox.Parent = inputWrapper
         registerTheme(urlBox, "Text", "TextColor3")
 
-        local ubCorner = Instance.new("UICorner")
-        ubCorner.CornerRadius = UDim.new(0, 8)
-        ubCorner.Parent = urlBox
-
-        local ubStroke = Instance.new("UIStroke")
-        ubStroke.Color = C.Accent
-        ubStroke.Thickness = 1
-        ubStroke.Transparency = 0.5
-        ubStroke.Parent = urlBox
-        registerTheme(ubStroke, "Accent", "Color")
-
-        local ubPad = Instance.new("UIPadding")
-        ubPad.PaddingLeft = UDim.new(0, 10)
-        ubPad.PaddingRight = UDim.new(0, 10)
-        ubPad.Parent = urlBox
-
-        -- Toggle Enable
-        makeToggle(webhookContent, "Enable Webhook", Shared.WebhookEnabled or false, function(v)
-            Shared.WebhookEnabled = v
-            if v then
-                notify("🔔 Webhook: ON", "success")
-            else
-                notify("🔔 Webhook: OFF", "info")
-            end
-        end)
-
-        -- Save Button
-        local saveBtn = Instance.new("TextButton")
-        saveBtn.Size = UDim2.new(1, 0, 0, 34)
-        saveBtn.BackgroundColor3 = C.Accent
-        saveBtn.Text = "💾 SAVE WEBHOOK URL"
-        saveBtn.TextColor3 = Color3.new(1, 1, 1)
-        saveBtn.Font = Enum.Font.GothamBold
-        saveBtn.TextSize = CFG.FONT_LABEL
-        saveBtn.BorderSizePixel = 0
-        saveBtn.AutoButtonColor = false
-        saveBtn.LayoutOrder = 5
-        saveBtn.ZIndex = 3
-        saveBtn.Parent = webhookContent
-        registerTheme(saveBtn, "Accent", "BackgroundColor3")
-
-        local sbCorner = Instance.new("UICorner")
-        sbCorner.CornerRadius = UDim.new(0, 8)
-        sbCorner.Parent = saveBtn
-
-        saveBtn.MouseButton1Click:Connect(function()
+        -- Auto-save pas user keluar dari input
+        urlBox.FocusLost:Connect(function()
             local url = urlBox.Text:gsub("^%s+", ""):gsub("%s+$", "")
-            if url == "" then
-                notify("❌ URL is empty!", "error")
-                return
+            if url ~= "" and (url:find("discord.com/api/webhooks") or url:find("discordapp.com/api/webhooks")) then
+                Shared.WebhookURL = url
+                saveWebhookURL(url)
+                iwStroke.Color = C.Success
+                iwStroke.Transparency = 0.2
+                notify("✅ URL auto-saved", "success")
+                task.delay(1.5, function()
+                    TweenService:Create(iwStroke, TweenInfo.new(0.5), { Transparency = 0.4 }):Play()
+                end)
+            elseif url ~= "" then
+                iwStroke.Color = C.Error
+                notify("❌ Invalid Discord webhook URL", "error")
             end
-            if not url:find("discord.com/api/webhooks") and not url:find("discordapp.com/api/webhooks") then
-                notify("❌ Invalid Discord webhook URL!", "error")
-                return
-            end
-                        Shared.WebhookURL = url
-            saveWebhookURL(url)   -- ← ⭐ TAMBAH INI
-            statusLbl.Text = "Status: ✅ Configured"
-            statusLbl.TextColor3 = C.Success
-            notify("✅ Webhook URL saved!", "success")
         end)
 
-        -- Test Button
+        -- Sync status awal
+        task.defer(function()
+            if Shared.WebhookURL and Shared.WebhookURL ~= "" then
+                iwStroke.Color = C.Success
+                if Shared.WebhookEnabled then
+                    statusLbl.Text = "WEBHOOK ENABLED"
+                    statusLbl.TextColor3 = C.Success
+                    statusStroke.Color = C.Success
+                    statusDot.BackgroundColor3 = C.Success
+                end
+            end
+        end)
+
+        -- ═══════════════════════════════════════════
+        -- CARD 3: TEST NOTIFICATION
+        -- ═══════════════════════════════════════════
+        local testCard, testContent = makeCard(webhookPage, "🧪 TEST NOTIFICATION", 3)
+
+        local testDesc = Instance.new("TextLabel")
+        testDesc.Size = UDim2.new(1, 0, 0, 28)
+        testDesc.BackgroundTransparency = 1
+        testDesc.Text = "Kirim embed test ke Discord untuk cek koneksi webhook kamu."
+        testDesc.TextColor3 = C.Muted
+        testDesc.Font = Enum.Font.GothamSemibold
+        testDesc.TextSize = CFG.FONT_MUTED
+        testDesc.TextWrapped = true
+        testDesc.TextXAlignment = Enum.TextXAlignment.Left
+        testDesc.TextYAlignment = Enum.TextYAlignment.Top
+        testDesc.ZIndex = 3
+        testDesc.Parent = testContent
+        registerTheme(testDesc, "Muted", "TextColor3")
+
+        -- Test button premium dengan gradient
         local testBtn = Instance.new("TextButton")
-        testBtn.Size = UDim2.new(1, 0, 0, 34)
-        testBtn.BackgroundColor3 = C.Surface3
-        testBtn.Text = "🧪 TEST WEBHOOK"
-        testBtn.TextColor3 = C.Text
+        testBtn.Size = UDim2.new(1, 0, 0, 42)
+        testBtn.BackgroundColor3 = C.Accent
+        testBtn.Text = "🚀 SEND TEST NOTIFICATION"
+        testBtn.TextColor3 = Color3.new(1, 1, 1)
         testBtn.Font = Enum.Font.GothamBold
         testBtn.TextSize = CFG.FONT_LABEL
         testBtn.BorderSizePixel = 0
         testBtn.AutoButtonColor = false
-        testBtn.LayoutOrder = 6
-        testBtn.ZIndex = 3
-        testBtn.Parent = webhookContent
-        registerTheme(testBtn, "Surface3", "BackgroundColor3")
+        testBtn.ZIndex = 4
+        testBtn.Parent = testContent
+        registerTheme(testBtn, "Accent", "BackgroundColor3")
 
         local tbCorner = Instance.new("UICorner")
-        tbCorner.CornerRadius = UDim.new(0, 8)
+        tbCorner.CornerRadius = UDim.new(0, 10)
         tbCorner.Parent = testBtn
 
+        local tbGradient = Instance.new("UIGradient")
+        tbGradient.Rotation = 0
+        tbGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, C.Accent),
+            ColorSequenceKeypoint.new(1, C.Accent2),
+        })
+        tbGradient.Parent = testBtn
+
+        local tbStroke = Instance.new("UIStroke")
+        tbStroke.Color = C.Accent2
+        tbStroke.Thickness = 1.5
+        tbStroke.Transparency = 0.3
+        tbStroke.Parent = testBtn
+
+        -- Hover effect
+        testBtn.MouseEnter:Connect(function()
+            TweenService:Create(testBtn, TweenInfo.new(0.2), {
+                BackgroundColor3 = C.Accent2
+            }):Play()
+            TweenService:Create(tbStroke, TweenInfo.new(0.2), {
+                Transparency = 0
+            }):Play()
+        end)
+        testBtn.MouseLeave:Connect(function()
+            TweenService:Create(testBtn, TweenInfo.new(0.2), {
+                BackgroundColor3 = C.Accent
+            }):Play()
+            TweenService:Create(tbStroke, TweenInfo.new(0.2), {
+                Transparency = 0.3
+            }):Play()
+        end)
+
+        -- Click handler
         testBtn.MouseButton1Click:Connect(function()
             if not Shared.WebhookURL or Shared.WebhookURL == "" then
                 notify("❌ Set webhook URL first!", "error")
                 return
             end
-            testBtn.Text = "SENDING..."
+
+            -- Animasi klik
+            TweenService:Create(testBtn, TweenInfo.new(0.1), {
+                Size = UDim2.new(0.98, 0, 0, 40)
+            }):Play()
+            task.delay(0.15, function()
+                TweenService:Create(testBtn, TweenInfo.new(0.15), {
+                    Size = UDim2.new(1, 0, 0, 42)
+                }):Play()
+            end)
+
+            testBtn.Text = "⏳ SENDING..."
             task.spawn(function()
                 local HttpService = game:GetService("HttpService")
                 local payload = HttpService:JSONEncode({
-                    content = "**VRILZHUB Webhook Test** ✅",
+                    username = "🌈 VRILZHUB TEST",
                     embeds = {{
-                        title = "🎮 Ride a Pet v2.0",
-                        description = "Webhook connection **successful**!",
+                        author = {
+                            name = "VRILZHUB · Ride a Pet",
+                            icon_url = "https://i.imgur.com/your-logo.png",
+                        },
+                        title = "🧪 WEBHOOK TEST SUCCESS",
+                        description = "Koneksi webhook kamu **berhasil**!\nSemua notifikasi bakal masuk ke channel ini.",
                         color = 16747520,
                         fields = {
-                            {name = "Player", value = LocalPlayer.DisplayName .. " (@" .. LocalPlayer.Name .. ")", inline = true},
-                            {name = "UserID", value = tostring(LocalPlayer.UserId), inline = true},
-                            {name = "Time", value = os.date("%H:%M:%S"), inline = true},
+                            {
+                                name = "👤  **PLAYER**",
+                                value = "```\n" .. LocalPlayer.DisplayName .. "\n@" .. LocalPlayer.Name .. "\n```",
+                                inline = true,
+                            },
+                            {
+                                name = "🎮  **GAME**",
+                                value = "```\nPlace: " .. game.PlaceId .. "\nKey: " .. tostring(Shared.KeyType or "FREE") .. "\n```",
+                                inline = true,
+                            },
+                            {
+                                name = "⏰  **TIME**",
+                                value = "```\n" .. os.date("%H:%M:%S") .. "\n" .. os.date("%d/%m/%Y") .. "\n```",
+                                inline = true,
+                            },
                         },
-                        footer = {text = "VRILZHUB • " .. os.date("%d/%m/%Y")},
+                        footer = {
+                            text = "🌈 VRILZHUB  •  Webhook Online",
+                        },
                         timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
                     }}
                 })
@@ -4244,34 +4390,53 @@ end)
                     return {StatusCode = 200}
                 end)
 
-                if ok then
-                    statusLbl.Text = "Status: ✅ Connected"
-                    statusLbl.TextColor3 = C.Success
-                    notify("✅ Webhook test sent!", "success")
-                else
-                    statusLbl.Text = "Status: ❌ Failed"
-                    statusLbl.TextColor3 = C.Error
-                    notify("❌ Webhook failed!", "error")
+                -- Cek HTTP status
+                local success = false
+                if ok and res then
+                    local code = tonumber(res.StatusCode or res.Status or 0) or 0
+                    if (code >= 200 and code < 300) or code == 204 then
+                        success = true
+                    end
                 end
-                testBtn.Text = "🧪 TEST WEBHOOK"
+
+                if success then
+                    testBtn.Text = "✅ SENT!"
+                    notify("✅ Test sent to Discord!", "success")
+                else
+                    testBtn.Text = "❌ FAILED"
+                    notify("❌ Webhook failed! Check URL", "error")
+                end
+
+                task.wait(2)
+                testBtn.Text = "🚀 SEND TEST NOTIFICATION"
             end)
         end)
 
-        -- Info
-        local webhookNote = Instance.new("TextLabel")
-        webhookNote.Size = UDim2.new(1, 0, 0, 42)
-        webhookNote.BackgroundTransparency = 1
-        webhookNote.Text = "Kirim notifikasi ke Discord saat:\n• Egg rare/mythic muncul\n• Auto Hatch dapat pet bagus"
-        webhookNote.TextColor3 = C.Muted
-        webhookNote.Font = Enum.Font.GothamSemibold
-        webhookNote.TextSize = CFG.FONT_MUTED
-        webhookNote.TextWrapped = true
-        webhookNote.TextXAlignment = Enum.TextXAlignment.Left
-        webhookNote.TextYAlignment = Enum.TextYAlignment.Top
-        webhookNote.LayoutOrder = 10
-        webhookNote.ZIndex = 3
-        webhookNote.Parent = webhookContent
-        registerTheme(webhookNote, "Muted", "TextColor3")
+        -- ═══════════════════════════════════════════
+        -- CARD 4: INFO
+        -- ═══════════════════════════════════════════
+        local infoCard, infoContent = makeCard(webhookPage, "💡 INFO", 4)
+
+        local infoLines = {
+            "• Webhook otomatis kirim embed",
+            "• Rare egg spawn → notif rainbow",
+            "• Mutation complete → notif fire",
+            "• Auto-save: URL tersimpan otomatis",
+        }
+        for i, line in ipairs(infoLines) do
+            local lbl = Instance.new("TextLabel")
+            lbl.Size = UDim2.new(1, 0, 0, 16)
+            lbl.BackgroundTransparency = 1
+            lbl.Text = line
+            lbl.TextColor3 = C.Muted
+            lbl.Font = Enum.Font.GothamSemibold
+            lbl.TextSize = CFG.FONT_MUTED
+            lbl.TextXAlignment = Enum.TextXAlignment.Left
+            lbl.LayoutOrder = i
+            lbl.ZIndex = 3
+            lbl.Parent = infoContent
+            registerTheme(lbl, "Muted", "TextColor3")
+        end
 
         -- Register tab
         registerTab("Webhook", "🔔", "Webhook")
