@@ -3826,17 +3826,44 @@ local function yinCollectReward()
         task.wait(0.2)
     end
 
+       -- ⭐ Cek reward udah ke-tangan (bukan cuma prompt)
     if not findRewardPrompt() then
-        print("[YIN REWARD] ✅ Reward ke-tangan (final)")
+        print("[YIN REWARD] ✅ Reward ke-tangan (prompt hilang)")
         return true
     end
-    warn("[YIN REWARD] ❌ Gagal collect reward setelah 20 attempt")
+
+    -- ⭐ Cek candy di character
+    local char = LocalPlayer.Character
+    if char then
+        for _, obj in ipairs(char:GetChildren()) do
+            if (obj:IsA("Model") or obj:IsA("Tool")) and obj.Name:lower():find("candy") then
+                print("[YIN REWARD] ✅ Reward ke-tangan (candy di character)")
+                return true
+            end
+        end
+    end
+
+    -- ⭐ Cek candy di backpack
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    if backpack then
+        for _, obj in ipairs(backpack:GetChildren()) do
+            if (obj:IsA("Tool") or obj:IsA("Model")) and obj.Name:lower():find("candy") then
+                print("[YIN REWARD] ✅ Reward ke-tangan (candy di backpack)")
+                return true
+            end
+        end
+    end
+
+    -- Kalo masih ada prompt + gak ada candy → beneran gagal
+    warn("[YIN REWARD] ❌ Gagal collect reward (prompt masih ada, candy gak ketemu)")
     return false
 end
 
--- ⭐ RETURN KE BASE
+-- ⭐ RETURN KE BASE — MULTI-FALLBACK (Halloween → Plot → Origin)
 local function yinReturnToBase()
     local base = nil
+
+    -- CARA 1: Halloween base
     local candidates = {
         "HalloweenHomeAnchor", "HalloweenBase", "HalloweenSpawn",
         "HalloweenBaseplate", "HalloweenStart",
@@ -3845,22 +3872,71 @@ local function yinReturnToBase()
         local part = Workspace:FindFirstChild(name, true)
         if part and part:IsA("BasePart") then
             base = part
+            print("[YIN RETURN] Base:", part:GetFullName())
             break
         end
     end
+
+    -- CARA 2: Folder Halloween
     if not base then
         local hf = Workspace:FindFirstChild("Halloween")
         if hf then
             local sp = hf:FindFirstChildWhichIsA("SpawnLocation", true)
-            if sp then base = sp
+            if sp then 
+                base = sp
+                print("[YIN RETURN] Halloween folder spawn:", sp:GetFullName())
             else
                 local bp = hf:FindFirstChildWhichIsA("BasePart", true)
-                if bp then base = bp end
+                if bp then 
+                    base = bp
+                    print("[YIN RETURN] Halloween folder part:", bp:GetFullName())
+                end
             end
         end
     end
-    if not base then return false end
 
+    -- ⭐ CARA 3: Player Plot (fallback)
+    if not base then
+        local Plots = Workspace:FindFirstChild("Plots")
+        if Plots then
+            for _, plot in ipairs(Plots:GetChildren()) do
+                local owner = plot:GetAttribute("OwnerUserId") 
+                           or plot:GetAttribute("Owner")
+                if owner == LocalPlayer.UserId or owner == LocalPlayer.Name then
+                    local sp = plot:FindFirstChild("Spawn", true)
+                            or plot:FindFirstChildWhichIsA("SpawnLocation", true)
+                            or plot:FindFirstChild("Baseplate", true)
+                            or plot:FindFirstChildWhichIsA("BasePart", true)
+                    if sp then
+                        base = sp
+                        print("[YIN RETURN] Plot fallback:", sp:GetFullName())
+                    end
+                    break
+                end
+            end
+        end
+    end
+
+    -- ⭐ CARA 4: HeadlessRitual.Origin (paling terakhir)
+    if not base then
+        local hr = Workspace:FindFirstChild("HeadlessRitual")
+        if hr then
+            local origin = hr:FindFirstChild("Origin")
+            if origin and origin:IsA("BasePart") then
+                base = origin
+                print("[YIN RETURN] Origin fallback:", origin:GetFullName())
+            end
+        end
+    end
+
+    if not base then
+        warn("[YIN RETURN] ❌ GAK ADA base sama sekali — skip return")
+        return false
+    end
+
+    print("[YIN RETURN] 🏠 TP ke:", tostring(base.Position))
+
+    -- TP step-by-step ke base
     local char = LocalPlayer.Character
     local root = char and char:FindFirstChild("HumanoidRootPart")
     if not root then return false end
@@ -3883,10 +3959,11 @@ local function yinReturnToBase()
         r.AssemblyLinearVelocity = Vector3.zero
         task.wait(0.08)
     end
+
     task.wait(0.3)
+    print("[YIN RETURN] ✅ Selesai")
     return true
 end
-
 -- ⭐ LOOP UTAMA
 function Features.startAutoYinRitual()
     task.spawn(function()
