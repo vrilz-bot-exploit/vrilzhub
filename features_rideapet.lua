@@ -3913,7 +3913,7 @@ local function yinCollect(itemName)
     return isHoldingRitualItem(itemName) or findRitualItem(itemName) == nil
 end
 
--- ⭐ PLACE YIN/YANG — FIXED: cuma fire prompt Yin/Yang aja, gak semua
+-- ⭐ PLACE YIN/YANG — FIXED: TP ke altar DULU baru fire prompt
 local function yinPlace(itemName)
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then 
@@ -3936,7 +3936,84 @@ local function yinPlace(itemName)
     local fireCount = 0
     local matchItem = itemName:lower()
 
-    -- ⭐ Loop: cari prompt tiap 0.3 detik
+    -- ═══════════════════════════════════════════════════════════
+    -- STEP 1: CARI POSISI ALTAR (sekali aja di awal)
+    -- ═══════════════════════════════════════════════════════════
+    local altarPos = nil
+
+    -- Cara 1: Cari part bernama "Altar" atau "altar"
+    pcall(function()
+        for _, d in ipairs(hr:GetDescendants()) do
+            if d:IsA("BasePart") then
+                local n = d.Name:lower()
+                if n == "altar" or n:find("altar") then
+                    altarPos = d.Position
+                    print("[YIN PLACE] 📍 Altar ketemu:", d:GetFullName())
+                    break
+                end
+            end
+        end
+    end)
+
+    -- Cara 2: Cari di folder Altar
+    if not altarPos then
+        local altarFolder = hr:FindFirstChild("Altar")
+        if altarFolder then
+            local altarPart = altarFolder:FindFirstChildWhichIsA("BasePart", true)
+            if altarPart then
+                altarPos = altarPart.Position
+                print("[YIN PLACE] 📍 Altar (folder) ketemu:", altarPart:GetFullName())
+            end
+        end
+    end
+
+    -- Cara 3: Cari prompt "Place" & pake posisinya
+    if not altarPos then
+        for _, d in ipairs(hr:GetDescendants()) do
+            if d:IsA("ProximityPrompt") then
+                local at = (d.ActionText or ""):lower()
+                if at:find("place") then
+                    local p = d.Parent
+                    while p and not altarPos do
+                        if p:IsA("BasePart") then 
+                            altarPos = p.Position 
+                        elseif p:IsA("Model") then
+                            local ok, pivot = pcall(function() return p:GetPivot().Position end)
+                            if ok then altarPos = pivot end
+                        end
+                        p = p.Parent
+                    end
+                    if altarPos then
+                        print("[YIN PLACE] 📍 Altar (dari prompt) ketemu")
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    if not altarPos then
+        warn("[YIN PLACE] ❌ Gak dapet posisi altar!")
+        return false
+    end
+
+    -- ═══════════════════════════════════════════════════════════
+    -- STEP 2: TP KE ALTAR DULU
+    -- ═══════════════════════════════════════════════════════════
+    local char = LocalPlayer.Character
+    if not char then return false end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not root then return false end
+
+    print("[YIN PLACE] 🚀 TP ke altar...")
+    root.CFrame = CFrame.new(altarPos + Vector3.new(0, 3, 0))
+    root.Velocity = Vector3.zero
+    root.AssemblyLinearVelocity = Vector3.zero
+    task.wait(0.5)   -- ⬆️ tunggu sampe posisi sync
+
+    -- ═══════════════════════════════════════════════════════════
+    -- STEP 3: LOOP FIRE PROMPT SAMPE KE-PLACE
+    -- ═══════════════════════════════════════════════════════════
     while os.clock() - startTime < YinRitualCfg.PLACE_TIMEOUT do
         if not YinRitualState.Enabled then return false end
 
@@ -3950,9 +4027,8 @@ local function yinPlace(itemName)
             return true
         end
 
-        -- ⭐ CARI PROMPT YANG SPESIFIK BUAT Yin / Yang
+        -- ⭐ CARI PROMPT YANG SPESIFIK BUAT Yin/Yang
         local targetPrompt = nil
-        local targetPos = nil
 
         for _, d in ipairs(hr:GetDescendants()) do
             if d:IsA("ProximityPrompt") and d.Enabled then
@@ -3960,72 +4036,37 @@ local function yinPlace(itemName)
                 local ot = (d.ObjectText or ""):lower()
                 local combined = at .. " " .. ot
 
-                -- ✅ FIX: cek "place" + match item (Yin / Yang)
-                -- Handle prompt gabungan "Place Yang Yin" — tetep match
+                -- Cek "place" + match item
                 if combined:find("place") and combined:find(matchItem) then
                     targetPrompt = d
-                    -- Cari posisi dari parent
-                    local p = d.Parent
-                    while p and not targetPos do
-                        if p:IsA("BasePart") then 
-                            targetPos = p.Position
-                        elseif p:IsA("Model") then
-                            local ok, pivot = pcall(function() return p:GetPivot().Position end)
-                            if ok then targetPos = pivot end
-                        end
-                        p = p.Parent
-                    end
-                    if targetPos then break end
+                    break
                 end
             end
         end
 
-        -- ⭐ Fallback: cari slot placement di Altar
-        if not targetPos then
-            local altar = hr:FindFirstChild("Altar")
-            if altar then
-                local slot = altar:FindFirstChild(itemName .. "Placement")
-                    or altar:FindFirstChild(itemName:lower() .. "Placement")
-                    or altar:FindFirstChild("Placement_" .. itemName)
-                if slot then
-                    if slot:IsA("Attachment") then 
-                        targetPos = slot.WorldPosition
-                    elseif slot:IsA("BasePart") then 
-                        targetPos = slot.Position
+        -- Fallback: prompt "place" apa aja
+        if not targetPrompt then
+            for _, d in ipairs(hr:GetDescendants()) do
+                if d:IsA("ProximityPrompt") and d.Enabled then
+                    local at = (d.ActionText or ""):lower()
+                    if at:find("place") then
+                        targetPrompt = d
+                        break
                     end
                 end
             end
         end
 
-        -- ⭐ Fallback 2: pake posisi Altar
-        if not targetPos then
-            local altar = hr:FindFirstChild("Altar")
-            if altar then
-                local altarPart = altar:FindFirstChildWhichIsA("BasePart", true)
-                if altarPart then
-                    targetPos = altarPart.Position + Vector3.new(0, 3, 0)
-                end
-            end
+        -- ⭐ RE-TP ke altar tiap loop (biar gak drift)
+        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if curRoot then
+            curRoot.CFrame = CFrame.new(altarPos + Vector3.new(0, 3, 0))
+            curRoot.Velocity = Vector3.zero
+            curRoot.AssemblyLinearVelocity = Vector3.zero
         end
+        task.wait(0.1)
 
-        if not targetPos then
-            print("[YIN PLACE] ⏳ Gak dapet posisi, retry...")
-            task.wait(0.3)
-            continue
-        end
-
-        -- ⭐ TP KE POSISI
-        local char = LocalPlayer.Character
-        if not char then return false end
-        local root = char:FindFirstChild("HumanoidRootPart")
-        if not root then return false end
-
-        root.CFrame = CFrame.new(targetPos + Vector3.new(0, 2, 0))
-        root.Velocity = Vector3.zero
-        root.AssemblyLinearVelocity = Vector3.zero
-        task.wait(0.15)
-
-        -- ⭐ FIRE PROMPT — CUMA PROMPT YIN/YANG AJA
+        -- ⭐ FIRE PROMPT
         if targetPrompt then
             pcall(function()
                 targetPrompt.Enabled = true
@@ -4039,7 +4080,7 @@ local function yinPlace(itemName)
                 pcall(fireproximityprompt, targetPrompt)
                 fireCount = fireCount + 1
             end
-            task.wait(0.08)
+            task.wait(0.1)
 
             -- Fire 2: input hold
             pcall(function()
@@ -4048,12 +4089,14 @@ local function yinPlace(itemName)
                 targetPrompt:InputHoldEnd()
             end)
             fireCount = fireCount + 1
+        else
+            print("[YIN PLACE] ⏳ Prompt gak ketemu, retry...")
         end
 
-        task.wait(0.25)
+        task.wait(0.3)
     end
 
-    -- ⭐ Cek final
+    -- Cek final
     if itemName == "Yin" then
         local r = isYinPlaced()
         print("[YIN PLACE] ⚠️ Timeout. isYinPlaced() = " .. tostring(r) .. " | Total: " .. fireCount)
