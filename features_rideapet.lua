@@ -3184,7 +3184,7 @@ function Features.isPremiumUser()
 end
 
 -- ============================================================
--- AUTO YIN RITUAL — FIXED v2
+-- AUTO YIN RITUAL — FIXED v3 (step 80 + verifikasi)
 -- Prioritas: cek reward dulu → baru collect Yin/Yang
 -- ============================================================
 local YinRitualState = {
@@ -3200,8 +3200,10 @@ local YinRitualState = {
 local YinRitualCfg = {
     SCAN_INTERVAL = 0.4,
     TP_HEIGHT = 3,
-    COLLECT_TIMEOUT = 6,
+    COLLECT_TIMEOUT = 8,
+    PLACE_TIMEOUT = 8,
     REWARD_WAIT = 2,
+    TP_STEP = 80,
 }
 
 -- ⭐ CARI ITEM (Yin/Yang) DI RUNTIME
@@ -3274,7 +3276,6 @@ local function isYangPlaced()
     if not hr then return false end
     local rt = hr:FindFirstChild("Runtime")
 
-    -- Cara 1: Yang GAK ADA di runtime = udah ke-place
     if rt then
         local yangInRT = rt:FindFirstChild("Yang")
         if not yangInRT then
@@ -3282,10 +3283,8 @@ local function isYangPlaced()
         end
     end
 
-    -- Cara 2: attribute player
     if LocalPlayer:GetAttribute("RitualYang") == true then return true end
 
-    -- Cara 3: attribute slot
     local altar = hr:FindFirstChild("Altar")
     if altar then
         local slot = altar:FindFirstChild("YangPlacement")
@@ -3302,7 +3301,31 @@ local function isYangPlaced()
     return false
 end
 
--- ⭐ TP KE POSISI (STEP 80 STUDs + handle naik pet)
+-- ⭐ FIRE PROMPT (paksa)
+local function yinFirePrompt(prompt)
+    if not prompt then return false end
+
+    pcall(function()
+        prompt.Enabled = true
+        prompt.HoldDuration = 0
+        prompt.MaxActivationDistance = math.huge
+        prompt.RequiresLineOfSight = false
+    end)
+
+    if typeof(fireproximityprompt) == "function" then
+        pcall(fireproximityprompt, prompt)
+    end
+
+    pcall(function()
+        prompt:InputHoldBegin()
+        task.wait(0.1)
+        prompt:InputHoldEnd()
+    end)
+
+    return true
+end
+
+-- ⭐ TP STEP 80 STUDs
 local function yinTp(pos)
     local char = LocalPlayer.Character
     if not char then return false end
@@ -3310,128 +3333,66 @@ local function yinTp(pos)
     if not root then return false end
 
     local targetPos = pos + Vector3.new(0, YinRitualCfg.TP_HEIGHT, 0)
+    local startPos = root.Position
+    local totalDist = (targetPos - startPos).Magnitude
 
-    -- ═══════════════════════════════════════════════
-    -- Helper: TP step-by-step per 80 studs
-    -- ═══════════════════════════════════════════════
-    local function tpStep80(finalPos)
-        local startPos = root.Position
-        local totalDist = (finalPos - startPos).Magnitude
-
-        -- Kalo jarak deket (< 80), langsung TP
-        if totalDist <= 80 then
-            root.CFrame = CFrame.new(finalPos)
-            root.Velocity = Vector3.zero
-            root.AssemblyLinearVelocity = Vector3.zero
-            return
-        end
-
-        -- Step 80 studs
-        local steps = math.ceil(totalDist / 80)
-        local dir = (finalPos - startPos)
-        dir = Vector3.new(dir.X, 0, dir.Z)
-        if dir.Magnitude > 1 then dir = dir.Unit end
-
-        for i = 1, steps do
-            local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if not r then return end
-
-            local dist = math.min(80 * i, totalDist)
-            local stepPos = startPos + dir * dist
-            stepPos = Vector3.new(stepPos.X, finalPos.Y, stepPos.Z)
-
-            r.CFrame = CFrame.new(stepPos)
-            r.Velocity = Vector3.zero
-            r.AssemblyLinearVelocity = Vector3.zero
-            task.wait(0.06)
-        end
-
-        -- Final TP ke target
-        local r2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if r2 then
-            r2.CFrame = CFrame.new(finalPos)
-            r2.Velocity = Vector3.zero
-            r2.AssemblyLinearVelocity = Vector3.zero
-        end
+    -- Jarak deket (< 80), langsung TP
+    if totalDist <= YinRitualCfg.TP_STEP then
+        root.CFrame = CFrame.new(targetPos)
+        root.Velocity = Vector3.zero
+        root.AssemblyLinearVelocity = Vector3.zero
+        return true
     end
 
-    -- ═══════════════════════════════════════════════
-    -- Kalo lagi naik pet → gerakin pet sekalian
-    -- ═══════════════════════════════════════════════
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if hum and hum.SeatPart then
-        local pet = hum.SeatPart:FindFirstAncestorOfClass("Model")
-        if pet then
-            local seat = hum.SeatPart
-            local offset = root.CFrame:ToObjectSpace(seat.CFrame)
-            local startPos = root.Position
-            local totalDist = (targetPos - startPos).Magnitude
+    -- Step 80 studs
+    local steps = math.ceil(totalDist / YinRitualCfg.TP_STEP)
+    local dir = (targetPos - startPos)
+    dir = Vector3.new(dir.X, 0, dir.Z)
+    if dir.Magnitude > 1 then dir = dir.Unit end
 
-            -- Kalo deket, langsung TP (root + pet)
-            if totalDist <= 80 then
-                root.CFrame = CFrame.new(targetPos)
-                root.Velocity = Vector3.zero
-                root.AssemblyLinearVelocity = Vector3.zero
-                task.wait(0.05)
+    for i = 1, steps do
+        local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if not r then return false end
 
-                local newSeatCF = CFrame.new(targetPos) * offset
-                local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
-                local targetPivot = newSeatCF * pivotToSeat:Inverse()
-                pcall(function() pet:PivotTo(targetPivot) end)
-                return true
-            end
+        local dist = math.min(YinRitualCfg.TP_STEP * i, totalDist)
+        local stepPos = startPos + dir * dist
+        stepPos = Vector3.new(stepPos.X, targetPos.Y, stepPos.Z)
 
-            -- Step 80 studs (root + pet sekaligus)
-            local steps = math.ceil(totalDist / 80)
-            local dir = (targetPos - startPos)
-            dir = Vector3.new(dir.X, 0, dir.Z)
-            if dir.Magnitude > 1 then dir = dir.Unit end
-
-            for i = 1, steps do
-                local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if not r then return false end
-
-                local dist = math.min(80 * i, totalDist)
-                local stepPos = startPos + dir * dist
-                stepPos = Vector3.new(stepPos.X, targetPos.Y, stepPos.Z)
-                local stepCF = CFrame.new(stepPos)
-
-                r.CFrame = stepCF
-                r.Velocity = Vector3.zero
-                r.AssemblyLinearVelocity = Vector3.zero
-
-                -- Gerakin pet sekalian
-                local newSeatCF = stepCF * offset
-                local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
-                local targetPivot = newSeatCF * pivotToSeat:Inverse()
-                pcall(function() pet:PivotTo(targetPivot) end)
-
-                task.wait(0.06)
-            end
-
-            return true
-        end
+        r.CFrame = CFrame.new(stepPos)
+        r.Velocity = Vector3.zero
+        r.AssemblyLinearVelocity = Vector3.zero
+        task.wait(0.06)
     end
 
-    -- ═══════════════════════════════════════════════
-    -- Normal (gak naik pet)
-    -- ═══════════════════════════════════════════════
-    tpStep80(targetPos)
+    -- Final TP
+    local r2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if r2 then
+        r2.CFrame = CFrame.new(targetPos)
+        r2.Velocity = Vector3.zero
+        r2.AssemblyLinearVelocity = Vector3.zero
+    end
+
     return true
 end
 
--- ⭐ COLLECT YIN/YANG
+-- ⭐ COLLECT YIN/YANG (step 80 + verifikasi)
 local function yinCollect(itemName)
     local item = findRitualItem(itemName)
     if not item then return false end
 
     local startTime = os.clock()
+
     while os.clock() - startTime < YinRitualCfg.COLLECT_TIMEOUT do
         if not YinRitualState.Enabled then return false end
 
+        -- Cek udah ke-collect
         item = findRitualItem(itemName)
-        if not item then return true end
+        if not item then
+            print("[YIN] ✅ " .. itemName .. " ke-tangan!")
+            return true
+        end
 
+        -- Cari root part
         local rootPart = item:FindFirstChild("Root")
         if not rootPart then
             rootPart = item:FindFirstChildWhichIsA("BasePart", true)
@@ -3441,21 +3402,33 @@ local function yinCollect(itemName)
             continue
         end
 
+        -- Cari prompt
         local prompt = rootPart:FindFirstChild("RitualPrompt")
         if not prompt then
             prompt = item:FindFirstChildWhichIsA("ProximityPrompt", true)
         end
 
+        -- TP step 80
         yinTp(rootPart.Position)
-        task.wait(0.1)
-        if prompt then yinFirePrompt(prompt) end
-        task.wait(0.25)
+        task.wait(0.15)
+
+        -- Fire prompt 3x
+        if prompt then
+            for fire = 1, 3 do
+                if not YinRitualState.Enabled then return false end
+                if not item.Parent then return true end
+                yinFirePrompt(prompt)
+                task.wait(0.15)
+            end
+        end
+
+        task.wait(0.15)
     end
 
     return findRitualItem(itemName) == nil
 end
 
--- ⭐ PLACE YIN/YANG KE ALTAR
+-- ⭐ PLACE YIN/YANG KE ALTAR (step 80 + verifikasi)
 local function yinPlace(itemName)
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then return false end
@@ -3481,29 +3454,45 @@ local function yinPlace(itemName)
     end
     if not pos then return false end
 
-    -- Coba 5x fire prompt
-    for attempt = 1, 5 do
+    local startTime = os.clock()
+
+    while os.clock() - startTime < YinRitualCfg.PLACE_TIMEOUT do
         if not YinRitualState.Enabled then return false end
 
+        -- Cek udah ke-place
+        if itemName == "Yin" and isYinPlaced() then
+            print("[YIN PLACE] ✅ Yin placed!")
+            return true
+        end
+        if itemName == "Yang" and isYangPlaced() then
+            print("[YIN PLACE] ✅ Yang placed!")
+            return true
+        end
+
+        -- TP step 80 ke slot
         yinTp(pos)
         task.wait(0.15)
-        yinFirePrompt(prompt)
-        task.wait(0.35)
 
-        -- Cek udah ke-place
-        if itemName == "Yin" and isYinPlaced() then return true end
-        if itemName == "Yang" and isYangPlaced() then return true end
+        -- Fire prompt 3x
+        for fire = 1, 3 do
+            if not YinRitualState.Enabled then return false end
+            yinFirePrompt(prompt)
+            task.wait(0.15)
+        end
+
+        task.wait(0.15)
     end
 
+    if itemName == "Yin" then return isYinPlaced() end
+    if itemName == "Yang" then return isYangPlaced() end
     return false
 end
 
--- ⭐ COLLECT REWARD
+-- ⭐ COLLECT REWARD (step 80 + verifikasi)
 local function yinCollectReward()
     local prompt = findRewardPrompt()
     if not prompt then return false end
 
-    -- Cari posisi prompt
     local pos = nil
     local p = prompt.Parent
     while p and not pos do
@@ -3521,7 +3510,6 @@ local function yinCollectReward()
     for attempt = 1, 15 do
         if not YinRitualState.Enabled then return false end
 
-        -- Re-scan prompt
         prompt = findRewardPrompt()
         if not prompt then
             print("[YIN REWARD] ✅ Reward ke-tangan!")
@@ -3531,10 +3519,9 @@ local function yinCollectReward()
         yinTp(pos)
         task.wait(0.1)
         yinFirePrompt(prompt)
-        task.wait(0.3)
+        task.wait(0.25)
     end
 
-    -- Final check
     if not findRewardPrompt() then
         print("[YIN REWARD] ✅ Reward ke-tangan (final)")
         return true
@@ -3636,7 +3623,7 @@ function Features.startAutoYinRitual()
             end
 
             -- ═══════════════════════════════════════════════
-            -- STEP 1: CEK REWARD DULU (PRIORITAS UTAMA)
+            -- STEP 1: CEK REWARD DULU
             -- ═══════════════════════════════════════════════
             if findRewardPrompt() then
                 YinRitualState.Active = true
@@ -3661,12 +3648,9 @@ function Features.startAutoYinRitual()
             end
 
             -- ═══════════════════════════════════════════════
-            -- STEP 2: CEK YIN/YANG DI RUNTIME → COLLECT + PLACE
+            -- STEP 2: YIN
             -- ═══════════════════════════════════════════════
             local yinItem = findRitualItem("Yin")
-            local yangItem = findRitualItem("Yang")
-
-            -- Yin dulu
             if yinItem then
                 YinRitualState.Active = true
                 YinRitualState.Status = "🔵 Collecting Yin..."
@@ -3684,7 +3668,10 @@ function Features.startAutoYinRitual()
                 continue
             end
 
-            -- Yang
+            -- ═══════════════════════════════════════════════
+            -- STEP 3: YANG
+            -- ═══════════════════════════════════════════════
+            local yangItem = findRitualItem("Yang")
             if yangItem then
                 YinRitualState.Active = true
                 YinRitualState.Status = "🔴 Collecting Yang..."
@@ -3703,7 +3690,7 @@ function Features.startAutoYinRitual()
             end
 
             -- ═══════════════════════════════════════════════
-            -- STEP 3: GAK ADA YIN/YANG DI RUNTIME → SCAN LAGI
+            -- STEP 4: SCAN LAGI
             -- ═══════════════════════════════════════════════
             YinRitualState.Active = false
             YinRitualState.Status = "🔍 Scanning Yin & Yang..."
