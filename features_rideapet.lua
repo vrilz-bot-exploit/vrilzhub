@@ -112,8 +112,8 @@ local function sendPlatinumWebhook(eventType, data)
     -- ═══ EMBED 1: HERO HEADER ═══
     table.insert(embeds, {
         author = {
-            name = "VRILZHUB · Platinum Edition",
-            icon_url = "https://i.imgur.com/your-logo.png",
+            name = "VRILZHUB · King R A P",
+                        icon_url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2018.56.22.jpeg",
         },
         title = icons[1] .. "  " .. data.title,
         description = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" .. (data.description or "​"),
