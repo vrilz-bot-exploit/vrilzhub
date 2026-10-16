@@ -3185,6 +3185,14 @@ local function halloweenReturnToBase()
     local root = char and char:FindFirstChild("HumanoidRootPart")
     local hum = char and char:FindFirstChildOfClass("Humanoid")
 
+    -- ⭐ JUMP 1x DULU sebelum return (biar gak nyangkut di tempat candy)
+    if hum and hum.Health > 0 then
+        pcall(function()
+            hum.Jump = true
+        end)
+        task.wait(0.3)
+    end
+
     if root and hum and hum.SeatPart then
         -- Player lagi naik pet — pake TP step yang handle vehicle
         local pet = hum.SeatPart:FindFirstAncestorOfClass("Model")
