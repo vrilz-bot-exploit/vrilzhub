@@ -3163,6 +3163,9 @@ local function halloweenTpStep(targetPos, stepSize, waitTime)
         task.wait(waitTime)   -- ✅ pakai waitTime
     end
 
+return true
+end
+
 -- ⭐ TP MAIN FUNCTION — pilih metode
 local function halloweenTpJumpTo(targetPos)
     local method = HalloweenState.TPMethod or "TP100"
