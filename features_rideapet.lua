@@ -3487,7 +3487,7 @@ local function yinCollect(itemName)
     return isHoldingRitualItem(itemName) or findRitualItem(itemName) == nil
 end
 
--- ⭐ PLACE YIN/YANG KE ALTAR — FIXED FINAL
+-- ⭐ PLACE YIN/YANG KE ALTAR — FIXED (pake remote EggPlaced)
 local function yinPlace(itemName)
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then
@@ -3505,20 +3505,25 @@ local function yinPlace(itemName)
         return false
     end
 
-    -- Cari prompt
+    -- Cari prompt (kalo ada)
     local prompt = slot:FindFirstChild("RitualPrompt")
-    if not prompt then
-        prompt = slot:FindFirstChildWhichIsA("ProximityPrompt", true)
-    end
-    if not prompt then
-        print("[YIN PLACE] ❌ RitualPrompt gak ketemu")
-        return false
-    end
+        or slot:FindFirstChildWhichIsA("ProximityPrompt", true)
+
+    -- Cari remote EggPlaced
+    local RS = game:GetService("ReplicatedStorage")
+    local Remotes = RS:FindFirstChild("Remotes")
+    local Game = Remotes and Remotes:FindFirstChild("Game")
+    local eggPlacedRemote = Game and Game:FindFirstChild("EggPlaced")
+    local basketDropRemote = Game and Game:FindFirstChild("BasketDrop")
 
     print("[YIN PLACE] 🎯 Try place " .. itemName)
-    print("[YIN PLACE] 📍 Prompt ActionText:", prompt.ActionText)
-    print("[YIN PLACE] 📍 Prompt Enabled:", prompt.Enabled)
-    print("[YIN PLACE] 📏 Prompt MaxActivationDistance:", prompt.MaxActivationDistance)
+    if prompt then
+        print("[YIN PLACE] 📍 Prompt ActionText:", prompt.ActionText)
+        print("[YIN PLACE] 📍 Prompt Enabled:", prompt.Enabled)
+    else
+        print("[YIN PLACE] ⚠️ Prompt GAK ADA di slot — pake REMOTE aja")
+    end
+    print("[YIN PLACE] 📍 EggPlaced remote:", eggPlacedRemote ~= nil)
 
     -- Cari posisi slot
     local pos
@@ -3544,62 +3549,92 @@ local function yinPlace(itemName)
 
         -- Cek udah ke-place
         if itemName == "Yin" and isYinPlaced() then
-            print("[YIN PLACE] ✅ Yin placed! (setelah " .. fireCount .. " fire)")
+            print("[YIN PLACE] ✅ Yin placed! (setelah " .. fireCount .. " attempt)")
             return true
         end
         if itemName == "Yang" and isYangPlaced() then
-            print("[YIN PLACE] ✅ Yang placed! (setelah " .. fireCount .. " fire)")
+            print("[YIN PLACE] ✅ Yang placed! (setelah " .. fireCount .. " attempt)")
             return true
         end
 
-        -- ⭐ TP LANGSUNG ke slot, gak pake step
+        -- ⭐ TP LANGSUNG ke slot
         local char = LocalPlayer.Character
         if not char then return false end
         local root = char:FindFirstChild("HumanoidRootPart")
         if not root then return false end
 
-        -- TP langsung ke atas slot, biar prompt detect
         root.CFrame = CFrame.new(pos + Vector3.new(0, 2, 0))
         root.Velocity = Vector3.zero
         root.AssemblyLinearVelocity = Vector3.zero
 
         task.wait(0.1)
 
-        -- ⭐ FORCE ENABLE PROMPT
-        pcall(function()
-            prompt.Enabled = true
-            prompt.HoldDuration = 0
-            prompt.MaxActivationDistance = math.huge
-            prompt.RequiresLineOfSight = false
-        end)
+        -- ⭐ FIRE REMOTE EggPlaced — banyak payload
+        if eggPlacedRemote then
+            pcall(function() eggPlacedRemote:FireServer() end)
+            fireCount = fireCount + 1
+            task.wait(0.05)
 
-        -- ⭐ FIRE PROMPT BANYAK CARA
-        for fire = 1, 5 do
-            if not YinRitualState.Enabled then return false end
+            pcall(function() eggPlacedRemote:FireServer(itemName) end)
+            fireCount = fireCount + 1
+            task.wait(0.05)
 
-            -- Cek udah ke-place
-            if itemName == "Yin" and isYinPlaced() then
-                print("[YIN PLACE] ✅ Yin placed! (setelah " .. fireCount .. " fire)")
-                return true
-            end
-            if itemName == "Yang" and isYangPlaced() then
-                print("[YIN PLACE] ✅ Yang placed! (setelah " .. fireCount .. " fire)")
-                return true
-            end
+            pcall(function() eggPlacedRemote:FireServer(itemName:lower()) end)
+            fireCount = fireCount + 1
+            task.wait(0.05)
 
-            -- Fire 1: fireproximityprompt biasa
+            pcall(function() eggPlacedRemote:FireServer(slot) end)
+            fireCount = fireCount + 1
+            task.wait(0.05)
+
+            pcall(function() eggPlacedRemote:FireServer(slot.Name) end)
+            fireCount = fireCount + 1
+            task.wait(0.05)
+
+            pcall(function() eggPlacedRemote:FireServer(itemName, slot) end)
+            fireCount = fireCount + 1
+            task.wait(0.05)
+
+            pcall(function() eggPlacedRemote:FireServer(slot, itemName) end)
+            fireCount = fireCount + 1
+            task.wait(0.05)
+
+            pcall(function() eggPlacedRemote:FireServer(itemName, slot.Name) end)
+            fireCount = fireCount + 1
+            task.wait(0.05)
+
+            pcall(function() eggPlacedRemote:FireServer(slot.Name, itemName) end)
+            fireCount = fireCount + 1
+            task.wait(0.1)
+        end
+
+        -- ⭐ FIRE BasketDrop sebagai alternatif
+        if basketDropRemote then
+            pcall(function() basketDropRemote:FireServer() end)
+            fireCount = fireCount + 1
+            task.wait(0.05)
+
+            pcall(function() basketDropRemote:FireServer(itemName) end)
+            fireCount = fireCount + 1
+            task.wait(0.05)
+        end
+
+        -- ⭐ FIRE PROMPT (kalo ada)
+        if prompt then
+            -- Force enable
+            pcall(function()
+                prompt.Enabled = true
+                prompt.HoldDuration = 0
+                prompt.MaxActivationDistance = math.huge
+                prompt.RequiresLineOfSight = false
+            end)
+
             if typeof(fireproximityprompt) == "function" then
                 pcall(fireproximityprompt, prompt)
+                fireCount = fireCount + 1
             end
-            fireCount = fireCount + 1
             task.wait(0.05)
 
-            -- Fire 2: yinFirePrompt
-            yinFirePrompt(prompt)
-            fireCount = fireCount + 1
-            task.wait(0.05)
-
-            -- Fire 3: InputHold
             pcall(function()
                 prompt:InputHoldBegin()
                 task.wait(0.05)
@@ -3616,18 +3651,18 @@ local function yinPlace(itemName)
             root.Velocity = Vector3.zero
             root.AssemblyLinearVelocity = Vector3.zero
         end
-        task.wait(0.15)
+        task.wait(0.1)
     end
 
     -- Timeout
     if itemName == "Yin" then
         local r = isYinPlaced()
-        print("[YIN PLACE] ⚠️ Timeout. isYinPlaced() = " .. tostring(r) .. " | Total fire: " .. fireCount)
+        print("[YIN PLACE] ⚠️ Timeout. isYinPlaced() = " .. tostring(r) .. " | Total: " .. fireCount)
         return r
     end
     if itemName == "Yang" then
         local r = isYangPlaced()
-        print("[YIN PLACE] ⚠️ Timeout. isYangPlaced() = " .. tostring(r) .. " | Total fire: " .. fireCount)
+        print("[YIN PLACE] ⚠️ Timeout. isYangPlaced() = " .. tostring(r) .. " | Total: " .. fireCount)
         return r
     end
     return false
