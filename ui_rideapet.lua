@@ -1386,6 +1386,36 @@ local function buildFPSWindow(parent)
     return fpsWin
 end
 
+-- ===== WEBHOOK SAVE/LOAD =====
+local WEBHOOK_SAVE_FILE = "vrilz_webhook.txt"
+
+local function saveWebhookURL(url)
+    _G.VRILZ_WebhookURL = url
+    if writefile then
+        pcall(writefile, WEBHOOK_SAVE_FILE, url or "")
+    end
+end
+
+local function loadWebhookURL()
+    if _G.VRILZ_WebhookURL then
+        return _G.VRILZ_WebhookURL
+    end
+    if readfile and isfile then
+        local ok, exists = pcall(isfile, WEBHOOK_SAVE_FILE)
+        if ok and exists then
+            local okRead, content = pcall(readfile, WEBHOOK_SAVE_FILE)
+            if okRead and content then
+                content = content:gsub("^%s+", ""):gsub("%s+$", "")
+                if content ~= "" then
+                    _G.VRILZ_WebhookURL = content
+                    return content
+                end
+            end
+        end
+    end
+    return nil
+end
+
 -- ============================================================
 -- LIVE CHAT CLIENT (global via Cloudflare Worker + D1)
 -- ============================================================
@@ -5521,36 +5551,6 @@ end
     end  -- ← TAMBAH PENUTUP do...end
 
     return main
-end
-
--- ===== WEBHOOK SAVE/LOAD =====
-local WEBHOOK_SAVE_FILE = "vrilz_webhook.txt"
-
-local function saveWebhookURL(url)
-    _G.VRILZ_WebhookURL = url
-    if writefile then
-        pcall(writefile, WEBHOOK_SAVE_FILE, url or "")
-    end
-end
-
-local function loadWebhookURL()
-    if _G.VRILZ_WebhookURL then
-        return _G.VRILZ_WebhookURL
-    end
-    if readfile and isfile then
-        local ok, exists = pcall(isfile, WEBHOOK_SAVE_FILE)
-        if ok and exists then
-            local okRead, content = pcall(readfile, WEBHOOK_SAVE_FILE)
-            if okRead and content then
-                content = content:gsub("^%s+", ""):gsub("%s+$", "")
-                if content ~= "" then
-                    _G.VRILZ_WebhookURL = content
-                    return content
-                end
-            end
-        end
-    end
-    return nil
 end
 
 -- ============================================================
