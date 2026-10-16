@@ -165,7 +165,7 @@ local function sendPlatinumWebhook(eventType, data)
     table.insert(embeds, {
         color = PLATINUM_COLORS.gold,
         image = {
-            url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2018.56.22.jpeg",
+            url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2019.12.33.jpeg",
         },
         footer = {
             text = "👑 VRILZHUB KING — Premium Script",
