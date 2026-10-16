@@ -3487,174 +3487,139 @@ local function yinCollect(itemName)
     return isHoldingRitualItem(itemName) or findRitualItem(itemName) == nil
 end
 
--- ⭐ PLACE YIN/YANG KE ALTAR — FIXED (pake remote EggPlaced)
+-- ⭐ PLACE YIN/YANG — Cari prompt "Place" di SELURUH HeadlessRitual
 local function yinPlace(itemName)
     local hr = Workspace:FindFirstChild("HeadlessRitual")
-    if not hr then
-        print("[YIN PLACE] ❌ HeadlessRitual gak ada")
-        return false
-    end
-    local altar = hr:FindFirstChild("Altar")
-    if not altar then
-        print("[YIN PLACE] ❌ Altar gak ada")
-        return false
-    end
-    local slot = altar:FindFirstChild(itemName .. "Placement")
-    if not slot then
-        print("[YIN PLACE] ❌ Slot " .. itemName .. "Placement gak ada")
-        return false
-    end
+    if not hr then return false end
 
-    -- Cari prompt (kalo ada)
-    local prompt = slot:FindFirstChild("RitualPrompt")
-        or slot:FindFirstChildWhichIsA("ProximityPrompt", true)
-
-    -- Cari remote EggPlaced
-    local RS = game:GetService("ReplicatedStorage")
-    local Remotes = RS:FindFirstChild("Remotes")
-    local Game = Remotes and Remotes:FindFirstChild("Game")
-    local eggPlacedRemote = Game and Game:FindFirstChild("EggPlaced")
-    local basketDropRemote = Game and Game:FindFirstChild("BasketDrop")
+    -- Cek udah ke-place
+    if itemName == "Yin" and isYinPlaced() then
+        print("[YIN PLACE] ⏭️ Yin udah ke-place")
+        return true
+    end
+    if itemName == "Yang" and isYangPlaced() then
+        print("[YIN PLACE] ⏭️ Yang udah ke-place")
+        return true
+    end
 
     print("[YIN PLACE] 🎯 Try place " .. itemName)
-    if prompt then
-        print("[YIN PLACE] 📍 Prompt ActionText:", prompt.ActionText)
-        print("[YIN PLACE] 📍 Prompt Enabled:", prompt.Enabled)
-    else
-        print("[YIN PLACE] ⚠️ Prompt GAK ADA di slot — pake REMOTE aja")
-    end
-    print("[YIN PLACE] 📍 EggPlaced remote:", eggPlacedRemote ~= nil)
-
-    -- Cari posisi slot
-    local pos
-    if slot:IsA("Attachment") then
-        pos = slot.WorldPosition
-    elseif slot:IsA("BasePart") then
-        pos = slot.Position
-    else
-        local ok, pivot = pcall(function() return slot:GetPivot().Position end)
-        if ok then pos = pivot end
-    end
-    if not pos then
-        print("[YIN PLACE] ❌ Posisi slot gak ketemu")
-        return false
-    end
-    print("[YIN PLACE] 📍 Slot posisi:", tostring(pos))
-
     local startTime = os.clock()
     local fireCount = 0
 
     while os.clock() - startTime < YinRitualCfg.PLACE_TIMEOUT do
         if not YinRitualState.Enabled then return false end
 
-        -- Cek udah ke-place
         if itemName == "Yin" and isYinPlaced() then
-            print("[YIN PLACE] ✅ Yin placed! (setelah " .. fireCount .. " attempt)")
+            print("[YIN PLACE] ✅ Yin placed! (setelah " .. fireCount .. " fire)")
             return true
         end
         if itemName == "Yang" and isYangPlaced() then
-            print("[YIN PLACE] ✅ Yang placed! (setelah " .. fireCount .. " attempt)")
+            print("[YIN PLACE] ✅ Yang placed! (setelah " .. fireCount .. " fire)")
             return true
         end
 
-        -- ⭐ TP LANGSUNG ke slot
+        -- ⭐ CARI PROMPT "Place X" di SELURUH HeadlessRitual
+        local targetPrompt = nil
+        local targetPos = nil
+        local matchItem = itemName:lower()
+
+        for _, d in ipairs(hr:GetDescendants()) do
+            if d:IsA("ProximityPrompt") and d.Enabled then
+                local at = d.ActionText:lower()
+                local ot = d.ObjectText:lower()
+
+                -- Cek prompt "place" + "yin"/"yang"
+                if at:find("place") and (at:find(matchItem) or ot:find(matchItem)) then
+                    targetPrompt = d
+                    local p = d.Parent
+                    while p and not targetPos do
+                        if p:IsA("BasePart") then targetPos = p.Position
+                        elseif p:IsA("Model") then
+                            local ok, pivot = pcall(function() return p:GetPivot().Position end)
+                            if ok then targetPos = pivot end
+                        end
+                        p = p.Parent
+                    end
+                    if targetPos then break end
+                end
+            end
+        end
+
+        -- Fallback: prompt apapun yang ada "place"
+        if not targetPrompt then
+            for _, d in ipairs(hr:GetDescendants()) do
+                if d:IsA("ProximityPrompt") and d.Enabled and d.ActionText:lower():find("place") then
+                    targetPrompt = d
+                    local p = d.Parent
+                    while p and not targetPos do
+                        if p:IsA("BasePart") then targetPos = p.Position
+                        elseif p:IsA("Model") then
+                            local ok, pivot = pcall(function() return p:GetPivot().Position end)
+                            if ok then targetPos = pivot end
+                        end
+                        p = p.Parent
+                    end
+                    if targetPos then break end
+                end
+            end
+        end
+
+        -- Fallback terakhir: pake posisi slot
+        if not targetPos then
+            local altar = hr:FindFirstChild("Altar")
+            if altar then
+                local slot = altar:FindFirstChild(itemName .. "Placement")
+                if slot then
+                    if slot:IsA("Attachment") then targetPos = slot.WorldPosition
+                    elseif slot:IsA("BasePart") then targetPos = slot.Position
+                    end
+                end
+            end
+        end
+
+        if not targetPos then
+            print("[YIN PLACE] ❌ Gak ada prompt/posisi buat " .. itemName)
+            return false
+        end
+
+        -- ⭐ TP LANGSUNG ke posisi
         local char = LocalPlayer.Character
         if not char then return false end
         local root = char:FindFirstChild("HumanoidRootPart")
         if not root then return false end
 
-        root.CFrame = CFrame.new(pos + Vector3.new(0, 2, 0))
+        root.CFrame = CFrame.new(targetPos + Vector3.new(0, 2, 0))
         root.Velocity = Vector3.zero
         root.AssemblyLinearVelocity = Vector3.zero
+        task.wait(0.15)
 
-        task.wait(0.1)
-
-        -- ⭐ FIRE REMOTE EggPlaced — banyak payload
-        if eggPlacedRemote then
-            pcall(function() eggPlacedRemote:FireServer() end)
-            fireCount = fireCount + 1
-            task.wait(0.05)
-
-            pcall(function() eggPlacedRemote:FireServer(itemName) end)
-            fireCount = fireCount + 1
-            task.wait(0.05)
-
-            pcall(function() eggPlacedRemote:FireServer(itemName:lower()) end)
-            fireCount = fireCount + 1
-            task.wait(0.05)
-
-            pcall(function() eggPlacedRemote:FireServer(slot) end)
-            fireCount = fireCount + 1
-            task.wait(0.05)
-
-            pcall(function() eggPlacedRemote:FireServer(slot.Name) end)
-            fireCount = fireCount + 1
-            task.wait(0.05)
-
-            pcall(function() eggPlacedRemote:FireServer(itemName, slot) end)
-            fireCount = fireCount + 1
-            task.wait(0.05)
-
-            pcall(function() eggPlacedRemote:FireServer(slot, itemName) end)
-            fireCount = fireCount + 1
-            task.wait(0.05)
-
-            pcall(function() eggPlacedRemote:FireServer(itemName, slot.Name) end)
-            fireCount = fireCount + 1
-            task.wait(0.05)
-
-            pcall(function() eggPlacedRemote:FireServer(slot.Name, itemName) end)
-            fireCount = fireCount + 1
-            task.wait(0.1)
-        end
-
-        -- ⭐ FIRE BasketDrop sebagai alternatif
-        if basketDropRemote then
-            pcall(function() basketDropRemote:FireServer() end)
-            fireCount = fireCount + 1
-            task.wait(0.05)
-
-            pcall(function() basketDropRemote:FireServer(itemName) end)
-            fireCount = fireCount + 1
-            task.wait(0.05)
-        end
-
-        -- ⭐ FIRE PROMPT (kalo ada)
-        if prompt then
-            -- Force enable
+        -- ⭐ FIRE PROMPT
+        if targetPrompt then
             pcall(function()
-                prompt.Enabled = true
-                prompt.HoldDuration = 0
-                prompt.MaxActivationDistance = math.huge
-                prompt.RequiresLineOfSight = false
+                targetPrompt.Enabled = true
+                targetPrompt.HoldDuration = 0
+                targetPrompt.MaxActivationDistance = math.huge
+                targetPrompt.RequiresLineOfSight = false
             end)
 
             if typeof(fireproximityprompt) == "function" then
-                pcall(fireproximityprompt, prompt)
+                pcall(fireproximityprompt, targetPrompt)
                 fireCount = fireCount + 1
             end
             task.wait(0.05)
 
             pcall(function()
-                prompt:InputHoldBegin()
-                task.wait(0.05)
-                prompt:InputHoldEnd()
+                targetPrompt:InputHoldBegin()
+                task.wait(0.08)
+                targetPrompt:InputHoldEnd()
             end)
             fireCount = fireCount + 1
             task.wait(0.1)
         end
 
-        -- Re-TP kalo belum ke-place
-        root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if root then
-            root.CFrame = CFrame.new(pos + Vector3.new(0, 2, 0))
-            root.Velocity = Vector3.zero
-            root.AssemblyLinearVelocity = Vector3.zero
-        end
         task.wait(0.1)
     end
 
-    -- Timeout
     if itemName == "Yin" then
         local r = isYinPlaced()
         print("[YIN PLACE] ⚠️ Timeout. isYinPlaced() = " .. tostring(r) .. " | Total: " .. fireCount)
@@ -3668,11 +3633,15 @@ local function yinPlace(itemName)
     return false
 end
 
--- ⭐ COLLECT REWARD (step 80 + verifikasi)
+-- ⭐ COLLECT REWARD — TP LANGSUNG + handle naik pet
 local function yinCollectReward()
     local prompt = findRewardPrompt()
-    if not prompt then return false end
+    if not prompt then
+        print("[YIN REWARD] ❌ Prompt reward gak ketemu")
+        return false
+    end
 
+    -- Cari posisi prompt
     local pos = nil
     local p = prompt.Parent
     while p and not pos do
@@ -3684,29 +3653,84 @@ local function yinCollectReward()
         end
         p = p.Parent
     end
-    if not pos then return false end
+    if not pos then
+        print("[YIN REWARD] ❌ Posisi reward gak ketemu")
+        return false
+    end
 
-    -- Coba 15x
+    print("[YIN REWARD] 🎯 Reward di:", tostring(pos))
+
     for attempt = 1, 15 do
         if not YinRitualState.Enabled then return false end
 
         prompt = findRewardPrompt()
         if not prompt then
-            print("[YIN REWARD] ✅ Reward ke-tangan!")
+            print("[YIN REWARD] ✅ Reward ke-tangan! (attempt " .. attempt .. ")")
             return true
         end
 
-        yinTp(pos)
+        -- TP LANGSUNG ke reward
+        local char = LocalPlayer.Character
+        if not char then return false end
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if not root then return false end
+
+        local targetCF = CFrame.new(pos + Vector3.new(0, 2, 0))
+
+        -- Handle naik pet
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum and hum.SeatPart then
+            local pet = hum.SeatPart:FindFirstAncestorOfClass("Model")
+            if pet then
+                local seat = hum.SeatPart
+                local offset = root.CFrame:ToObjectSpace(seat.CFrame)
+
+                root.CFrame = targetCF
+                root.Velocity = Vector3.zero
+                root.AssemblyLinearVelocity = Vector3.zero
+                task.wait(0.05)
+
+                local newSeatCF = targetCF * offset
+                local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
+                local targetPivot = newSeatCF * pivotToSeat:Inverse()
+                pcall(function() pet:PivotTo(targetPivot) end)
+            else
+                root.CFrame = targetCF
+                root.Velocity = Vector3.zero
+                root.AssemblyLinearVelocity = Vector3.zero
+            end
+        else
+            root.CFrame = targetCF
+            root.Velocity = Vector3.zero
+            root.AssemblyLinearVelocity = Vector3.zero
+        end
+
         task.wait(0.1)
-        yinFirePrompt(prompt)
-        task.wait(0.25)
+
+        pcall(function()
+            prompt.Enabled = true
+            prompt.HoldDuration = 0
+            prompt.MaxActivationDistance = math.huge
+            prompt.RequiresLineOfSight = false
+        end)
+
+        if typeof(fireproximityprompt) == "function" then
+            pcall(fireproximityprompt, prompt)
+        end
+        task.wait(0.05)
+
+        pcall(function()
+            prompt:InputHoldBegin()
+            task.wait(0.05)
+            prompt:InputHoldEnd()
+        end)
+        task.wait(0.2)
     end
 
     if not findRewardPrompt() then
         print("[YIN REWARD] ✅ Reward ke-tangan (final)")
         return true
     end
-
     warn("[YIN REWARD] ❌ Gagal collect reward")
     return false
 end
