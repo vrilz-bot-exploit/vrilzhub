@@ -3234,6 +3234,8 @@ local YinRitualState = {
     RitualCount = 0,
     RewardCount = 0,
     Active = false,
+    _lastRewardTime = 0,     -- ⭐ BARU
+    _collectingReward = false, -- ⭐ BARU
 }
 
 local YinRitualCfg = {
@@ -3779,7 +3781,6 @@ local function yinCollectReward()
 
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum and hum.SeatPart then
-            -- Handle naik pet
             local pet = hum.SeatPart:FindFirstAncestorOfClass("Model")
             if pet then
                 local seat = hum.SeatPart
@@ -3805,7 +3806,7 @@ local function yinCollectReward()
 
         task.wait(0.15)
 
-        -- ⭐ FORCE ENABLE + FIRE
+        -- FORCE ENABLE + FIRE
         pcall(function()
             prompt.Enabled = true
             prompt.HoldDuration = 0
@@ -3826,13 +3827,13 @@ local function yinCollectReward()
         task.wait(0.2)
     end
 
-       -- ⭐ Cek reward udah ke-tangan (bukan cuma prompt)
+    -- Cek reward udah ke-tangan (bukan cuma prompt)
     if not findRewardPrompt() then
         print("[YIN REWARD] ✅ Reward ke-tangan (prompt hilang)")
         return true
     end
 
-    -- ⭐ Cek candy di character
+    -- Cek candy di character
     local char = LocalPlayer.Character
     if char then
         for _, obj in ipairs(char:GetChildren()) do
@@ -3843,7 +3844,7 @@ local function yinCollectReward()
         end
     end
 
-    -- ⭐ Cek candy di backpack
+        -- Cek candy di backpack
     local backpack = LocalPlayer:FindFirstChild("Backpack")
     if backpack then
         for _, obj in ipairs(backpack:GetChildren()) do
@@ -3854,10 +3855,10 @@ local function yinCollectReward()
         end
     end
 
-    -- Kalo masih ada prompt + gak ada candy → beneran gagal
-    warn("[YIN REWARD] ❌ Gagal collect reward (prompt masih ada, candy gak ketemu)")
+    -- ⭐ Kalo masih ada prompt + gak ada candy → beneran gagal
+    warn("[YIN REWARD] ❌ Gagal collect reward")
     return false
-end
+end   -- ⭐ END FUNCTION — INI YANG HILANG
 
 -- ⭐ RETURN KE BASE — MULTI-FALLBACK (Halloween → Plot → Origin)
 local function yinReturnToBase()
@@ -3944,7 +3945,7 @@ local function yinReturnToBase()
     local startPos = root.Position
     local targetPos = base.Position + Vector3.new(0, 5, 0)
     local totalDist = (targetPos - startPos).Magnitude
-    local stepSize = 100
+    local stepSize = 500
     local steps = math.ceil(totalDist / stepSize)
 
     for i = 1, steps do
@@ -4005,29 +4006,39 @@ end
             end
 
             -- ═══════════════════════════════════════════════
-            -- STEP 1: CEK REWARD DULU
-            -- ═══════════════════════════════════════════════
-            if findRewardPrompt() then
-                YinRitualState.Active = true
-                YinRitualState.Status = "🎁 Collecting reward..."
-                task.wait(0.5)
+-- STEP 1: CEK REWARD — TAPI PAKE COOLDOWN BIAR GAK LOOP
+-- ═══════════════════════════════════════════════
+if findRewardPrompt() then
+    -- ⭐ Guard: cek apakah baru aja collect reward
+    local now = os.clock()
+    if YinRitualState._lastRewardTime and (now - YinRitualState._lastRewardTime) < 8 then
+        -- Baru collect < 8 detik lalu, skip
+        YinRitualState.Status = "⏳ Cooldown reward..."
+        task.wait(1)
+        continue
+    end
 
-                local got = yinCollectReward()
+    YinRitualState.Active = true
+    YinRitualState.Status = "🎁 Collecting reward..."
+    task.wait(0.5)
 
-                if got then
-                    YinRitualState.RewardCount = YinRitualState.RewardCount + 1
-                    YinRitualState.RitualCount = YinRitualState.RitualCount + 1
-                    YinRitualState.Status = "✅ Reward #" .. YinRitualState.RewardCount .. " ke-tangan!"
-                    task.wait(0.5)
-                    YinRitualState.Status = "🏠 Returning..."
-                    yinReturnToBase()
-                    task.wait(YinRitualCfg.REWARD_WAIT)
-                else
-                    YinRitualState.Status = "⚠️ Reward retry..."
-                    task.wait(1)
-                end
-                continue
-            end
+    local got = yinCollectReward()
+
+    if got then
+        YinRitualState._lastRewardTime = now   -- ⭐ SET TIME
+        YinRitualState.RewardCount = YinRitualState.RewardCount + 1
+        YinRitualState.RitualCount = YinRitualState.RitualCount + 1
+        YinRitualState.Status = "✅ Reward #" .. YinRitualState.RewardCount .. " ke-tangan!"
+        task.wait(0.5)
+        YinRitualState.Status = "🏠 Returning..."
+        yinReturnToBase()
+        task.wait(YinRitualCfg.REWARD_WAIT)
+    else
+        YinRitualState.Status = "⚠️ Reward retry..."
+        task.wait(1)
+    end
+    continue
+end
 
                         -- ═══════════════════════════════════════════════
             -- STEP 2: PRIORITAS YANG BELUM DI-HANDLE
