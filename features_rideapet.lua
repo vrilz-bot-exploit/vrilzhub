@@ -981,19 +981,25 @@ local AutoRideState = {
     ForceAction = false,        -- ⭐ BARU: trigger langsung eksekusi
 }
 
-local function getPetKG(tool)
-    local num = tool.Name:match("%[([%d,]+)%s*KG%]")
-    if num then
-        local clean = string.gsub(num, ",", "")
-        local kg = tonumber(clean)
-        if kg then return kg end
+-- ⭐ CARI PET DENGAN KG TERTINGGI (gak peduli rarity)
+local function findBestPetForRide()
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    if not backpack then return nil end
+
+    local best, bestKG = nil, -1
+    for _, tool in ipairs(backpack:GetChildren()) do
+        if tool:IsA("Tool") then
+            local kg = getPetKG(tool)
+            -- ⭐ FILTER: cuma skip pet yang KETEBALAN di blacklist (flying)
+            local pname = tool:GetAttribute("PetName") or tool.Name
+            if kg > bestKG and not isFlyingPet(pname) then
+                bestKG = kg
+                best = tool
+            end
+        end
     end
-    local w = tool:GetAttribute("Weight")
-    if w then
-        local n = tonumber(w)
-        if n then return n end
-    end
-    return 0
+
+    return best
 end
 
 local function findBestPetForRide()
