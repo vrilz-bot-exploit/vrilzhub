@@ -3258,19 +3258,31 @@ local function findRitualItem(itemName)
     return nil
 end
 
--- ⭐ CEK PROMPT "PICKUP" REWARD UDAH READY
+-- ⭐ CEK PROMPT REWARD — SESUAI STRUKTUR GAME
+-- Struktur: Runtime.Rewards_<uuid>.Pot1.Pickup [ActionText="Pick Up"]
 local function findRewardPrompt()
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then return nil end
     local rt = hr:FindFirstChild("Runtime")
     if not rt then return nil end
-    for _, obj in ipairs(rt:GetDescendants()) do
-        if obj:IsA("ProximityPrompt")
-           and obj.Enabled
-           and obj.ActionText:lower():find("pick") then
-            return obj
+
+    -- Cari folder Rewards_xxx (prefix "Rewards_")
+    for _, folder in ipairs(rt:GetChildren()) do
+        if folder:IsA("Folder") and folder.Name:lower():find("reward", 1, true) then
+            for _, d in ipairs(folder:GetDescendants()) do
+                if d:IsA("ProximityPrompt") then
+                    local at = (d.ActionText or ""):lower()
+                    local ot = (d.ObjectText or ""):lower()
+                    -- "pick up" / "ritual candy pot"
+                    if at:find("pick", 1, true) or ot:find("candy", 1, true) 
+                       or ot:find("pot", 1, true) or ot:find("ritual", 1, true) then
+                        return d
+                    end
+                end
+            end
         end
     end
+
     return nil
 end
 
@@ -3671,63 +3683,110 @@ local function yinPlace(itemName)
     return false
 end
 
--- ⭐ COLLECT REWARD — TP LANGSUNG + handle naik pet
+-- ⭐ COLLECT REWARD — TP + FIRE, sesuai struktur game
 local function yinCollectReward()
-    local prompt = findRewardPrompt()
-    if not prompt then
-        print("[YIN REWARD] ❌ Prompt reward gak ketemu")
-        return false
+    local hr = Workspace:FindFirstChild("HeadlessRitual")
+    if not hr then 
+        print("[YIN REWARD] HeadlessRitual gak ada")
+        return false 
     end
 
-    -- Cari posisi prompt
-    local pos = nil
-    local p = prompt.Parent
-    while p and not pos do
-        if p:IsA("BasePart") then
-            pos = p.Position
-        elseif p:IsA("Model") then
-            local ok, pivot = pcall(function() return p:GetPivot().Position end)
-            if ok then pos = pivot end
+    -- Cari prompt reward (retry 10x kalo belum spawn)
+    local prompt, pos
+    for try = 1, 10 do
+        prompt = findRewardPrompt()
+        if prompt then
+            local p = prompt.Parent
+            while p and p ~= hr and not pos do
+                if p:IsA("BasePart") then
+                    pos = p.Position
+                elseif p:IsA("Model") then
+                    local ok, pivot = pcall(function() return p:GetPivot().Position end)
+                    if ok then pos = pivot end
+                end
+                p = p.Parent
+            end
+            if pos then break end
         end
-        p = p.Parent
+        task.wait(0.3)
     end
+
+    -- ⭐ FALLBACK: pake RewardPoints folder
     if not pos then
-        print("[YIN REWARD] ❌ Posisi reward gak ketemu")
+        local rp = hr:FindFirstChild("RewardPoints")
+        if rp then
+            for _, d in ipairs(rp:GetChildren()) do
+                if d:IsA("BasePart") then
+                    pos = d.Position
+                    break
+                elseif d:IsA("Attachment") then
+                    pos = d.WorldPosition
+                    break
+                end
+            end
+        end
+    end
+
+    -- ⭐ FALLBACK 2: pake Altar position
+    if not pos then
+        local altar = hr:FindFirstChild("Altar")
+        if altar and altar:IsA("BasePart") then
+            pos = altar.Position + Vector3.new(0, 10, 0)
+        end
+    end
+
+    if not pos then
+        print("[YIN REWARD] ❌ Gak dapet posisi reward")
         return false
     end
 
-    print("[YIN REWARD] 🎯 Reward di:", tostring(pos))
+    print("[YIN REWARD] 📍 Pos:", tostring(pos))
 
-    for attempt = 1, 15 do
+    -- TP + fire loop
+    for attempt = 1, 20 do
         if not YinRitualState.Enabled then return false end
 
-        prompt = findRewardPrompt()
-        if not prompt then
-            print("[YIN REWARD] ✅ Reward ke-tangan! (attempt " .. attempt .. ")")
+        -- Cek masih ada prompt?
+        local curPrompt = findRewardPrompt()
+        if not curPrompt then
+            print("[YIN REWARD] ✅ Reward ke-tangan (attempt " .. attempt .. ")")
             return true
         end
+        prompt = curPrompt
 
-        -- TP LANGSUNG ke reward
+        -- Update posisi dari prompt terkini
+        local p = prompt.Parent
+        while p and p ~= hr and not p:IsA("BasePart") and not p:IsA("Model") do
+            p = p.Parent
+        end
+        if p then
+            if p:IsA("BasePart") then
+                pos = p.Position
+            elseif p:IsA("Model") then
+                local ok, pivot = pcall(function() return p:GetPivot().Position end)
+                if ok then pos = pivot end
+            end
+        end
+
+        -- TP ke reward
         local char = LocalPlayer.Character
         if not char then return false end
         local root = char:FindFirstChild("HumanoidRootPart")
         if not root then return false end
 
-        local targetCF = CFrame.new(pos + Vector3.new(0, 2, 0))
+        local targetCF = CFrame.new(pos + Vector3.new(0, 3, 0))
 
-        -- Handle naik pet
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum and hum.SeatPart then
+            -- Handle naik pet
             local pet = hum.SeatPart:FindFirstAncestorOfClass("Model")
             if pet then
                 local seat = hum.SeatPart
                 local offset = root.CFrame:ToObjectSpace(seat.CFrame)
-
                 root.CFrame = targetCF
                 root.Velocity = Vector3.zero
                 root.AssemblyLinearVelocity = Vector3.zero
                 task.wait(0.05)
-
                 local newSeatCF = targetCF * offset
                 local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
                 local targetPivot = newSeatCF * pivotToSeat:Inverse()
@@ -3743,8 +3802,9 @@ local function yinCollectReward()
             root.AssemblyLinearVelocity = Vector3.zero
         end
 
-        task.wait(0.1)
+        task.wait(0.15)
 
+        -- ⭐ FORCE ENABLE + FIRE
         pcall(function()
             prompt.Enabled = true
             prompt.HoldDuration = 0
@@ -3755,11 +3815,11 @@ local function yinCollectReward()
         if typeof(fireproximityprompt) == "function" then
             pcall(fireproximityprompt, prompt)
         end
-        task.wait(0.05)
+        task.wait(0.1)
 
         pcall(function()
             prompt:InputHoldBegin()
-            task.wait(0.05)
+            task.wait(0.1)
             prompt:InputHoldEnd()
         end)
         task.wait(0.2)
@@ -3769,7 +3829,7 @@ local function yinCollectReward()
         print("[YIN REWARD] ✅ Reward ke-tangan (final)")
         return true
     end
-    warn("[YIN REWARD] ❌ Gagal collect reward")
+    warn("[YIN REWARD] ❌ Gagal collect reward setelah 20 attempt")
     return false
 end
 
