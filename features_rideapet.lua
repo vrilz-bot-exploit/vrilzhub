@@ -981,6 +981,55 @@ local AutoRideState = {
     ForceAction = false,        -- ⭐ BARU: trigger langsung eksekusi
 }
 
+-- ⭐ SAFE getPetKG — handle kalo fungsi asli gak ada
+-- Coba ambil KG dari: attribute → nama tool → StringValue/NumberValue di dalam
+local function getPetKG(tool)
+    if not tool then return 0 end
+
+    -- CARA 1: Attribute (paling reliable)
+    local kg = tool:GetAttribute("KG")
+             or tool:GetAttribute("Weight")
+             or tool:GetAttribute("PetKG")
+             or tool:GetAttribute("Mass")
+    if kg and type(kg) == "number" then return kg end
+
+    -- CARA 2: Dari nama tool — format "PetName_123KG" atau "PetName 123"
+    local name = tostring(tool.Name)
+    local num = name:match("(%d+%.?%d*)%s*[Kk][Gg]")   -- "123KG"
+             or name:match("[Kk][Gg]%s*(%d+%.?%d*)")   -- "KG123"
+             or name:match("_(%d+%.?%d*)$")            -- "_123" di akhir
+    if num then
+        local n = tonumber(num)
+        if n then return n end
+    end
+
+    -- CARA 3: Cari StringValue/NumberValue di dalam tool
+    for _, c in ipairs(tool:GetDescendants()) do
+        if c:IsA("NumberValue") then
+            local n = c.Name:lower()
+            if n:find("kg") or n:find("weight") or n:find("mass") then
+                return c.Value
+            end
+        elseif c:IsA("StringValue") then
+            local n = c.Name:lower()
+            if n:find("kg") or n:find("weight") or n:find("mass") then
+                local v = tonumber(c.Value)
+                if v then return v end
+            end
+        elseif c:IsA("TextLabel") or c:IsA("TextButton") then
+            -- Kadang KG ada di UI text
+            local t = c.Text
+            local m = t and t:match("(%d+%.?%d*)%s*[Kk][Gg]")
+            if m then
+                local v = tonumber(m)
+                if v then return v end
+            end
+        end
+    end
+
+    return 0
+end
+
 -- ⭐ CARI PET DENGAN KG TERTINGGI (gak peduli rarity)
 local function findBestPetForRide()
     local backpack = LocalPlayer:FindFirstChild("Backpack")
@@ -989,30 +1038,12 @@ local function findBestPetForRide()
     local best, bestKG = nil, -1
     for _, tool in ipairs(backpack:GetChildren()) do
         if tool:IsA("Tool") then
-            local kg = getPetKG(tool)
-            -- ⭐ FILTER: cuma skip pet yang KETEBALAN di blacklist (flying)
+            -- ⭐ FLEKSIBEL: pake PetName kalo ada, fallback ke Name
             local pname = tool:GetAttribute("PetName") or tool.Name
-            if kg > bestKG and not isFlyingPet(pname) then
-                bestKG = kg
-                best = tool
-            end
-        end
-    end
 
-    return best
-end
-
-local function findBestPetForRide()
-    local backpack = LocalPlayer:FindFirstChild("Backpack")
-    if not backpack then return nil end
-
-    local best, bestKG = nil, -1
-    for _, tool in ipairs(backpack:GetChildren()) do
-        if tool:IsA("Tool") then
-            local key = tool:GetAttribute("PetKey")
-            local pname = tool:GetAttribute("PetName")
-            if key and pname and not isFlyingPet(pname) then  -- ← FILTER
-                local kg = getPetKG(tool)
+            -- ⭐ Skip flying pet
+            if not isFlyingPet(pname) then
+                local kg = getPetKG(tool) or 0   -- ⭐ guard nil
                 if kg > bestKG then
                     bestKG = kg
                     best = tool
@@ -1020,6 +1051,7 @@ local function findBestPetForRide()
             end
         end
     end
+
     return best
 end
 
@@ -1119,27 +1151,26 @@ function Features.startAutoRidePet()
             -- ═══════════════════════════════════════════════════════
             local best
 
-            if AutoRideState.SelectedPet and AutoRideState.SelectedPet ~= "Auto (Best KG)" then
-                if not isFlyingPet(AutoRideState.SelectedPet) then
-                    local backpack = LocalPlayer:FindFirstChild("Backpack")
-                    local bestKG = -1
-                    if backpack then
-                        for _, tool in ipairs(backpack:GetChildren()) do
-                            if tool:IsA("Tool") then
-                                local pname = tool:GetAttribute("PetName")
-                                if pname == AutoRideState.SelectedPet then
-                                    local kg = getPetKG(tool)
-                                    if kg > bestKG then
-                                        bestKG = kg
-                                        best = tool
-                                    end
-                                end
-                            end
+           if AutoRideState.SelectedPet and AutoRideState.SelectedPet ~= "Auto (Best KG)" then
+    if not isFlyingPet(AutoRideState.SelectedPet) then
+        local backpack = LocalPlayer:FindFirstChild("Backpack")
+        local bestKG = -1
+        if backpack then
+            for _, tool in ipairs(backpack:GetChildren()) do
+                if tool:IsA("Tool") then
+                    local pname = tool:GetAttribute("PetName") or tool.Name   -- ⭐ FIX
+                    if pname == AutoRideState.SelectedPet then
+                        local kg = getPetKG(tool) or 0                        -- ⭐ FIX
+                        if kg > bestKG then
+                            bestKG = kg
+                            best = tool
                         end
                     end
                 end
             end
-
+        end
+    end
+end
             if not best then
                 best = findBestPetForRide()
             end
@@ -1239,9 +1270,10 @@ function Features.getPetListForDropdown()
     local map = {}
     for _, tool in ipairs(backpack:GetChildren()) do
         if tool:IsA("Tool") then
-            local pname = tool:GetAttribute("PetName")
+            -- ⭐ FLEKSIBEL: fallback ke tool.Name
+            local pname = tool:GetAttribute("PetName") or tool.Name
             if pname and not isFlyingPet(pname) then
-                local kg = getPetKG(tool)
+                local kg = getPetKG(tool) or 0   -- ⭐ guard nil
                 if not map[pname] then
                     map[pname] = { name = pname, kg = kg, tool = tool, count = 0 }
                 end
