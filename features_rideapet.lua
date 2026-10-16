@@ -4208,10 +4208,41 @@ local function yinCollectReward()
         task.wait(0.2)
     end
 
-    -- Cek reward udah ke-tangan (bukan cuma prompt)
+        -- Cek reward udah ke-tangan (bukan cuma prompt)
     if not findRewardPrompt() then
         print("[YIN REWARD] ✅ Reward ke-tangan (prompt hilang)")
         return true
+    end
+
+    -- ⭐ Extra: cek apakah reward ada di backpack / character
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    if backpack then
+        for _, obj in ipairs(backpack:GetChildren()) do
+            if (obj:IsA("Tool") or obj:IsA("Model")) and obj.Name:lower():find("candy") then
+                print("[YIN REWARD] ✅ Reward ada di backpack")
+                return true
+            end
+        end
+    end
+
+    -- ⭐ Extra: cek kalo reward prompt di Destroy (bukan cuma disable)
+    local hr2 = Workspace:FindFirstChild("HeadlessRitual")
+    if hr2 then
+        local rt2 = hr2:FindFirstChild("Runtime")
+        if rt2 then
+            -- Kalo gak ada folder Rewards_xxx → udah di-ambil
+            local hasRewardFolder = false
+            for _, f in ipairs(rt2:GetChildren()) do
+                if f:IsA("Folder") and f.Name:lower():find("reward", 1, true) then
+                    hasRewardFolder = true
+                    break
+                end
+            end
+            if not hasRewardFolder then
+                print("[YIN REWARD] ✅ Gak ada reward folder → reward ke-ambil")
+                return true
+            end
+        end
     end
 
     -- Cek candy di character
@@ -4355,7 +4386,17 @@ function Features.startAutoYinRitual()
                 YinRitualState.Active = false
                 continue
             end
+-- ⭐ Global cooldown reward — skip semua kalo baru collect reward
+local _now = os.clock()
+if YinRitualState._lastRewardTime and (_now - YinRitualState._lastRewardTime) < 20 then
+    YinRitualState.Status = "⏳ Reward cooldown... (" .. 
+        math.floor(20 - (_now - YinRitualState._lastRewardTime)) .. "s)"
+    YinRitualState.Active = false
+    task.wait(1)
+    continue
+end
 
+            
             -- Priority check
             if Shared.AutoMutation_Enabled then
                 local ms = Features.getMutationState and Features.getMutationState()
@@ -4392,9 +4433,10 @@ end
 if findRewardPrompt() then
     -- ⭐ Guard: cek apakah baru aja collect reward
     local now = os.clock()
-    if YinRitualState._lastRewardTime and (now - YinRitualState._lastRewardTime) < 8 then
-        -- Baru collect < 8 detik lalu, skip
-        YinRitualState.Status = "⏳ Cooldown reward..."
+    if YinRitualState._lastRewardTime and (now - YinRitualState._lastRewardTime) < 20 then
+        -- ⬆️ dari 8 → 20 detik
+        YinRitualState.Status = "⏳ Cooldown reward... (" .. 
+            math.floor(20 - (now - YinRitualState._lastRewardTime)) .. "s)"
         task.wait(1)
         continue
     end
@@ -4406,19 +4448,23 @@ if findRewardPrompt() then
     local got = yinCollectReward()
 
     if got then
-        YinRitualState._lastRewardTime = now   -- ⭐ SET TIME
-        YinRitualState.RewardCount = YinRitualState.RewardCount + 1
-        YinRitualState.RitualCount = YinRitualState.RitualCount + 1
-        YinRitualState.Status = "✅ Reward #" .. YinRitualState.RewardCount .. " ke-tangan!"
-        task.wait(0.5)
-        YinRitualState.Status = "🏠 Returning..."
-        yinReturnToBase()
-        task.wait(YinRitualCfg.REWARD_WAIT)
-    else
-        YinRitualState.Status = "⚠️ Reward retry..."
-        task.wait(1)
-    end
-    continue
+    YinRitualState._lastRewardTime = os.clock()   -- ⭐ Update time
+    YinRitualState.RewardCount = YinRitualState.RewardCount + 1
+    YinRitualState.RitualCount = YinRitualState.RitualCount + 1
+    YinRitualState.Status = "✅ Reward #" .. YinRitualState.RewardCount .. " ke-tangan!"
+    task.wait(0.5)
+    YinRitualState.Status = "🏠 Returning to base..."
+    yinReturnToBase()
+    task.wait(2)   -- ⬆️ extra wait biar prompt ilang dari server
+
+    -- ⭐ Update time LAGI (biar cooldown fresh dari pas balik ke base)
+    YinRitualState._lastRewardTime = os.clock()
+    YinRitualState.Status = "⏳ Cooldown 20s..."
+else
+    YinRitualState.Status = "⚠️ Reward retry..."
+    task.wait(1)
+end
+continue
 end
 
                         -- ═══════════════════════════════════════════════
