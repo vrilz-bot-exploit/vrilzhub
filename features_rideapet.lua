@@ -3015,10 +3015,11 @@ end
 function Features.startAutoHalloween()
     task.spawn(function()
         while task.wait(HalloweenCfg.LOOP_WAIT) do
-            if not HalloweenState.Enabled then
-                HalloweenState.Status = "⏸️ Idle"
-                continue
-            end
+           if not HalloweenState.Enabled then
+    HalloweenState.Status = "⏸️ Idle"
+    _G.VRILZ_HalloweenBusy = false   -- ⭐ FIX: reset flag pas OFF
+    continue
+end
 
                         -- ⭐ PRIORITY 1: Auto Mutation — paling utama
 if Shared.AutoMutation_Enabled then
@@ -3905,11 +3906,13 @@ function Features.startAutoYinRitual()
                     continue
                 end
             end
-            if _G.VRILZ_HalloweenBusy then
-                YinRitualState.Status = "⏸️ Waiting Auto Halloween..."
-                YinRitualState.Active = false
-                continue
-            end
+            -- ⭐ FIX: cek HalloweenState.Enabled DULU, baru flag
+local hs = Features.getHalloweenState and Features.getHalloweenState()
+if hs and hs.Enabled and _G.VRILZ_HalloweenBusy then
+    YinRitualState.Status = "⏸️ Waiting Auto Halloween..."
+    YinRitualState.Active = false
+    continue
+end
             if Shared.MutationSteal_Active and Shared.MutationSteal_Enabled then
                 YinRitualState.Status = "⏳ Waiting Mutation Steal..."
                 YinRitualState.Active = false
