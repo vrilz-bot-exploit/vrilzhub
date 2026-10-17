@@ -4833,11 +4833,31 @@ end)
         end
     end)
 
+       -- ═══════════════════════════════════════════
+    -- CUSTOM TITLE INPUT — AUTO REFRESH
     -- ═══════════════════════════════════════════
-    -- CUSTOM TITLE INPUT (OWNER + PREMIUM)
-    -- ═══════════════════════════════════════════
-    local canCustom = false
-    pcall(function()
+    local customTitleHolder = Instance.new("Frame")
+    customTitleHolder.Name = "CustomTitleHolder"
+    customTitleHolder.Size = UDim2.new(1, 0, 0, 0)
+    customTitleHolder.AutomaticSize = Enum.AutomaticSize.Y
+    customTitleHolder.BackgroundTransparency = 1
+    customTitleHolder.ZIndex = 3
+    customTitleHolder.Parent = titleContent
+
+    local customTitleLayout = Instance.new("UIListLayout")
+    customTitleLayout.Padding = UDim.new(0, CFG.CARD_GAP)
+    customTitleLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    customTitleLayout.Parent = customTitleHolder
+
+    local function rebuildCustomTitleUI()
+        -- Destroy children existing (kecuali layout)
+        for _, c in ipairs(customTitleHolder:GetChildren()) do
+            if not c:IsA("UIListLayout") then
+                c:Destroy()
+            end
+        end
+
+        local canCustom = false
         if LocalPlayer.UserId == OWNER_USERID then
             canCustom = true
         elseif Shared and Shared.KeyType then
@@ -4846,263 +4866,222 @@ end)
                 canCustom = true
             end
         end
-    end)
 
-    if canCustom then
-        -- Label
-        local customLbl = Instance.new("TextLabel")
-        customLbl.Size = UDim2.new(1, 0, 0, 16)
-        customLbl.BackgroundTransparency = 1
-        customLbl.Text = "Custom Title (auto UPPERCASE, max 15):"
-        customLbl.TextColor3 = C.Accent
-        customLbl.Font = Enum.Font.GothamBold
-        customLbl.TextSize = CFG.FONT_MUTED
-        customLbl.TextXAlignment = Enum.TextXAlignment.Left
-        customLbl.ZIndex = 3
-        customLbl.Parent = titleContent
-        registerTheme(customLbl, "Accent", "TextColor3")
+        if canCustom then
+            -- ═══ UNLOCKED ═══
+            local customLbl = Instance.new("TextLabel")
+            customLbl.Size = UDim2.new(1, 0, 0, 16)
+            customLbl.BackgroundTransparency = 1
+            customLbl.Text = "Custom Title (auto UPPERCASE, max 15):"
+            customLbl.TextColor3 = C.Accent
+            customLbl.Font = Enum.Font.GothamBold
+            customLbl.TextSize = CFG.FONT_MUTED
+            customLbl.TextXAlignment = Enum.TextXAlignment.Left
+            customLbl.ZIndex = 3
+            customLbl.LayoutOrder = 1
+            customLbl.Parent = customTitleHolder
 
-        -- Input box
-        local customBox = Instance.new("TextBox")
-        customBox.Size = UDim2.new(1, 0, 0, 34)
-        customBox.BackgroundColor3 = C.Surface3
-        customBox.BorderSizePixel = 0
-        customBox.Text = _G.VRILZ_CustomTitle or ""
-        customBox.PlaceholderText = "Enter Text"
-        customBox.PlaceholderColor3 = C.Muted
-        customBox.TextColor3 = C.Text
-        customBox.Font = Enum.Font.GothamBold
-        customBox.TextSize = CFG.FONT_LABEL
-        customBox.TextXAlignment = Enum.TextXAlignment.Center
-        customBox.ClearTextOnFocus = false
-        customBox.ZIndex = 3
-        customBox.Parent = titleContent
-        registerTheme(customBox, "Surface3", "BackgroundColor3")
-        registerTheme(customBox, "Text", "TextColor3")
+            local customBox = Instance.new("TextBox")
+            customBox.Size = UDim2.new(1, 0, 0, 34)
+            customBox.BackgroundColor3 = C.Surface3
+            customBox.BorderSizePixel = 0
+            customBox.Text = _G.VRILZ_CustomTitle or ""
+            customBox.PlaceholderText = "Enter Text"
+            customBox.PlaceholderColor3 = C.Muted
+            customBox.TextColor3 = C.Text
+            customBox.Font = Enum.Font.GothamBold
+            customBox.TextSize = CFG.FONT_LABEL
+            customBox.TextXAlignment = Enum.TextXAlignment.Center
+            customBox.ClearTextOnFocus = false
+            customBox.ZIndex = 3
+            customBox.LayoutOrder = 2
+            customBox.Parent = customTitleHolder
 
-        local cbCorner = Instance.new("UICorner")
-        cbCorner.CornerRadius = UDim.new(0, 8)
-        cbCorner.Parent = customBox
+            local cbCorner = Instance.new("UICorner")
+            cbCorner.CornerRadius = UDim.new(0, 8)
+            cbCorner.Parent = customBox
 
-        local cbStroke = Instance.new("UIStroke")
-        cbStroke.Color = C.Accent
-        cbStroke.Thickness = 1.5
-        cbStroke.Transparency = 0.3
-        cbStroke.Parent = customBox
-        registerTheme(cbStroke, "Accent", "Color")
+            local cbStroke = Instance.new("UIStroke")
+            cbStroke.Color = C.Accent
+            cbStroke.Thickness = 1.5
+            cbStroke.Transparency = 0.3
+            cbStroke.Parent = customBox
 
-        -- ═══ AUTO UPPERCASE + MAX 15 LIVE ═══
-        customBox:GetPropertyChangedSignal("Text"):Connect(function()
-            local current = customBox.Text
-            local upper = current:upper()
-            if #upper > 15 then
-                upper = upper:sub(1, 15)
-            end
-            upper = upper:gsub("[^%w%s]", "")
-            if current ~= upper then
-                local cursorPos = customBox.CursorPosition
-                customBox.Text = upper
-                customBox.CursorPosition = math.min(cursorPos, #upper + 1)
-            end
-        end)
+            customBox:GetPropertyChangedSignal("Text"):Connect(function()
+                local current = customBox.Text
+                local upper = current:upper()
+                if #upper > 15 then upper = upper:sub(1, 15) end
+                upper = upper:gsub("[^%w%s]", "")
+                if current ~= upper then
+                    local cursorPos = customBox.CursorPosition
+                    customBox.Text = upper
+                    customBox.CursorPosition = math.min(cursorPos, #upper + 1)
+                end
+            end)
 
-        -- Tombol row
-        local btnRow = Instance.new("Frame")
-        btnRow.Size = UDim2.new(1, 0, 0, 32)
-        btnRow.BackgroundTransparency = 1
-        btnRow.ZIndex = 3
-        btnRow.Parent = titleContent
+            local btnRow = Instance.new("Frame")
+            btnRow.Size = UDim2.new(1, 0, 0, 32)
+            btnRow.BackgroundTransparency = 1
+            btnRow.ZIndex = 3
+            btnRow.LayoutOrder = 3
+            btnRow.Parent = customTitleHolder
 
-        -- SAVE
-        local saveBtn = Instance.new("TextButton")
-        saveBtn.Size = UDim2.new(0.48, 0, 1, 0)
-        saveBtn.Position = UDim2.new(0, 0, 0, 0)
-        saveBtn.BackgroundColor3 = C.Success
-        saveBtn.Text = "💾 SAVE"
-        saveBtn.TextColor3 = Color3.new(1, 1, 1)
-        saveBtn.Font = Enum.Font.GothamBold
-        saveBtn.TextSize = CFG.FONT_LABEL
-        saveBtn.BorderSizePixel = 0
-        saveBtn.ZIndex = 4
-        saveBtn.Parent = btnRow
-        registerTheme(saveBtn, "Success", "BackgroundColor3")
+            local saveBtn = Instance.new("TextButton")
+            saveBtn.Size = UDim2.new(0.48, 0, 1, 0)
+            saveBtn.Position = UDim2.new(0, 0, 0, 0)
+            saveBtn.BackgroundColor3 = C.Success
+            saveBtn.Text = "💾 SAVE"
+            saveBtn.TextColor3 = Color3.new(1, 1, 1)
+            saveBtn.Font = Enum.Font.GothamBold
+            saveBtn.TextSize = CFG.FONT_LABEL
+            saveBtn.BorderSizePixel = 0
+            saveBtn.ZIndex = 4
+            saveBtn.Parent = btnRow
 
-        local sbCorner = Instance.new("UICorner")
-        sbCorner.CornerRadius = UDim.new(0, 8)
-        sbCorner.Parent = saveBtn
+            local sbCorner = Instance.new("UICorner")
+            sbCorner.CornerRadius = UDim.new(0, 8)
+            sbCorner.Parent = saveBtn
 
-        -- CLEAR
-        local clearBtn = Instance.new("TextButton")
-        clearBtn.Size = UDim2.new(0.48, 0, 1, 0)
-        clearBtn.Position = UDim2.new(0.52, 0, 0, 0)
-        clearBtn.BackgroundColor3 = C.Error
-        clearBtn.Text = "🗑 CLEAR"
-        clearBtn.TextColor3 = Color3.new(1, 1, 1)
-        clearBtn.Font = Enum.Font.GothamBold
-        clearBtn.TextSize = CFG.FONT_LABEL
-        clearBtn.BorderSizePixel = 0
-        clearBtn.ZIndex = 4
-        clearBtn.Parent = btnRow
-        registerTheme(clearBtn, "Error", "BackgroundColor3")
+            local clearBtn = Instance.new("TextButton")
+            clearBtn.Size = UDim2.new(0.48, 0, 1, 0)
+            clearBtn.Position = UDim2.new(0.52, 0, 0, 0)
+            clearBtn.BackgroundColor3 = C.Error
+            clearBtn.Text = "🗑 CLEAR"
+            clearBtn.TextColor3 = Color3.new(1, 1, 1)
+            clearBtn.Font = Enum.Font.GothamBold
+            clearBtn.TextSize = CFG.FONT_LABEL
+            clearBtn.BorderSizePixel = 0
+            clearBtn.ZIndex = 4
+            clearBtn.Parent = btnRow
 
-        local clbCorner = Instance.new("UICorner")
-        clbCorner.CornerRadius = UDim.new(0, 8)
-        clbCorner.Parent = clearBtn
+            local clbCorner = Instance.new("UICorner")
+            clbCorner.CornerRadius = UDim.new(0, 8)
+            clbCorner.Parent = clearBtn
 
-                -- ═══════════════════════════════════════════
-        -- SAVE HANDLER — SAVE SEKALI, LANGSUNG PERMANEN
-        -- ═══════════════════════════════════════════
-        local isSaved = false  -- state: udah saved atau belum
-        
-        -- Cek apakah title skrg udah ke-save
-        if _G.VRILZ_CustomTitle and _G.VRILZ_CustomTitle == customBox.Text then
-            isSaved = true
-            saveBtn.Text = "✅ SAVED"
-            saveBtn.BackgroundColor3 = C.Muted
-        end
-
-        local function updateSaveButton()
-            if isSaved then
+            local isSaved = false
+            if _G.VRILZ_CustomTitle and _G.VRILZ_CustomTitle == customBox.Text then
+                isSaved = true
                 saveBtn.Text = "✅ SAVED"
                 saveBtn.BackgroundColor3 = C.Muted
-            else
-                saveBtn.Text = "💾 SAVE"
-                saveBtn.BackgroundColor3 = C.Success
             end
-        end
 
-        -- Kalo user edit lagi, SAVE balik aktif
-        customBox:GetPropertyChangedSignal("Text"):Connect(function()
-            if isSaved and customBox.Text ~= _G.VRILZ_CustomTitle then
+            local function updateSaveButton()
+                if isSaved then
+                    saveBtn.Text = "✅ SAVED"
+                    saveBtn.BackgroundColor3 = C.Muted
+                else
+                    saveBtn.Text = "💾 SAVE"
+                    saveBtn.BackgroundColor3 = C.Success
+                end
+            end
+
+            customBox:GetPropertyChangedSignal("Text"):Connect(function()
+                if isSaved and customBox.Text ~= _G.VRILZ_CustomTitle then
+                    isSaved = false
+                    updateSaveButton()
+                end
+            end)
+
+            saveBtn.MouseButton1Click:Connect(function()
+                if isSaved then
+                    notify("ℹ️ Title already saved", "info")
+                    return
+                end
+                local txt = customBox.Text:gsub("^%s+", ""):gsub("%s+$", "")
+                if txt == "" then
+                    notify("❌ Title is empty!", "error")
+                    return
+                end
+                txt = txt:upper()
+                if #txt > 15 then
+                    txt = txt:sub(1, 15)
+                    notify("⚠️ Trimmed to 15 chars: " .. txt, "warning")
+                end
+                txt = txt:gsub("[^%w%s]", "")
+                if txt == "" then
+                    notify("❌ Only letters & numbers!", "error")
+                    return
+                end
+                customBox.Text = txt
+                _G.VRILZ_CustomTitle = txt
+                saveCustomTitle(txt)
+                isSaved = true
+                updateSaveButton()
+                notify("✅ Saved: " .. txt .. " (" .. #txt .. "/15) — permanent!", "success")
+                if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
+            end)
+
+            clearBtn.MouseButton1Click:Connect(function()
+                customBox.Text = ""
+                clearCustomTitle()
                 isSaved = false
                 updateSaveButton()
-            end
-        end)
+                notify("🗑 Title reset — you can SAVE again", "info")
+                if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
+            end)
 
-                -- SAVE
-        saveBtn.MouseButton1Click:Connect(function()
-            -- Kalo udah saved, gak perlu save lagi
-            if isSaved then
-                notify("ℹ️ Title already saved", "info")
-                return
-            end
-            
-            local txt = customBox.Text:gsub("^%s+", ""):gsub("%s+$", "")
-            if txt == "" then
-                notify("❌ Title is empty!", "error")
-                return
-            end
-            txt = txt:upper()
-            if #txt > 15 then
-                txt = txt:sub(1, 15)
-                notify("⚠️ Trimmed to 15 chars: " .. txt, "warning")
-            end
-                        txt = txt:gsub("[^%w%s]", "")
-            if txt == "" then
-                notify("❌ Only letters & numbers!", "error")
-                return
-            end
-            
-            -- Update box
-            customBox.Text = txt
-            
-            -- SAVE PERMANEN — sekali aja
-            _G.VRILZ_CustomTitle = txt
-            saveCustomTitle(txt)
-            
-            -- Set state
-            isSaved = true
-            updateSaveButton()
-            
-            notify("✅ Saved: " .. txt .. " (" .. #txt .. "/15) — permanent!", "success")
-            
-            -- Refresh title di atas karakter
-            if _G.VRILZ_RefreshTitle then
-                _G.VRILZ_RefreshTitle()
-            end
-        end)
+        else
+            -- ═══ LOCKED ═══
+            local lockedFrame = Instance.new("Frame")
+            lockedFrame.Size = UDim2.new(1, 0, 0, 52)
+            lockedFrame.BackgroundColor3 = C.Surface3
+            lockedFrame.BackgroundTransparency = 0.5
+            lockedFrame.BorderSizePixel = 0
+            lockedFrame.ZIndex = 3
+            lockedFrame.LayoutOrder = 1
+            lockedFrame.Parent = customTitleHolder
 
-                -- ═══════════════════════════════════════════
-        -- CLEAR HANDLER — RESET, ABIS ITU BISA SAVE LAGI
-        -- ═══════════════════════════════════════════
-                clearBtn.MouseButton1Click:Connect(function()
-            customBox.Text = ""
-            clearCustomTitle()
-            
-            -- Reset state — SAVE balik aktif
-            isSaved = false
-            updateSaveButton()
-            
-            notify("🗑 Title reset — you can SAVE again", "info")
-            
-            -- Refresh title di atas karakter
-            if _G.VRILZ_RefreshTitle then
-                _G.VRILZ_RefreshTitle()
-            end
-        end)
-    else
-                -- ═══════════════════════════════════════════
-        -- REGULAR USER — CUSTOM TITLE LOCKED
-        -- ═══════════════════════════════════════════
-        local lockedFrame = Instance.new("Frame")
-        lockedFrame.Size = UDim2.new(1, 0, 0, 52)
-        lockedFrame.BackgroundColor3 = C.Surface3
-        lockedFrame.BackgroundTransparency = 0.5
-        lockedFrame.BorderSizePixel = 0
-        lockedFrame.ZIndex = 3
-        lockedFrame.Parent = titleContent
-        registerTheme(lockedFrame, "Surface3", "BackgroundColor3")
+            local lockedCorner = Instance.new("UICorner")
+            lockedCorner.CornerRadius = UDim.new(0, 8)
+            lockedCorner.Parent = lockedFrame
 
-        local lockedCorner = Instance.new("UICorner")
-        lockedCorner.CornerRadius = UDim.new(0, 8)
-        lockedCorner.Parent = lockedFrame
+            local lockedStroke = Instance.new("UIStroke")
+            lockedStroke.Color = C.Muted
+            lockedStroke.Thickness = 1
+            lockedStroke.Transparency = 0.6
+            lockedStroke.Parent = lockedFrame
 
-        local lockedStroke = Instance.new("UIStroke")
-        lockedStroke.Color = C.Muted
-        lockedStroke.Thickness = 1
-        lockedStroke.Transparency = 0.6
-        lockedStroke.Parent = lockedFrame
+            local lockIcon = Instance.new("TextLabel")
+            lockIcon.Size = UDim2.fromOffset(28, 28)
+            lockIcon.Position = UDim2.fromOffset(10, 12)
+            lockIcon.BackgroundTransparency = 1
+            lockIcon.Text = "🔒"
+            lockIcon.TextColor3 = C.Muted
+            lockIcon.Font = Enum.Font.GothamBold
+            lockIcon.TextSize = 18
+            lockIcon.ZIndex = 4
+            lockIcon.Parent = lockedFrame
 
-        local lockIcon = Instance.new("TextLabel")
-        lockIcon.Size = UDim2.fromOffset(28, 28)
-        lockIcon.Position = UDim2.fromOffset(10, 12)
-        lockIcon.BackgroundTransparency = 1
-        lockIcon.Text = "🔒"
-        lockIcon.TextColor3 = C.Muted
-        lockIcon.Font = Enum.Font.GothamBold
-        lockIcon.TextSize = 18
-        lockIcon.ZIndex = 4
-        lockIcon.Parent = lockedFrame
-        registerTheme(lockIcon, "Muted", "TextColor3")
+            local lockTitle = Instance.new("TextLabel")
+            lockTitle.Size = UDim2.new(1, -50, 0, 16)
+            lockTitle.Position = UDim2.fromOffset(42, 9)
+            lockTitle.BackgroundTransparency = 1
+            lockTitle.Text = "CUSTOM TITLE LOCKED"
+            lockTitle.TextColor3 = C.Muted
+            lockTitle.Font = Enum.Font.GothamBold
+            lockTitle.TextSize = CFG.FONT_MUTED
+            lockTitle.TextXAlignment = Enum.TextXAlignment.Left
+            lockTitle.ZIndex = 4
+            lockTitle.Parent = lockedFrame
 
-        local lockTitle = Instance.new("TextLabel")
-        lockTitle.Size = UDim2.new(1, -50, 0, 16)
-        lockTitle.Position = UDim2.fromOffset(42, 9)
-        lockTitle.BackgroundTransparency = 1
-        lockTitle.Text = "CUSTOM TITLE LOCKED"
-        lockTitle.TextColor3 = C.Muted
-        lockTitle.Font = Enum.Font.GothamBold
-        lockTitle.TextSize = CFG.FONT_MUTED
-        lockTitle.TextXAlignment = Enum.TextXAlignment.Left
-        lockTitle.ZIndex = 4
-        lockTitle.Parent = lockedFrame
-        registerTheme(lockTitle, "Muted", "TextColor3")
+            local lockDesc = Instance.new("TextLabel")
+            lockDesc.Size = UDim2.new(1, -50, 0, 22)
+            lockDesc.Position = UDim2.fromOffset(42, 25)
+            lockDesc.BackgroundTransparency = 1
+            lockDesc.Text = "This feature is exclusive to\nPremium keys only."
+            lockDesc.TextColor3 = C.Muted
+            lockDesc.Font = Enum.Font.GothamSemibold
+            lockDesc.TextSize = CFG.FONT_MUTED
+            lockDesc.TextWrapped = true
+            lockDesc.TextXAlignment = Enum.TextXAlignment.Left
+            lockDesc.TextYAlignment = Enum.TextYAlignment.Top
+            lockDesc.ZIndex = 4
+            lockDesc.Parent = lockedFrame
+        end
+    end
 
-        local lockDesc = Instance.new("TextLabel")
-        lockDesc.Size = UDim2.new(1, -50, 0, 22)
-        lockDesc.Position = UDim2.fromOffset(42, 25)
-        lockDesc.BackgroundTransparency = 1
-        lockDesc.Text = "This feature is exclusive to\nPremium keys only."
-        lockDesc.TextColor3 = C.Muted
-        lockDesc.Font = Enum.Font.GothamSemibold
-        lockDesc.TextSize = CFG.FONT_MUTED
-        lockDesc.TextWrapped = true
-        lockDesc.TextXAlignment = Enum.TextXAlignment.Left
-        lockDesc.TextYAlignment = Enum.TextYAlignment.Top
-        lockDesc.ZIndex = 4
-        lockDesc.Parent = lockedFrame
-        registerTheme(lockDesc, "Muted", "TextColor3")
-    end   -- ← INI PENUTUP `if canCustom then`
+    rebuildCustomTitleUI()
+    _G.VRILZ_RebuildCustomTitle = rebuildCustomTitleUI
 
     -- ===== STEAL MODE (BARU) =====
     local stealModeCard, stealModeContent = makeCard(setPage, "STEAL MODE", 2)
@@ -5404,61 +5383,72 @@ returnModeHolder.LayoutOrder = 6
 returnModeHolder.ZIndex = 3
 returnModeHolder.Parent = mutContent
 
--- Cek apakah user premium
-local isPremUser = false
-pcall(function()
-    if LocalPlayer.UserId == OWNER_USERID then
-        isPremUser = true
-    elseif Shared and Shared.KeyType then
-        local kt = tostring(Shared.KeyType):upper()
-        if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
+    -- ═══════════════════════════════════════════
+    -- RETURN MODE — AUTO REFRESH
+    -- ═══════════════════════════════════════════
+    local returnModeInner = Instance.new("Frame")
+    returnModeInner.Size = UDim2.new(1, 0, 1, 0)
+    returnModeInner.BackgroundTransparency = 1
+    returnModeInner.ZIndex = 3
+    returnModeInner.Parent = returnModeHolder
+
+    local function rebuildReturnModeUI()
+        for _, c in ipairs(returnModeInner:GetChildren()) do
+            c:Destroy()
+        end
+
+        local isPremUser = false
+        if LocalPlayer.UserId == OWNER_USERID then
             isPremUser = true
+        elseif Shared and Shared.KeyType then
+            local kt = tostring(Shared.KeyType):upper()
+            if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
+                isPremUser = true
+            end
+        end
+
+        if isPremUser then
+            makeDropdownGlobal(returnModeInner, {"Step", "Instant"}, Shared.ReturnMode or "Step", function(v)
+                Shared.ReturnMode = v
+                if v == "Instant" then
+                    notify("⚡ Return: INSTANT", "success")
+                else
+                    notify("🚶 Return: Step", "info")
+                end
+            end)
+        else
+            local lockedFrame = Instance.new("Frame")
+            lockedFrame.Size = UDim2.new(1, 0, 1, 0)
+            lockedFrame.BackgroundColor3 = C.Surface3
+            lockedFrame.BackgroundTransparency = 0.5
+            lockedFrame.BorderSizePixel = 0
+            lockedFrame.Parent = returnModeInner
+
+            local lkCorner = Instance.new("UICorner")
+            lkCorner.CornerRadius = UDim.new(0, 9)
+            lkCorner.Parent = lockedFrame
+
+            local lkStroke = Instance.new("UIStroke")
+            lkStroke.Color = C.Muted
+            lkStroke.Thickness = 1
+            lkStroke.Transparency = 0.6
+            lkStroke.Parent = lockedFrame
+
+            local lkLbl = Instance.new("TextLabel")
+            lkLbl.Size = UDim2.new(1, -20, 1, 0)
+            lkLbl.Position = UDim2.fromOffset(12, 0)
+            lkLbl.BackgroundTransparency = 1
+            lkLbl.Text = "🔒 Instant (Premium only)"
+            lkLbl.TextColor3 = C.Muted
+            lkLbl.Font = Enum.Font.GothamSemibold
+            lkLbl.TextSize = CFG.FONT_LABEL
+            lkLbl.TextXAlignment = Enum.TextXAlignment.Left
+            lkLbl.Parent = lockedFrame
         end
     end
-end)
 
-if isPremUser then
-    -- Premium: bisa pilih Step / Instant
-    makeDropdownGlobal(returnModeHolder, {"Step", "Instant"}, Shared.ReturnMode or "Step", function(v)
-        Shared.ReturnMode = v
-        if v == "Instant" then
-            notify("⚡ Return: INSTANT", "success")
-        else
-            notify("🚶 Return: Step", "info")
-        end
-    end)
-else
-    -- Free: locked (gaya sama kaya candy)
-    local lockedFrame = Instance.new("Frame")
-    lockedFrame.Size = UDim2.new(1, 0, 1, 0)
-    lockedFrame.BackgroundColor3 = C.Surface3
-    lockedFrame.BackgroundTransparency = 0.5
-    lockedFrame.BorderSizePixel = 0
-    lockedFrame.Parent = returnModeHolder
-    registerTheme(lockedFrame, "Surface3", "BackgroundColor3")
-
-    local lkCorner = Instance.new("UICorner")
-    lkCorner.CornerRadius = UDim.new(0, 9)
-    lkCorner.Parent = lockedFrame
-
-    local lkStroke = Instance.new("UIStroke")
-    lkStroke.Color = C.Muted
-    lkStroke.Thickness = 1
-    lkStroke.Transparency = 0.6
-    lkStroke.Parent = lockedFrame
-
-    local lkLbl = Instance.new("TextLabel")
-    lkLbl.Size = UDim2.new(1, -20, 1, 0)
-    lkLbl.Position = UDim2.fromOffset(12, 0)
-    lkLbl.BackgroundTransparency = 1
-    lkLbl.Text = "🔒 Instant (Premium only)"
-    lkLbl.TextColor3 = C.Muted
-    lkLbl.Font = Enum.Font.GothamSemibold
-    lkLbl.TextSize = CFG.FONT_LABEL
-    lkLbl.TextXAlignment = Enum.TextXAlignment.Left
-    lkLbl.Parent = lockedFrame
-    registerTheme(lkLbl, "Muted", "TextColor3")
-end
+    rebuildReturnModeUI()
+    _G.VRILZ_RebuildReturnMode = rebuildReturnModeUI
 
     -- CARD 2: INFO PANEL (state live)
     local infoCard, infoContent = makeCard(mutPage, "📊 STATUS MUTATION", 2)
@@ -6633,46 +6623,51 @@ function UI.Init(sharedState)
         showKeyWindow()
     end
 
+               -- ⭐ LOOP TRANSISI (tiap 30 detik, tanpa network call)
         -- ============================================================
-    -- ⭐ LOOP TRANSISI (tiap 30 detik, tanpa network call)
-    -- ============================================================
-    task.spawn(function()
-        while true do
-            task.wait(30)
-            local nowPrem = isPremiumTimeNow()
-            if nowPrem == Shared._PremiumAutoUnlock then
-                continue
-            end
-            Shared._PremiumAutoUnlock = nowPrem
-
-            if nowPrem then
-                -- ═══ AUTO-UNLOCK ON ═══
-                Shared.KeyType = "PREMIUM"
-                Shared.KeyExpiresAt = 0
-                if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
-                -- ⭐ Notif cuma buat user FREE, bukan premium asli
-                if Shared.Notify and not isRealPremiumKey(Shared._RealKeyType) then
-                    Shared.Notify("👑 PREMIUM AUTO-UNLOCK AKTIF!", "success")
+        task.spawn(function()
+            while true do
+                task.wait(30)
+                local nowPrem = isPremiumTimeNow()
+                if nowPrem == Shared._PremiumAutoUnlock then
+                    continue
                 end
-            else
-                -- ═══ AUTO-UNLOCK OFF ═══
-                if isRealPremiumKey(Shared._RealKeyType) then
-                    Shared.KeyType = Shared._RealKeyType
-                    Shared.KeyExpiresAt = Shared._RealKeyExpiresAt or 0
-                    if Shared.Notify then
-                        Shared.Notify("👑 Key premium tetap aktif — auto-unlock selesai", "info")
+                Shared._PremiumAutoUnlock = nowPrem
+
+                if nowPrem then
+                    -- ═══ AUTO-UNLOCK ON ═══
+                    Shared.KeyType = "PREMIUM"
+                    Shared.KeyExpiresAt = 0
+                    if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
+                    -- ⭐ AUTO-REFRESH UI
+                    if _G.VRILZ_RebuildCustomTitle then pcall(_G.VRILZ_RebuildCustomTitle) end
+                    if _G.VRILZ_RebuildReturnMode then pcall(_G.VRILZ_RebuildReturnMode) end
+                    -- ⭐ Notif cuma buat user FREE, bukan premium asli
+                    if Shared.Notify and not isRealPremiumKey(Shared._RealKeyType) then
+                        Shared.Notify("👑 PREMIUM AUTO-UNLOCK AKTIF!", "success")
                     end
                 else
-                    Shared.KeyType = "FREE"
-                    Shared.KeyExpiresAt = 0
-                    if Shared.Notify then
-                        Shared.Notify("🔒 Premium auto-unlock selesai — fitur premium ditutup", "warning")
+                    -- ═══ AUTO-UNLOCK OFF ═══
+                    if isRealPremiumKey(Shared._RealKeyType) then
+                        Shared.KeyType = Shared._RealKeyType
+                        Shared.KeyExpiresAt = Shared._RealKeyExpiresAt or 0
+                        if Shared.Notify then
+                            Shared.Notify("👑 Key premium tetap aktif — auto-unlock selesai", "info")
+                        end
+                    else
+                        Shared.KeyType = "FREE"
+                        Shared.KeyExpiresAt = 0
+                        if Shared.Notify then
+                            Shared.Notify("🔒 Premium auto-unlock selesai — fitur premium ditutup", "warning")
+                        end
                     end
+                    if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
+                    -- ⭐ AUTO-REFRESH UI
+                    if _G.VRILZ_RebuildCustomTitle then pcall(_G.VRILZ_RebuildCustomTitle) end
+                    if _G.VRILZ_RebuildReturnMode then pcall(_G.VRILZ_RebuildReturnMode) end
                 end
-                if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
             end
-        end
-    end)
+        end)
 end
 
 return UI
