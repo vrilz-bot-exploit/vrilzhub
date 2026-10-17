@@ -6506,23 +6506,82 @@ function UI.Init(sharedState)
         end
     end)
 
-    local savedKey = loadSavedKey()
-    if savedKey then
-        task.spawn(function()
-            local valid, message, data = verifySavedKeyWithServer(savedKey)
-            if valid then
-                applyKeyInfo(data, savedKey)
-                startLoading()
-                return
+        -- ============================================================
+    -- ⭐ AUTO-UNLOCK PREMIUM — SABTU 19:30 - 23:59 WIB (TANPA KEY)
+    -- ============================================================
+    local function isPremiumTimeNow()
+        -- Owner selalu premium
+        if LocalPlayer.UserId == OWNER_USERID then
+            return true
+        end
+
+        local ok, result = pcall(function()
+            -- WIB = UTC+7
+            local now = os.time()
+            local utcOffset = 7 * 3600
+            local wibTime = now + utcOffset
+            local wibDate = os.date("!*t", wibTime)
+
+            local isSaturday = (wibDate.wday == 7)
+            local hour = wibDate.hour
+            local min = wibDate.min
+
+            -- Sabtu 19:30 - 23:59:59 WIB
+            if isSaturday then
+                if hour == 19 and min >= 30 then return true end
+                if hour >= 20 and hour <= 23 then return true end
             end
 
-            -- Jika expired / tidak valid, hapus key tersimpan supaya gate muncul lagi.
-            clearSavedKey()
-            showKeyWindow()
+            return false
         end)
-    else
-        showKeyWindow()
+
+        return ok and result
     end
+
+    -- Set premium state berdasarkan waktu
+    local premiumNow = isPremiumTimeNow()
+    if premiumNow then
+        Shared.KeyType = "PREMIUM"
+        Shared.KeyExpiresAt = 0
+        Shared._PremiumAutoUnlock = true
+    else
+        Shared.KeyType = Shared.KeyType or "FREE"
+        Shared._PremiumAutoUnlock = false
+    end
+
+    -- Notif premium aktif
+    task.spawn(function()
+        task.wait(1.5)
+        if premiumNow and Shared.Notify then
+            Shared.Notify("👑 PREMIUM AUTO-UNLOCK (Sabtu 19:30-23:59 WIB)", "success")
+        end
+    end)
+
+    -- ⭐ AUTO-UPDATE PREMIUM STATE TIAP 30 DETIK (tanpa reload)
+    task.spawn(function()
+        while true do
+            task.wait(30)
+            local nowPrem = isPremiumTimeNow()
+            if nowPrem ~= Shared._PremiumAutoUnlock then
+                Shared._PremiumAutoUnlock = nowPrem
+                if nowPrem then
+                    Shared.KeyType = "PREMIUM"
+                    Shared.KeyExpiresAt = 0
+                    if Shared.Notify then
+                        Shared.Notify("👑 PREMIUM AUTO-UNLOCK AKTIF!", "success")
+                    end
+                else
+                    Shared.KeyType = "FREE"
+                    if Shared.Notify then
+                        Shared.Notify("🔒 Premium auto-unlock selesai", "info")
+                    end
+                end
+            end
+        end
+    end)
+
+    -- ⭐ LANGSUNG LOADING, TANPA KEY
+    startLoading()
 end
 
 return UI
