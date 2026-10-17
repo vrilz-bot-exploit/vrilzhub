@@ -4476,7 +4476,7 @@ end
                 continue
             end
 
-            -- PRIORITAS #4: Yang ada di runtime & belum di-place & belum di tangan → collect
+                        -- PRIORITAS #4: Yang ada di runtime & belum di-place & belum di tangan → collect
             if yangItem and not yangPlaced and not yangHolding then
                 YinRitualState.Active = true
                 YinRitualState.Status = "🔴 Collecting Yang..."
@@ -4490,41 +4490,6 @@ end
                         YinRitualState.Status = "⚠️ Yang place gagal"
                     end
                     task.wait(0.5)
-                end
-
-                -- ⭐ FIX: Setelah Yang placed, LANGSUNG ke altar & tunggu reward
-                if isYangPlaced() and isYinPlaced() then
-                    YinRitualState.Active = true
-                    YinRitualState.Status = "🎯 Yin & Yang placed — going to altar..."
-
-                    -- Tunggu reward prompt muncul (max 10 detik)
-                    local waitAltar = os.clock()
-                    while os.clock() - waitAltar < 10 do
-                        if not YinRitualState.Enabled then break end
-                        if findRewardPrompt() then break end
-                        task.wait(0.2)
-                    end
-
-                    -- Kalau reward prompt udah muncul → collect langsung
-                    if findRewardPrompt() then
-                        YinRitualState.Status = "🎁 Collecting reward..."
-                        local got = yinCollectReward()
-                        if got then
-                            YinRitualState._lastRewardTime = os.clock()
-                            YinRitualState.RewardCount = YinRitualState.RewardCount + 1
-                            YinRitualState.RitualCount = YinRitualState.RitualCount + 1
-                            YinRitualState.Status = "✅ Reward #" .. YinRitualState.RewardCount .. " ke-tangan!"
-                            task.wait(0.5)
-                            YinRitualState.Status = "🏠 Returning to base..."
-                            yinReturnToBase()
-                            task.wait(2)
-                            YinRitualState._lastRewardTime = os.clock()
-                            YinRitualState.Status = "⏳ Cooldown 20s..."
-                        else
-                            YinRitualState.Status = "⚠️ Reward retry..."
-                            task.wait(1)
-                        end
-                    end
                 end
                 continue
             end
