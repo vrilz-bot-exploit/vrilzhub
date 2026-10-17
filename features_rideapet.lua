@@ -3704,28 +3704,42 @@ local function findRitualItem(itemName)
     return nil
 end
 
--- ⭐ CEK PROMPT REWARD — SESUAI STRUKTUR GAME
--- Struktur: Runtime.Rewards_<uuid>.Pot1.Pickup [ActionText="Pick Up"]
+-- ⭐ CARI PROMPT REWARD — SCAN SELURUH HEADLESSRITUAL + FALLBACK
 local function findRewardPrompt()
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then return nil end
-    local rt = hr:FindFirstChild("Runtime")
-    if not rt then return nil end
 
-    -- Cari folder Rewards_xxx (prefix "Rewards_")
-    for _, folder in ipairs(rt:GetChildren()) do
-        if folder:IsA("Folder") and folder.Name:lower():find("reward", 1, true) then
-            for _, d in ipairs(folder:GetDescendants()) do
-                if d:IsA("ProximityPrompt") then
-                    local at = (d.ActionText or ""):lower()
-                    local ot = (d.ObjectText or ""):lower()
-                    -- "pick up" / "ritual candy pot"
-                    if at:find("pick", 1, true) or ot:find("candy", 1, true) 
-                       or ot:find("pot", 1, true) or ot:find("ritual", 1, true) then
-                        return d
-                    end
+    -- 1. Scan SEMUA ProximityPrompt di HeadlessRitual
+    for _, d in ipairs(hr:GetDescendants()) do
+        if d:IsA("ProximityPrompt") then
+            local at = (d.ActionText or ""):lower()
+            local ot = (d.ObjectText or ""):lower()
+            -- Deteksi prompt "Pick Up", "Ritual Candy Pot", "Collect"
+            if at:find("pick", 1, true) or ot:find("candy", 1, true)
+               or ot:find("pot", 1, true) or ot:find("ritual", 1, true)
+               or at:find("collect", 1, true) then
+                return d
+            end
+        end
+    end
+
+    -- 2. Fallback: cari prompt di dalam folder "Rewards_"
+    local rt = hr:FindFirstChild("Runtime")
+    if rt then
+        for _, folder in ipairs(rt:GetChildren()) do
+            if folder:IsA("Folder") and folder.Name:lower():find("reward", 1, true) then
+                for _, d in ipairs(folder:GetDescendants()) do
+                    if d:IsA("ProximityPrompt") then return d end
                 end
             end
+        end
+    end
+
+    -- 3. Fallback: cek RewardPoints
+    local rp = hr:FindFirstChild("RewardPoints")
+    if rp then
+        for _, d in ipairs(rp:GetChildren()) do
+            if d:IsA("ProximityPrompt") then return d end
         end
     end
 
