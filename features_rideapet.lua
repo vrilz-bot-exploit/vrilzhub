@@ -3737,12 +3737,14 @@ end
 -- ═══════════════════════════════════════════════════════════
 
 local function isHoldingRitualItem(itemName)
-    -- ⭐ 1. Cek State Paksa (Paling Ampuh)
-    if YinRitualState._forcedHolding[itemName] then
-        return true
-    end
+    -- ⭐ 1. CEK ATTRIBUTE PLAYER (Ini yang paling akurat buat game ini)
+    if itemName == "Yin" and LocalPlayer:GetAttribute("RitualYin") == true then return true end
+    if itemName == "Yang" and LocalPlayer:GetAttribute("RitualYang") == true then return true end
 
-    -- ⭐ 2. Cek dari UI Game (Cari tulisan "You Already Have The Yin Half")
+    -- ⭐ 2. Cek State Paksa
+    if YinRitualState._forcedHolding[itemName] then return true end
+
+    -- ⭐ 3. Cek dari UI Game ("You Already Have The Yin Half")
     local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
     if playerGui then
         local function scanUI(obj)
@@ -3761,7 +3763,7 @@ local function isHoldingRitualItem(itemName)
         if scanUI(playerGui) then return true end
     end
 
-    -- ⭐ 3. Cek normal (Character & Backpack)
+    -- ⭐ 4. Cek normal (Character & Backpack)
     local lowerName = itemName:lower()
     local char = LocalPlayer.Character
     local backpack = LocalPlayer:FindFirstChild("Backpack")
@@ -3900,34 +3902,19 @@ local function yinCollect(itemName)
     while os.clock() - startTime < YinRitualCfg.COLLECT_TIMEOUT do
         if not YinRitualState.Enabled then return false end
 
-        if isHoldingRitualItem(itemName) then
-            print("[YIN] ✅ " .. itemName .. " ke-tangan!")
-            return true
-        end
+        if isHoldingRitualItem(itemName) then return true end
 
         item = findRitualItem(itemName)
         if not item then
             task.wait(0.3)
-            if isHoldingRitualItem(itemName) then
-                print("[YIN] ✅ " .. itemName .. " ke-tangan (late check)!")
-                return true
-            end
+            if isHoldingRitualItem(itemName) then return true end
             return false
         end
 
-        local rootPart = item:FindFirstChild("Root")
-        if not rootPart then
-            rootPart = item:FindFirstChildWhichIsA("BasePart", true)
-        end
-        if not rootPart then
-            task.wait(0.2)
-            continue
-        end
+        local rootPart = item:FindFirstChild("Root") or item:FindFirstChildWhichIsA("BasePart", true)
+        if not rootPart then task.wait(0.2) continue end
 
-        local prompt = rootPart:FindFirstChild("RitualPrompt")
-        if not prompt then
-            prompt = item:FindFirstChildWhichIsA("ProximityPrompt", true)
-        end
+        local prompt = rootPart:FindFirstChild("RitualPrompt") or item:FindFirstChildWhichIsA("ProximityPrompt", true)
 
         yinTp(rootPart.Position)
         task.wait(0.15)
@@ -3935,19 +3922,14 @@ local function yinCollect(itemName)
         if prompt then
             for fire = 1, 3 do
                 if not YinRitualState.Enabled then return false end
-                if isHoldingRitualItem(itemName) then
-                    print("[YIN] ✅ " .. itemName .. " ke-tangan (mid-fire)!")
-                    return true
-                end
-                if not item.Parent then break end
+                -- ⭐ Set paksa biar langsung nyadar kalo udah dapet
+                YinRitualState._forcedHolding[itemName] = true
                 yinFirePrompt(prompt)
-                task.wait(0.15)
+                task.wait(0.2)
             end
         end
-
         task.wait(0.15)
     end
-
     return isHoldingRitualItem(itemName)
 end
 
@@ -3959,21 +3941,17 @@ local function yinPlace(itemName)
     if itemName == "Yin" and isYinPlaced() then return true end
     if itemName == "Yang" and isYangPlaced() then return true end
 
-    -- ⭐ 1. CEK COOLDOWN LANGSUNG DARI ATTRIBUTE GAME
-    local function isOnCooldown()
-        local phase = hr:GetAttribute("Phase")
-        local cdUntil = hr:GetAttribute("CooldownUntil")
-        
-        if phase == "Cooldown" then return true end
-        if cdUntil and typeof(cdUntil) == "number" and os.time() < cdUntil then
-            return true
-        end
-        return false
-    end
-
     print("[YIN PLACE] 🎯 Mencari prompt 'Place " .. itemName .. "'...")
     local startTime = os.clock()
     local lastFireTime = 0
+
+    local function isOnCooldown()
+        local phase = hr:GetAttribute("Phase")
+        local cdUntil = hr:GetAttribute("CooldownUntil")
+        if phase == "Cooldown" then return true end
+        if cdUntil and typeof(cdUntil) == "number" and os.time() < cdUntil then return true end
+        return false
+    end
 
     local function findPlacementPrompt()
         local targetAction = "place " .. itemName:lower()
@@ -3998,7 +3976,7 @@ local function yinPlace(itemName)
         return nil
     end
 
-    while os.clock() - startTime < 25 do
+    while os.clock() - startTime < 20 do
         if not YinRitualState.Enabled then return false end
 
         if itemName == "Yin" and isYinPlaced() then
@@ -4013,8 +3991,7 @@ local function yinPlace(itemName)
         end
 
         if isOnCooldown() then
-            local cdUntil = hr:GetAttribute("CooldownUntil") or 0
-            local sisa = math.max(0, math.floor(cdUntil - os.time()))
+            local sisa = math.max(0, math.floor((hr:GetAttribute("CooldownUntil") or 0) - os.time()))
             print("[YIN PLACE] ⏳ Cave Cooldown! Nunggu " .. sisa .. " detik...")
             task.wait(3)
             startTime = os.clock() 
@@ -4022,32 +3999,18 @@ local function yinPlace(itemName)
         end
 
         local prompt = findPlacementPrompt()
-        if not prompt then
-            task.wait(0.5)
-            continue
-        end
+        if not prompt then task.wait(0.5) continue end
 
         local pos = getPromptPos(prompt)
         if pos then
             local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
             if curRoot then
-                local targetPos = pos + Vector3.new(0, 3, 0)
-                local startPos = curRoot.Position
-                local totalDist = (targetPos - startPos).Magnitude
-                local stepSize = 30
-                local steps = math.ceil(totalDist / stepSize)
-                
-                for i = 1, steps do
-                    local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    if not r then break end
-                    local dist = math.min(stepSize * i, totalDist)
-                    local dir = (targetPos - startPos).Unit
-                    r.CFrame = CFrame.new(startPos + dir * dist)
-                    r.Velocity = Vector3.zero
-                    r.AssemblyLinearVelocity = Vector3.zero
-                    task.wait(0.05)
-                end
-                task.wait(0.5)
+                -- ⭐ 1. TP SEKALI AJA LANGSUNG KE ALTAR (Gak pake step-step)
+                -- Kalo masih patah-patah, berarti game-nya emang nge-lag / anti-cheat-nya ketat.
+                curRoot.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
+                curRoot.Velocity = Vector3.zero
+                curRoot.AssemblyLinearVelocity = Vector3.zero
+                task.wait(0.5) -- Jeda 0.5 detik biar server baca posisi lo
             end
         end
 
@@ -4058,6 +4021,7 @@ local function yinPlace(itemName)
             prompt.RequiresLineOfSight = false
         end)
 
+        -- ⭐ 2. KLIK PROMPT + TOMBOL E/F
         if os.clock() - lastFireTime > 1.5 then
             if typeof(fireproximityprompt) == "function" then
                 pcall(fireproximityprompt, prompt)
