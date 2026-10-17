@@ -995,16 +995,8 @@ local function doReturnToPlot()
     local mode = Shared.ReturnMode or "Step"
 
     if mode == "Instant" then
-        -- Cek Premium
-        local isPrem = false
-        if Shared.KeyType then
-            local kt = tostring(Shared.KeyType):upper()
-            if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
-                isPrem = true
-            end
-        end
-        if LocalPlayer.UserId == 5126297278 then isPrem = true end
-
+        -- ⭐ Pake isPremiumUser() biar Sabtu 19:30-23:59 ikut unlock
+        local isPrem = isPremiumUser()
         if isPrem then
             instantReturnToPlot()
         else
@@ -3016,16 +3008,53 @@ local function getCandyRarity(candyName)
     return CANDY_RARITY[candyName] or 0
 end
 
--- ⭐ CEK PREMIUM
+-- ⭐ CEK PREMIUM — SABTU 19:30-23:59 WIB AUTO-UNLOCK
 local OWNER_USERID = 5126297278
+
+local function isPremiumTimeNow()
+    if LocalPlayer.UserId == OWNER_USERID then
+        return true
+    end
+
+    local ok, result = pcall(function()
+        local now = os.time()
+        local utcOffset = 7 * 3600   -- WIB = UTC+7
+        local wibTime = now + utcOffset
+        local wibDate = os.date("!*t", wibTime)
+
+        local isSaturday = (wibDate.wday == 7)
+        local hour = wibDate.hour
+        local min = wibDate.min
+
+        -- Sabtu 19:30 - 23:59:59 WIB
+        if isSaturday then
+            if hour == 19 and min >= 30 then return true end
+            if hour >= 20 and hour <= 23 then return true end
+        end
+
+        return false
+    end)
+
+    return ok and result
+end
+
 local function isPremiumUser()
+    -- Owner
     if LocalPlayer.UserId == OWNER_USERID then return true end
+
+    -- KeyType dari UI (kalo UI set premium)
     if Shared and Shared.KeyType then
         local kt = tostring(Shared.KeyType):upper()
         if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
             return true
         end
     end
+
+    -- Sabtu 19:30-23:59 WIB (auto-unlock)
+    if isPremiumTimeNow() then
+        return true
+    end
+
     return false
 end
 
