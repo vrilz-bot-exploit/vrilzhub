@@ -3951,7 +3951,7 @@ local function yinCollect(itemName)
     return isHoldingRitualItem(itemName)
 end
 
--- 7) PLACE YIN/YANG — ANTI-RUBBERBAND & ANTI-STUTTER
+-- 7) PLACE YIN/YANG — SMART COOLDOWN DETECTOR (FINAL & BERSIH)
 local function yinPlace(itemName)
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then return false end
@@ -3959,11 +3959,22 @@ local function yinPlace(itemName)
     if itemName == "Yin" and isYinPlaced() then return true end
     if itemName == "Yang" and isYangPlaced() then return true end
 
+    -- ⭐ 1. CEK COOLDOWN LANGSUNG DARI ATTRIBUTE GAME
+    local function isOnCooldown()
+        local phase = hr:GetAttribute("Phase")
+        local cdUntil = hr:GetAttribute("CooldownUntil")
+        
+        if phase == "Cooldown" then return true end
+        if cdUntil and typeof(cdUntil) == "number" and os.time() < cdUntil then
+            return true
+        end
+        return false
+    end
+
     print("[YIN PLACE] 🎯 Mencari prompt 'Place " .. itemName .. "'...")
     local startTime = os.clock()
-    local fireCount = 0
+    local lastFireTime = 0
 
-    -- ⭐ CARI PROMPT DINAMIS
     local function findPlacementPrompt()
         local targetAction = "place " .. itemName:lower()
         for _, d in ipairs(hr:GetDescendants()) do
@@ -3987,16 +3998,27 @@ local function yinPlace(itemName)
         return nil
     end
 
-    while os.clock() - startTime < 15 do -- Timeout 15 detik
+    while os.clock() - startTime < 25 do
         if not YinRitualState.Enabled then return false end
 
         if itemName == "Yin" and isYinPlaced() then
             YinRitualState._forcedHolding["Yin"] = nil
+            print("[YIN PLACE] ✅ Yin BERHASIL DI-PLACE!")
             return true
         end
         if itemName == "Yang" and isYangPlaced() then
             YinRitualState._forcedHolding["Yang"] = nil
+            print("[YIN PLACE] ✅ Yang BERHASIL DI-PLACE!")
             return true
+        end
+
+        if isOnCooldown() then
+            local cdUntil = hr:GetAttribute("CooldownUntil") or 0
+            local sisa = math.max(0, math.floor(cdUntil - os.time()))
+            print("[YIN PLACE] ⏳ Cave Cooldown! Nunggu " .. sisa .. " detik...")
+            task.wait(3)
+            startTime = os.clock() 
+            continue
         end
 
         local prompt = findPlacementPrompt()
@@ -4009,42 +4031,26 @@ local function yinPlace(itemName)
         if pos then
             local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
             if curRoot then
-                -- ⭐ 1. ANTI-RUBBERBAND: TP BERTAHAP (GLIDE)
                 local targetPos = pos + Vector3.new(0, 3, 0)
                 local startPos = curRoot.Position
                 local totalDist = (targetPos - startPos).Magnitude
-                
-                -- TP per 30 studs, biar server gak nge-flag
                 local stepSize = 30
                 local steps = math.ceil(totalDist / stepSize)
                 
                 for i = 1, steps do
                     local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                     if not r then break end
-                    
                     local dist = math.min(stepSize * i, totalDist)
                     local dir = (targetPos - startPos).Unit
-                    
                     r.CFrame = CFrame.new(startPos + dir * dist)
                     r.Velocity = Vector3.zero
                     r.AssemblyLinearVelocity = Vector3.zero
-                    
-                    -- ⭐ 2. ANTI-STUTTER: Wait 0.05 biar gak patah-patah
                     task.wait(0.05)
                 end
-                
-                -- Final TP pas nyampe
-                local rFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if rFinal then
-                    rFinal.CFrame = CFrame.new(targetPos)
-                    rFinal.Velocity = Vector3.zero
-                    rFinal.AssemblyLinearVelocity = Vector3.zero
-                end
-                task.wait(0.5) -- Jeda napas biar prompt kebuka
+                task.wait(0.5)
             end
         end
 
-        -- FORCE ENABLE PROMPT
         pcall(function()
             prompt.Enabled = true
             prompt.HoldDuration = 0
@@ -4052,26 +4058,23 @@ local function yinPlace(itemName)
             prompt.RequiresLineOfSight = false
         end)
 
-        -- ⭐ 3. FIRE PROMPT
-        if typeof(fireproximityprompt) == "function" then
-            for i = 1, 3 do
+        if os.clock() - lastFireTime > 1.5 then
+            if typeof(fireproximityprompt) == "function" then
                 pcall(fireproximityprompt, prompt)
-                fireCount = fireCount + 1
-                task.wait(0.2)
             end
+
+            pcall(function()
+                local vim = game:GetService("VirtualInputManager")
+                local key = (itemName == "Yin") and Enum.KeyCode.E or Enum.KeyCode.F
+                vim:SendKeyEvent(true, key, false, game)
+                task.wait(0.1)
+                vim:SendKeyEvent(false, key, false, game)
+            end)
+            
+            lastFireTime = os.clock()
         end
 
-        -- ⭐ 4. KIRIM KEYBOARD E / F (Cadangan)
-        pcall(function()
-            local vim = game:GetService("VirtualInputManager")
-            local key = (itemName == "Yin") and Enum.KeyCode.E or Enum.KeyCode.F
-            
-            vim:SendKeyEvent(true, key, false, game)
-            task.wait(0.1)
-            vim:SendKeyEvent(false, key, false, game)
-        end)
-
-        task.wait(0.8) -- Jeda biar server mikir
+        task.wait(0.5)
     end
 
     return (itemName == "Yin") and isYinPlaced() or isYangPlaced()
