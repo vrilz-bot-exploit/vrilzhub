@@ -3149,20 +3149,12 @@ local function halloweenTpStep(targetPos, stepSize, waitTime)
         dir = Vector3.new(math.cos(ang), 0, math.sin(ang))
     end
 
-       for i = 1, steps do
-        -- ⭐ JUMP 1x tiap step
-        local curHum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if curHum and curHum.Health > 0 and not curHum.SeatPart then
-            pcall(function() curHum.Jump = true end)
-            task.wait(0.08)
-        end
-
+              for i = 1, steps do
         local dist = math.min(stepSize * i, totalDist)
         local pos = startPos + dir * dist + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
         halloweenTpTo(pos)
         task.wait(waitTime)   -- ✅ pakai waitTime
     end
-
 return true
 end
 
