@@ -4093,7 +4093,7 @@ local function yinCollectReward()
         return false
     end
 
-    local prompt, pos
+          local prompt, pos
     for try = 1, 10 do
         prompt = findRewardPrompt()
         if prompt then
@@ -4109,7 +4109,7 @@ local function yinCollectReward()
             end
             if pos then break end
         end
-        task.wait(0.3)
+        -- ⭐ hapus task.wait(0.3) — langsung loop
     end
 
     if not pos then
@@ -4393,11 +4393,10 @@ function Features.startAutoYinRitual()
                 continue
             end
 
-            -- ═══ STEP 1: REWARD ═══
+                        -- ═══ STEP 1: REWARD ═══
             if findRewardPrompt() then
                 YinRitualState.Active = true
                 YinRitualState.Status = "🎁 Collecting reward..."
-                task.wait(0.5)
 
                 local got = yinCollectReward()
 
@@ -4406,15 +4405,12 @@ function Features.startAutoYinRitual()
                     YinRitualState.RewardCount = YinRitualState.RewardCount + 1
                     YinRitualState.RitualCount = YinRitualState.RitualCount + 1
                     YinRitualState.Status = "✅ Reward #" .. YinRitualState.RewardCount .. " ke-tangan!"
-                    task.wait(0.5)
                     YinRitualState.Status = "🏠 Returning to base..."
                     yinReturnToBase()
-                    task.wait(2)
                     YinRitualState._lastRewardTime = os.clock()
                     YinRitualState.Status = "⏳ Cooldown 20s..."
                 else
                     YinRitualState.Status = "⚠️ Reward retry..."
-                    task.wait(1)
                 end
                 continue
             end
