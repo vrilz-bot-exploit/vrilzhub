@@ -3951,41 +3951,24 @@ local function yinCollect(itemName)
     return isHoldingRitualItem(itemName)
 end
 
--- 7) PLACE YIN/YANG — FIXED: Nyari prompt di seluruh map (Sealed Cave / Altar)
+-- 7) PLACE YIN/YANG — ANTI-RUBBERBAND & ANTI-STUTTER
 local function yinPlace(itemName)
     local hr = Workspace:FindFirstChild("HeadlessRitual")
-    if not hr then
-        print("[YIN PLACE] ❌ HeadlessRitual gak ada")
-        return false
-    end
+    if not hr then return false end
 
-    if itemName == "Yin" and isYinPlaced() then
-        print("[YIN PLACE] ⏭️ Yin udah ke-place")
-        return true
-    end
-    if itemName == "Yang" and isYangPlaced() then
-        print("[YIN PLACE] ⏭️ Yang udah ke-place")
-        return true
-    end
+    if itemName == "Yin" and isYinPlaced() then return true end
+    if itemName == "Yang" and isYangPlaced() then return true end
 
-    print("[YIN PLACE] 🎯 Try place " .. itemName)
+    print("[YIN PLACE] 🎯 Mencari prompt 'Place " .. itemName .. "'...")
     local startTime = os.clock()
     local fireCount = 0
 
-    -- ⭐ CARI PROMPT DINAMIS (Gak peduli Altar atau Sealed Cave)
+    -- ⭐ CARI PROMPT DINAMIS
     local function findPlacementPrompt()
-        local targetAction = ("place " .. itemName):lower()
+        local targetAction = "place " .. itemName:lower()
         for _, d in ipairs(hr:GetDescendants()) do
             if d:IsA("ProximityPrompt") and (d.ActionText or ""):lower():find(targetAction, 1, true) then
                 return d
-            end
-        end
-        -- Fallback: cari slot di Altar kalo prompt gak ada
-        local altar = hr:FindFirstChild("Altar")
-        if altar then
-            local slot = altar:FindFirstChild(itemName .. "Placement")
-            if slot then
-                return slot:FindFirstChildWhichIsA("ProximityPrompt", true)
             end
         end
         return nil
@@ -3999,94 +3982,99 @@ local function yinPlace(itemName)
                 local ok, pivot = pcall(function() return p:GetPivot().Position end)
                 if ok then return pivot end
             end
-            if p:IsA("Attachment") then return p.WorldPosition end
             p = p.Parent
         end
         return nil
     end
 
-    while os.clock() - startTime < YinRitualCfg.PLACE_TIMEOUT do
+    while os.clock() - startTime < 15 do -- Timeout 15 detik
         if not YinRitualState.Enabled then return false end
 
         if itemName == "Yin" and isYinPlaced() then
-            print("[YIN PLACE] ✅ Yin placed! (" .. fireCount .. " fire)")
             YinRitualState._forcedHolding["Yin"] = nil
             return true
         end
         if itemName == "Yang" and isYangPlaced() then
-            print("[YIN PLACE] ✅ Yang placed! (" .. fireCount .. " fire)")
             YinRitualState._forcedHolding["Yang"] = nil
             return true
         end
 
         local prompt = findPlacementPrompt()
         if not prompt then
-            print("[YIN PLACE] ⏳ Nunggu prompt 'Place " .. itemName .. "' spawn...")
             task.wait(0.5)
             continue
         end
 
         local pos = getPromptPos(prompt)
         if pos then
-            -- ⭐ TP KE POSISI PROMPT (Bukan ke Altar)
             local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
             if curRoot then
-                curRoot.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
-                curRoot.Velocity = Vector3.zero
-                curRoot.AssemblyLinearVelocity = Vector3.zero
+                -- ⭐ 1. ANTI-RUBBERBAND: TP BERTAHAP (GLIDE)
+                local targetPos = pos + Vector3.new(0, 3, 0)
+                local startPos = curRoot.Position
+                local totalDist = (targetPos - startPos).Magnitude
+                
+                -- TP per 30 studs, biar server gak nge-flag
+                local stepSize = 30
+                local steps = math.ceil(totalDist / stepSize)
+                
+                for i = 1, steps do
+                    local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if not r then break end
+                    
+                    local dist = math.min(stepSize * i, totalDist)
+                    local dir = (targetPos - startPos).Unit
+                    
+                    r.CFrame = CFrame.new(startPos + dir * dist)
+                    r.Velocity = Vector3.zero
+                    r.AssemblyLinearVelocity = Vector3.zero
+                    
+                    -- ⭐ 2. ANTI-STUTTER: Wait 0.05 biar gak patah-patah
+                    task.wait(0.05)
+                end
+                
+                -- Final TP pas nyampe
+                local rFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if rFinal then
+                    rFinal.CFrame = CFrame.new(targetPos)
+                    rFinal.Velocity = Vector3.zero
+                    rFinal.AssemblyLinearVelocity = Vector3.zero
+                end
+                task.wait(0.5) -- Jeda napas biar prompt kebuka
             end
-            task.wait(0.4)
         end
 
-        -- ⭐ FORCE ENABLE PROMPT
+        -- FORCE ENABLE PROMPT
         pcall(function()
             prompt.Enabled = true
             prompt.HoldDuration = 0
-            prompt.MaxActivationDistance = 100
+            prompt.MaxActivationDistance = 50
             prompt.RequiresLineOfSight = false
         end)
 
-        -- ⭐ FIRE PROMPT (Instant 5x)
+        -- ⭐ 3. FIRE PROMPT
         if typeof(fireproximityprompt) == "function" then
-            for i = 1, 5 do
+            for i = 1, 3 do
                 pcall(fireproximityprompt, prompt)
                 fireCount = fireCount + 1
                 task.wait(0.2)
             end
         end
 
-        -- ⭐ FIRE HOLD (Kalo game pakai tahan)
-        pcall(function()
-            prompt.HoldDuration = 0.5
-            prompt:InputHoldBegin()
-        end)
-        task.wait(0.8)
-        pcall(function() prompt:InputHoldEnd() end)
-        fireCount = fireCount + 1
-
-        -- ⭐ KIRIM KEYBOARD E / F (JURUS PAMUNGKAS)
+        -- ⭐ 4. KIRIM KEYBOARD E / F (Cadangan)
         pcall(function()
             local vim = game:GetService("VirtualInputManager")
             local key = (itemName == "Yin") and Enum.KeyCode.E or Enum.KeyCode.F
+            
             vim:SendKeyEvent(true, key, false, game)
             task.wait(0.1)
             vim:SendKeyEvent(false, key, false, game)
         end)
 
-        task.wait(0.5)
+        task.wait(0.8) -- Jeda biar server mikir
     end
 
-    if itemName == "Yin" then 
-        local ok = isYinPlaced()
-        if ok then YinRitualState._forcedHolding["Yin"] = nil end
-        return ok
-    end
-    if itemName == "Yang" then 
-        local ok = isYangPlaced()
-        if ok then YinRitualState._forcedHolding["Yang"] = nil end
-        return ok
-    end
-    return false
+    return (itemName == "Yin") and isYinPlaced() or isYangPlaced()
 end
 
 -- 8) COLLECT REWARD — juga HILANG di file lo!
