@@ -4319,26 +4319,17 @@ local function yinReturnToBase()
     local root = char and char:FindFirstChild("HumanoidRootPart")
     if not root then return false end
 
-    local startPos = root.Position
+        local startPos = root.Position
     local targetPos = base.Position + Vector3.new(0, 5, 0)
-    local totalDist = (targetPos - startPos).Magnitude
-    local stepSize = 500
-    local steps = math.ceil(totalDist / stepSize)
 
-    for i = 1, steps do
-        local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if not r then break end
-        local dist = math.min(stepSize * i, totalDist)
-        local dir = (targetPos - startPos)
-        dir = Vector3.new(dir.X, 0, dir.Z)
-        if dir.Magnitude > 1 then dir = dir.Unit end
-        r.CFrame = CFrame.new(startPos + dir * dist + Vector3.new(0, 5, 0))
+    -- ⭐ LANGSUNG TP SEKALI — tanpa step, tanpa delay
+    local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if r then
+        r.CFrame = CFrame.new(targetPos)
         r.Velocity = Vector3.zero
         r.AssemblyLinearVelocity = Vector3.zero
-        task.wait(0.08)
     end
 
-    task.wait(0.3)
     print("[YIN RETURN] ✅ Selesai")
     return true
 end
