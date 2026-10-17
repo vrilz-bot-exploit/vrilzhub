@@ -3676,8 +3676,9 @@ local YinRitualState = {
     RitualCount = 0,
     RewardCount = 0,
     Active = false,
-    _lastRewardTime = 0,     -- ⭐ BARU
-    _collectingReward = false, -- ⭐ BARU
+    _lastRewardTime = 0,
+    _collectingReward = false,
+    _forcedHolding = {}, -- ⭐ Paksa inget state
 }
 
 local YinRitualCfg = {
@@ -3735,22 +3736,40 @@ end
 -- YIN RITUAL — CLEAN REWRITE (urutan benar, gak ada duplikat)
 -- ═══════════════════════════════════════════════════════════
 
--- 1) CEK ITEM DI TANGAN — paling dasar, HARUS paling atas
 local function isHoldingRitualItem(itemName)
+    -- ⭐ 1. Cek State Paksa (Paling Ampuh)
+    if YinRitualState._forcedHolding[itemName] then
+        return true
+    end
+
+    -- ⭐ 2. Cek dari UI Game (Cari tulisan "You Already Have The Yin Half")
+    local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+    if playerGui then
+        local function scanUI(obj)
+            if obj:IsA("TextLabel") and obj.Text then
+                local txt = obj.Text:lower()
+                if txt:find("already have") and txt:find(itemName:lower()) then
+                    YinRitualState._forcedHolding[itemName] = true
+                    return true
+                end
+            end
+            for _, child in ipairs(obj:GetChildren()) do
+                if scanUI(child) then return true end
+            end
+            return false
+        end
+        if scanUI(playerGui) then return true end
+    end
+
+    -- ⭐ 3. Cek normal (Character & Backpack)
     local lowerName = itemName:lower()
     local char = LocalPlayer.Character
     local backpack = LocalPlayer:FindFirstChild("Backpack")
 
     if char then
-        for _, obj in ipairs(char:GetChildren()) do
-            if (obj:IsA("Model") or obj:IsA("Tool"))
-               and obj.Name:lower():find(lowerName, 1, true) then
-                return true
-            end
-        end
         for _, obj in ipairs(char:GetDescendants()) do
-            if (obj:IsA("Model") or obj:IsA("Tool"))
-               and obj.Name:lower():find(lowerName, 1, true) then
+            if (obj:IsA("Model") or obj:IsA("Tool")) and obj.Name:lower():find(lowerName, 1, true) then
+                YinRitualState._forcedHolding[itemName] = true
                 return true
             end
         end
@@ -3758,27 +3777,11 @@ local function isHoldingRitualItem(itemName)
 
     if backpack then
         for _, obj in ipairs(backpack:GetChildren()) do
-            if (obj:IsA("Tool") or obj:IsA("Model"))
-               and obj.Name:lower():find(lowerName, 1, true) then
+            if (obj:IsA("Tool") or obj:IsA("Model")) and obj.Name:lower():find(lowerName, 1, true) then
+                YinRitualState._forcedHolding[itemName] = true
                 return true
             end
         end
-    end
-
-    if itemName == "Yin" and LocalPlayer:GetAttribute("HoldingYin") == true then
-        return true
-    end
-    if itemName == "Yang" and LocalPlayer:GetAttribute("HoldingYang") == true then
-        return true
-    end
-
-    local holdingItem = LocalPlayer:GetAttribute("HoldingItem")
-    if holdingItem and tostring(holdingItem):lower():find(lowerName, 1, true) then
-        return true
-    end
-    local carriedItem = LocalPlayer:GetAttribute("CarriedItem")
-    if carriedItem and tostring(carriedItem):lower():find(lowerName, 1, true) then
-        return true
     end
 
     return false
@@ -3948,7 +3951,7 @@ local function yinCollect(itemName)
     return isHoldingRitualItem(itemName)
 end
 
--- 7) PLACE YIN/YANG — INI YANG HILANG DI FILE LO!
+-- 7) PLACE YIN/YANG — FIXED: Nyari prompt di seluruh map (Sealed Cave / Altar)
 local function yinPlace(itemName)
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then
@@ -3969,24 +3972,37 @@ local function yinPlace(itemName)
     local startTime = os.clock()
     local fireCount = 0
 
-    local altar = hr:FindFirstChild("Altar")
-    if not altar then
-        warn("[YIN PLACE] ❌ Altar gak ada!")
-        return false
+    -- ⭐ CARI PROMPT DINAMIS (Gak peduli Altar atau Sealed Cave)
+    local function findPlacementPrompt()
+        local targetAction = ("place " .. itemName):lower()
+        for _, d in ipairs(hr:GetDescendants()) do
+            if d:IsA("ProximityPrompt") and (d.ActionText or ""):lower():find(targetAction, 1, true) then
+                return d
+            end
+        end
+        -- Fallback: cari slot di Altar kalo prompt gak ada
+        local altar = hr:FindFirstChild("Altar")
+        if altar then
+            local slot = altar:FindFirstChild(itemName .. "Placement")
+            if slot then
+                return slot:FindFirstChildWhichIsA("ProximityPrompt", true)
+            end
+        end
+        return nil
     end
-    local altarPos = altar.Position
 
-    local slotName = itemName .. "Placement"
-    local targetSlot = altar:FindFirstChild(slotName)
-    if not targetSlot then
-        warn("[YIN PLACE] ❌ " .. slotName .. " gak ada!")
-        return false
-    end
-
-    local prompt = targetSlot:FindFirstChild("RitualPrompt")
-    if not prompt then
-        warn("[YIN PLACE] ❌ RitualPrompt gak ada di " .. slotName)
-        return false
+    local function getPromptPos(prompt)
+        local p = prompt.Parent
+        while p and p ~= hr do
+            if p:IsA("BasePart") then return p.Position end
+            if p:IsA("Model") then
+                local ok, pivot = pcall(function() return p:GetPivot().Position end)
+                if ok then return pivot end
+            end
+            if p:IsA("Attachment") then return p.WorldPosition end
+            p = p.Parent
+        end
+        return nil
     end
 
     while os.clock() - startTime < YinRitualCfg.PLACE_TIMEOUT do
@@ -3994,28 +4010,43 @@ local function yinPlace(itemName)
 
         if itemName == "Yin" and isYinPlaced() then
             print("[YIN PLACE] ✅ Yin placed! (" .. fireCount .. " fire)")
+            YinRitualState._forcedHolding["Yin"] = nil
             return true
         end
         if itemName == "Yang" and isYangPlaced() then
             print("[YIN PLACE] ✅ Yang placed! (" .. fireCount .. " fire)")
+            YinRitualState._forcedHolding["Yang"] = nil
             return true
         end
 
-        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if curRoot then
-            curRoot.CFrame = CFrame.new(altarPos + Vector3.new(0, 3, 0))
-            curRoot.Velocity = Vector3.zero
-            curRoot.AssemblyLinearVelocity = Vector3.zero
+        local prompt = findPlacementPrompt()
+        if not prompt then
+            print("[YIN PLACE] ⏳ Nunggu prompt 'Place " .. itemName .. "' spawn...")
+            task.wait(0.5)
+            continue
         end
-        task.wait(0.5)
 
+        local pos = getPromptPos(prompt)
+        if pos then
+            -- ⭐ TP KE POSISI PROMPT (Bukan ke Altar)
+            local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if curRoot then
+                curRoot.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
+                curRoot.Velocity = Vector3.zero
+                curRoot.AssemblyLinearVelocity = Vector3.zero
+            end
+            task.wait(0.4)
+        end
+
+        -- ⭐ FORCE ENABLE PROMPT
         pcall(function()
             prompt.Enabled = true
             prompt.HoldDuration = 0
-            prompt.MaxActivationDistance = math.huge
+            prompt.MaxActivationDistance = 100
             prompt.RequiresLineOfSight = false
         end)
 
+        -- ⭐ FIRE PROMPT (Instant 5x)
         if typeof(fireproximityprompt) == "function" then
             for i = 1, 5 do
                 pcall(fireproximityprompt, prompt)
@@ -4024,32 +4055,37 @@ local function yinPlace(itemName)
             end
         end
 
+        -- ⭐ FIRE HOLD (Kalo game pakai tahan)
         pcall(function()
-            prompt.HoldDuration = 0.7
+            prompt.HoldDuration = 0.5
             prompt:InputHoldBegin()
         end)
-        task.wait(1.2)
+        task.wait(0.8)
         pcall(function() prompt:InputHoldEnd() end)
         fireCount = fireCount + 1
 
-        pcall(function() prompt:InputHoldBegin() end)
-        task.wait(2)
-        pcall(function() prompt:InputHoldEnd() end)
-        fireCount = fireCount + 1
+        -- ⭐ KIRIM KEYBOARD E / F (JURUS PAMUNGKAS)
+        pcall(function()
+            local vim = game:GetService("VirtualInputManager")
+            local key = (itemName == "Yin") and Enum.KeyCode.E or Enum.KeyCode.F
+            vim:SendKeyEvent(true, key, false, game)
+            task.wait(0.1)
+            vim:SendKeyEvent(false, key, false, game)
+        end)
 
         task.wait(0.5)
-        if itemName == "Yin" and isYinPlaced() then
-            print("[YIN PLACE] ✅ Yin placed! (" .. fireCount .. " fire)")
-            return true
-        end
-        if itemName == "Yang" and isYangPlaced() then
-            print("[YIN PLACE] ✅ Yang placed! (" .. fireCount .. " fire)")
-            return true
-        end
     end
 
-    if itemName == "Yin" then return isYinPlaced() end
-    if itemName == "Yang" then return isYangPlaced() end
+    if itemName == "Yin" then 
+        local ok = isYinPlaced()
+        if ok then YinRitualState._forcedHolding["Yin"] = nil end
+        return ok
+    end
+    if itemName == "Yang" then 
+        local ok = isYangPlaced()
+        if ok then YinRitualState._forcedHolding["Yang"] = nil end
+        return ok
+    end
     return false
 end
 
