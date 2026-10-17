@@ -3704,8 +3704,14 @@ local function findRitualItem(itemName)
     return nil
 end
 
--- ⭐ CARI PROMPT REWARD — SCAN SELURUH HEADLESSRITUAL + FALLBACK
+local _cachedRewardPrompt = nil
+
 local function findRewardPrompt()
+    if _cachedRewardPrompt and _cachedRewardPrompt.Parent then
+        return _cachedRewardPrompt
+    end
+    _cachedRewardPrompt = nil
+
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then return nil end
 
@@ -3714,10 +3720,10 @@ local function findRewardPrompt()
         if d:IsA("ProximityPrompt") then
             local at = (d.ActionText or ""):lower()
             local ot = (d.ObjectText or ""):lower()
-            -- Deteksi prompt "Pick Up", "Ritual Candy Pot", "Collect"
             if at:find("pick", 1, true) or ot:find("candy", 1, true)
                or ot:find("pot", 1, true) or ot:find("ritual", 1, true)
                or at:find("collect", 1, true) then
+                _cachedRewardPrompt = d
                 return d
             end
         end
@@ -3729,7 +3735,10 @@ local function findRewardPrompt()
         for _, folder in ipairs(rt:GetChildren()) do
             if folder:IsA("Folder") and folder.Name:lower():find("reward", 1, true) then
                 for _, d in ipairs(folder:GetDescendants()) do
-                    if d:IsA("ProximityPrompt") then return d end
+                    if d:IsA("ProximityPrompt") then
+                        _cachedRewardPrompt = d
+                        return d
+                    end
                 end
             end
         end
@@ -3739,39 +3748,56 @@ local function findRewardPrompt()
     local rp = hr:FindFirstChild("RewardPoints")
     if rp then
         for _, d in ipairs(rp:GetChildren()) do
-            if d:IsA("ProximityPrompt") then return d end
+            if d:IsA("ProximityPrompt") then
+                _cachedRewardPrompt = d
+                return d
+            end
         end
     end
 
     return nil
 end
+-- ═══════════════════════════════════════════════════════════
+-- CACHE SCAN UI — biar gak freeze (max 1x/detik)
+-- ═══════════════════════════════════════════════════════════
+local _yinUICache = { t = 0, yin = false, yang = false, yinP = false, yangP = false }
 
--- ═══════════════════════════════════════════════════════════
--- YIN RITUAL — CLEAN REWRITE (urutan benar, gak ada duplikat)
--- ═══════════════════════════════════════════════════════════
+local function _refreshYinUICache()
+    if os.clock() - _yinUICache.t < 1.0 then return end
+    _yinUICache.t = os.clock()
+    _yinUICache.yin, _yinUICache.yang, _yinUICache.yinP, _yinUICache.yangP = false, false, false, false
+
+    local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+    if not playerGui then return end
+
+    for _, gui in ipairs(playerGui:GetChildren()) do
+        if gui:IsA("ScreenGui") then
+            for _, d in ipairs(gui:GetDescendants()) do
+                if d:IsA("TextLabel") and d.Text then
+                    local txt = d.Text:lower()
+                    if txt:find("already have") then
+                        if txt:find("yin") then _yinUICache.yin = true end
+                        if txt:find("yang") then _yinUICache.yang = true end
+                    end
+                    if txt:find("already placed") then
+                        if txt:find("yin") then _yinUICache.yinP = true end
+                        if txt:find("yang") then _yinUICache.yangP = true end
+                    end
+                end
+            end
+        end
+    end
+end
 
 local function isHoldingRitualItem(itemName)
     -- ⭐ 1. CEK ATTRIBUTE PLAYER (Paling akurat)
     if itemName == "Yin" and LocalPlayer:GetAttribute("RitualYin") == true then return true end
     if itemName == "Yang" and LocalPlayer:GetAttribute("RitualYang") == true then return true end
 
-    -- ⭐ 2. Cek UI Game
-    local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-    if playerGui then
-        local function scanUI(obj)
-            if obj:IsA("TextLabel") and obj.Text then
-                local txt = obj.Text:lower()
-                if txt:find("already have") and txt:find(itemName:lower()) then
-                    return true
-                end
-            end
-            for _, child in ipairs(obj:GetChildren()) do
-                if scanUI(child) then return true end
-            end
-            return false
-        end
-        if scanUI(playerGui) then return true end
-    end
+    -- ⭐ 2. Cek UI Game (cached)
+    _refreshYinUICache()
+    if itemName == "Yin" and _yinUICache.yin then return true end
+    if itemName == "Yang" and _yinUICache.yang then return true end
 
     -- ⭐ 3. Cek normal (Character & Backpack)
     local lowerName = itemName:lower()
@@ -3779,7 +3805,7 @@ local function isHoldingRitualItem(itemName)
     local backpack = LocalPlayer:FindFirstChild("Backpack")
 
     if char then
-        for _, obj in ipairs(char:GetDescendants()) do
+        for _, obj in ipairs(char:GetChildren()) do
             if (obj:IsA("Model") or obj:IsA("Tool")) and obj.Name:lower():find(lowerName, 1, true) then
                 return true
             end
@@ -3797,27 +3823,10 @@ local function isHoldingRitualItem(itemName)
     return false
 end
 
--- ⭐ CEK PLACED — DETEKSI UI "Already Placed"
 local function isYinPlaced()
-    -- 1. Cek UI Game (Paling akurat, baca tulisan "Yin Is Already Placed")
-    local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-    if playerGui then
-        local function scanUI(obj)
-            if obj:IsA("TextLabel") and obj.Text then
-                local txt = obj.Text:lower()
-                if txt:find("yin") and txt:find("already placed") then
-                    return true
-                end
-            end
-            for _, child in ipairs(obj:GetChildren()) do
-                if scanUI(child) then return true end
-            end
-            return false
-        end
-        if scanUI(playerGui) then return true end
-    end
+    _refreshYinUICache()
+    if _yinUICache.yinP then return true end
 
-    -- 2. Fallback ke Runtime (kalo Yin gak ada di runtime & gak di tangan)
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if hr then
         local rt = hr:FindFirstChild("Runtime")
@@ -3832,22 +3841,8 @@ local function isYinPlaced()
 end
 
 local function isYangPlaced()
-    local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-    if playerGui then
-        local function scanUI(obj)
-            if obj:IsA("TextLabel") and obj.Text then
-                local txt = obj.Text:lower()
-                if txt:find("yang") and txt:find("already placed") then
-                    return true
-                end
-            end
-            for _, child in ipairs(obj:GetChildren()) do
-                if scanUI(child) then return true end
-            end
-            return false
-        end
-        if scanUI(playerGui) then return true end
-    end
+    _refreshYinUICache()
+    if _yinUICache.yangP then return true end
 
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if hr then
@@ -3859,8 +3854,9 @@ local function isYangPlaced()
         end
     end
 
-    return false
+        return false
 end
+
 -- 3) CEK ITEM HANDLED
 local function isItemHandled(itemName)
     if isHoldingRitualItem(itemName) then return true end
@@ -4074,20 +4070,12 @@ end
             prompt.RequiresLineOfSight = false
         end)
 
-        -- ⭐ 2. KLIK PROMPT + TOMBOL E/F
+                -- ⭐ 2. KLIK PROMPT (VIM dihapus)
         if os.clock() - lastFireTime > 1.5 then
             if typeof(fireproximityprompt) == "function" then
                 pcall(fireproximityprompt, prompt)
             end
 
-            pcall(function()
-                local vim = game:GetService("VirtualInputManager")
-                local key = (itemName == "Yin") and Enum.KeyCode.E or Enum.KeyCode.F
-                vim:SendKeyEvent(true, key, false, game)
-                task.wait(0.1)
-                vim:SendKeyEvent(false, key, false, game)
-            end)
-            
             lastFireTime = os.clock()
         end
 
