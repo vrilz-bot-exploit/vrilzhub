@@ -3737,21 +3737,17 @@ end
 -- ═══════════════════════════════════════════════════════════
 
 local function isHoldingRitualItem(itemName)
-    -- ⭐ 1. CEK ATTRIBUTE PLAYER (Ini yang paling akurat buat game ini)
+    -- ⭐ 1. CEK ATTRIBUTE PLAYER (Paling akurat)
     if itemName == "Yin" and LocalPlayer:GetAttribute("RitualYin") == true then return true end
     if itemName == "Yang" and LocalPlayer:GetAttribute("RitualYang") == true then return true end
 
-    -- ⭐ 2. Cek State Paksa
-    if YinRitualState._forcedHolding[itemName] then return true end
-
-    -- ⭐ 3. Cek dari UI Game ("You Already Have The Yin Half")
+    -- ⭐ 2. Cek UI Game
     local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
     if playerGui then
         local function scanUI(obj)
             if obj:IsA("TextLabel") and obj.Text then
                 local txt = obj.Text:lower()
                 if txt:find("already have") and txt:find(itemName:lower()) then
-                    YinRitualState._forcedHolding[itemName] = true
                     return true
                 end
             end
@@ -3763,7 +3759,7 @@ local function isHoldingRitualItem(itemName)
         if scanUI(playerGui) then return true end
     end
 
-    -- ⭐ 4. Cek normal (Character & Backpack)
+    -- ⭐ 3. Cek normal (Character & Backpack)
     local lowerName = itemName:lower()
     local char = LocalPlayer.Character
     local backpack = LocalPlayer:FindFirstChild("Backpack")
@@ -3771,7 +3767,6 @@ local function isHoldingRitualItem(itemName)
     if char then
         for _, obj in ipairs(char:GetDescendants()) do
             if (obj:IsA("Model") or obj:IsA("Tool")) and obj.Name:lower():find(lowerName, 1, true) then
-                YinRitualState._forcedHolding[itemName] = true
                 return true
             end
         end
@@ -3780,7 +3775,6 @@ local function isHoldingRitualItem(itemName)
     if backpack then
         for _, obj in ipairs(backpack:GetChildren()) do
             if (obj:IsA("Tool") or obj:IsA("Model")) and obj.Name:lower():find(lowerName, 1, true) then
-                YinRitualState._forcedHolding[itemName] = true
                 return true
             end
         end
@@ -3789,23 +3783,35 @@ local function isHoldingRitualItem(itemName)
     return false
 end
 
--- 2) CEK PLACED — pake isHoldingRitualItem, jadi harus SETELAH #1
+-- ⭐ 2) CEK PLACED — GAK pake isHoldingRitualItem lagi!
 local function isYinPlaced()
-    if isHoldingRitualItem("Yin") then return false end
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then return false end
     local rt = hr:FindFirstChild("Runtime")
     if not rt then return false end
-    return rt:FindFirstChild("Yin") == nil
+    
+    -- Cek runtime: kalo Yin gak ada di runtime, berarti udah ke-place
+    local yinExists = rt:FindFirstChild("Yin")
+    if yinExists then return false end -- Masih ada di runtime (belum ke-place)
+    
+    -- TAPI, cek juga: kalo player MASIH bawa Yin, berarti belum ke-place
+    if LocalPlayer:GetAttribute("RitualYin") == true then return false end
+    
+    return true
 end
 
 local function isYangPlaced()
-    if isHoldingRitualItem("Yang") then return false end
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then return false end
     local rt = hr:FindFirstChild("Runtime")
     if not rt then return false end
-    return rt:FindFirstChild("Yang") == nil
+    
+    local yangExists = rt:FindFirstChild("Yang")
+    if yangExists then return false end
+    
+    if LocalPlayer:GetAttribute("RitualYang") == true then return false end
+    
+    return true
 end
 
 -- 3) CEK ITEM HANDLED
@@ -3979,16 +3985,16 @@ local function yinPlace(itemName)
     while os.clock() - startTime < 20 do
         if not YinRitualState.Enabled then return false end
 
-        if itemName == "Yin" and isYinPlaced() then
-            YinRitualState._forcedHolding["Yin"] = nil
-            print("[YIN PLACE] ✅ Yin BERHASIL DI-PLACE!")
-            return true
-        end
-        if itemName == "Yang" and isYangPlaced() then
-            YinRitualState._forcedHolding["Yang"] = nil
-            print("[YIN PLACE] ✅ Yang BERHASIL DI-PLACE!")
-            return true
-        end
+if itemName == "Yin" and isYinPlaced() then
+    YinRitualState._forcedHolding["Yin"] = nil
+    print("[YIN PLACE] ✅ Yin BERHASIL DI-PLACE!")
+    return true
+end
+if itemName == "Yang" and isYangPlaced() then
+    YinRitualState._forcedHolding["Yang"] = nil
+    print("[YIN PLACE] ✅ Yang BERHASIL DI-PLACE!")
+    return true
+end
 
         if isOnCooldown() then
             local sisa = math.max(0, math.floor((hr:GetAttribute("CooldownUntil") or 0) - os.time()))
@@ -4379,38 +4385,40 @@ function Features.startAutoYinRitual()
             end
 
             -- ═══ STEP 2: PRIORITAS MUTLAK ═══
-            local yinHolding  = isHoldingRitualItem("Yin")
-            local yangHolding = isHoldingRitualItem("Yang")
-            local yinPlaced   = isYinPlaced()
-            local yangPlaced  = isYangPlaced()
+local yinHolding  = isHoldingRitualItem("Yin")
+local yangHolding = isHoldingRitualItem("Yang")
+local yinPlaced   = isYinPlaced()
+local yangPlaced  = isYangPlaced()
 
-            -- PRIORITAS #1: Yin di tangan → PLACE MUTLAK
-            if yinHolding and not yinPlaced then
-                YinRitualState.Active = true
-                YinRitualState.Status = "🔮 Placing Yin (di tangan)..."
-                local ok = yinPlace("Yin")
-                if ok then
-                    YinRitualState.Status = "✅ Yin placed!"
-                else
-                    YinRitualState.Status = "⚠️ Yin place gagal — retry..."
-                end
-                task.wait(0.5)
-                continue
-            end
+-- PRIORITAS #1: Yin di tangan & BELUM placed
+if yinHolding and not yinPlaced then
+    YinRitualState.Active = true
+    YinRitualState.Status = "🔮 Placing Yin (di tangan)..."
+    local ok = yinPlace("Yin")
+    if ok then
+        YinRitualState.Status = "✅ Yin placed!"
+        YinRitualState._forcedHolding["Yin"] = nil -- ⭐ HAPUS STATE PAKSA
+    else
+        YinRitualState.Status = "⚠️ Yin place gagal — retry..."
+    end
+    task.wait(0.5)
+    continue
+end
 
-            -- PRIORITAS #2: Yang di tangan → PLACE MUTLAK
-            if yangHolding and not yangPlaced then
-                YinRitualState.Active = true
-                YinRitualState.Status = "🔮 Placing Yang (di tangan)..."
-                local ok = yinPlace("Yang")
-                if ok then
-                    YinRitualState.Status = "✅ Yang placed!"
-                else
-                    YinRitualState.Status = "⚠️ Yang place gagal — retry..."
-                end
-                task.wait(0.5)
-                continue
-            end
+-- PRIORITAS #2: Yang di tangan & BELUM placed
+if yangHolding and not yangPlaced then
+    YinRitualState.Active = true
+    YinRitualState.Status = "🔮 Placing Yang (di tangan)..."
+    local ok = yinPlace("Yang")
+    if ok then
+        YinRitualState.Status = "✅ Yang placed!"
+        YinRitualState._forcedHolding["Yang"] = nil -- ⭐ HAPUS STATE PAKSA
+    else
+        YinRitualState.Status = "⚠️ Yang place gagal — retry..."
+    end
+    task.wait(0.5)
+    continue
+end
 
             -- PRIORITAS #3: Yin ada di runtime & belum di-place & belum di tangan → collect
             local yinItem = findRitualItem("Yin")
