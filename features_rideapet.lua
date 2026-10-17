@@ -4476,7 +4476,7 @@ end
                 continue
             end
 
-            -- PRIORITAS #4: Yang ada di runtime & belum di-place & belum di tangan → collect
+                        -- PRIORITAS #4: Yang ada di runtime & belum di-place & belum di tangan → collect
             if yangItem and not yangPlaced and not yangHolding then
                 YinRitualState.Active = true
                 YinRitualState.Status = "🔴 Collecting Yang..."
@@ -4490,6 +4490,16 @@ end
                         YinRitualState.Status = "⚠️ Yang place gagal"
                     end
                     task.wait(0.5)
+                end
+                -- ⭐ FIX: setelah Yang placed, LANGSUNG ke altar (bukan balik base)
+                YinRitualState.Status = "🎯 Yang placed — going to altar..."
+                task.wait(0.3)
+                -- Tunggu reward prompt muncul (max 5 detik)
+                local waitAltar = os.clock()
+                while os.clock() - waitAltar < 5 do
+                    if not YinRitualState.Enabled then break end
+                    if findRewardPrompt() then break end
+                    task.wait(0.2)
                 end
                 continue
             end
