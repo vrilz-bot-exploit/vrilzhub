@@ -1914,10 +1914,15 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     tpMethodLbl.Parent = eventContent
     registerTheme(tpMethodLbl, "Muted", "TextColor3")
 
-    local F_check = getFeatures()
+        local F_check = getFeatures()
     local isPrem = false
-    if F_check and F_check.isPremiumUser then
-        isPrem = F_check.isPremiumUser()
+    if LocalPlayer.UserId == OWNER_USERID then
+        isPrem = true
+    elseif Shared and Shared.KeyType then
+        local kt = tostring(Shared.KeyType):upper()
+        if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
+            isPrem = true
+        end
     end
 
     if isPrem then
@@ -5609,6 +5614,12 @@ local function saveKey(key)
     if writefile then
         pcall(writefile, "vrilz_key.txt", key)
     end
+
+    -- ⭐ Update _RealKeyType juga — biar transisi OFF pakai key baru
+    if Shared then
+        Shared._RealKeyType = Shared.KeyType
+        Shared._RealKeyExpiresAt = Shared.KeyExpiresAt or 0
+    end
 end
 
 local function clearSavedKey()
@@ -5949,16 +5960,17 @@ local function buildKeyWindow(parent, onSuccess)
         task.spawn(function()
             local valid, message, data = verifyKeyWithServer(box.Text)
             if valid then
-                local normalizedKey = tostring(box.Text):gsub("^%s+", ""):gsub("%s+$", ""):upper()
-                saveKey(normalizedKey)
-                applyKeyInfo(data, normalizedKey)
-                status.Text = "Status: " .. message
-                status.TextColor3 = C.Success
-                task.wait(0.35)
-                if gate and gate.Parent then
-                    gate:Destroy()
-                end
-                onSuccess()
+    local normalizedKey = tostring(box.Text):gsub("^%s+", ""):gsub("%s+$", ""):upper()
+    applyKeyInfo(data, normalizedKey)
+    saveKey(normalizedKey)   -- saveKey sekarang update _RealKeyType juga
+
+    status.Text = "Status: " .. message
+    status.TextColor3 = C.Success
+    task.wait(0.35)
+    if gate and gate.Parent then
+        gate:Destroy()
+    end
+    onSuccess()
             else
                 status.Text = "Status: " .. message
                 status.TextColor3 = C.Error
@@ -6506,82 +6518,161 @@ function UI.Init(sharedState)
         end
     end)
 
-        -- ============================================================
-    -- ⭐ AUTO-UNLOCK PREMIUM — SABTU 19:30 - 23:59 WIB (TANPA KEY)
+       -- ============================================================
+    -- ⭐ PREMIUM AUTO-UNLOCK — SABTU 19:50–23:59 WIB
     -- ============================================================
-    local function isPremiumTimeNow()
-        -- Owner selalu premium
+    -- Aturan:
+    --  • Sabtu 19:50–23:59 WIB → bypass key window, buka semua fitur premium
+    --  • Di luar jam itu → restore key tersimpan (PREMIUM/FREE)
+    --  • User PREMIUM asli → selalu premium (gak pernah turun jadi FREE)
+    --  • User FREE → fitur premium tertutup di luar jam auto-unlock
+
+    local function isRealPremiumKey(keyType)
+        if not keyType then return false end
+        local kt = tostring(keyType):upper()
+        return kt == "PREMIUM" or kt == "OWNER" or kt == "VIP"
+    end
+
+        local function isPremiumTimeNow()
         if LocalPlayer.UserId == OWNER_USERID then
             return true
         end
 
         local ok, result = pcall(function()
-            -- WIB = UTC+7
-            local now = os.time()
-            local utcOffset = 7 * 3600
-            local wibTime = now + utcOffset
+            local wibTime = os.time() + 7 * 3600
             local wibDate = os.date("!*t", wibTime)
+            if wibDate.wday ~= 7 then return false end
 
-            local isSaturday = (wibDate.wday == 7)
-            local hour = wibDate.hour
-            local min = wibDate.min
-
-            -- Sabtu 19:30 - 23:59:59 WIB
-            if isSaturday then
-                if hour == 19 and min >= 30 then return true end
-                if hour >= 20 and hour <= 23 then return true end
-            end
-
-            return false
+            local totalMin = wibDate.hour * 60 + wibDate.min
+            -- 19:50 = 1190, 23:59 = 1439
+            return totalMin >= 1190 and totalMin <= 1439
         end)
 
         return ok and result
     end
+       -- Sinkron: restore saved key DULU, baru evaluasi premium.
+    local function restoreSavedKeySync()
+        local savedKey = loadSavedKey()
+        if not savedKey then
+            Shared.KeyType = Shared.KeyType or "FREE"
+            Shared.KeyExpiresAt = Shared.KeyExpiresAt or 0
+            Shared.KeyValue = nil
+            Shared._RealKeyType = Shared.KeyType
+            Shared._RealKeyExpiresAt = Shared.KeyExpiresAt
+            return
+        end
 
-    -- Set premium state berdasarkan waktu
-    local premiumNow = isPremiumTimeNow()
-    if premiumNow then
-        Shared.KeyType = "PREMIUM"
-        Shared.KeyExpiresAt = 0
-        Shared._PremiumAutoUnlock = true
-    else
-        Shared.KeyType = Shared.KeyType or "FREE"
-        Shared._PremiumAutoUnlock = false
+        Shared.KeyValue = savedKey
+        local valid, message, data = verifySavedKeyWithServer(savedKey)
+
+        if valid and data then
+            applyKeyInfo(data, savedKey)
+            print("[KEY] Restored:", Shared.KeyType)
+        else
+            -- ⭐ BEDAIN: network error vs key beneran invalid
+            local isNetworkError = false
+            if type(message) == "string" then
+                if message:find("Cannot verify")
+                    or message:find("Cannot connect")
+                    or message:find("network")
+                    or message:find("timeout") then
+                    isNetworkError = true
+                end
+            end
+
+            if isNetworkError then
+                -- Server down / no internet → JANGAN clear key
+                -- Asumsi optimis: anggap masih valid
+                print("[KEY] Verify failed (network). Keeping saved key:", message)
+                Shared.KeyType = Shared.KeyType or "PREMIUM"
+                Shared.KeyExpiresAt = Shared.KeyExpiresAt or 0
+            else
+                -- Key beneran invalid / expired → clear
+                clearSavedKey()
+                Shared.KeyType = "FREE"
+                Shared.KeyExpiresAt = 0
+                print("[KEY] Saved key expired/invalid:", message)
+            end
+        end
+
+        Shared._RealKeyType = Shared.KeyType
+        Shared._RealKeyExpiresAt = Shared.KeyExpiresAt or 0
     end
 
-    -- Notif premium aktif
-    task.spawn(function()
-        task.wait(1.5)
-        if premiumNow and Shared.Notify then
-            Shared.Notify("👑 PREMIUM AUTO-UNLOCK (Sabtu 19:30-23:59 WIB)", "success")
-        end
-    end)
+    -- ============================================================
+    -- ⭐ STARTUP
+    -- ============================================================
+    restoreSavedKeySync()                       -- 1. Restore key dulu (sinkron)
+    local premiumNow = isPremiumTimeNow()       -- 2. Baru cek jam
+    Shared._PremiumAutoUnlock = premiumNow
 
-    -- ⭐ AUTO-UPDATE PREMIUM STATE TIAP 30 DETIK (tanpa reload)
+    local hasRealPremium = isRealPremiumKey(Shared._RealKeyType)
+
+    if hasRealPremium then
+        -- ═══ User PREMIUM asli → selalu masuk, fitur premium aktif ═══
+        Shared.KeyType = Shared._RealKeyType
+        Shared.KeyExpiresAt = Shared._RealKeyExpiresAt or 0
+        startLoading()
+
+    elseif premiumNow then
+        -- ═══ User FREE + jam auto-unlock → bypass key, buka premium ═══
+        Shared.KeyType = "PREMIUM"
+        Shared.KeyExpiresAt = 0
+        task.spawn(function()
+            task.wait(1.5)
+            if Shared.Notify then
+                Shared.Notify("👑 PREMIUM AUTO-UNLOCK (Sabtu 19:50–23:59 WIB)", "success")
+            end
+        end)
+        startLoading()
+
+    else
+        -- ═══ User FREE + bukan jam auto-unlock → key window ═══
+        Shared.KeyType = "FREE"
+        Shared.KeyExpiresAt = 0
+        showKeyWindow()
+    end
+
+        -- ============================================================
+    -- ⭐ LOOP TRANSISI (tiap 30 detik, tanpa network call)
+    -- ============================================================
     task.spawn(function()
         while true do
             task.wait(30)
             local nowPrem = isPremiumTimeNow()
-            if nowPrem ~= Shared._PremiumAutoUnlock then
-                Shared._PremiumAutoUnlock = nowPrem
-                if nowPrem then
-                    Shared.KeyType = "PREMIUM"
-                    Shared.KeyExpiresAt = 0
+            if nowPrem == Shared._PremiumAutoUnlock then
+                continue
+            end
+            Shared._PremiumAutoUnlock = nowPrem
+
+            if nowPrem then
+                -- ═══ AUTO-UNLOCK ON ═══
+                Shared.KeyType = "PREMIUM"
+                Shared.KeyExpiresAt = 0
+                if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
+                -- ⭐ Notif cuma buat user FREE, bukan premium asli
+                if Shared.Notify and not isRealPremiumKey(Shared._RealKeyType) then
+                    Shared.Notify("👑 PREMIUM AUTO-UNLOCK AKTIF!", "success")
+                end
+            else
+                -- ═══ AUTO-UNLOCK OFF ═══
+                if isRealPremiumKey(Shared._RealKeyType) then
+                    Shared.KeyType = Shared._RealKeyType
+                    Shared.KeyExpiresAt = Shared._RealKeyExpiresAt or 0
                     if Shared.Notify then
-                        Shared.Notify("👑 PREMIUM AUTO-UNLOCK AKTIF!", "success")
+                        Shared.Notify("👑 Key premium tetap aktif — auto-unlock selesai", "info")
                     end
                 else
                     Shared.KeyType = "FREE"
+                    Shared.KeyExpiresAt = 0
                     if Shared.Notify then
-                        Shared.Notify("🔒 Premium auto-unlock selesai", "info")
+                        Shared.Notify("🔒 Premium auto-unlock selesai — fitur premium ditutup", "warning")
                     end
                 end
+                if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
             end
         end
     end)
-
-    -- ⭐ LANGSUNG LOADING, TANPA KEY
-    startLoading()
 end
 
 return UI
