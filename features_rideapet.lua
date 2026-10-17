@@ -3783,37 +3783,70 @@ local function isHoldingRitualItem(itemName)
     return false
 end
 
--- ⭐ 2) CEK PLACED — GAK pake isHoldingRitualItem lagi!
+-- ⭐ CEK PLACED — DETEKSI UI "Already Placed"
 local function isYinPlaced()
+    -- 1. Cek UI Game (Paling akurat, baca tulisan "Yin Is Already Placed")
+    local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+    if playerGui then
+        local function scanUI(obj)
+            if obj:IsA("TextLabel") and obj.Text then
+                local txt = obj.Text:lower()
+                if txt:find("yin") and txt:find("already placed") then
+                    return true
+                end
+            end
+            for _, child in ipairs(obj:GetChildren()) do
+                if scanUI(child) then return true end
+            end
+            return false
+        end
+        if scanUI(playerGui) then return true end
+    end
+
+    -- 2. Fallback ke Runtime (kalo Yin gak ada di runtime & gak di tangan)
     local hr = Workspace:FindFirstChild("HeadlessRitual")
-    if not hr then return false end
-    local rt = hr:FindFirstChild("Runtime")
-    if not rt then return false end
-    
-    -- Cek runtime: kalo Yin gak ada di runtime, berarti udah ke-place
-    local yinExists = rt:FindFirstChild("Yin")
-    if yinExists then return false end -- Masih ada di runtime (belum ke-place)
-    
-    -- TAPI, cek juga: kalo player MASIH bawa Yin, berarti belum ke-place
-    if LocalPlayer:GetAttribute("RitualYin") == true then return false end
-    
-    return true
+    if hr then
+        local rt = hr:FindFirstChild("Runtime")
+        if rt and rt:FindFirstChild("Yin") == nil then
+            if not isHoldingRitualItem("Yin") then
+                return true
+            end
+        end
+    end
+
+    return false
 end
 
 local function isYangPlaced()
-    local hr = Workspace:FindFirstChild("HeadlessRitual")
-    if not hr then return false end
-    local rt = hr:FindFirstChild("Runtime")
-    if not rt then return false end
-    
-    local yangExists = rt:FindFirstChild("Yang")
-    if yangExists then return false end
-    
-    if LocalPlayer:GetAttribute("RitualYang") == true then return false end
-    
-    return true
-end
+    local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+    if playerGui then
+        local function scanUI(obj)
+            if obj:IsA("TextLabel") and obj.Text then
+                local txt = obj.Text:lower()
+                if txt:find("yang") and txt:find("already placed") then
+                    return true
+                end
+            end
+            for _, child in ipairs(obj:GetChildren()) do
+                if scanUI(child) then return true end
+            end
+            return false
+        end
+        if scanUI(playerGui) then return true end
+    end
 
+    local hr = Workspace:FindFirstChild("HeadlessRitual")
+    if hr then
+        local rt = hr:FindFirstChild("Runtime")
+        if rt and rt:FindFirstChild("Yang") == nil then
+            if not isHoldingRitualItem("Yang") then
+                return true
+            end
+        end
+    end
+
+    return false
+end
 -- 3) CEK ITEM HANDLED
 local function isItemHandled(itemName)
     if isHoldingRitualItem(itemName) then return true end
