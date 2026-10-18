@@ -4661,30 +4661,78 @@ hrp.CFrame = rigRoot.CFrame * CFrame.new(0, 0, 3)
         task.wait(1.5)
         
         -- ═══ 2. KLIK "LET'S GO" ═══
-        print("[AUTO OBBY] Milih Let's go...")
-        local startTime = tick()
-        while tick() - startTime < 4 do
-            for _, gui in ipairs(player.PlayerGui:GetDescendants()) do
-                if gui:IsA("TextButton") or gui:IsA("ImageButton") then
-                    local isTarget = false
-                    if string.lower(gui.Name):find("let") or string.lower(gui.Name):find("go") then isTarget = true end
-                    if gui:IsA("TextButton") and (string.lower(gui.Text):find("let") or string.lower(gui.Text):find("go")) then isTarget = true end
+print("[AUTO OBBY] Milih Let's go...")
+local startTime = tick()
+local clicked = false
+
+while tick() - startTime < 4 do
+    for _, gui in ipairs(player.PlayerGui:GetDescendants()) do
+        -- Pastiin gui itu TextButton/ImageButton dan punya Visible
+        if (gui:IsA("TextButton") or gui:IsA("ImageButton")) and gui:IsA("GuiObject") then
+            local isVisible = gui.Visible
+            if isVisible then
+                local isTarget = false
+                
+                -- Cek nama
+                local guiName = string.lower(gui.Name or "")
+                if guiName:find("let", 1, true) or guiName:find("go", 1, true) then 
+                    isTarget = true 
+                end
+                
+                -- Cek teks (khusus TextButton)
+                if not isTarget and gui:IsA("TextButton") then
+                    local guiText = string.lower(gui.Text or "")
+                    if guiText:find("let", 1, true) or guiText:find("go", 1, true) then 
+                        isTarget = true 
+                    end
+                end
+                
+                if isTarget then
+                    -- Cek AbsolutePosition & AbsoluteSize valid
+                    local absPos = gui.AbsolutePosition
+                    local absSize = gui.AbsoluteSize
                     
-                    if isTarget and gui.Visible then
-                        pcall(function() gui.MouseButton1Click:Fire() end)
-                        pcall(function() gui.Activated:Fire() end)
-                        local cx = gui.AbsolutePosition.X + (gui.AbsoluteSize.X / 2)
-                        local cy = gui.AbsolutePosition.Y + (gui.AbsoluteSize.Y / 2)
-                        VIM:SendMouseMoveEvent(cx, cy, 0)
-                        VIM:SendMouseButtonEvent(cx, cy, 0, true, game, 1)
-                        task.wait(0.05)
-                        VIM:SendMouseButtonEvent(cx, cy, 0, false, game, 1)
+                    if absPos and absSize then
+                        local cx = absPos.X + (absSize.X / 2)
+                        local cy = absPos.Y + (absSize.Y / 2)
+                        
+                        -- Pastiin cx, cy itu number valid
+                        if type(cx) == "number" and type(cy) == "number" and cx > 0 and cy > 0 then
+                            print("[AUTO OBBY] Klik tombol:", gui:GetFullName())
+                            
+                            pcall(function() gui.MouseButton1Click:Fire() end)
+                            pcall(function() gui.Activated:Fire() end)
+                            
+                            pcall(function()
+                                VIM:SendMouseMoveEvent(cx, cy, 0)
+                            end)
+                            task.wait(0.05)
+                            pcall(function()
+                                VIM:SendMouseButtonEvent(cx, cy, 0, true, game, 1)
+                            end)
+                            task.wait(0.05)
+                            pcall(function()
+                                VIM:SendMouseButtonEvent(cx, cy, 0, false, game, 1)
+                            end)
+                            
+                            clicked = true
+                        end
                     end
                 end
             end
-            task.wait(0.2)
         end
-        
+    end
+    
+    if clicked then break end
+    task.wait(0.2)
+end
+
+if clicked then
+    print("[AUTO OBBY] ✅ Berhasil klik Let's go")
+else
+    print("[AUTO OBBY] ⚠️ Gak nemu tombol Let's go yang valid")
+end
+
         -- ═══ 3. TUNGGU MENTAL KE OBBY ═══
         print("[AUTO OBBY] Nunggu mental ke obby...")
         local waitStart = tick()
