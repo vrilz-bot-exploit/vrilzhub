@@ -4740,13 +4740,15 @@ end
             if hrp.Position.X > 20000 then break end
             task.wait(0.5)
         end
-        
-        if hrp.Position.X < 20000 then 
-            print("[AUTO OBBY] Gagal mental.")
-            ObbyState.Running = false
-            return 
-        end
-        
+
+        -- ⭐ DELAY 8 DETIK — biar obby load dulu sebelum terbang
+        print("[AUTO OBBY] ⏳ Delay 8 detik — nunggu obby load...")
+        task.wait(8)
+
+        -- ⭐ Refresh char & hrp setelah delay
+        char = player.Character or player.CharacterAdded:Wait()
+        hrp = char:WaitForChild("HumanoidRootPart")
+
         -- ═══ 4. TP GLIDE KE FINISH ═══
         print("[AUTO OBBY] Terbang ke Finish...")
         for _, part in ipairs(char:GetDescendants()) do
