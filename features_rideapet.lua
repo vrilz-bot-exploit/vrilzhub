@@ -915,13 +915,20 @@ local function instantReturnToPlot()
     -- Polling ringan biar tau kalo egg tiba-tiba lepas
     local delayStart = os.clock()
     local DELAY_TOTAL = 4.0
+    local missStart = nil
     while os.clock() - delayStart < DELAY_TOTAL do
-        if not isHoldingEggLocal() then
-            -- Egg lepas di tengah delay → abort
-            return
+        if isHoldingEggLocal() then
+            missStart = nil
+        else
+            if not missStart then
+                missStart = os.clock()
+                        elseif os.clock() - missStart > 3.0 then
+                return
+            end
         end
-        task.wait(0.2)
+        task.wait(0.1)
     end
+    if not isHoldingEggLocal() then return end
 
     -- ⭐ STEP 2: Re-check egg masih di tangan setelah delay
     if not isHoldingEggLocal() then return end
@@ -971,14 +978,55 @@ local function returnToMyPlot()
     local myRoot = char and char:FindFirstChild("HumanoidRootPart")
     if not myRoot then return end
 
-    local holding = isHoldingEggLocal()
-    if not holding then return end
+        local holding = isHoldingEggLocal()
+    if not holding then
+        local ok = confirmEggInHand(4)
+        if not ok then
+            -- ⭐ Fallback: egg mungkin udah di-drop di tanah, coba pickup ulang
+            local spawnPart = getMyPlotSpawn()
+            if spawnPart then
+                local myRoot2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if myRoot2 then
+                    -- cek apakah ada egg di sekitar plot
+                    local rendered = Workspace:FindFirstChild("RenderedEggs")
+                    if rendered then
+                        for _, egg in ipairs(rendered:GetChildren()) do
+                            if egg:IsA("Model") then
+                                local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+                                if eggPart and (eggPart.Position - spawnPart.Position).Magnitude < 30 then
+                                    local prompt = egg:FindFirstChild("Pickup", true)
+                                    if prompt and prompt:IsA("ProximityPrompt") then
+                                        prompt.HoldDuration = 0
+                                        if typeof(fireproximityprompt) == "function" then
+                                            pcall(fireproximityprompt, prompt)
+                                            task.wait(0.5)
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            if not isHoldingEggLocal() then return end
+        end
+        holding = true
+    end
 
-    -- ⭐ DELAY 4 DETIK — konfirmasi egg stabil dulu (polling bisa abort)
+    -- ⭐ DELAY 4 DETIK — toleransi flicker 1.5s (egg sering flicker di server)
     local delayStart = os.clock()
+    local missStart = nil
     while os.clock() - delayStart < 4.0 do
-        if not isHoldingEggLocal() then return end
-        task.wait(0.2)
+        if isHoldingEggLocal() then
+            missStart = nil
+        else
+            if not missStart then
+                missStart = os.clock()
+                        elseif os.clock() - missStart > 3.0 then
+                return  -- beneran lepas >3s → abort
+            end
+        end
+        task.wait(0.1)
     end
     if not isHoldingEggLocal() then return end
 
@@ -1053,7 +1101,12 @@ end
 
 -- ⭐ WRAPPER — Auto pilih Step / Instant
 local function doReturnToPlot()
-    if not Shared.MutationReturn_Enabled then return end
+    if not Shared.MutationReturn_Enabled then 
+        print("[RETURN] ❌ MutationReturn_Enabled = false")
+        return 
+    end
+    
+    print("[RETURN] ▶ doReturnToPlot, mode =", Shared.ReturnMode, "holding =", isHoldingEggLocal())
 
     local mode = Shared.ReturnMode or "Step"
 
@@ -2945,11 +2998,36 @@ local function runMutationOnce()
         return false
     end
 
-       local retWaited = 0
+           local retWaited = 0
     while retWaited < MUT_CONFIG.RETURN_TIMEOUT do
         task.wait(1)
         retWaited = retWaited + 1
         if isHoldingEggMutation() then break end
+    end
+
+    -- ⭐ STABILIZE: toleransi flicker 3s
+    local stableStart = os.clock()
+    local missStart = nil
+    local stableOk = false
+    while os.clock() - stableStart < 4.0 do
+        if isHoldingEggMutation() then
+            missStart = nil
+            stableOk = true
+        else
+            if not missStart then
+                missStart = os.clock()
+            elseif os.clock() - missStart > 3.0 then
+                stableOk = false
+                break
+            end
+        end
+        task.wait(0.2)
+    end
+    if not stableOk or not isHoldingEggMutation() then
+        MutationState.Running = false
+        MutationState.StealPaused = false
+        MutationState.EggLocked = false
+        return false
     end
 
               -- 🏆 PLATINUM WEBHOOK TRIGGER
@@ -2969,11 +3047,11 @@ local function runMutationOnce()
         })
     end
 
-        if Shared.MutationReturn_Enabled then
-        task.wait(0.5)
+            if Shared.MutationReturn_Enabled then
+        task.wait(0.5)  -- jeda webhook
         local oldFlag = Shared.AutoReturn_Enabled
         Shared.AutoReturn_Enabled = true
-        doReturnToPlot()          -- ⬅️ auto pilih Instant / Step sesuai ReturnMode
+        doReturnToPlot()  -- delay 4s udah ada di dalam returnToMyPlot/instantReturnToPlot
         Shared.AutoReturn_Enabled = oldFlag
     end
 
