@@ -3271,7 +3271,7 @@ end
                             task.wait(1)
                             if isHoldingEggMutation() then
                                 if Shared.Notify then
-                                    Shared.Notify("🔥 Mutation selesai!", "success")
+                                    Shared.Notify("🔥 Wait 4 seconds!", "success")
                                 end
                                 break
                             end
@@ -3404,7 +3404,7 @@ doReturnToPlot()
                     task.wait(1)
                     if isHoldingEggMutation() then
                         if Shared.Notify then
-                            Shared.Notify("🔥 Mutation selesai!", "success")
+                            Shared.Notify("🔥 Wait 4 seconds!", "success")
                         end
                                                 -- 🏆 PLATINUM WEBHOOK TRIGGER
                                                 if _G.VRILZ_SendWebhook then
