@@ -1773,22 +1773,34 @@ local function isRaritySelected(eggName)
 end
 
 -- ============================================================
--- INFINITY JUMP
+-- INFINITY JUMP (FIXED v2)
 -- ============================================================
 local InfinityJumpState = {
     Enabled = false,
     Height = 50,
     MinHeight = 10,
     MaxHeight = 50,
+    InputConn = nil,
+    MobileHooked = false,
 }
+
+-- ⭐ Konversi Height → JumpPower (Roblox default 7.2 height = 50 power)
+local function heightToPower(h)
+    -- Pakai rasio standar Roblox: JumpPower 50 ≈ JumpHeight 7.2
+    return h * (50 / 7.2)
+end
 
 local function applyJumpHeight()
     local char = LocalPlayer.Character
     local hum = char and char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
+
+    local power = heightToPower(InfinityJumpState.Height)
     pcall(function()
-        hum.UseJumpPower = false
-        hum.JumpHeight = InfinityJumpState.Height
+        hum.UseJumpPower = true
+        hum.JumpPower = power
+        -- Fallback: set JumpHeight juga (kalo game support)
+        pcall(function() hum.JumpHeight = InfinityJumpState.Height end)
     end)
 end
 
@@ -1796,40 +1808,49 @@ local function doJump()
     if not InfinityJumpState.Enabled then return end
     local char = LocalPlayer.Character
     local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-    if hum.Health <= 0 then return end
+    if not hum or hum.Health <= 0 then return end
 
+    -- Apply height dulu
+    applyJumpHeight()
+
+    -- ⭐ FIX: pake .Jump = true (BUKAN cuma ChangeState)
     pcall(function()
-        hum.UseJumpPower = false
-        hum.JumpHeight = InfinityJumpState.Height
+        hum.Jump = true
     end)
-
     pcall(function()
         hum:ChangeState(Enum.HumanoidStateType.Jumping)
     end)
 end
 
-function Features.startInfinityJump()
-    -- Space trigger (PC)
+            function Features.startInfinityJump()
     local UserInputService = game:GetService("UserInputService")
-    UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
+
+    -- ⭐ PC: Space trigger — SIMPAN CONN biar gak dobel
+    if InfinityJumpState.InputConn then
+        pcall(function() InfinityJumpState.InputConn:Disconnect() end)
+    end
+    InfinityJumpState.InputConn = UserInputService.InputBegan:Connect(function(input, gp)
+        if gp then return end
         if input.KeyCode == Enum.KeyCode.Space then
             doJump()
         end
     end)
 
-    -- Mobile jump button hook
+    -- ⭐ MOBILE: hook jump button (kalo ada)
     task.spawn(function()
+        if not UserInputService.TouchEnabled then return end
+
         local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
         if not playerGui then return end
-        while task.wait(1) do
+
+        while task.wait(0.5) do
             local touchGui = playerGui:FindFirstChild("TouchGui")
             local touchFrame = touchGui and touchGui:FindFirstChild("TouchControlFrame")
             local jumpBtn = touchFrame and touchFrame:FindFirstChild("JumpButton")
             if jumpBtn and jumpBtn:IsA("ImageButton") then
                 if not jumpBtn:GetAttribute("VrilzInfinityHooked") then
                     jumpBtn:SetAttribute("VrilzInfinityHooked", true)
+                    -- ⭐ PAKE SALAH SATU AJA — MouseButton1Down lebih reliable
                     jumpBtn.MouseButton1Down:Connect(function()
                         doJump()
                     end)
@@ -1838,7 +1859,7 @@ function Features.startInfinityJump()
         end
     end)
 
-    -- Re-apply on respawn
+    -- ⭐ Re-apply on respawn
     LocalPlayer.CharacterAdded:Connect(function()
         task.wait(1)
         if InfinityJumpState.Enabled then
@@ -1846,12 +1867,13 @@ function Features.startInfinityJump()
         end
     end)
 end
-
+                
 function Features.setInfinityJumpEnabled(v)
     InfinityJumpState.Enabled = v
     if v then
         applyJumpHeight()
     else
+        -- ⭐ Restore default JumpPower
         local char = LocalPlayer.Character
         local hum = char and char:FindFirstChildOfClass("Humanoid")
         if hum then
