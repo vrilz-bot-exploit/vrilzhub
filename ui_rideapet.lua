@@ -1,5 +1,5 @@
 -- ============================================================
--- VRILZHUB UI — RIDE A PET v2.0 (AUTO-DETECT PC & MOBILE)
+-- VRILZHUB UI — RIDE A PET v2.1 (AUTO-DETECT PC & MOBILE)
 -- PC: 800x580 | Mobile: 88% x 78% viewport
 -- ============================================================
 
@@ -2241,20 +2241,6 @@ local function buildInfinityJumpSection(speedContent, makeToggle, C, CFG, notify
             end
         end
     end)
-
-    -- Note
-    local infNote = Instance.new("TextLabel")
-    infNote.Size = UDim2.new(1, 0, 0, 14)
-    infNote.BackgroundTransparency = 1
-    infNote.Text = "Tekan Space = lompat tinggi · Gak pencet = diam"
-    infNote.TextColor3 = C.Muted
-    infNote.Font = Enum.Font.GothamSemibold
-    infNote.TextSize = CFG.FONT_MUTED
-    infNote.TextXAlignment = Enum.TextXAlignment.Left
-    infNote.LayoutOrder = 7
-    infNote.ZIndex = 3
-    infNote.Parent = speedContent
-    registerTheme(infNote, "Muted", "TextColor3")
 end
 
 -- ============================================================
@@ -2412,7 +2398,7 @@ local function buildMainWindow(parent)
     subtitle.Size = UDim2.new(0, 300, 0, 14)
     subtitle.Position = UDim2.fromOffset(IS_MOBILE and 48 or 58, IS_MOBILE and 26 or 28)
     subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Ride a Pet · v2.0"
+    subtitle.Text = "Ride a Pet · v2.1"
     subtitle.TextColor3 = C.Muted
     subtitle.Font = Enum.Font.GothamSemibold
     subtitle.TextSize = IS_MOBILE and 9 or 10
@@ -3114,11 +3100,11 @@ local function buildMainWindow(parent)
     local updateCard, updateContent = makeCard(infoPage, "📢 UPDATE INFORMATION", 2)
 
     local infoLines = {
-        "Version        : 2.0",
-        "Last Update    : 29 Sept 2026",
+        "Version        : 2.1",
+        "Last Update    : 18 Okto 2026",
         "Status         : Online ✅",
-        "Changelog      : Live Chat, Tp Mode, Auto Hatch",
-        "                 Auto Event, Auto Yin, Fps Boost",
+        "Changelog      : Fly Chard, Tp Mode, Auto Hatch",
+        "                 Auto Event, Auto Yin, Auto Obby",
     }
     for i, line in ipairs(infoLines) do
         local lbl = Instance.new("TextLabel")
@@ -4249,22 +4235,6 @@ do
         end
         notify("🛸 Fly Speed: " .. s .. " studs/s", "info")
     end)
-
-    -- Note
-    local flyNote = Instance.new("TextLabel")
-    flyNote.Size = UDim2.new(1, 0, 0, 42)
-    flyNote.BackgroundTransparency = 1
-    flyNote.Text = "WASD = gerak · Space = naik · LeftCtrl = turun\nGanti height = auto naik/turun instant"
-    flyNote.TextColor3 = C.Muted
-    flyNote.Font = Enum.Font.GothamSemibold
-    flyNote.TextSize = CFG.FONT_MUTED
-    flyNote.TextWrapped = true
-    flyNote.TextXAlignment = Enum.TextXAlignment.Left
-    flyNote.TextYAlignment = Enum.TextYAlignment.Top
-    flyNote.LayoutOrder = 10
-    flyNote.ZIndex = 3
-    flyNote.Parent = flyContent
-    registerTheme(flyNote, "Muted", "TextColor3")
 end
     -- ═══════════════════════════════════════════
     local ipCard, ipContent = makeCard(autoPage, "INSTANT PICKUP", 3)
@@ -4862,7 +4832,7 @@ end)
                             },
                         },
                         footer = {
-                            text = "🏆 VRILZHUB PLATINUM  •  v2.0",
+                            text = "🏆 VRILZHUB PLATINUM  •  v2.1",
                         },
                         timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
                     }}
