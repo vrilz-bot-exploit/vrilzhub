@@ -2138,6 +2138,126 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
 end
 
 -- ============================================================
+-- BUILD INFINITY JUMP SECTION (dipisah biar gak exceed register limit)
+-- ============================================================
+local function buildInfinityJumpSection(speedContent, makeToggle, C, CFG, notify, registerTheme)
+    -- Divider
+    local infDivider = Instance.new("Frame")
+    infDivider.Size = UDim2.new(1, 0, 0, 1)
+    infDivider.BackgroundColor3 = C.Surface3
+    infDivider.BorderSizePixel = 0
+    infDivider.LayoutOrder = 4
+    infDivider.ZIndex = 3
+    infDivider.Parent = speedContent
+    registerTheme(infDivider, "Surface3", "BackgroundColor3")
+
+    -- Toggle Enable Infinity Jump
+    makeToggle(speedContent, "Enable Infinity Jump", false, function(v)
+        Shared.InfinityJump_Enabled = v
+        local F = getFeatures()
+        if F and F.setInfinityJumpEnabled then
+            F.setInfinityJumpEnabled(v)
+        end
+        if v then
+            notify("♾️ Infinity Jump: ON", "success")
+        else
+            notify("♾️ Infinity Jump: OFF", "info")
+        end
+    end)
+
+    -- Label Height
+    local infHeightLbl = Instance.new("TextLabel")
+    infHeightLbl.Size = UDim2.new(1, 0, 0, 16)
+    infHeightLbl.BackgroundTransparency = 1
+    infHeightLbl.Text = "Jump Height: " .. (Shared.InfinityJump_Height or 50) .. " studs (max 50)"
+    infHeightLbl.TextColor3 = C.Muted
+    infHeightLbl.Font = Enum.Font.GothamSemibold
+    infHeightLbl.TextSize = CFG.FONT_MUTED
+    infHeightLbl.TextXAlignment = Enum.TextXAlignment.Left
+    infHeightLbl.LayoutOrder = 5
+    infHeightLbl.ZIndex = 3
+    infHeightLbl.Parent = speedContent
+    registerTheme(infHeightLbl, "Muted", "TextColor3")
+
+    -- Slider BG
+    local infSliderBg = Instance.new("Frame")
+    infSliderBg.Size = UDim2.new(1, 0, 0, 8)
+    infSliderBg.BackgroundColor3 = C.Surface3
+    infSliderBg.BorderSizePixel = 0
+    infSliderBg.LayoutOrder = 6
+    infSliderBg.ZIndex = 3
+    infSliderBg.Parent = speedContent
+    registerTheme(infSliderBg, "Surface3", "BackgroundColor3")
+
+    local infSliderBgCorner = Instance.new("UICorner")
+    infSliderBgCorner.CornerRadius = UDim.new(1, 0)
+    infSliderBgCorner.Parent = infSliderBg
+
+    -- Slider Fill
+    local infSliderFill = Instance.new("Frame")
+    local initPct = ((Shared.InfinityJump_Height or 50) - 10) / (50 - 10)
+    infSliderFill.Size = UDim2.new(math.clamp(initPct, 0, 1), 0, 1, 0)
+    infSliderFill.BackgroundColor3 = C.Accent
+    infSliderFill.BorderSizePixel = 0
+    infSliderFill.ZIndex = 4
+    infSliderFill.Parent = infSliderBg
+    registerTheme(infSliderFill, "Accent", "BackgroundColor3")
+
+    local infSliderFillCorner = Instance.new("UICorner")
+    infSliderFillCorner.CornerRadius = UDim.new(1, 0)
+    infSliderFillCorner.Parent = infSliderFill
+
+    -- Slider click area
+    local infSliderBtn = Instance.new("TextButton")
+    infSliderBtn.Size = UDim2.new(1, 0, 1, 20)
+    infSliderBtn.Position = UDim2.new(0, 0, 0.5, -10)
+    infSliderBtn.BackgroundTransparency = 1
+    infSliderBtn.Text = ""
+    infSliderBtn.ZIndex = 5
+    infSliderBtn.Parent = infSliderBg
+
+    local draggingInf = false
+    infSliderBtn.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+            draggingInf = true
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+            draggingInf = false
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(i)
+        if draggingInf and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+            local mouseX = UserInputService:GetMouseLocation().X
+            local rel = math.clamp((mouseX - infSliderBg.AbsolutePosition.X) / infSliderBg.AbsoluteSize.X, 0, 1)
+            local h = math.floor(10 + (50 - 10) * rel)
+            Shared.InfinityJump_Height = h
+            infSliderFill.Size = UDim2.new(rel, 0, 1, 0)
+            infHeightLbl.Text = "Jump Height: " .. h .. " studs (max 50)"
+            local F = getFeatures()
+            if F and F.setInfinityJumpHeight then
+                F.setInfinityJumpHeight(h)
+            end
+        end
+    end)
+
+    -- Note
+    local infNote = Instance.new("TextLabel")
+    infNote.Size = UDim2.new(1, 0, 0, 14)
+    infNote.BackgroundTransparency = 1
+    infNote.Text = "Tekan Space = lompat tinggi · Gak pencet = diam"
+    infNote.TextColor3 = C.Muted
+    infNote.Font = Enum.Font.GothamSemibold
+    infNote.TextSize = CFG.FONT_MUTED
+    infNote.TextXAlignment = Enum.TextXAlignment.Left
+    infNote.LayoutOrder = 7
+    infNote.ZIndex = 3
+    infNote.Parent = speedContent
+    registerTheme(infNote, "Muted", "TextColor3")
+end
+
+-- ============================================================
 -- BUILD MAIN WINDOW
 -- ============================================================
 local function buildMainWindow(parent)
@@ -4010,7 +4130,7 @@ local function buildMainWindow(parent)
     sliderFill.BackgroundColor3 = C.Accent
     sliderFill.BorderSizePixel = 0
     sliderFill.Parent = sliderBg
-    local sfc = Instance.new("UICorner"); sfc.CornerRadius = UDim.new(1,0); sfc.Parent = sliderFill
+        local sfc = Instance.new("UICorner"); sfc.CornerRadius = UDim.new(1,0); sfc.Parent = sliderFill
 
     local sliderBtn = Instance.new("TextButton")
     sliderBtn.Size = UDim2.new(1, 0, 1, 20)
@@ -4019,129 +4139,33 @@ local function buildMainWindow(parent)
     sliderBtn.Text = ""
     sliderBtn.Parent = sliderBg
 
-        -- ═══════════════════════════════════════════════════════════
-    -- ♾️ INFINITY JUMP — TAMBAHAN DI CARD SPEED
-    -- ═══════════════════════════════════════════════════════════
-
-    -- Divider tipis pemisah
-    local infDivider = Instance.new("Frame")
-    infDivider.Size = UDim2.new(1, 0, 0, 1)
-    infDivider.BackgroundColor3 = C.Surface3
-    infDivider.BorderSizePixel = 0
-    infDivider.LayoutOrder = 4
-    infDivider.ZIndex = 3
-    infDivider.Parent = speedContent
-    registerTheme(infDivider, "Surface3", "BackgroundColor3")
-
-    -- Toggle Infinity Jump
-    makeToggle(speedContent, "Enable Infinity Jump", false, function(v)
-        Shared.InfinityJump_Enabled = v
-        local F = getFeatures()
-        if F and F.setInfinityJumpEnabled then
-            F.setInfinityJumpEnabled(v)
-        end
-        if v then
-            notify("♾️ Infinity Jump: ON", "success")
-        else
-            notify("♾️ Infinity Jump: OFF", "info")
-        end
-    end)
-
-    -- Label Height
-    local infHeightLbl = Instance.new("TextLabel")
-    infHeightLbl.Size = UDim2.new(1, 0, 0, 16)
-    infHeightLbl.BackgroundTransparency = 1
-    infHeightLbl.Text = "Jump Height: " .. (Shared.InfinityJump_Height or 50) .. " studs (max 50)"
-    infHeightLbl.TextColor3 = C.Muted
-    infHeightLbl.Font = Enum.Font.GothamSemibold
-    infHeightLbl.TextSize = CFG.FONT_MUTED
-    infHeightLbl.TextXAlignment = Enum.TextXAlignment.Left
-    infHeightLbl.LayoutOrder = 5
-    infHeightLbl.ZIndex = 3
-    infHeightLbl.Parent = speedContent
-    registerTheme(infHeightLbl, "Muted", "TextColor3")
-
-    -- Slider Background
-    local infSliderBg = Instance.new("Frame")
-    infSliderBg.Size = UDim2.new(1, 0, 0, 8)
-    infSliderBg.BackgroundColor3 = C.Surface3
-    infSliderBg.BorderSizePixel = 0
-    infSliderBg.LayoutOrder = 6
-    infSliderBg.ZIndex = 3
-    infSliderBg.Parent = speedContent
-    registerTheme(infSliderBg, "Surface3", "BackgroundColor3")
-
-    local infSliderBgCorner = Instance.new("UICorner")
-    infSliderBgCorner.CornerRadius = UDim.new(1, 0)
-    infSliderBgCorner.Parent = infSliderBg
-
-    -- Slider Fill
-    local infSliderFill = Instance.new("Frame")
-    local initPct = ((Shared.InfinityJump_Height or 50) - 10) / (50 - 10)
-    infSliderFill.Size = UDim2.new(math.clamp(initPct, 0, 1), 0, 1, 0)
-    infSliderFill.BackgroundColor3 = C.Accent
-    infSliderFill.BorderSizePixel = 0
-    infSliderFill.ZIndex = 4
-    infSliderFill.Parent = infSliderBg
-    registerTheme(infSliderFill, "Accent", "BackgroundColor3")
-
-    local infSliderFillCorner = Instance.new("UICorner")
-    infSliderFillCorner.CornerRadius = UDim.new(1, 0)
-    infSliderFillCorner.Parent = infSliderFill
-
-    -- Slider Click Area
-    local infSliderBtn = Instance.new("TextButton")
-    infSliderBtn.Size = UDim2.new(1, 0, 1, 20)
-    infSliderBtn.Position = UDim2.new(0, 0, 0.5, -10)
-    infSliderBtn.BackgroundTransparency = 1
-    infSliderBtn.Text = ""
-    infSliderBtn.ZIndex = 5
-    infSliderBtn.Parent = infSliderBg
-
-    -- Drag logic
-    local draggingInf = false
-    infSliderBtn.InputBegan:Connect(function(i)
+    local draggingSlider = false
+    sliderBtn.InputBegan:Connect(function(i)
         if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-            draggingInf = true
+            draggingSlider = true
         end
     end)
     UserInputService.InputEnded:Connect(function(i)
         if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-            draggingInf = false
+            draggingSlider = false
         end
     end)
-    UserInputService.InputChanged:Connect(function(i)
-        if draggingInf and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+       UserInputService.InputChanged:Connect(function(i)
+        if draggingSlider and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
             local mouseX = UserInputService:GetMouseLocation().X
-            local rel = math.clamp((mouseX - infSliderBg.AbsolutePosition.X) / infSliderBg.AbsoluteSize.X, 0, 1)
-            local h = math.floor(10 + (50 - 10) * rel)
-            Shared.InfinityJump_Height = h
-            infSliderFill.Size = UDim2.new(rel, 0, 1, 0)
-            infHeightLbl.Text = "Jump Height: " .. h .. " studs (max 50)"
+            local rel = math.clamp((mouseX - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
+            Shared.Speed_Value = math.floor(rel * 500)
+            sliderFill.Size = UDim2.new(rel, 0, 1, 0)
+            speedLbl.Text = "Speed: " .. Shared.Speed_Value
             local F = getFeatures()
-            if F and F.setInfinityJumpHeight then
-                F.setInfinityJumpHeight(h)
+            if F and F.setSpeed then
+                F.setSpeed(Shared.Speed_Value)
             end
         end
     end)
 
-    -- Note
-    local infNote = Instance.new("TextLabel")
-    infNote.Size = UDim2.new(1, 0, 0, 14)
-    infNote.BackgroundTransparency = 1
-    infNote.Text = "Tekan Space = lompat tinggi · Gak pencet = diam"
-    infNote.TextColor3 = C.Muted
-    infNote.Font = Enum.Font.GothamSemibold
-    infNote.TextSize = CFG.FONT_MUTED
-    infNote.TextXAlignment = Enum.TextXAlignment.Left
-    infNote.LayoutOrder = 7
-    infNote.ZIndex = 3
-    infNote.Parent = speedContent
-    registerTheme(infNote, "Muted", "TextColor3")
-
-    -- ═══════════════════════════════════════════════════════════
-    -- END INFINITY JUMP TAMBAHAN
-    -- ═══════════════════════════════════════════════════════════
+    -- Infinity Jump section (dipanggil dari fungsi terpisah)
+    buildInfinityJumpSection(speedContent, makeToggle, C, CFG, notify, registerTheme)
 
     local ipCard, ipContent = makeCard(autoPage, "INSTANT PICKUP", 2)
     makeToggle(ipContent, "Enable Instant Pickup", false, function(v) Shared.InstantPickup_Enabled = v end)
