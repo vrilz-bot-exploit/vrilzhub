@@ -1773,6 +1773,108 @@ local function isRaritySelected(eggName)
 end
 
 -- ============================================================
+-- INFINITY JUMP
+-- ============================================================
+local InfinityJumpState = {
+    Enabled = false,
+    Height = 50,
+    MinHeight = 10,
+    MaxHeight = 50,
+}
+
+local function applyJumpHeight()
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    pcall(function()
+        hum.UseJumpPower = false
+        hum.JumpHeight = InfinityJumpState.Height
+    end)
+end
+
+local function doJump()
+    if not InfinityJumpState.Enabled then return end
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    if hum.Health <= 0 then return end
+
+    pcall(function()
+        hum.UseJumpPower = false
+        hum.JumpHeight = InfinityJumpState.Height
+    end)
+
+    pcall(function()
+        hum:ChangeState(Enum.HumanoidStateType.Jumping)
+    end)
+end
+
+function Features.startInfinityJump()
+    -- Space trigger (PC)
+    local UserInputService = game:GetService("UserInputService")
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.Space then
+            doJump()
+        end
+    end)
+
+    -- Mobile jump button hook
+    task.spawn(function()
+        local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+        if not playerGui then return end
+        while task.wait(1) do
+            local touchGui = playerGui:FindFirstChild("TouchGui")
+            local touchFrame = touchGui and touchGui:FindFirstChild("TouchControlFrame")
+            local jumpBtn = touchFrame and touchFrame:FindFirstChild("JumpButton")
+            if jumpBtn and jumpBtn:IsA("ImageButton") then
+                if not jumpBtn:GetAttribute("VrilzInfinityHooked") then
+                    jumpBtn:SetAttribute("VrilzInfinityHooked", true)
+                    jumpBtn.MouseButton1Down:Connect(function()
+                        doJump()
+                    end)
+                end
+            end
+        end
+    end)
+
+    -- Re-apply on respawn
+    LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(1)
+        if InfinityJumpState.Enabled then
+            applyJumpHeight()
+        end
+    end)
+end
+
+function Features.setInfinityJumpEnabled(v)
+    InfinityJumpState.Enabled = v
+    if v then
+        applyJumpHeight()
+    else
+        local char = LocalPlayer.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            pcall(function()
+                hum.UseJumpPower = true
+                hum.JumpPower = 50
+            end)
+        end
+    end
+end
+
+function Features.setInfinityJumpHeight(h)
+    InfinityJumpState.Height = math.clamp(h, InfinityJumpState.MinHeight, InfinityJumpState.MaxHeight)
+    if InfinityJumpState.Enabled then
+        applyJumpHeight()
+    end
+end
+
+function Features.getInfinityJumpState()
+    return InfinityJumpState
+end
+
+-- ============================================================
 -- SPEED
 -- ============================================================
 function Features.setSpeed(v)
@@ -4538,6 +4640,7 @@ function Features.Init(sharedState)
     Features.startAutoHatchLuck()
     Features.startAutoHalloween()
     Features.startAutoYinRitual()
+    Features.startInfinityJump()
 
            -- ⭐ AUTO-ENABLE AUTO RIDE PET — LANGSUNG ON
     Shared.AutoRidePet_Enabled = true
