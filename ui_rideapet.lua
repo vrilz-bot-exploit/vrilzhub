@@ -1882,6 +1882,21 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
         else notify("🔮 Yin Ritual: OFF", "info") end
     end)
 
+     -- ⭐ AUTO OBBY (TALK + FINISH)
+    makeToggle(eventContent, "Auto Obby (Talk + Finish)", false, function(v)
+        if v then
+            notify("🏃 Auto Obby: ON - Starting...", "success")
+            task.spawn(function()
+                local F = getFeatures()
+                if F and F.startAutoObby then 
+                    F.startAutoObby()
+                end
+            end)
+        else
+            notify("🏃 Auto Obby: OFF", "info")
+        end
+    end)
+
     local eventNote = Instance.new("TextLabel")
     eventNote.Size = UDim2.new(1, 0, 0, 32)
     eventNote.BackgroundTransparency = 1
