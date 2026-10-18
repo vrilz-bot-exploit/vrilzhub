@@ -4166,8 +4166,106 @@ local function buildMainWindow(parent)
 
     -- Infinity Jump section (dipanggil dari fungsi terpisah)
     buildInfinityJumpSection(speedContent, makeToggle, C, CFG, notify, registerTheme)
+    -- ═══════════════════════════════════════════
+    -- 🛸 CHARACTER FLY CARD
+    -- ═══════════════════════════════════════════
+    local flyCard, flyContent = makeCard(autoPage, "🛸 CHARACTER FLY", 2)
 
-    local ipCard, ipContent = makeCard(autoPage, "INSTANT PICKUP", 2)
+    -- Toggle Enable Fly
+    makeToggle(flyContent, "Enable Fly", false, function(v)
+        Shared.Fly_Enabled = v
+        local F = getFeatures()
+        if F and F.setFlyEnabled then
+            F.setFlyEnabled(v)
+        end
+        if v then
+            notify("🛸 Fly: ON", "success")
+        else
+            notify("🛸 Fly: OFF", "info")
+        end
+    end)
+
+    -- Height Dropdown
+    local flyHeightLbl = Instance.new("TextLabel")
+    flyHeightLbl.Size = UDim2.new(1, 0, 0, 16)
+    flyHeightLbl.BackgroundTransparency = 1
+    flyHeightLbl.Text = "Fly Height:"
+    flyHeightLbl.TextColor3 = C.Muted
+    flyHeightLbl.Font = Enum.Font.GothamSemibold
+    flyHeightLbl.TextSize = CFG.FONT_MUTED
+    flyHeightLbl.TextXAlignment = Enum.TextXAlignment.Left
+    flyHeightLbl.LayoutOrder = 2
+    flyHeightLbl.ZIndex = 3
+    flyHeightLbl.Parent = flyContent
+    registerTheme(flyHeightLbl, "Muted", "TextColor3")
+
+    local flyHeightHolder = Instance.new("Frame")
+    flyHeightHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
+    flyHeightHolder.BackgroundTransparency = 1
+    flyHeightHolder.LayoutOrder = 3
+    flyHeightHolder.ZIndex = 3
+    flyHeightHolder.Parent = flyContent
+
+    local FLY_HEIGHT_LIST = {"50", "100", "150", "200", "250", "500"}
+    makeDropdownGlobal(flyHeightHolder, FLY_HEIGHT_LIST, tostring(Shared.Fly_Height or 100), function(v)
+        local h = tonumber(v) or 100
+        Shared.Fly_Height = h
+        local F = getFeatures()
+        if F and F.setFlyHeight then
+            F.setFlyHeight(h)
+        end
+        notify("🛸 Fly Height: " .. h .. " studs", "info")
+    end)
+
+    -- Speed Dropdown
+    local flySpeedLbl = Instance.new("TextLabel")
+    flySpeedLbl.Size = UDim2.new(1, 0, 0, 16)
+    flySpeedLbl.BackgroundTransparency = 1
+    flySpeedLbl.Text = "Fly Speed:"
+    flySpeedLbl.TextColor3 = C.Muted
+    flySpeedLbl.Font = Enum.Font.GothamSemibold
+    flySpeedLbl.TextSize = CFG.FONT_MUTED
+    flySpeedLbl.TextXAlignment = Enum.TextXAlignment.Left
+    flySpeedLbl.LayoutOrder = 4
+    flySpeedLbl.ZIndex = 3
+    flySpeedLbl.Parent = flyContent
+    registerTheme(flySpeedLbl, "Muted", "TextColor3")
+
+    local flySpeedHolder = Instance.new("Frame")
+    flySpeedHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
+    flySpeedHolder.BackgroundTransparency = 1
+    flySpeedHolder.LayoutOrder = 5
+    flySpeedHolder.ZIndex = 3
+    flySpeedHolder.Parent = flyContent
+
+    local FLY_SPEED_LIST = {"100", "200", "300", "400", "500"}
+    makeDropdownGlobal(flySpeedHolder, FLY_SPEED_LIST, tostring(Shared.Fly_Speed or 300), function(v)
+        local s = tonumber(v) or 300
+        Shared.Fly_Speed = s
+        local F = getFeatures()
+        if F and F.setFlySpeed then
+            F.setFlySpeed(s)
+        end
+        notify("🛸 Fly Speed: " .. s .. " studs/s", "info")
+    end)
+
+    -- Note
+    local flyNote = Instance.new("TextLabel")
+    flyNote.Size = UDim2.new(1, 0, 0, 42)
+    flyNote.BackgroundTransparency = 1
+    flyNote.Text = "WASD = gerak · Space = naik · LeftCtrl = turun\nGanti height = auto naik/turun instant"
+    flyNote.TextColor3 = C.Muted
+    flyNote.Font = Enum.Font.GothamSemibold
+    flyNote.TextSize = CFG.FONT_MUTED
+    flyNote.TextWrapped = true
+    flyNote.TextXAlignment = Enum.TextXAlignment.Left
+    flyNote.TextYAlignment = Enum.TextYAlignment.Top
+    flyNote.LayoutOrder = 10
+    flyNote.ZIndex = 3
+    flyNote.Parent = flyContent
+    registerTheme(flyNote, "Muted", "TextColor3")
+    -- ═══════════════════════════════════════════
+    local ipCard, ipContent = makeCard(autoPage, "INSTANT PICKUP", 3)
     makeToggle(ipContent, "Enable Instant Pickup", false, function(v) Shared.InstantPickup_Enabled = v end)
 
     local ipNote = Instance.new("TextLabel")
@@ -4181,7 +4279,7 @@ local function buildMainWindow(parent)
     ipNote.LayoutOrder = 2
     ipNote.Parent = ipContent
 
-                local autoCard, autoContent = makeCard(autoPage, "OTHER AUTO", 3)
+    local autoCard, autoContent = makeCard(autoPage, "OTHER AUTO", 4)
     
     -- Wrap semua variable dropdown di do...end biar gak numpuk local register
     do
