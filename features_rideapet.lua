@@ -2071,11 +2071,16 @@ local function fly_start()
             vertVel = -FlyState.VerticalSpeed
         end
 
-        FlyState.BodyVelocity.Velocity = Vector3.new(
+                FlyState.BodyVelocity.Velocity = Vector3.new(
             horizVel.X,
             vertVel,
             horizVel.Z
         )
+
+        -- ⭐ BARU: sync BaseY pas manual naik/turun (Space/LeftCtrl)
+        if vertVel ~= 0 then
+            FlyState.BaseY = root2.Position.Y - FlyState.Height
+        end
 
         if camLook.Magnitude > 0.01 then
             FlyState.BodyGyro.CFrame = CFrame.lookAt(root2.Position, root2.Position + camLook)
@@ -2114,17 +2119,25 @@ function Features.setFlyEnabled(v)
 end
 
 function Features.setFlyHeight(h)
-    FlyState.Height = math.clamp(h, 10, 1000)
+    local newH = math.clamp(h, 10, 1000)
+    local oldH = FlyState.Height
+
     if FlyState.Flying then
         local root = fly_getRoot()
         if root then
+            local delta = newH - oldH
             root.CFrame = CFrame.new(
                 root.Position.X,
-                FlyState.BaseY + h,
+                root.Position.Y + delta,
                 root.Position.Z
             )
+            root.Velocity = Vector3.zero
+            root.AssemblyLinearVelocity = Vector3.zero
+            FlyState.BaseY = root.Position.Y - newH
         end
     end
+
+    FlyState.Height = newH
 end
 
 function Features.setFlySpeed(s)
