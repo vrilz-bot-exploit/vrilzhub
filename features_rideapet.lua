@@ -1784,10 +1784,13 @@ local InfinityJumpState = {
     MobileHooked = false,
 }
 
--- ⭐ Konversi Height → JumpPower (Roblox default 7.2 height = 50 power)
+-- ⭐ Konversi Height → JumpPower buat max 50 studs
+-- Rumus fisika Roblox: JumpPower = sqrt(2 * gravity * height)
+-- Gravity default = 196.2 studs/s²
 local function heightToPower(h)
-    -- Pakai rasio standar Roblox: JumpPower 50 ≈ JumpHeight 7.2
-    return h * (50 / 7.2)
+    h = math.clamp(h, 10, 50)          -- ⭐ hard cap 50 studs
+    local gravity = 196.2
+    return math.sqrt(2 * gravity * h)  -- ⭐ fisika bener
 end
 
 local function applyJumpHeight()
@@ -1795,12 +1798,14 @@ local function applyJumpHeight()
     local hum = char and char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
 
-    local power = heightToPower(InfinityJumpState.Height)
+    local height = math.clamp(InfinityJumpState.Height, 10, 50)  -- ⭐ cap
+    local power = heightToPower(height)
+
     pcall(function()
         hum.UseJumpPower = true
         hum.JumpPower = power
         -- Fallback: set JumpHeight juga (kalo game support)
-        pcall(function() hum.JumpHeight = InfinityJumpState.Height end)
+        pcall(function() hum.JumpHeight = height end)
     end)
 end
 
@@ -1810,10 +1815,13 @@ local function doJump()
     local hum = char and char:FindFirstChildOfClass("Humanoid")
     if not hum or hum.Health <= 0 then return end
 
-    -- Apply height dulu
-    applyJumpHeight()
+    -- ⭐ Pastiin JumpPower udah di-set (idempotent, aman)
+    -- Cuma re-apply kalo beda (biar gak reset terus)
+    local targetPower = heightToPower(InfinityJumpState.Height)
+    if math.abs(hum.JumpPower - targetPower) > 1 then
+        applyJumpHeight()
+    end
 
-    -- ⭐ FIX: pake .Jump = true (BUKAN cuma ChangeState)
     pcall(function()
         hum.Jump = true
     end)
