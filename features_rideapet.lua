@@ -4588,10 +4588,6 @@ function Features.Init(sharedState)
             end
         end
     end)
-    
-    _G.VRILZ_Features = Features
-_G.VRILZ_Shared = Shared
-_G.VRILZ_UI_Shared = Shared
 
 -- ============================================================
 -- AUTO OBBY (TALK + FLY TO FINISH + 30 MIN COOLDOWN)
@@ -4648,7 +4644,18 @@ function Features.startAutoObby()
         local prompt = rig:FindFirstChildWhichIsA("ProximityPrompt", true)
         
         print("[AUTO OBBY] Talk ke Skeleton...")
-        hrp.CFrame = rig.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
+        local rigRoot = rig:FindFirstChild("HumanoidRootPart") 
+    or rig:FindFirstChild("Torso") 
+    or rig:FindFirstChild("UpperTorso")
+    or rig:FindFirstChildWhichIsA("BasePart")
+
+if not rigRoot then
+    print("[AUTO OBBY] NPC gak punya part buat dideketin!")
+    ObbyState.Running = false
+    return
+end
+
+hrp.CFrame = rigRoot.CFrame * CFrame.new(0, 0, 3)
         task.wait(0.5)
         if prompt then fireproximityprompt(prompt) end
         task.wait(1.5)
@@ -4775,6 +4782,10 @@ function Features.getObbyState()
     return ObbyState
 end
 
+
+    _G.VRILZ_Features = Features
+_G.VRILZ_Shared = Shared
+_G.VRILZ_UI_Shared = Shared
 print("[VRILZHUB] Ride a Pet Features v3.8 loaded")
 end
 
