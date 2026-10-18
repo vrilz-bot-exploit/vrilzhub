@@ -869,24 +869,78 @@ local function getDropRemoteLocal()
         or gameR:FindFirstChild("Drop")
 end
 
--- ⭐ INSTANT RETURN — TP langsung ke plot
+-- ⭐ HELPER BARU: Konfirmasi egg beneran udah di tangan (DisplayEgg stabil)
+local function confirmEggInHand(timeout)
+    timeout = timeout or 4
+    local startTime = os.clock()
+    local lastResult = false
+    local stableCount = 0
+
+    while os.clock() - startTime < timeout do
+        local holding = isHoldingEggLocal()
+        if holding then
+            lastResult = true
+            stableCount = stableCount + 1
+            -- Butuh 2x cek berturut-turut biar yakin (server udah register)
+            if stableCount >= 2 then
+                return true, os.clock() - startTime
+            end
+        else
+            lastResult = false
+            stableCount = 0
+        end
+        task.wait(0.25)
+    end
+
+    return lastResult, os.clock() - startTime
+end
+
+-- ⭐ INSTANT RETURN — TP langsung ke plot (dengan delay 4 detik konfirmasi)
 local function instantReturnToPlot()
     if not Shared.MutationReturn_Enabled then return end
 
     local char = LocalPlayer.Character
     local myRoot = char and char:FindFirstChild("HumanoidRootPart")
     if not myRoot then return end
+
+    -- ⭐ STEP 0: Konfirmasi egg di tangan dulu (max 4 detik)
+    local holding = isHoldingEggLocal()
+    if not holding then
+        -- Tunggu sampai egg masuk (max 4 detik)
+        local ok = confirmEggInHand(4)
+        if not ok then return end
+    end
+
+    -- ⭐ STEP 1: Delay 4 detik total sejak egg di tangan
+    -- Polling ringan biar tau kalo egg tiba-tiba lepas
+    local delayStart = os.clock()
+    local DELAY_TOTAL = 4.0
+    while os.clock() - delayStart < DELAY_TOTAL do
+        if not isHoldingEggLocal() then
+            -- Egg lepas di tengah delay → abort
+            return
+        end
+        task.wait(0.2)
+    end
+
+    -- ⭐ STEP 2: Re-check egg masih di tangan setelah delay
     if not isHoldingEggLocal() then return end
+
+    char = LocalPlayer.Character
+    myRoot = char and char:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return end
 
     local spawnPart = getMyPlotSpawn()
     if not spawnPart then return end
 
+    -- ⭐ STEP 3: TP ke plot
     clearForces(myRoot)
     myRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
     myRoot.Velocity = Vector3.zero
     myRoot.AssemblyLinearVelocity = Vector3.zero
     task.wait(0.3)
 
+    -- ⭐ STEP 4: Drop egg
     if isHoldingEggLocal() then
         for _, d in ipairs(char:GetDescendants()) do
             if d:IsA("ProximityPrompt") and d.Name:lower():find("drop") then
@@ -920,7 +974,16 @@ local function returnToMyPlot()
     local holding = isHoldingEggLocal()
     if not holding then return end
 
+    -- ⭐ DELAY 4 DETIK — konfirmasi egg stabil dulu (polling bisa abort)
+    local delayStart = os.clock()
+    while os.clock() - delayStart < 4.0 do
+        if not isHoldingEggLocal() then return end
+        task.wait(0.2)
+    end
+    if not isHoldingEggLocal() then return end
+
     local spawnPart = getMyPlotSpawn()
+    -- ... sisanya sama seperti aslinya
     if not spawnPart then return end
 
     local startPos = myRoot.Position
@@ -2906,11 +2969,11 @@ local function runMutationOnce()
         })
     end
 
-    if Shared.MutationReturn_Enabled then
+        if Shared.MutationReturn_Enabled then
         task.wait(0.5)
         local oldFlag = Shared.AutoReturn_Enabled
         Shared.AutoReturn_Enabled = true
-        returnToMyPlot()
+        doReturnToPlot()          -- ⬅️ auto pilih Instant / Step sesuai ReturnMode
         Shared.AutoReturn_Enabled = oldFlag
     end
 
