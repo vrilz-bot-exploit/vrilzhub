@@ -4588,6 +4588,7 @@ function Features.Init(sharedState)
             end
         end
     end)
+end
 
 -- ============================================================
 -- AUTO OBBY (TALK + FLY TO FINISH + 30 MIN COOLDOWN)
@@ -4814,29 +4815,153 @@ end
             if part:IsA("BasePart") then part.CanCollide = true end
         end
         
-        -- ═══ 5. SIMPAN WAKTU SELESAI ═══
-        print("[AUTO OBBY] ✅ FINISH! Menyimpan cooldown 30 menit.")
-        if writefile then
-            pcall(writefile, "vrilz_obby_time.txt", tostring(os.time()))
-        end
-        
-        if Shared.Notify then
-            Shared.Notify("🏁 Auto Obby Selesai! Cooldown 30 menit.", "success")
-        end
-        
-        ObbyState.Running = false
-    end)
+        -- ═══ 5. VERIFIKASI FINISH + TRIGGER DELIVERY ═══
+print("[AUTO OBBY] Verifikasi finish...")
+
+-- 5a. Cek player beneran deket Finish model
+local function isNearFinish()
+    local r = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not r then return false end
+    if not finishModel or not finishModel.Parent then return false end
+    local finishPos2 = finishModel:GetPivot().Position
+    local dist = (r.Position - finishPos2).Magnitude
+    return dist <= 25  -- toleransi 25 studs
 end
 
-function Features.getObbyState()
-    return ObbyState
+-- 5b. Cari ProximityPrompt / TouchPart di Finish & trigger manual
+local function triggerFinishDelivery()
+    if not finishModel or not finishModel.Parent then return false end
+
+    -- Cari prompt di dalam finish
+    local prompt = finishModel:FindFirstChildWhichIsA("ProximityPrompt", true)
+    if prompt then
+        prompt.HoldDuration = 0
+        prompt.MaxActivationDistance = math.huge
+        prompt.RequiresLineOfSight = false
+        if typeof(fireproximityprompt) == "function" then
+            pcall(fireproximityprompt, prompt)
+            task.wait(0.3)
+            pcall(fireproximityprompt, prompt)
+        end
+        return true
+    end
+
+    -- Fallback: cari RemoteEvent delivery
+    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+    local gameR = remotes and remotes:FindFirstChild("Game")
+    if gameR then
+        for _, name in ipairs({"ObbyFinish", "FinishObby", "CompleteObby", "ObbyComplete", "DeliveryComplete"}) do
+            local r = gameR:FindFirstChild(name)
+            if r and (r:IsA("RemoteEvent") or r:IsA("RemoteFunction")) then
+                pcall(function() r:FireServer() end)
+                task.wait(0.3)
+                return true
+            end
+        end
+    end
+
+    return false
 end
 
+-- 5c. Loop verifikasi: TP ulang kalo belum nyampe, trigger delivery, tunggu konfirmasi
+local verified = false
+local startVerify = tick()
+
+while tick() - startVerify < 20 do
+    if not ObbyState.Running then break end
+
+    -- Refresh char/hrp
+    local r = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not r then task.wait(0.5) continue end
+
+    -- TP ulang ke finish kalo masih jauh
+    if not isNearFinish() then
+        local fp = finishModel:GetPivot().Position
+        r.CFrame = CFrame.new(fp + Vector3.new(0, 5, 0))
+        r.Velocity = Vector3.zero
+        r.AssemblyLinearVelocity = Vector3.zero
+        task.wait(0.5)
+        continue
+    end
+
+    -- Udah deket finish → trigger delivery
+    triggerFinishDelivery()
+    task.wait(0.8)
+
+    -- ⭐ Cek konfirmasi: attribute / folder / UI
+    local confirmed = false
+
+    -- (1) Attribute player
+    if LocalPlayer:GetAttribute("ObbyCompleted") == true then confirmed = true end
+    if LocalPlayer:GetAttribute("ObbyFinished") == true then confirmed = true end
+    if LocalPlayer:GetAttribute("DeliveryCompleted") == true then confirmed = true end
+
+    -- (2) Folder HalloweenObbyRuns hilang / Finish dihapus = udah selesai
+    local obbyFolder2 = workspace:FindFirstChild("HalloweenObbyRuns")
+    local activeFolder2 = obbyFolder2 and obbyFolder2:FindFirstChild("5126297278")
+    if not activeFolder2 then
+        -- folder hilang → server udah bersihin = sukses
+        confirmed = true
+    else
+        local finishModel2 = activeFolder2:FindFirstChild("Finish")
+        if not finishModel2 then
+            confirmed = true
+        end
+    end
+
+    -- (3) UI text konfirmasi
+    local pg = LocalPlayer:FindFirstChild("PlayerGui")
+    if pg then
+        for _, gui in ipairs(pg:GetDescendants()) do
+            if gui:IsA("TextLabel") and gui.Text then
+                local t = gui.Text:lower()
+                if t:find("finish") or t:find("complete") or t:find("delivery") then
+                    if t:find("✅") or t:find("success") or t:find("done") then
+                        confirmed = true
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    if confirmed then
+        verified = true
+        break
+    end
+
+    task.wait(0.5)
+end
+
+-- ═══ 6. SIMPAN COOLDOWN — CUMA KALO VERIFIED ═══
+if verified then
+    print("[AUTO OBBY] ✅ FINISH VERIFIED! Menyimpan cooldown 30 menit.")
+    if writefile then
+        pcall(writefile, "vrilz_obby_time.txt", tostring(os.time()))
+    end
+    if Shared.Notify then
+        Shared.Notify("🏁 Auto Obby Selesai! Cooldown 30 menit.", "success")
+    end
+else
+    print("[AUTO OBBY] ❌ Gagal verifikasi finish — cooldown TIDAK disimpan, bisa retry.")
+    if Shared.Notify then
+        Shared.Notify("⚠️ Auto Obby gagal finish — gak kena cooldown, coba lagi.", "warning")
+    end
+end
+
+-- Restore collision (AMAN)
+local restoreChar = player.Character
+if restoreChar then
+    for _, part in ipairs(restoreChar:GetDescendants()) do
+        if part:IsA("BasePart") then part.CanCollide = true end
+    end
+end
+
+ObbyState.Running = false
 
     _G.VRILZ_Features = Features
 _G.VRILZ_Shared = Shared
 _G.VRILZ_UI_Shared = Shared
 print("[VRILZHUB] Ride a Pet Features v3.8 loaded")
-end
 
 return Features
