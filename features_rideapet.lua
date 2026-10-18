@@ -4592,6 +4592,189 @@ function Features.Init(sharedState)
     _G.VRILZ_Features = Features
 _G.VRILZ_Shared = Shared
 _G.VRILZ_UI_Shared = Shared
+
+-- ============================================================
+-- AUTO OBBY (TALK + FLY TO FINISH + 30 MIN COOLDOWN)
+-- ============================================================
+local ObbyState = {
+    Running = false,
+}
+
+function Features.startAutoObby()
+    if ObbyState.Running then return end
+    ObbyState.Running = true
+
+    task.spawn(function()
+        local player = game.Players.LocalPlayer
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+        local VIM = game:GetService("VirtualInputManager")
+        local COOLDOWN = 30 * 60 -- 30 menit
+
+        -- ═══ CEK COOLDOWN ═══
+        local lastFinish = 0
+        if isfile and readfile then
+            if isfile("vrilz_obby_time.txt") then
+                local ok, content = pcall(readfile, "vrilz_obby_time.txt")
+                if ok and tonumber(content) then
+                    lastFinish = tonumber(content)
+                end
+            end
+        end
+
+        local now = os.time()
+        local timePassed = now - lastFinish
+        
+        if timePassed < COOLDOWN then
+            local sisaMenit = math.ceil((COOLDOWN - timePassed) / 60)
+            if Shared.Notify then
+                Shared.Notify("⏳ Cooldown! Tunggu " .. sisaMenit .. " menit lagi.", "warning")
+            end
+            ObbyState.Running = false
+            return
+        end
+        
+        -- ═══ 1. TALK KE SKELETON ═══
+        local npc = workspace:FindFirstChild("SkeletonNPC")
+        if not npc then 
+            ObbyState.Running = false
+            return 
+        end
+        local rig = npc:FindFirstChild("Rig")
+        if not rig then 
+            ObbyState.Running = false
+            return 
+        end
+        local prompt = rig:FindFirstChildWhichIsA("ProximityPrompt", true)
+        
+        print("[AUTO OBBY] Talk ke Skeleton...")
+        hrp.CFrame = rig.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
+        task.wait(0.5)
+        if prompt then fireproximityprompt(prompt) end
+        task.wait(1.5)
+        
+        -- ═══ 2. KLIK "LET'S GO" ═══
+        print("[AUTO OBBY] Milih Let's go...")
+        local startTime = tick()
+        while tick() - startTime < 4 do
+            for _, gui in ipairs(player.PlayerGui:GetDescendants()) do
+                if gui:IsA("TextButton") or gui:IsA("ImageButton") then
+                    local isTarget = false
+                    if string.lower(gui.Name):find("let") or string.lower(gui.Name):find("go") then isTarget = true end
+                    if gui:IsA("TextButton") and (string.lower(gui.Text):find("let") or string.lower(gui.Text):find("go")) then isTarget = true end
+                    
+                    if isTarget and gui.Visible then
+                        pcall(function() gui.MouseButton1Click:Fire() end)
+                        pcall(function() gui.Activated:Fire() end)
+                        local cx = gui.AbsolutePosition.X + (gui.AbsoluteSize.X / 2)
+                        local cy = gui.AbsolutePosition.Y + (gui.AbsoluteSize.Y / 2)
+                        VIM:SendMouseMoveEvent(cx, cy, 0)
+                        VIM:SendMouseButtonEvent(cx, cy, 0, true, game, 1)
+                        task.wait(0.05)
+                        VIM:SendMouseButtonEvent(cx, cy, 0, false, game, 1)
+                    end
+                end
+            end
+            task.wait(0.2)
+        end
+        
+        -- ═══ 3. TUNGGU MENTAL KE OBBY ═══
+        print("[AUTO OBBY] Nunggu mental ke obby...")
+        local waitStart = tick()
+        while tick() - waitStart < 15 do
+            if hrp.Position.X > 20000 then break end
+            task.wait(0.5)
+        end
+        
+        if hrp.Position.X < 20000 then 
+            print("[AUTO OBBY] Gagal mental.")
+            ObbyState.Running = false
+            return 
+        end
+        
+        -- ═══ 4. TP GLIDE KE FINISH ═══
+        print("[AUTO OBBY] Terbang ke Finish...")
+        for _, part in ipairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
+        end
+        
+        local obbyFolder = workspace:FindFirstChild("HalloweenObbyRuns")
+        if not obbyFolder then 
+            ObbyState.Running = false
+            return 
+        end
+        local activeFolder = obbyFolder:FindFirstChild("5126297278")
+        if not activeFolder then 
+            ObbyState.Running = false
+            return 
+        end
+        local finishModel = activeFolder:FindFirstChild("Finish")
+        if not finishModel then 
+            ObbyState.Running = false
+            return 
+        end
+        
+        local finishPos = finishModel:GetPivot().Position
+        local flyHeight = math.max(hrp.Position.Y, finishPos.Y) + 50
+        
+        while hrp and hrp.Position.Y < flyHeight do
+            hrp.CFrame = hrp.CFrame + Vector3.new(0, 20, 0)
+            hrp.Velocity = Vector3.zero
+            task.wait(0.05)
+            hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        end
+        task.wait(0.5)
+        
+        local startP = hrp.Position
+        local totalDist = (finishPos - startP).Magnitude
+        local steps = math.ceil(totalDist / 40)
+        local dir = (finishPos - startP).Unit
+        
+        for i = 1, steps do
+            local r = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            if not r then break end
+            local dist = math.min(40 * i, totalDist)
+            local newPos = Vector3.new(startP.X + dir.X * dist, flyHeight, startP.Z + dir.Z * dist)
+            r.CFrame = CFrame.new(newPos)
+            r.Velocity = Vector3.zero
+            r.AssemblyLinearVelocity = Vector3.zero
+            task.wait(0.05)
+        end
+        task.wait(0.5)
+        
+        local r = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        local currentY = r.Position.Y
+        while currentY > finishPos.Y + 5 do
+            currentY = currentY - 10
+            if currentY < finishPos.Y + 5 then currentY = finishPos.Y + 5 end
+            r.CFrame = CFrame.new(r.Position.X, currentY, r.Position.Z)
+            r.Velocity = Vector3.zero
+            task.wait(0.05)
+            r = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        end
+        
+        for _, part in ipairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = true end
+        end
+        
+        -- ═══ 5. SIMPAN WAKTU SELESAI ═══
+        print("[AUTO OBBY] ✅ FINISH! Menyimpan cooldown 30 menit.")
+        if writefile then
+            pcall(writefile, "vrilz_obby_time.txt", tostring(os.time()))
+        end
+        
+        if Shared.Notify then
+            Shared.Notify("🏁 Auto Obby Selesai! Cooldown 30 menit.", "success")
+        end
+        
+        ObbyState.Running = false
+    end)
+end
+
+function Features.getObbyState()
+    return ObbyState
+end
+
 print("[VRILZHUB] Ride a Pet Features v3.8 loaded")
 end
 
