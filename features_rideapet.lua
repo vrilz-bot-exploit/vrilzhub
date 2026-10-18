@@ -1924,6 +1924,276 @@ function Features.startSpeed()
 end
 
 -- ============================================================
+-- CHARACTER FLY — Auto Fly + Height/Speed Dropdown
+-- ============================================================
+local FlyState = {
+    Enabled = false,
+    Flying = false,
+    Height = 100,
+    Speed = 300,
+    VerticalSpeed = 150,
+    BaseY = 0,
+    BodyVelocity = nil,
+    BodyGyro = nil,
+    KeyStates = {},
+    InputConn = nil,
+    InputEndConn = nil,
+    UpdateConn = nil,
+}
+
+local FLY_KEYS = {
+    Up   = Enum.KeyCode.Space,
+    Down = Enum.KeyCode.LeftControl,
+}
+
+local function fly_getRoot()
+    local char = LocalPlayer.Character
+    return char and char:FindFirstChild("HumanoidRootPart")
+end
+
+local function fly_getHum()
+    local char = LocalPlayer.Character
+    return char and char:FindFirstChildOfClass("Humanoid")
+end
+
+local function fly_cleanup()
+    if FlyState.BodyVelocity then
+        pcall(function() FlyState.BodyVelocity:Destroy() end)
+        FlyState.BodyVelocity = nil
+    end
+    if FlyState.BodyGyro then
+        pcall(function() FlyState.BodyGyro:Destroy() end)
+        FlyState.BodyGyro = nil
+    end
+
+    local hum = fly_getHum()
+    if hum then
+        pcall(function()
+            hum.PlatformStand = false
+            hum:ChangeState(Enum.HumanoidStateType.Freefall)
+        end)
+    end
+
+    FlyState.KeyStates = {}
+end
+
+local function fly_stop()
+    FlyState.Flying = false
+    if FlyState.UpdateConn then
+        pcall(function() FlyState.UpdateConn:Disconnect() end)
+        FlyState.UpdateConn = nil
+    end
+    fly_cleanup()
+end
+
+local function fly_start()
+    if FlyState.Flying then return end
+    local root = fly_getRoot()
+    local hum = fly_getHum()
+    if not root or not hum then return end
+
+    fly_cleanup()
+
+    FlyState.BaseY = root.Position.Y
+
+    pcall(function()
+        hum.PlatformStand = false
+        hum:ChangeState(Enum.HumanoidStateType.Physics)
+    end)
+
+    local bv = Instance.new("BodyVelocity")
+    bv.Name = "Vrilz_FlyBV"
+    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bv.Velocity = Vector3.zero
+    bv.Parent = root
+    FlyState.BodyVelocity = bv
+
+    local bg = Instance.new("BodyGyro")
+    bg.Name = "Vrilz_FlyBG"
+    bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+    bg.P = 5000
+    bg.D = 500
+    bg.CFrame = root.CFrame
+    bg.Parent = root
+    FlyState.BodyGyro = bg
+
+    root.CFrame = CFrame.new(
+        root.Position.X,
+        FlyState.BaseY + FlyState.Height,
+        root.Position.Z
+    )
+
+    FlyState.Flying = true
+
+    if FlyState.UpdateConn then
+        pcall(function() FlyState.UpdateConn:Disconnect() end)
+    end
+    FlyState.UpdateConn = RunService.RenderStepped:Connect(function()
+        if not FlyState.Enabled then return end
+        if not FlyState.Flying then return end
+
+        local root2 = fly_getRoot()
+        if not root2 or not FlyState.BodyVelocity then
+            fly_stop()
+            return
+        end
+
+        local cam = workspace.CurrentCamera
+        if not cam then return end
+
+        local forward = 0
+        local sideways = 0
+
+        if FlyState.KeyStates[Enum.KeyCode.W] then forward = forward + 1 end
+        if FlyState.KeyStates[Enum.KeyCode.S] then forward = forward - 1 end
+        if FlyState.KeyStates[Enum.KeyCode.D] then sideways = sideways + 1 end
+        if FlyState.KeyStates[Enum.KeyCode.A] then sideways = sideways - 1 end
+
+        local camLook = cam.CFrame.LookVector
+        camLook = Vector3.new(camLook.X, 0, camLook.Z)
+        if camLook.Magnitude > 0.01 then camLook = camLook.Unit end
+
+        local camRight = cam.CFrame.RightVector
+        camRight = Vector3.new(camRight.X, 0, camRight.Z)
+        if camRight.Magnitude > 0.01 then camRight = camRight.Unit end
+
+        local horizVel = (camLook * forward + camRight * sideways)
+        if horizVel.Magnitude > 0.01 then
+            horizVel = horizVel.Unit * FlyState.Speed
+        else
+            horizVel = Vector3.zero
+        end
+
+        local vertVel = 0
+        if FlyState.KeyStates[FLY_KEYS.Up] then
+            vertVel = FlyState.VerticalSpeed
+        elseif FlyState.KeyStates[FLY_KEYS.Down] then
+            vertVel = -FlyState.VerticalSpeed
+        end
+
+        FlyState.BodyVelocity.Velocity = Vector3.new(
+            horizVel.X,
+            vertVel,
+            horizVel.Z
+        )
+
+        if camLook.Magnitude > 0.01 then
+            FlyState.BodyGyro.CFrame = CFrame.lookAt(root2.Position, root2.Position + camLook)
+        end
+    end)
+end
+
+local function fly_setupInput()
+    local UserInputService = game:GetService("UserInputService")
+
+    if FlyState.InputConn then
+        pcall(function() FlyState.InputConn:Disconnect() end)
+    end
+    if FlyState.InputEndConn then
+        pcall(function() FlyState.InputEndConn:Disconnect() end)
+    end
+
+    FlyState.InputConn = UserInputService.InputBegan:Connect(function(input, gp)
+        if gp then return end
+        FlyState.KeyStates[input.KeyCode] = true
+    end)
+
+    FlyState.InputEndConn = UserInputService.InputEnded:Connect(function(input)
+        FlyState.KeyStates[input.KeyCode] = false
+    end)
+end
+
+function Features.setFlyEnabled(v)
+    FlyState.Enabled = v
+    if v then
+        fly_start()
+        fly_setupInput()
+    else
+        fly_stop()
+    end
+end
+
+function Features.setFlyHeight(h)
+    FlyState.Height = math.clamp(h, 10, 1000)
+    if FlyState.Flying then
+        local root = fly_getRoot()
+        if root then
+            root.CFrame = CFrame.new(
+                root.Position.X,
+                FlyState.BaseY + h,
+                root.Position.Z
+            )
+        end
+    end
+end
+
+function Features.setFlySpeed(s)
+    FlyState.Speed = math.clamp(s, 10, 2000)
+    FlyState.VerticalSpeed = math.clamp(s * 0.5, 20, 1000)
+end
+
+function Features.getFlyState()
+    return FlyState
+end
+
+-- Auto-stop fly kalo fitur lain aktif + handle respawn
+task.spawn(function()
+    while task.wait(0.5) do
+        if not FlyState.Enabled then continue end
+
+        -- ⭐ Handle karakter respawn / mati / force hilang
+        local root = fly_getRoot()
+        local hum = fly_getHum()
+        local forceLost = FlyState.Flying and (
+            not root or 
+            not hum or 
+            hum.Health <= 0 or 
+            not FlyState.BodyVelocity or
+            not FlyState.BodyVelocity.Parent
+        )
+
+        if forceLost then
+            fly_stop()
+            task.wait(0.3)
+            if FlyState.Enabled then
+                fly_start()
+            end
+            continue
+        end
+
+        local shouldStop = false
+        if Shared.AutoSteal_Enabled then shouldStop = true end
+        if Shared.AutoFarm_Enabled then shouldStop = true end
+        if Shared.AutoHatch_Enabled then shouldStop = true end
+        if Shared.AutoPlantEgg_Enabled then shouldStop = true end
+        if Shared.MutationSteal_Active then shouldStop = true end
+        if Shared.VolcanicHunt_Enabled then shouldStop = true end
+        if Shared.AutoMutation_Enabled then shouldStop = true end
+        if Shared.YinRitual_Enabled then
+            local ys = Features.getYinRitualState and Features.getYinRitualState()
+            if ys and ys.Active then shouldStop = true end
+        end
+
+        if shouldStop and FlyState.Flying then
+            fly_stop()
+            if Shared.Notify then
+                Shared.Notify("🛸 Fly auto-OFF — fitur lain aktif", "warning")
+            end
+        elseif not shouldStop and FlyState.Enabled and not FlyState.Flying then
+            fly_start()
+        end
+    end
+end)
+
+-- ⭐ Re-fly pas respawn
+LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(2)
+    if FlyState.Enabled and not FlyState.Flying then
+        fly_start()
+    end
+end)
+
+-- ============================================================
 -- INSTANT PICKUP
 -- ============================================================
 function Features.startInstantPickup()
@@ -4647,6 +4917,9 @@ function Features.Init(sharedState)
     if Shared.MutationSteal_Active == nil then Shared.MutationSteal_Active = false end
     if Shared.AutoRidePet_Enabled == nil then Shared.AutoRidePet_Enabled = true end
     if Shared.YinRitual_Enabled == nil then Shared.YinRitual_Enabled = false end
+    if Shared.Fly_Enabled == nil then Shared.Fly_Enabled = false end
+    if Shared.Fly_Height == nil then Shared.Fly_Height = 100 end
+    if Shared.Fly_Speed == nil then Shared.Fly_Speed = 300 end
 
     -- ⭐ Guard: cegah double-start anti-AFK
     if not Features._antiAFKStarted then
