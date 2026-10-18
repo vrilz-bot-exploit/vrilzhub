@@ -4588,7 +4588,7 @@ function Features.Init(sharedState)
             end
         end
     end)
-end
+end   -- ⭐⭐⭐ TUTUP Features.Init DI SINI ⭐⭐⭐
 
 -- ============================================================
 -- AUTO OBBY (TALK + FLY TO FINISH + 30 MIN COOLDOWN)
@@ -4957,7 +4957,9 @@ if restoreChar then
     end
 end
 
-ObbyState.Running = false
+        ObbyState.Running = false
+    end)
+end
 
     _G.VRILZ_Features = Features
 _G.VRILZ_Shared = Shared
