@@ -4169,6 +4169,7 @@ local function buildMainWindow(parent)
     -- ═══════════════════════════════════════════
     -- 🛸 CHARACTER FLY CARD
     -- ═══════════════════════════════════════════
+do
     local flyCard, flyContent = makeCard(autoPage, "🛸 CHARACTER FLY", 2)
 
     -- Toggle Enable Fly
@@ -4264,6 +4265,7 @@ local function buildMainWindow(parent)
     flyNote.ZIndex = 3
     flyNote.Parent = flyContent
     registerTheme(flyNote, "Muted", "TextColor3")
+end
     -- ═══════════════════════════════════════════
     local ipCard, ipContent = makeCard(autoPage, "INSTANT PICKUP", 3)
     makeToggle(ipContent, "Enable Instant Pickup", false, function(v) Shared.InstantPickup_Enabled = v end)
