@@ -5440,6 +5440,7 @@ end)
     -- ============================================================
     -- TAB EGG MUTATION (BARU)
     -- ============================================================
+do
     local mutPage = createPage("EggMutation")
     pages.EggMutation = mutPage
 
@@ -5740,6 +5741,7 @@ returnModeHolder.Parent = mutContent
             mutInfoLbl.Text = table.concat(lines, "\n")
         end
     end)
+end
 
         registerTab("EggMutation", "🔥", "Egg Mutation")
 
