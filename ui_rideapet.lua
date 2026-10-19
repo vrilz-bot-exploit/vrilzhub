@@ -2693,6 +2693,58 @@ local function buildEggExecutorGUI(screenGui)
         end
     end)
 
+    -- ⭐ AUTO-HIDE mini panel pas buka menu game
+    local function isAnyMenuOpenLocal()
+        local PG = LocalPlayer:FindFirstChild("PlayerGui")
+        if not PG then return false end
+
+        for _, gui in ipairs(PG:GetChildren()) do
+            if gui:IsA("ScreenGui") and gui.Enabled then
+                local guiName = gui.Name:lower()
+                if guiName == "vrilz_eggpanelexecutor"
+                    or guiName == "vrilz_rideapet"
+                    or guiName == "vrilz_eggpanel_executor" then
+                    continue
+                end
+
+                for _, desc in ipairs(gui:GetDescendants()) do
+                    if (desc:IsA("Frame") or desc:IsA("ImageLabel") or desc:IsA("ScrollingFrame"))
+                       and desc.Visible
+                       and desc.AbsoluteSize.X > 150
+                       and desc.AbsoluteSize.Y > 150 then
+                        local n = desc.Name:lower()
+                        if n:find("shop") or n:find("egg") or n:find("pet")
+                        or n:find("index") or n:find("rebirth") or n:find("fusion")
+                        or n:find("store") or n:find("setting") or n:find("sell")
+                        or n:find("inventory") or n:find("backpack") or n:find("menu")
+                        or n:find("codex") or n:find("achievement") or n:find("quest")
+                        or n:find("upgrade") or n:find("trade") or n:find("craft")
+                        or n:find("panel") or n:find("main") or n:find("container") then
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+        return false
+    end
+
+    task.spawn(function()
+        while eggScreen.Parent do
+            task.wait(0.1)
+            if isAnyMenuOpenLocal() then
+                if mini.Visible then
+                    mini.Visible = false
+                    if EggState.WindowVisible then closeWindow() end
+                end
+            else
+                if not mini.Visible then
+                    mini.Visible = true
+                end
+            end
+        end
+    end)
+    
     task.spawn(function()
         while win.Parent do
             task.wait(0.3)
