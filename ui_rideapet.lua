@@ -2712,6 +2712,65 @@ local function buildEggExecutorGUI(screenGui)
     end)
 end
 
+    -- ============================================================
+    -- ⭐ AUTO-HIDE MINI PANEL (FIX ANTI-CRASH)
+    -- ============================================================
+    local function isAnyMenuOpenLocal()
+        local PG = LocalPlayer:FindFirstChild("PlayerGui")
+        if not PG then return false end
+
+        for _, gui in ipairs(PG:GetChildren()) do
+            if gui:IsA("ScreenGui") and gui.Enabled then
+                local guiName = gui.Name:lower()
+                if guiName == "vrilz_eggpanelexecutor" or guiName == "vrilz_rideapet" or guiName == "vrilz_eggpanel_executor" then
+                    continue
+                end
+
+                for _, desc in ipairs(gui:GetDescendants()) do
+                    local isBig = pcall(function()
+                        return (desc:IsA("Frame") or desc:IsA("ImageLabel") or desc:IsA("ScrollingFrame") or desc:IsA("TextButton"))
+                            and desc.Visible
+                            and desc.AbsoluteSize.X > 200
+                            and desc.AbsoluteSize.Y > 200
+                    end)
+
+                    if isBig == true then
+                        local n = desc.Name:lower()
+                        if n:find("shop") or n:find("egg") or n:find("pet") or n:find("telur") or n:find("tumbuka")
+                        or n:find("index") or n:find("rebirth") or n:find("fusion")
+                        or n:find("store") or n:find("setting") or n:find("sell")
+                        or n:find("inventory") or n:find("backpack") or n:find("menu")
+                        or n:find("codex") or n:find("achievement") or n:find("quest")
+                        or n:find("upgrade") or n:find("trade") or n:find("craft")
+                        or n:find("panel") or n:find("main") or n:find("container") then
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+        return false
+    end
+
+    task.spawn(function()
+        while eggScreen.Parent do
+            task.wait(0.1)
+            local success, isOpen = pcall(isAnyMenuOpenLocal)
+            
+            if success and isOpen then
+                if mini.Visible then
+                    mini.Visible = false
+                    if EggState.WindowVisible then closeWindow() end
+                end
+            else
+                if not mini.Visible then
+                    mini.Visible = true
+                end
+            end
+        end
+    end)
+end
+
 -- ============================================================
 -- BUILD MAIN WINDOW
 -- ============================================================
@@ -5976,9 +6035,6 @@ end
             end)
         end
     end)
-
-    -- ⭐ Panggil GUI Egg Executor
-    buildEggExecutorGUI(screenGui)
 
     -- Drag handler
     do
