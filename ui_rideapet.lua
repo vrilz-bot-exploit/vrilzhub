@@ -2248,11 +2248,9 @@ end
 -- Dipanggil dari buildMainWindow biar gak exceed local register
 -- ============================================================
 local function buildEggExecutorGUI(screenGui)
-    -- ⭐ POSISI ADAPTIF — pojok kanan atas, 20px dari tepi
-    local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
+    local EGG_X, EGG_Y = 1348, 256
     local MINI_W, MINI_H = 72, 72
-    local MINI_X = viewport.X - MINI_W - 20   -- kanan: lebar layar - 72 - 20
-    local MINI_Y = 90                          -- atas: 90px (di bawah topbar)
+    local MINI_X, MINI_Y = EGG_X, EGG_Y - MINI_H - 6
     local WIN_W, WIN_H = 540, 460
     local WIN_X, WIN_Y = 0.5, 0.5
 
