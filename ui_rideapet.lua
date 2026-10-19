@@ -2710,7 +2710,6 @@ local function buildEggExecutorGUI(screenGui)
             end
         end
     end)
-end
 
     -- ============================================================
     -- ⭐ AUTO-HIDE MINI PANEL (FIX ANTI-CRASH)
