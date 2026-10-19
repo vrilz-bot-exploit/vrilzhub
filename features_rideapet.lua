@@ -2926,6 +2926,14 @@ local function fireBasketDrop()
     return pcall(function() bd:FireServer() end)
 end
 
+-- ⭐ Notif dinamis: Instant → "Wait 6 seconds!", Step → "Wait 4 seconds!"
+local function getWaitNotifText()
+    if (Shared.ReturnMode or "Step") == "Instant" then
+        return "🔥 Wait 6 seconds!"
+    end
+    return "🔥 Wait 4 seconds!"
+end
+
 local function tpToSafe(pos)
     local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not myRoot then return false end
@@ -3266,11 +3274,11 @@ end
                             if not Shared.MutationSteal_Enabled then break end
                             task.wait(1)
                             if isHoldingEggMutation() then
-                                if Shared.Notify then
-                                    Shared.Notify("🔥 Wait 4 seconds!", "success")
-                                end
-                                break
-                            end
+    if Shared.Notify then
+        Shared.Notify(getWaitNotifText(), "success")
+    end
+    break
+end
                         end
                     end
                 end
@@ -3399,10 +3407,10 @@ doReturnToPlot()
                     if not Shared.MutationSteal_Enabled then break end
                     task.wait(1)
                     if isHoldingEggMutation() then
-                        if Shared.Notify then
-                            Shared.Notify("🔥 Wait 4 seconds!", "success")
-                        end
-                                                -- 🏆 PLATINUM WEBHOOK TRIGGER
+    if Shared.Notify then
+        Shared.Notify(getWaitNotifText(), "success")
+    end
+    -- 🏆 PLATINUM WEBHOOK TRIGGER
                                                 if _G.VRILZ_SendWebhook then
                             local cleanEggName = normalizeEggName(egg.Name)
                             local eggInfo = _G.VRILZ_GetEggInfo and _G.VRILZ_GetEggInfo(cleanEggName) or {}
