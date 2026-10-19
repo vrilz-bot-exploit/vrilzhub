@@ -6068,6 +6068,9 @@ end
         end)
     end
 
+-- ⭐ PANGGIL EGG EXECUTOR DI SINI
+    buildEggExecutorGUI(screenGui)
+
     return main
 end
 
