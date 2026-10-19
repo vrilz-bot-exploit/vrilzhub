@@ -5693,16 +5693,17 @@ returnModeHolder.Parent = mutContent
         while mutInfoLbl.Parent do
             task.wait(0.5)
             local lines = {}
-            
-            if Features and Features.isHoldingEgg then
-                local holding, eggName = Features.isHoldingEgg()
+            local F = getFeatures()
+
+            if F and F.isHoldingEgg then
+                local holding, eggName = F.isHoldingEgg()
                 table.insert(lines, "✋ Held: " .. (holding and ("YES " .. (eggName or "?")) or "no"))
             else
                 table.insert(lines, "✋ Held: --")
             end
 
-            if Features and Features.getMutationState then
-                local state = Features.getMutationState()
+            if F and F.getMutationState then
+                local state = F.getMutationState()
                 table.insert(lines, "🔒 Lock: " .. (state.EggLocked and "YES" or "no"))
                 table.insert(lines, "⏸ Paused: " .. (state.StealPaused and "YES" or "no"))
                 table.insert(lines, "▶ Running: " .. (state.Running and "YES" or "no"))
@@ -5713,11 +5714,11 @@ returnModeHolder.Parent = mutContent
     end)
 end
 
-        registerTab("EggMutation", "🔥", "Egg Mutation")
+                registerTab("EggMutation", "🔥", "Egg Mutation")
 
     registerTab("Settings", "⚙", "Settings")
 
-    pages.Info.Visible = true
+            pages.Info.Visible = true
     navs.Info.btn.BackgroundColor3 = C.Accent
     navs.Info.btn.BackgroundTransparency = 0
     navs.Info.ic.TextColor3 = Color3.new(1, 1, 1)
