@@ -5065,6 +5065,7 @@ end
 -- ============================================================
 function Features.Init(sharedState)
     Shared = sharedState
+    _G.VRILZ_Shared = Shared
 
     -- ⭐ SET DEFAULT BIAR AMAN
     if Shared.AntiAFK_Enabled == nil then Shared.AntiAFK_Enabled = true end
