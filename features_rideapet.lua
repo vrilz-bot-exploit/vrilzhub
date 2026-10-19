@@ -895,7 +895,7 @@ local function confirmEggInHand(timeout)
     return lastResult, os.clock() - startTime
 end
 
--- ⭐ INSTANT RETURN — TP langsung ke plot (dengan delay 4 detik konfirmasi)
+-- ⭐ INSTANT RETURN — TP langsung ke plot (delay 6 detik khusus Instant)
 local function instantReturnToPlot()
     if not Shared.MutationReturn_Enabled then return end
 
@@ -906,15 +906,13 @@ local function instantReturnToPlot()
     -- ⭐ STEP 0: Konfirmasi egg di tangan dulu (max 4 detik)
     local holding = isHoldingEggLocal()
     if not holding then
-        -- Tunggu sampai egg masuk (max 4 detik)
         local ok = confirmEggInHand(4)
         if not ok then return end
     end
 
-    -- ⭐ STEP 1: Delay 4 detik total sejak egg di tangan
-    -- Polling ringan biar tau kalo egg tiba-tiba lepas
+    -- ⭐ STEP 1: Delay 6 detik total sejak egg di tangan (KHUSUS INSTANT)
     local delayStart = os.clock()
-    local DELAY_TOTAL = 4.0
+    local DELAY_TOTAL = 6.0                          -- ⬅️ 4.0 → 6.0
     local missStart = nil
     while os.clock() - delayStart < DELAY_TOTAL do
         if isHoldingEggLocal() then
@@ -922,7 +920,7 @@ local function instantReturnToPlot()
         else
             if not missStart then
                 missStart = os.clock()
-                        elseif os.clock() - missStart > 3.0 then
+            elseif os.clock() - missStart > 3.0 then
                 return
             end
         end
