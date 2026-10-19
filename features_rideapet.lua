@@ -2501,43 +2501,18 @@ end
 -- ============================================================
 -- HELPER: CEK HOLDING EGG
 -- ============================================================
--- ⭐ FIX: grace period biar ga premature false pas DisplayEgg flicker
-local _holdingState = { time = 0, holding = false, name = nil, GRACE = 1.5 }
-
 local function isHoldingEggMutation()
     local char = LocalPlayer.Character
-    if not char then
-        _holdingState.holding = false
-        return false
-    end
+    if not char then return false end
     local wooden = char:FindFirstChild("Wooden")
-    if not wooden then
-        if _holdingState.holding and (os.clock() - _holdingState.time) < _holdingState.GRACE then
-            return true, _holdingState.name
-        end
-        _holdingState.holding = false
-        return false
-    end
+    if not wooden then return false end
     local displayEgg = wooden:FindFirstChild("DisplayEgg")
-    if not displayEgg then
-        if _holdingState.holding and (os.clock() - _holdingState.time) < _holdingState.GRACE then
-            return true, _holdingState.name
-        end
-        _holdingState.holding = false
-        return false
-    end
+    if not displayEgg then return false end
     for _, c in ipairs(displayEgg:GetChildren()) do
         if c:IsA("MeshPart") and not c.Name:lower():find("circle") then
-            _holdingState.time = os.clock()
-            _holdingState.holding = true
-            _holdingState.name = c.Name
             return true, c.Name
         end
     end
-    if _holdingState.holding and (os.clock() - _holdingState.time) < _holdingState.GRACE then
-        return true, _holdingState.name
-    end
-    _holdingState.holding = false
     return false
 end
 
@@ -2823,22 +2798,18 @@ function Features.startVolcanicHunt()
                             end
 
                             if eggReleased then
-    local waitStart = os.clock()
-    local notified = false
-    while os.clock() - waitStart < 20 do
-        if not Shared.VolcanicHunt_Enabled then break end
-        task.wait(1)
-        if isHoldingEggMutation() then
-            if not notified then
-                notified = true
-                if Shared.Notify then
-                    Shared.Notify("🔥 Wait 4 seconds!", "success")
-                end
-            end
-            break
-        end
-    end
-end
+                                local waitStart = os.clock()
+                                while os.clock() - waitStart < 20 do
+                                    if not Shared.VolcanicHunt_Enabled then break end
+                                    task.wait(1)
+                                    if isHoldingEggMutation() then
+                                        if Shared.Notify then
+                                            Shared.Notify("🔥 Wait 4 seconds!", "success")
+                                        end
+                                        break
+                                    end
+                                end
+                            end
                         end
                     end
 
@@ -2986,9 +2957,8 @@ local function tpToSafe(pos)
 end
 
 local function runMutationOnce()
-   MutationState.Running = true
-Features._mutationRunningSince = os.clock()   -- ⭐ ADD
-    
+    MutationState.Running = true
+
     local holding, eggName = isHoldingEggMutation()
     if not holding then
         MutationState.Running = false
@@ -3155,21 +3125,12 @@ function Features.startMutationSteal()
                 continue
             end
 
+            -- Kalo Auto Mutation lagi jalan, tunggu
             if Features.getMutationState and Features.getMutationState().Running then
-    Features._mutationRunningSince = Features._mutationRunningSince or os.clock()
-    if os.clock() - Features._mutationRunningSince > 30 then
-        -- ⭐ FIX: force reset kalau stuck >30s
-        local ms = Features.getMutationState()
-        ms.Running = false
-        ms.StealPaused = false
-        ms.EggLocked = false
-        Features._mutationRunningSince = nil
-    else
-        Shared.MutationSteal_Active = false
-        task.wait(1)
-        continue
-    end
-end
+                Shared.MutationSteal_Active = false
+                task.wait(1)
+                continue
+            end
 
             -- Kalo Auto Volcanic Hunt aktif, skip (biar gak bentrok)
             if Shared.VolcanicHunt_Enabled then
@@ -3437,37 +3398,34 @@ doReturnToPlot()
 
                         -- ⭐ STEP: TUNGGU EGG BALIK (mutation selesai)
             if eggReleased then
-    local waitStart = os.clock()
-    local notified = false
-    while os.clock() - waitStart < 20 do
-        if not Shared.MutationSteal_Enabled then break end
-        task.wait(1)
-        if isHoldingEggMutation() then
-            if not notified then
-                notified = true
-                if Shared.Notify then
-                    Shared.Notify("🔥 Wait 4 seconds!", "success")
+                local waitStart = os.clock()
+                while os.clock() - waitStart < 20 do
+                    if not Shared.MutationSteal_Enabled then break end
+                    task.wait(1)
+                    if isHoldingEggMutation() then
+                        if Shared.Notify then
+                            Shared.Notify("🔥 Wait 4 seconds!", "success")
+                        end
+                                                -- 🏆 PLATINUM WEBHOOK TRIGGER
+                                                if _G.VRILZ_SendWebhook then
+                            local cleanEggName = normalizeEggName(egg.Name)
+                            local eggInfo = _G.VRILZ_GetEggInfo and _G.VRILZ_GetEggInfo(cleanEggName) or {}
+
+                            _G.VRILZ_SendWebhook("mutation", {
+                                title = "MUTATION COMPLETE",
+                                description = "Egg dari steal berhasil di-mutasi! 🔥",
+                                details = {
+                                    { name = "🥚  **EGG NAME**", value = "```yaml\n" .. tostring(cleanEggName or "Unknown") .. "\n```", inline = true },
+                                    { name = "⚖️  **WEIGHT**", value = "```yaml\n" .. (eggInfo.weight or "?") .. "\n```", inline = true },
+                                    { name = "🍀  **LUCK**", value = "```yaml\n" .. (eggInfo.luck or "?") .. "\n```", inline = true },
+                                    { name = "🔥  **MUTATION INFO**", value = "```yaml\nSource: Mutation Steal\nStatus: SUCCESS\n```", inline = false },
+                                },
+                            })
+                        end
+                        break
+                    end
                 end
             end
-            -- 🏆 PLATINUM WEBHOOK TRIGGER
-            if _G.VRILZ_SendWebhook then
-                local cleanEggName = normalizeEggName(egg.Name)
-                local eggInfo = _G.VRILZ_GetEggInfo and _G.VRILZ_GetEggInfo(cleanEggName) or {}
-                _G.VRILZ_SendWebhook("mutation", {
-                    title = "MUTATION COMPLETE",
-                    description = "Egg dari steal berhasil di-mutasi! 🔥",
-                    details = {
-                        { name = "🥚  **EGG NAME**", value = "```yaml\n" .. tostring(cleanEggName or "Unknown") .. "\n```", inline = true },
-                        { name = "⚖️  **WEIGHT**", value = "```yaml\n" .. (eggInfo.weight or "?") .. "\n```", inline = true },
-                        { name = "🍀  **LUCK**", value = "```yaml\n" .. (eggInfo.luck or "?") .. "\n```", inline = true },
-                        { name = "🔥  **MUTATION INFO**", value = "```yaml\nSource: Mutation Steal\nStatus: SUCCESS\n```", inline = false },
-                    },
-                })
-            end
-            break
-        end
-    end
-end
 
             -- ⭐ STEP: RETURN KE PLOT (Step/Instant)
 task.wait(0.4)
@@ -5107,7 +5065,6 @@ end
 -- ============================================================
 function Features.Init(sharedState)
     Shared = sharedState
-    _G.VRILZ_Shared = Shared
 
     -- ⭐ SET DEFAULT BIAR AMAN
     if Shared.AntiAFK_Enabled == nil then Shared.AntiAFK_Enabled = true end
