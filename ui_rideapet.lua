@@ -3398,8 +3398,12 @@ local function buildMainWindow(parent)
         ic.Parent = btn
         registerTheme(ic, "Accent", "TextColor3")
 
+               -- 1️⃣ Bikin btn, corner, stroke, ic (SAMA kayak sekarang)
+
+        -- 2️⃣ Bikin lbl DULU kalau perlu
+        local lbl = nil
         if CFG.TAB_SHOW_LABEL then
-            local lbl = Instance.new("TextLabel")
+            lbl = Instance.new("TextLabel")
             lbl.Size = UDim2.new(1, -44, 1, 0)
             lbl.Position = UDim2.fromOffset(42, 0)
             lbl.BackgroundTransparency = 1
@@ -3411,12 +3415,10 @@ local function buildMainWindow(parent)
             lbl.ZIndex = 6
             lbl.Parent = btn
             registerTheme(lbl, "Muted", "TextColor3")
-            navs[id] = {btn = btn, ic = ic, lbl = lbl}
-        else
-            navs[id] = {btn = btn, ic = ic, lbl = nil}
         end
 
-              local function switchTo()
+        -- 3️⃣ BARU deklarasi switchTo
+        local function switchTo()
             for n, p in pairs(pages) do
                 if p then p.Visible = false end
             end
@@ -3439,6 +3441,9 @@ local function buildMainWindow(parent)
                 end
             end
         end
+
+        -- 4️⃣ BARU masukin ke navs (switchTo udah ada)
+        navs[id] = {btn = btn, ic = ic, lbl = lbl, switchTo = switchTo}
 
         btn.MouseButton1Click:Connect(switchTo)
         return btn, switchTo
@@ -6012,10 +6017,10 @@ end
     registerTab("Webhook", "🔔", "Webhook")
     registerTab("Settings", "⚙", "Settings")
 
-    -- ⬇️ TAMBAH INI — auto buka tab Info pas pertama launch
+        -- ⬇️ AUTO BUKA TAB INFO PAS PERTAMA LAUNCH
     task.defer(function()
-        if navs.Info and navs.Info.btn then
-            navs.Info.btn.MouseButton1Click:Fire()
+        if navs.Info and navs.Info.switchTo then
+            navs.Info.switchTo()
         end
     end)
 
@@ -6025,8 +6030,9 @@ end
     -- Drag handler
     do
         local dragging, dragInput, dragStart, startPos
-        header.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                header.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 
+               or input.UserInputType == Enum.UserInputType.Touch then
                 local mouseX = UserInputService:GetMouseLocation().X
                 if mouseX > (header.AbsolutePosition.X + header.AbsoluteSize.X - 90) then return end
                 dragging = true
