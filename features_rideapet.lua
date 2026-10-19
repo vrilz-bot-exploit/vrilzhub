@@ -5497,6 +5497,305 @@ function Features.Init(sharedState)
 end   -- ⭐⭐⭐ TUTUP Features.Init DI SINI ⭐⭐⭐
 
 -- ============================================================
+-- 🥚 EGG STEAL EXECUTOR — FUNGSI BARU (TANPA UBAH YANG LAMA)
+-- Dipanggil dari GUI egg executor
+-- Flow: TP ke egg → pickup → TP lava → drop → tunggu balik → wait 4s → return step
+-- ============================================================
+local StealExecState = {
+    Busy = false,
+    Status = "Idle",
+}
+
+function Features.getStealExecState()
+    return StealExecState
+end
+
+-- ⭐ Cek fitur steal/mutation yang ON
+local function _isAnyStealFeatureOn()
+    local reasons = {}
+    if Shared.AutoMutation_Enabled then table.insert(reasons, "Auto Mutation") end
+    if Shared.MutationSteal_Enabled then table.insert(reasons, "Mutation Steal") end
+    if Shared.AutoFarm_Enabled then table.insert(reasons, "Auto Farm") end
+    if Shared.AutoSteal_Enabled then table.insert(reasons, "Auto Steal") end
+    if Shared.VolcanicHunt_Enabled then table.insert(reasons, "Volcanic Hunt") end
+    if Shared.MutationSteal_Active then table.insert(reasons, "Mutation Steal (active)") end
+    local ms = Features.getMutationState and Features.getMutationState()
+    if ms and (ms.Running or ms.EggLocked or ms.StealPaused) then
+        table.insert(reasons, "Mutation (running)")
+    end
+    return #reasons > 0, reasons
+end
+
+-- ⭐ Return by STEP — persis kayak returnToMyPlot() di file lu
+local function _stealExecReturnStep()
+    local oldFlag = Shared.AutoReturn_Enabled
+    Shared.AutoReturn_Enabled = true
+    local ok = pcall(returnToMyPlot)
+    Shared.AutoReturn_Enabled = oldFlag
+    return ok
+end
+
+-- ⭐ Core: steal egg biasa
+local function _stealExecNormal(egg)
+    StealExecState.Status = "🎯 TP to egg: " .. egg.Name
+
+    local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+    if not eggPart then return false, "Egg no BasePart" end
+
+    local prompt = egg:FindFirstChild("Pickup", true) or egg:FindFirstChildWhichIsA("ProximityPrompt", true)
+    if not prompt then return false, "Egg no Pickup prompt" end
+
+    if prompt:IsA("ProximityPrompt") then
+        prompt.HoldDuration = 0
+        prompt.MaxActivationDistance = math.huge
+        prompt.RequiresLineOfSight = false
+    end
+
+    -- TP langsung ke egg
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return false, "No HRP" end
+    myRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
+    myRoot.Velocity = Vector3.zero
+    myRoot.AssemblyLinearVelocity = Vector3.zero
+    task.wait(0.1)
+
+    -- Pickup loop
+    local picked = false
+    for i = 1, 15 do
+        if not egg.Parent then picked = true; break end
+        if typeof(fireproximityprompt) == "function" then
+            pcall(fireproximityprompt, prompt)
+        end
+        task.wait(0.25)
+        if isHoldingEggMutation() then picked = true; break end
+        if eggPart and eggPart.Parent then
+            myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if myRoot then
+                myRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
+                myRoot.Velocity = Vector3.zero
+                myRoot.AssemblyLinearVelocity = Vector3.zero
+            end
+            task.wait(0.1)
+        end
+    end
+
+    if not picked or not isHoldingEggMutation() then
+        return false, "Failed pickup"
+    end
+
+    StealExecState.Status = "🌋 TP to magma..."
+    task.wait(0.5)
+    local safePos = findSafeVolcanoPos()
+    if safePos then
+        local rootLava = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if rootLava then
+            rootLava.CFrame = CFrame.new(safePos)
+            rootLava.Velocity = Vector3.zero
+            rootLava.AssemblyLinearVelocity = Vector3.zero
+        end
+    end
+    task.wait(1.5)
+
+    StealExecState.Status = "🔥 Dipping..."
+
+    -- Dip sampe egg released
+    local dropWaited = 0
+    local eggReleased = false
+    while dropWaited < 15 do
+        fireVolcanoDip()
+        task.wait(1.5)
+        dropWaited = dropWaited + 1.5
+        if not isHoldingEggMutation() then eggReleased = true; break end
+    end
+
+    if not eggReleased then return false, "Dip timeout" end
+
+    StealExecState.Status = "⏳ Waiting egg back (max 20s)..."
+
+    -- Tunggu egg balik
+    local waitStart = os.clock()
+    while os.clock() - waitStart < 20 do
+        task.wait(1)
+        if isHoldingEggMutation() then
+            StealExecState.Status = "✅ Mutation complete!"
+            if Shared.Notify then Shared.Notify("🔥 Wait 4 seconds!", "success") end
+            task.wait(4)   -- ⭐ 4 detik
+            break
+        end
+    end
+
+    if not isHoldingEggMutation() then
+        return false, "Egg not back (timeout)"
+    end
+
+    StealExecState.Status = "🏠 Returning (step)..."
+
+    local ok = _stealExecReturnStep()
+    if ok then StealExecState.Status = "✅ Done!"
+    else StealExecState.Status = "⚠️ Return failed" end
+
+    return true
+end
+
+-- ⭐ Core: steal volcanic egg (cave waypoint)
+local function _stealExecVolcanic(egg)
+    StealExecState.Status = "🌋 Volcanic: " .. egg.Name
+
+    local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+    if not eggPart then return false, "Egg no BasePart" end
+
+    -- TP ke volcanic spawn (kalo jauh)
+    local spawns = Workspace:FindFirstChild("EggSpawns")
+    local spawnPart = spawns and spawns:FindFirstChild("Volcanic")
+    if spawnPart and spawnPart:IsA("BasePart") then
+        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if curRoot then
+            local d = (spawnPart.Position - curRoot.Position).Magnitude
+            if d > 50 then
+                curRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
+                curRoot.Velocity = Vector3.zero
+                curRoot.AssemblyLinearVelocity = Vector3.zero
+                task.wait(0.5)
+            end
+        end
+    end
+
+    -- Masuk cave pake waypoint
+    StealExecState.Status = "🚶 Entering cave..."
+    for i, wp in ipairs(VolcanicWaypoints) do
+        tpWaypoint(wp)
+        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if curRoot and eggPart and eggPart.Parent then
+            local d = (eggPart.Position - curRoot.Position).Magnitude
+            if d <= 40 then break end
+        end
+    end
+
+    -- TP langsung ke egg
+    local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if curRoot and eggPart and eggPart.Parent then
+        curRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
+        curRoot.Velocity = Vector3.zero
+        curRoot.AssemblyLinearVelocity = Vector3.zero
+        task.wait(0.3)
+    end
+
+    -- Pickup
+    StealExecState.Status = "🖐 Picking up..."
+    local picked = false
+    if egg.Parent then picked = volcanicPickupVerified(egg)
+    else picked = isHoldingEggMutation() end
+
+    if not picked or not isHoldingEggMutation() then
+        return false, "Failed pickup volcanic"
+    end
+
+    -- Exit cave
+    StealExecState.Status = "🚶 Exiting cave..."
+    local exited = exitCave()
+    if not exited or not isHoldingEggMutation() then
+        return false, "Failed exit cave"
+    end
+
+    -- Ke magma
+    StealExecState.Status = "🌋 TP to magma..."
+    task.wait(0.5)
+    local safePos = findSafeVolcanoPos()
+    if safePos then
+        local rootLava = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if rootLava then
+            rootLava.CFrame = CFrame.new(safePos)
+            rootLava.Velocity = Vector3.zero
+            rootLava.AssemblyLinearVelocity = Vector3.zero
+        end
+    end
+    task.wait(1.5)
+
+    StealExecState.Status = "🔥 Dipping..."
+
+    local dropWaited = 0
+    local eggReleased = false
+    while dropWaited < 15 do
+        fireVolcanoDip()
+        task.wait(1.5)
+        dropWaited = dropWaited + 1.5
+        if not isHoldingEggMutation() then eggReleased = true; break end
+    end
+
+    if not eggReleased then return false, "Dip timeout" end
+
+    StealExecState.Status = "⏳ Waiting egg back (max 20s)..."
+
+    local waitStart = os.clock()
+    while os.clock() - waitStart < 20 do
+        task.wait(1)
+        if isHoldingEggMutation() then
+            StealExecState.Status = "✅ Mutation complete!"
+            if Shared.Notify then Shared.Notify("🔥 Wait 4 seconds!", "success") end
+            task.wait(4)   -- ⭐ 4 detik
+            break
+        end
+    end
+
+    if not isHoldingEggMutation() then
+        return false, "Egg not back (timeout)"
+    end
+
+    StealExecState.Status = "🏠 Returning (step)..."
+
+    local ok = _stealExecReturnStep()
+    if ok then StealExecState.Status = "✅ Done!"
+    else StealExecState.Status = "⚠️ Return failed" end
+
+    return true
+end
+
+-- ⭐ MAIN ENTRY — dipanggil dari GUI
+function Features.stealEgg(egg)
+    if StealExecState.Busy then
+        if Shared.Notify then Shared.Notify("⏳ Already stealing...", "warning") end
+        return false, "busy"
+    end
+
+    -- Guard
+    local anyOn, reasons = _isAnyStealFeatureOn()
+    if anyOn then
+        local reasonStr = table.concat(reasons, ", ")
+        if Shared.Notify then
+            Shared.Notify("⚠️ Please disable your steal/mutation first! (" .. reasonStr .. ")", "error")
+        end
+        StealExecState.Status = "❌ Blocked: " .. reasonStr
+        return false, "blocked"
+    end
+
+    if not egg or not egg.Parent then
+        if Shared.Notify then Shared.Notify("❌ Egg not found", "error") end
+        return false, "not_found"
+    end
+
+    StealExecState.Busy = true
+    local isVolcanic = egg.Name:lower():find("volcan") ~= nil
+    StealExecState.Status = isVolcanic and "🌋 Stealing volcanic..." or "🎯 Stealing..."
+
+    task.spawn(function()
+        local ok, err
+        if isVolcanic then ok, err = _stealExecVolcanic(egg)
+        else ok, err = _stealExecNormal(egg) end
+
+        if not ok then
+            if Shared.Notify then Shared.Notify("❌ Steal failed: " .. tostring(err), "error") end
+            StealExecState.Status = "❌ " .. tostring(err)
+        else
+            if Shared.Notify then Shared.Notify("✅ Steal complete!", "success") end
+        end
+
+        StealExecState.Busy = false
+    end)
+
+    return true
+end
+
+-- ============================================================
 -- AUTO OBBY (TALK + FLY TO FINISH + 30 MIN COOLDOWN)
 -- ============================================================
 local ObbyState = {
