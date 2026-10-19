@@ -5521,6 +5521,272 @@ end
     end)
 end
 
+-- ============================================================
+-- 🥚 EGG TRACKER UI — LANGSUNG MUNCUL (TANPA TOGGLE)
+-- ============================================================
+task.spawn(function()
+    -- Tunggu sampe _G.VRILZ_Features siap
+    while not _G.VRILZ_Features do
+        task.wait(0.5)
+    end
+    
+    local LP = game.Players.LocalPlayer
+    local PG = LP:FindFirstChild("PlayerGui") or LP:WaitForChild("PlayerGui")
+    local TweenService = game:GetService("TweenService")
+    
+    -- Hapus UI lama kalo ada
+    local old = PG:FindFirstChild("VRILZ_EggTracker_Standalone")
+    if old then old:Destroy() end
+    
+    local screen = Instance.new("ScreenGui")
+    screen.Name = "VRILZ_EggTracker_Standalone"
+    screen.ResetOnSpawn = false
+    screen.IgnoreGuiInset = true
+    screen.DisplayOrder = 500
+    screen.Parent = PG
+    
+    local WIN_W, WIN_H = 540, 460
+    local WIN_X, WIN_Y = 0.5, 0.5
+    
+    -- TEMA (Sesuaiin sama UI lu)
+    local COLOR_BG_MAIN = Color3.fromRGB(10, 10, 14)
+    local COLOR_BG_CARD = Color3.fromRGB(22, 22, 30)
+    local COLOR_GLASS   = Color3.fromRGB(35, 35, 45)
+    local COLOR_CYAN    = Color3.fromRGB(0, 240, 255)
+    local COLOR_CYAN_DIM= Color3.fromRGB(0, 120, 140)
+    local COLOR_TEXT    = Color3.fromRGB(255, 255, 255)
+    local COLOR_TEXT_DIM= Color3.fromRGB(160, 160, 180)
+    local COLOR_RED     = Color3.fromRGB(255, 70, 70)
+    local COLOR_GREEN   = Color3.fromRGB(0, 255, 150)
+    
+    local State = { WindowVisible = true, IsStealing = false } -- ⭐ LANGSUNG TRUE
+    local EggCache = {}
+    local TrackedCards = {}
+    
+    local function getRoot() local c = LP.Character; return c and c:FindFirstChild("HumanoidRootPart") end
+    local function getEggPart(egg) return egg and (egg:FindFirstChild("Handle") or egg:FindFirstChild("EggBase") or egg:FindFirstChildWhichIsA("BasePart", true)) end
+    
+    -- WINDOW UTAMA (LANGSUNG VISIBLE)
+    local win = Instance.new("Frame")
+    win.Name = "BigWindow"
+    win.AnchorPoint = Vector2.new(0.5, 0.5)
+    win.Position = UDim2.new(WIN_X, 0, WIN_Y, 0) -- ⭐ LANGSUNG DI TENGAH
+    win.Size = UDim2.fromOffset(WIN_W, WIN_H)
+    win.BackgroundColor3 = COLOR_BG_MAIN
+    win.BorderSizePixel = 0
+    win.Visible = true -- ⭐ LANGSUNG MUNCUL
+    win.Active = true
+    win.Parent = screen
+    
+    local wCorner = Instance.new("UICorner"); wCorner.CornerRadius = UDim.new(0, 16); wCorner.Parent = win
+    local wStroke = Instance.new("UIStroke"); wStroke.Color = COLOR_CYAN; wStroke.Thickness = 2; wStroke.Transparency = 0.3; wStroke.Parent = win
+    
+    local winGlow = Instance.new("Frame"); winGlow.Size = UDim2.new(1, 12, 1, 12); winGlow.Position = UDim2.fromOffset(-6, -6); winGlow.BackgroundColor3 = COLOR_CYAN; winGlow.BackgroundTransparency = 0.9; winGlow.BorderSizePixel = 0; winGlow.ZIndex = 0; winGlow.Parent = win
+    local wgCorner = Instance.new("UICorner"); wgCorner.CornerRadius = UDim.new(0, 20); wgCorner.Parent = winGlow
+    
+    local winHeader = Instance.new("Frame"); winHeader.Size = UDim2.new(1, 0, 0, 60); winHeader.BackgroundColor3 = COLOR_GLASS; winHeader.BackgroundTransparency = 0.1; winHeader.BorderSizePixel = 0; winHeader.Parent = win
+    local whCorner = Instance.new("UICorner"); whCorner.CornerRadius = UDim.new(0, 16); whCorner.Parent = winHeader
+    local whFix = Instance.new("Frame"); whFix.Size = UDim2.new(1, 0, 0.5, 0); whFix.Position = UDim2.new(0, 0, 0.5, 0); whFix.BackgroundColor3 = COLOR_GLASS; whFix.BackgroundTransparency = 0.1; whFix.BorderSizePixel = 0; whFix.Parent = winHeader
+    
+    local accentLine = Instance.new("Frame"); accentLine.Size = UDim2.new(0, 4, 1, -16); accentLine.Position = UDim2.fromOffset(12, 8); accentLine.BackgroundColor3 = COLOR_CYAN; accentLine.BorderSizePixel = 0; accentLine.Parent = winHeader
+    local alCorner = Instance.new("UICorner"); alCorner.CornerRadius = UDim.new(1, 0); alCorner.Parent = accentLine
+    
+    task.spawn(function()
+        while winHeader.Parent do
+            TweenService:Create(accentLine, TweenInfo.new(1.5), { BackgroundTransparency = 0.5 }):Play()
+            task.wait(1.5)
+            TweenService:Create(accentLine, TweenInfo.new(1.5), { BackgroundTransparency = 0 }):Play()
+            task.wait(1.5)
+        end
+    end)
+    
+    local winTitle = Instance.new("TextLabel"); winTitle.Size = UDim2.new(1, -40, 0, 24); winTitle.Position = UDim2.fromOffset(28, 8); winTitle.BackgroundTransparency = 1; winTitle.Text = "EGG TRACKER"; winTitle.TextColor3 = COLOR_CYAN; winTitle.Font = Enum.Font.GothamBold; winTitle.TextSize = 18; winTitle.TextXAlignment = Enum.TextXAlignment.Left; winTitle.Parent = winHeader
+    local winSub = Instance.new("TextLabel"); winSub.Size = UDim2.new(1, -40, 0, 16); winSub.Position = UDim2.fromOffset(28, 32); winSub.BackgroundTransparency = 1; winSub.Text = "LIVE TRACKER"; winSub.TextColor3 = COLOR_TEXT_DIM; winSub.Font = Enum.Font.GothamMedium; winSub.TextSize = 10; winSub.TextXAlignment = Enum.TextXAlignment.Left; winSub.Parent = winHeader
+    
+    local body = Instance.new("ScrollingFrame"); body.Size = UDim2.new(1, -32, 1, -80); body.Position = UDim2.fromOffset(16, 70); body.BackgroundTransparency = 1; body.BorderSizePixel = 0; body.ScrollBarThickness = 4; body.ScrollBarImageColor3 = COLOR_CYAN; body.CanvasSize = UDim2.new(0, 0, 0, 0); body.AutomaticCanvasSize = Enum.AutomaticSize.Y; body.Parent = win
+    local grid = Instance.new("UIGridLayout"); grid.CellSize = UDim2.fromOffset(145, 190); grid.CellPadding = UDim2.fromOffset(12, 12); grid.SortOrder = Enum.SortOrder.LayoutOrder; grid.HorizontalAlignment = Enum.HorizontalAlignment.Center; grid.Parent = body
+    
+    local function createEggPreview(parent, eggModel)
+        local vpf = Instance.new("ViewportFrame"); vpf.Size = UDim2.new(1, -12, 0, 95); vpf.Position = UDim2.fromOffset(6, 6); vpf.BackgroundColor3 = Color3.fromRGB(5, 5, 10); vpf.BackgroundTransparency = 0.3; vpf.Parent = parent
+        local vCorner = Instance.new("UICorner"); vCorner.CornerRadius = UDim.new(0, 8); vCorner.Parent = vpf
+        local vStroke = Instance.new("UIStroke"); vStroke.Color = COLOR_CYAN_DIM; vStroke.Thickness = 1; vStroke.Transparency = 0.4; vStroke.Parent = vpf
+        local cam = Instance.new("Camera"); cam.Parent = vpf; vpf.CurrentCamera = cam
+    
+                local clonedEgg = EggCache[eggModel]
+        if not clonedEgg then
+            local ok, made = pcall(function()
+                local c = eggModel:Clone()
+                for _, d in ipairs(c:GetDescendants()) do
+                    if d:IsA("ProximityPrompt") or d:IsA("Script") or d:IsA("LocalScript") then d:Destroy() end
+                    if d:IsA("BasePart") then d.Anchored = true; d.CanCollide = false end
+                end
+                return c
+            end)
+            if not ok or not made then return end
+            clonedEgg = made
+            EggCache[eggModel] = clonedEgg
+        end
+        local okClone, clone = pcall(function() return clonedEgg:Clone() end)
+        if not okClone or not clone then return end
+        clone.Parent = vpf
+        local okBBox, bboxCF, bboxSize = pcall(function() return clone:GetBoundingBox() end)
+        if not okBBox or not bboxCF then clone:Destroy(); return end
+        local center = bboxCF.Position; local radius = math.max(bboxSize.X, bboxSize.Y, bboxSize.Z) / 2
+        cam.CFrame = CFrame.new(center + Vector3.new(radius*2.5, radius*1.5, radius*2.5), center)
+    end
+    
+    local function updateTracker()
+        local myRoot = getRoot()
+        local currentModels = {}
+    
+        local rendered = workspace:FindFirstChild("RenderedEggs")
+        if rendered then
+            for _, egg in ipairs(rendered:GetChildren()) do
+                if egg:IsA("Model") then
+                    local part = getEggPart(egg)
+                    if part then
+                        currentModels[egg] = {
+                            name = egg.Name,
+                            dist = myRoot and (part.Position - myRoot.Position).Magnitude or 0,
+                            isVolcanic = egg.Name:lower():find("volcan") ~= nil,
+                            eggModel = egg
+                        }
+                    end
+                end
+            end
+        end
+    
+        local plots = workspace:FindFirstChild("Plots")
+        if plots then
+            for _, plot in ipairs(plots:GetChildren()) do
+                local owner = plot:GetAttribute("OwnerUserId") or plot:GetAttribute("Owner")
+                if owner == LP.UserId or owner == LP.Name then
+                    local eggsFolder = plot:FindFirstChild("Eggs") or plot:FindFirstChild("Nests")
+                    if eggsFolder then
+                        for _, egg in ipairs(eggsFolder:GetDescendants()) do
+                            if egg:IsA("Model") and not currentModels[egg] then
+                                local part = getEggPart(egg)
+                                if part then
+                                    currentModels[egg] = {
+                                        name = egg.Name,
+                                        dist = myRoot and (part.Position - myRoot.Position).Magnitude or 0,
+                                        isVolcanic = false,
+                                        eggModel = egg
+                                    }
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    
+                for eggModel, data in pairs(TrackedCards) do
+            if not currentModels[eggModel] then
+                if data.card and data.card.Parent then data.card:Destroy() end
+                EggCache[eggModel] = nil
+                TrackedCards[eggModel] = nil
+            end
+        end
+    
+        for eggModel, info in pairs(currentModels) do
+            if not TrackedCards[eggModel] then
+                local card = Instance.new("Frame")
+                card.Size = UDim2.fromOffset(145, 190)
+                card.BackgroundColor3 = COLOR_BG_CARD
+                card.BorderSizePixel = 0
+                card.LayoutOrder = #TrackedCards + 1
+                card.Parent = body
+    
+                local cc = Instance.new("UICorner"); cc.CornerRadius = UDim.new(0, 12); cc.Parent = card
+                local cs = Instance.new("UIStroke"); cs.Color = info.isVolcanic and COLOR_RED or COLOR_CYAN_DIM; cs.Thickness = 1.5; cs.Transparency = 0.2; cs.Parent = card
+    
+                createEggPreview(card, eggModel)
+    
+                local nl = Instance.new("TextLabel"); nl.Size = UDim2.new(1, -12, 0, 22); nl.Position = UDim2.fromOffset(6, 105); nl.BackgroundTransparency = 1; nl.Text = info.name; nl.TextColor3 = COLOR_TEXT; nl.Font = Enum.Font.GothamBold; nl.TextSize = 13; nl.TextTruncate = Enum.TextTruncate.AtEnd; nl.Parent = card
+                
+                local dl = Instance.new("TextLabel"); dl.Name = "DistLabel"; dl.Size = UDim2.new(1, -12, 0, 14); dl.Position = UDim2.fromOffset(6, 128); dl.BackgroundTransparency = 1; dl.Text = string.format("%d STUDS AWAY", math.floor(info.dist)); dl.TextColor3 = COLOR_TEXT_DIM; dl.Font = Enum.Font.GothamMedium; dl.TextSize = 10; dl.TextXAlignment = Enum.TextXAlignment.Left; dl.Parent = card
+    
+                local stealBtn = Instance.new("TextButton"); stealBtn.Size = UDim2.new(1, -20, 0, 28); stealBtn.Position = UDim2.new(0, 10, 1, -36); stealBtn.BackgroundColor3 = COLOR_CYAN_DIM; stealBtn.Text = "STEAL"; stealBtn.TextColor3 = Color3.new(1, 1, 1); stealBtn.Font = Enum.Font.GothamBold; stealBtn.TextSize = 12; stealBtn.BorderSizePixel = 0; stealBtn.AutoButtonColor = false; stealBtn.Parent = card
+                local sbc = Instance.new("UICorner"); sbc.CornerRadius = UDim.new(0, 8); sbc.Parent = stealBtn
+    
+                stealBtn.MouseEnter:Connect(function() TweenService:Create(stealBtn, TweenInfo.new(0.2), { BackgroundColor3 = COLOR_GREEN }):Play() end)
+                stealBtn.MouseLeave:Connect(function() TweenService:Create(stealBtn, TweenInfo.new(0.2), { BackgroundColor3 = COLOR_CYAN_DIM }):Play() end)
+    
+                -- FUNGSI EKSEKUSI LANGSUNG DARI UI
+                                stealBtn.MouseButton1Click:Connect(function()
+                    if State.IsStealing then return end
+                    State.IsStealing = true
+                    stealBtn.Text = "STEALING..."; stealBtn.BackgroundColor3 = COLOR_GREEN
+                    
+                    local F = _G.VRILZ_Features
+                    local S = _G.VRILZ_Shared
+    
+                    if F and S then
+                        if not S.MutationSelectedEggs then S.MutationSelectedEggs = {} end
+                        local prevReturn = S.AutoReturn_Enabled
+                        -- Matikan fitur lain biar fokus
+                        S.AutoFarm_Enabled = false
+                        S.AutoSteal_Enabled = false
+                        S.AutoMutation_Enabled = false
+                        S.MutationSteal_Enabled = false
+                        S.AutoReturn_Enabled = false
+                        
+                        task.wait(0.5)
+    
+                        -- Set TP mode ke Studs
+                        S.StealMode = "TP"
+                        S.MutationReturn_Enabled = true
+    
+                        if info.isVolcanic then
+                            S.VolcanicHunt_Enabled = true
+                            if F.startVolcanicHunt then F.startVolcanicHunt() end
+                            if S.Notify then S.Notify("🌋 Volcanic Hunt Triggered!", "success") end
+                        else
+                            S.MutationSelectedEggs[info.name] = true
+                            S.MutationSteal_Enabled = true
+                            if F.startMutationSteal then F.startMutationSteal() end
+                            if S.Notify then S.Notify("🎯 Mutation Steal Triggered!", "success") end
+                        end
+                        task.wait(2)
+                        S.AutoReturn_Enabled = prevReturn
+                    else
+                        if S then S.Notify("⚠️ Fitur utama belum jalan!", "warning") end
+                    end
+                    
+                    stealBtn.Text = "STEAL"; stealBtn.BackgroundColor3 = COLOR_CYAN_DIM
+                    State.IsStealing = false
+                end)
+    
+                TrackedCards[eggModel] = { card = card, distLbl = dl }
+            else
+                local data = TrackedCards[eggModel]
+                if data.distLbl and data.distLbl.Parent then
+                    data.distLbl.Text = string.format("%d STUDS AWAY", math.floor(info.dist))
+                end
+            end
+        end
+    
+        local sorted = {}
+        for eggModel, info in pairs(currentModels) do table.insert(sorted, {model = eggModel, dist = info.dist}) end
+        table.sort(sorted, function(a, b) return a.dist < b.dist end)
+        for i, entry in ipairs(sorted) do
+            local data = TrackedCards[entry.model]
+            if data and data.card then data.card.LayoutOrder = i end
+        end
+    end
+    
+    -- Loop update tiap 1 detik
+    task.spawn(function()
+        while win.Parent do
+            task.wait(1)
+            updateTracker()
+        end
+    end)
+    
+    print("✅ Egg Tracker UI — Langsung Muncul")
+end)
+
     _G.VRILZ_Features = Features
 _G.VRILZ_Shared = Shared
 _G.VRILZ_UI_Shared = Shared
