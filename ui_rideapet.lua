@@ -6159,30 +6159,28 @@ local function buildKeyWindow(parent, onSuccess)
         status.TextColor3 = C.Muted
 
         task.spawn(function()
-            local valid, message, data = verifyKeyWithServer(box.Text)
-   if valid then
-    local normalizedKey = tostring(box.Text):gsub("^%s+", ""):gsub("%s+$", ""):upper()
-    applyKeyInfo(data, normalizedKey)
-    saveKey(normalizedKey)
-    status.Text = "Status: " .. message
-    status.TextColor3 = C.Success
-    task.wait(0.35)
-    if gate and gate.Parent then
-        gate:Destroy()
+    local valid, message, data = verifyKeyWithServer(box.Text)
+    if valid then
+        local normalizedKey = tostring(box.Text):gsub("^%s+", ""):gsub("%s+$", ""):upper()
+        applyKeyInfo(data, normalizedKey)
+        saveKey(normalizedKey)
+        status.Text = "Status: " .. message
+        status.TextColor3 = C.Success
+        task.wait(0.35)
+        if gate and gate.Parent then
+            gate:Destroy()
+        end
+
+        _G.VRILZ_KEY_VALID = true
+
+        onSuccess()
+    else        -- ✅ ELSE LANGSUNG NEMPEL, TANPA END DI ATASNYA
+        status.Text = "Status: " .. message
+        status.TextColor3 = C.Error
+        checkBtn.Text = "CHECK KEY"
+        checking = false
     end
-    
-    -- ⭐ SET FLAG KEY VALID
-    _G.VRILZ_KEY_VALID = true
-    
-    onSuccess()  -- → startLoading → loading screen → buildMainWindow
-end
-            else
-                status.Text = "Status: " .. message
-                status.TextColor3 = C.Error
-                checkBtn.Text = "CHECK KEY"
-                checking = false
-            end
-        end)
+end)
     end)
 
     box.FocusLost:Connect(function()
