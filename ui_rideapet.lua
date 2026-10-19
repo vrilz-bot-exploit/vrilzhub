@@ -2714,43 +2714,30 @@ local function buildEggExecutorGUI(screenGui)
     -- ============================================================
     -- ⭐ AUTO-HIDE MINI PANEL (FIX ANTI-CRASH)
     -- ============================================================
-    local function isAnyMenuOpenLocal()
+        local function isAnyMenuOpenLocal()
+        -- ⭐ Scan ScreenGui "Main" — ScreenGui utama game Ride a Pet
         local PG = LocalPlayer:FindFirstChild("PlayerGui")
         if not PG then return false end
 
-        for _, gui in ipairs(PG:GetChildren()) do
-            if gui:IsA("ScreenGui") and gui.Enabled then
-                local guiName = gui.Name:lower()
-                if guiName == "vrilz_eggpanelexecutor" or guiName == "vrilz_rideapet" or guiName == "vrilz_eggpanel_executor" then
-                    continue
-                end
+        local mainGui = PG:FindFirstChild("Main")
+        if not mainGui then return false end
 
-                for _, desc in ipairs(gui:GetDescendants()) do
-                    local isBig = pcall(function()
-                        return (desc:IsA("Frame") or desc:IsA("ImageLabel") or desc:IsA("ScrollingFrame") or desc:IsA("TextButton"))
-                            and desc.Visible
-                            and desc.AbsoluteSize.X > 200
-                            and desc.AbsoluteSize.Y > 200
-                    end)
-
-                    if isBig == true then
-                        local n = desc.Name:lower()
-                        if n:find("shop") or n:find("egg") or n:find("pet") or n:find("telur") or n:find("tumbuka")
-                        or n:find("index") or n:find("rebirth") or n:find("fusion")
-                        or n:find("store") or n:find("setting") or n:find("sell")
-                        or n:find("inventory") or n:find("backpack") or n:find("menu")
-                        or n:find("codex") or n:find("achievement") or n:find("quest")
-                        or n:find("upgrade") or n:find("trade") or n:find("craft")
-                        or n:find("panel") or n:find("main") or n:find("container") then
-                            return true
-                        end
+        -- Iterasi children dari Main (Frame/ImageLabel)
+        for _, gui in ipairs(mainGui:GetChildren()) do
+            if gui:IsA("Frame") or gui:IsA("ImageLabel") then
+                local name = gui.Name:lower()
+                if name:find("shop") or name:find("egg") or name:find("pet") 
+                   or name:find("index") or name:find("rebirth") or name:find("fusion") 
+                   or name:find("store") or name:find("settings") or name:find("sell") then
+                    if gui.Visible and gui.AbsoluteSize.X > 200 and gui.AbsoluteSize.Y > 200 then 
+                        return true 
                     end
                 end
             end
         end
         return false
     end
-
+    
     task.spawn(function()
         while eggScreen.Parent do
             task.wait(0.1)
