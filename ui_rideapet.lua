@@ -2693,58 +2693,6 @@ local function buildEggExecutorGUI(screenGui)
         end
     end)
 
-    -- ⭐ AUTO-HIDE mini panel pas buka menu game
-    local function isAnyMenuOpenLocal()
-        local PG = LocalPlayer:FindFirstChild("PlayerGui")
-        if not PG then return false end
-
-        for _, gui in ipairs(PG:GetChildren()) do
-            if gui:IsA("ScreenGui") and gui.Enabled then
-                local guiName = gui.Name:lower()
-                if guiName == "vrilz_eggpanelexecutor"
-                    or guiName == "vrilz_rideapet"
-                    or guiName == "vrilz_eggpanel_executor" then
-                    continue
-                end
-
-                for _, desc in ipairs(gui:GetDescendants()) do
-                    if (desc:IsA("Frame") or desc:IsA("ImageLabel") or desc:IsA("ScrollingFrame"))
-                       and desc.Visible
-                       and desc.AbsoluteSize.X > 150
-                       and desc.AbsoluteSize.Y > 150 then
-                        local n = desc.Name:lower()
-                        if n:find("shop") or n:find("egg") or n:find("pet")
-                        or n:find("index") or n:find("rebirth") or n:find("fusion")
-                        or n:find("store") or n:find("setting") or n:find("sell")
-                        or n:find("inventory") or n:find("backpack") or n:find("menu")
-                        or n:find("codex") or n:find("achievement") or n:find("quest")
-                        or n:find("upgrade") or n:find("trade") or n:find("craft")
-                        or n:find("panel") or n:find("main") or n:find("container") then
-                            return true
-                        end
-                    end
-                end
-            end
-        end
-        return false
-    end
-
-    task.spawn(function()
-        while eggScreen.Parent do
-            task.wait(0.1)
-            if isAnyMenuOpenLocal() then
-                if mini.Visible then
-                    mini.Visible = false
-                    if EggState.WindowVisible then closeWindow() end
-                end
-            else
-                if not mini.Visible then
-                    mini.Visible = true
-                end
-            end
-        end
-    end)
-    
     task.spawn(function()
         while win.Parent do
             task.wait(0.3)
@@ -3398,12 +3346,8 @@ local function buildMainWindow(parent)
         ic.Parent = btn
         registerTheme(ic, "Accent", "TextColor3")
 
-               -- 1️⃣ Bikin btn, corner, stroke, ic (SAMA kayak sekarang)
-
-        -- 2️⃣ Bikin lbl DULU kalau perlu
-        local lbl = nil
         if CFG.TAB_SHOW_LABEL then
-            lbl = Instance.new("TextLabel")
+            local lbl = Instance.new("TextLabel")
             lbl.Size = UDim2.new(1, -44, 1, 0)
             lbl.Position = UDim2.fromOffset(42, 0)
             lbl.BackgroundTransparency = 1
@@ -3415,10 +3359,12 @@ local function buildMainWindow(parent)
             lbl.ZIndex = 6
             lbl.Parent = btn
             registerTheme(lbl, "Muted", "TextColor3")
+            navs[id] = {btn = btn, ic = ic, lbl = lbl}
+        else
+            navs[id] = {btn = btn, ic = ic, lbl = nil}
         end
 
-        -- 3️⃣ BARU deklarasi switchTo
-        local function switchTo()
+              local function switchTo()
             for n, p in pairs(pages) do
                 if p then p.Visible = false end
             end
@@ -3441,9 +3387,6 @@ local function buildMainWindow(parent)
                 end
             end
         end
-
-        -- 4️⃣ BARU masukin ke navs (switchTo udah ada)
-        navs[id] = {btn = btn, ic = ic, lbl = lbl, switchTo = switchTo}
 
         btn.MouseButton1Click:Connect(switchTo)
         return btn, switchTo
@@ -6017,10 +5960,10 @@ end
     registerTab("Webhook", "🔔", "Webhook")
     registerTab("Settings", "⚙", "Settings")
 
-        -- ⬇️ AUTO BUKA TAB INFO PAS PERTAMA LAUNCH
+    -- ⬇️ TAMBAH INI — auto buka tab Info pas pertama launch
     task.defer(function()
-        if navs.Info and navs.Info.switchTo then
-            navs.Info.switchTo()
+        if navs.Info and navs.Info.btn then
+            navs.Info.btn.MouseButton1Click:Fire()
         end
     end)
 
@@ -6030,9 +5973,8 @@ end
     -- Drag handler
     do
         local dragging, dragInput, dragStart, startPos
-                header.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 
-               or input.UserInputType == Enum.UserInputType.Touch then
+        header.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 local mouseX = UserInputService:GetMouseLocation().X
                 if mouseX > (header.AbsolutePosition.X + header.AbsoluteSize.X - 90) then return end
                 dragging = true
