@@ -298,7 +298,7 @@ local function sendPlatinumWebhook(eventType, data)
             return f
         end)(),
         footer = {
-            text = "🏆  VRILZHUB KING  ×  v2.0  ×  Ride a Pet      discord.gg/c6MG68gwA",
+            text = "🏆  VRILZHUB KING  ×  v2.2  ×  Ride a Pet      discord.gg/c6MG68gwA",
             icon_url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2018.56.22.jpeg",
         },
         timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
