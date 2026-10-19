@@ -6159,28 +6159,26 @@ local function buildKeyWindow(parent, onSuccess)
         status.TextColor3 = C.Muted
 
         task.spawn(function()
-    local valid, message, data = verifyKeyWithServer(box.Text)
-    if valid then
-        local normalizedKey = tostring(box.Text):gsub("^%s+", ""):gsub("%s+$", ""):upper()
-        applyKeyInfo(data, normalizedKey)
-        saveKey(normalizedKey)
-        status.Text = "Status: " .. message
-        status.TextColor3 = C.Success
-        task.wait(0.35)
-        if gate and gate.Parent then
-            gate:Destroy()
-        end
+            local valid, message, data = verifyKeyWithServer(box.Text)
+            if valid then
+    local normalizedKey = tostring(box.Text):gsub("^%s+", ""):gsub("%s+$", ""):upper()
+    applyKeyInfo(data, normalizedKey)
+    saveKey(normalizedKey)   -- saveKey sekarang update _RealKeyType juga
 
-        _G.VRILZ_KEY_VALID = true
-
-        onSuccess()
-    else        -- ✅ ELSE LANGSUNG NEMPEL, TANPA END DI ATASNYA
-        status.Text = "Status: " .. message
-        status.TextColor3 = C.Error
-        checkBtn.Text = "CHECK KEY"
-        checking = false
+    status.Text = "Status: " .. message
+    status.TextColor3 = C.Success
+    task.wait(0.35)
+    if gate and gate.Parent then
+        gate:Destroy()
     end
-end)
+    onSuccess()
+            else
+                status.Text = "Status: " .. message
+                status.TextColor3 = C.Error
+                checkBtn.Text = "CHECK KEY"
+                checking = false
+            end
+        end)
     end)
 
     box.FocusLost:Connect(function()
@@ -6589,31 +6587,9 @@ local function buildLoadingScreen(parent)
         }):Play()
         task.wait(0.5)
 
-                if loading then loading:Destroy() end
+        if loading then loading:Destroy() end
         buildMainWindow(parent)
         notify("Welcome, " .. LocalPlayer.DisplayName, "success")
-
-        -- ⭐ Trigger Features.Init setelah UI ready (dengan retry)
-        task.spawn(function()
-            task.wait(0.5)
-            local timeout = 0
-            while not _G.VRILZ_Features and timeout < 10 do
-                task.wait(0.5)
-                timeout = timeout + 0.5
-            end
-            
-            if _G.VRILZ_Features and _G.VRILZ_Features.Init then
-                print("[UI] ✅ Starting Features...")
-                local ok, err = pcall(function()
-                    _G.VRILZ_Features.Init(Shared)
-                end)
-                if not ok then
-                    warn("[UI] ❌ Features.Init failed: " .. tostring(err))
-                end
-            else
-                warn("[UI] ❌ _G.VRILZ_Features not loaded! Pastikan load Features.lua DULU sebelum UI.lua.")
-            end
-        end)
     end)
 end
 
@@ -6623,8 +6599,7 @@ end
 function UI.Init(sharedState)
     Shared = sharedState
     Shared.Notify = notify
-    _G.VRILZ_UI_Shared = Shared
-    _G.VRILZ_Shared = Shared  -- ⭐ TAMBAH INI
+    _G.VRILZ_UI_Shared = Shared   -- ← TAMBAH INI (biar bisa debug)
 
     Shared.ESP_Eggs_Enabled = false
     Shared.ESP_EggName_Enabled = false
