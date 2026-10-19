@@ -6160,18 +6160,22 @@ local function buildKeyWindow(parent, onSuccess)
 
         task.spawn(function()
             local valid, message, data = verifyKeyWithServer(box.Text)
-            if valid then
+   if valid then
     local normalizedKey = tostring(box.Text):gsub("^%s+", ""):gsub("%s+$", ""):upper()
     applyKeyInfo(data, normalizedKey)
-    saveKey(normalizedKey)   -- saveKey sekarang update _RealKeyType juga
-
+    saveKey(normalizedKey)
     status.Text = "Status: " .. message
     status.TextColor3 = C.Success
     task.wait(0.35)
     if gate and gate.Parent then
         gate:Destroy()
     end
-    onSuccess()
+    
+    -- ⭐ SET FLAG KEY VALID
+    _G.VRILZ_KEY_VALID = true
+    
+    onSuccess()  -- → startLoading → loading screen → buildMainWindow
+end
             else
                 status.Text = "Status: " .. message
                 status.TextColor3 = C.Error
@@ -6587,9 +6591,31 @@ local function buildLoadingScreen(parent)
         }):Play()
         task.wait(0.5)
 
-        if loading then loading:Destroy() end
+                if loading then loading:Destroy() end
         buildMainWindow(parent)
         notify("Welcome, " .. LocalPlayer.DisplayName, "success")
+
+        -- ⭐ Trigger Features.Init setelah UI ready (dengan retry)
+        task.spawn(function()
+            task.wait(0.5)
+            local timeout = 0
+            while not _G.VRILZ_Features and timeout < 10 do
+                task.wait(0.5)
+                timeout = timeout + 0.5
+            end
+            
+            if _G.VRILZ_Features and _G.VRILZ_Features.Init then
+                print("[UI] ✅ Starting Features...")
+                local ok, err = pcall(function()
+                    _G.VRILZ_Features.Init(Shared)
+                end)
+                if not ok then
+                    warn("[UI] ❌ Features.Init failed: " .. tostring(err))
+                end
+            else
+                warn("[UI] ❌ _G.VRILZ_Features not loaded! Pastikan load Features.lua DULU sebelum UI.lua.")
+            end
+        end)
     end)
 end
 
@@ -6599,7 +6625,8 @@ end
 function UI.Init(sharedState)
     Shared = sharedState
     Shared.Notify = notify
-    _G.VRILZ_UI_Shared = Shared   -- ← TAMBAH INI (biar bisa debug)
+    _G.VRILZ_UI_Shared = Shared
+    _G.VRILZ_Shared = Shared  -- ⭐ TAMBAH INI
 
     Shared.ESP_Eggs_Enabled = false
     Shared.ESP_EggName_Enabled = false
