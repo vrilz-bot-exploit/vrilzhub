@@ -5065,6 +5065,347 @@ function Features.setYinRitualEnabled(v)
 end
 
 -- ============================================================
+-- STEAL EXECUTOR — LOGIC ONLY (dipanggil dari UI)
+-- Tanpa GUI, tanpa toggle. UI yang bikin tombol, ini yang jalanin.
+-- Guard: Auto Mutation / Mutation Steal / Auto Farm / Volcanic Hunt
+-- Volcanic egg → cave waypoint | Normal egg → direct TP
+-- Return: STEP mode | Wait egg back: 4 seconds
+-- ============================================================
+local StealExecState = {
+    Busy = false,
+    Status = "Idle",
+    CurrentEggName = nil,
+}
+
+-- ⭐ cek fitur steal/mutation yang ON
+local function isAnyStealFeatureOn()
+    local reasons = {}
+
+    if Shared.AutoMutation_Enabled then table.insert(reasons, "Auto Mutation") end
+    if Shared.MutationSteal_Enabled then table.insert(reasons, "Mutation Steal") end
+    if Shared.AutoFarm_Enabled then table.insert(reasons, "Auto Farm") end
+    if Shared.AutoSteal_Enabled then table.insert(reasons, "Auto Steal") end
+    if Shared.VolcanicHunt_Enabled then table.insert(reasons, "Volcanic Hunt") end
+    if Shared.MutationSteal_Active then table.insert(reasons, "Mutation Steal (active)") end
+
+    local ms = Features.getMutationState and Features.getMutationState()
+    if ms and (ms.Running or ms.EggLocked or ms.StealPaused) then
+        table.insert(reasons, "Mutation (running)")
+    end
+
+    return #reasons > 0, reasons
+end
+
+-- ⭐ cari remote (persis kayak yang udah ada di file lu)
+local function seGetRemote(name)
+    local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+    if not remotes then return nil end
+    local gameR = remotes:FindFirstChild("Game")
+    if not gameR then return nil end
+    return gameR:FindFirstChild(name)
+end
+
+local function seGetDropRemoteLocal()
+    return seGetRemote("BasketDrop")
+        or seGetRemote("DropEgg")
+        or seGetRemote("EggDrop")
+        or seGetRemote("Drop")
+end
+
+-- ⭐ return by STEP — panggil returnToMyPlot() yang udah ada di file lu
+-- (returnToMyPlot() = step 100 studs + drop prompt + remote, persis kayak Features)
+local function seReturnToPlotStep()
+    local oldFlag = Shared.AutoReturn_Enabled
+    Shared.AutoReturn_Enabled = true
+    local ok, err = pcall(returnToMyPlot)
+    Shared.AutoReturn_Enabled = oldFlag
+    return ok
+end
+
+-- ⭐ CORE: STEAL EGG BIASA (non-volcanic)
+local function seStealNormalEgg(egg)
+    StealExecState.Status = "🎯 TP to egg: " .. egg.Name
+
+    local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+    if not eggPart then return false, "Egg has no BasePart" end
+
+    local prompt = egg:FindFirstChild("Pickup", true)
+        or egg:FindFirstChildWhichIsA("ProximityPrompt", true)
+    if not prompt then return false, "Egg has no Pickup prompt" end
+
+    if prompt:IsA("ProximityPrompt") then
+        prompt.HoldDuration = 0
+        prompt.MaxActivationDistance = math.huge
+        prompt.RequiresLineOfSight = false
+    end
+
+    -- TP langsung ke egg (persis kayak Features steal biasa)
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return false, "No HumanoidRootPart" end
+    myRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
+    myRoot.Velocity = Vector3.zero
+    myRoot.AssemblyLinearVelocity = Vector3.zero
+    task.wait(0.1)
+
+    -- Pickup loop
+    local picked = false
+    for i = 1, 15 do
+        if not egg.Parent then picked = true; break end
+        if typeof(fireproximityprompt) == "function" then
+            pcall(fireproximityprompt, prompt)
+        end
+        task.wait(0.25)
+        if isHoldingEggMutation() then picked = true; break end
+        if eggPart and eggPart.Parent then
+            myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if myRoot then
+                myRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
+                myRoot.Velocity = Vector3.zero
+                myRoot.AssemblyLinearVelocity = Vector3.zero
+            end
+            task.wait(0.1)
+        end
+    end
+
+    if not picked or not isHoldingEggMutation() then
+        return false, "Failed to pickup egg"
+    end
+
+    StealExecState.Status = "🌋 TP to magma..."
+
+    -- TP ke lava (persis kayak Features step 6)
+    task.wait(0.5)
+    local safePos = findSafeVolcanoPos()
+    if safePos then
+        local rootLava = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if rootLava then
+            rootLava.CFrame = CFrame.new(safePos)
+            rootLava.Velocity = Vector3.zero
+            rootLava.AssemblyLinearVelocity = Vector3.zero
+        end
+    end
+    task.wait(1.5)
+
+    StealExecState.Status = "🔥 Dipping..."
+
+    -- Dip sampe egg released
+    local dropWaited = 0
+    local eggReleased = false
+    while dropWaited < 15 do
+        fireVolcanoDip()
+        task.wait(1.5)
+        dropWaited = dropWaited + 1.5
+        if not isHoldingEggMutation() then eggReleased = true; break end
+    end
+
+    if not eggReleased then return false, "Egg didn't release (dip timeout)" end
+
+    StealExecState.Status = "⏳ Waiting egg back (max 20s)..."
+
+    -- Tunggu egg balik (mutation complete) — max 20s
+    local waitStart = os.clock()
+    while os.clock() - waitStart < 20 do
+        task.wait(1)
+        if isHoldingEggMutation() then
+            StealExecState.Status = "✅ Mutation complete!"
+            if Shared.Notify then Shared.Notify("🔥 Wait 4 seconds!", "success") end
+            task.wait(4)   -- ⭐ 4 detik persis kayak request lu
+            break
+        end
+    end
+
+    if not isHoldingEggMutation() then
+        return false, "Egg didn't come back (mutation timeout)"
+    end
+
+    StealExecState.Status = "🏠 Returning to plot (step)..."
+
+    -- Return by STEP (bukan Instant)
+    local ok = seReturnToPlotStep()
+    if ok then StealExecState.Status = "✅ Done!"
+    else StealExecState.Status = "⚠️ Return failed" end
+
+    return true, nil
+end
+
+-- ⭐ CORE: STEAL VOLCANIC EGG (jalur cave — beda fungsi)
+local function seStealVolcanicEgg(egg)
+    StealExecState.Status = "🌋 Volcanic detected: " .. egg.Name
+
+    local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
+    if not eggPart then return false, "Egg has no BasePart" end
+
+    -- Step 1: TP ke volcanic spawn (kalo jauh)
+    local spawns = Workspace:FindFirstChild("EggSpawns")
+    local spawnPart = spawns and spawns:FindFirstChild("Volcanic")
+    if spawnPart and spawnPart:IsA("BasePart") then
+        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if curRoot then
+            local d = (spawnPart.Position - curRoot.Position).Magnitude
+            if d > 50 then
+                curRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
+                curRoot.Velocity = Vector3.zero
+                curRoot.AssemblyLinearVelocity = Vector3.zero
+                task.wait(0.5)
+            end
+        end
+    end
+
+    -- Step 2: Masuk cave pake waypoint
+    StealExecState.Status = "🚶 Entering cave..."
+    for i, wp in ipairs(VolcanicWaypoints) do
+        tpWaypoint(wp)
+        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if curRoot and eggPart and eggPart.Parent then
+            local d = (eggPart.Position - curRoot.Position).Magnitude
+            if d <= 40 then break end
+        end
+    end
+
+    -- Step 3: SELALU TP langsung ke egg (persis kayak Features)
+    local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if curRoot and eggPart and eggPart.Parent then
+        curRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
+        curRoot.Velocity = Vector3.zero
+        curRoot.AssemblyLinearVelocity = Vector3.zero
+        task.wait(0.3)
+    end
+
+    -- Step 4: Ambil egg (pake volcanicPickupVerified yang udah ada)
+    StealExecState.Status = "🖐 Picking up volcanic egg..."
+    local picked = false
+    if egg.Parent then picked = volcanicPickupVerified(egg)
+    else picked = isHoldingEggMutation() end
+
+    if not picked or not isHoldingEggMutation() then
+        return false, "Failed to pickup volcanic egg"
+    end
+
+    -- Step 5: Keluar cave (reverse waypoint)
+    StealExecState.Status = "🚶 Exiting cave..."
+    local exited = exitCave()
+    if not exited or not isHoldingEggMutation() then
+        return false, "Failed to exit cave"
+    end
+
+    -- Step 6: Ke magma (drop)
+    StealExecState.Status = "🌋 TP to magma..."
+    task.wait(0.5)
+    local safePos = findSafeVolcanoPos()
+    if safePos then
+        local rootLava = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if rootLava then
+            rootLava.CFrame = CFrame.new(safePos)
+            rootLava.Velocity = Vector3.zero
+            rootLava.AssemblyLinearVelocity = Vector3.zero
+        end
+    end
+    task.wait(1.5)
+
+    StealExecState.Status = "🔥 Dipping..."
+
+    local dropWaited = 0
+    local eggReleased = false
+    while dropWaited < 15 do
+        fireVolcanoDip()
+        task.wait(1.5)
+        dropWaited = dropWaited + 1.5
+        if not isHoldingEggMutation() then eggReleased = true; break end
+    end
+
+    if not eggReleased then return false, "Egg didn't release (dip timeout)" end
+
+    StealExecState.Status = "⏳ Waiting egg back (max 20s)..."
+
+    local waitStart = os.clock()
+    while os.clock() - waitStart < 20 do
+        task.wait(1)
+        if isHoldingEggMutation() then
+            StealExecState.Status = "✅ Mutation complete!"
+            if Shared.Notify then Shared.Notify("🔥 Wait 4 seconds!", "success") end
+            task.wait(4)
+            break
+        end
+    end
+
+    if not isHoldingEggMutation() then
+        return false, "Egg didn't come back (mutation timeout)"
+    end
+
+    StealExecState.Status = "🏠 Returning to plot (step)..."
+
+    local ok = seReturnToPlotStep()
+    if ok then StealExecState.Status = "✅ Done!"
+    else StealExecState.Status = "⚠️ Return failed" end
+
+    return true, nil
+end
+
+-- ⭐ MAIN ENTRY — dipanggil dari UI
+function Features.stealEgg(egg)
+    if StealExecState.Busy then
+        if Shared.Notify then Shared.Notify("⏳ Already stealing, wait...", "warning") end
+        return false, "busy"
+    end
+
+    -- ⭐ GUARD: cek fitur steal/mutation yang ON
+    local anyOn, reasons = isAnyStealFeatureOn()
+    if anyOn then
+        local reasonStr = table.concat(reasons, ", ")
+        if Shared.Notify then
+            Shared.Notify("⚠️ Please disable your steal/mutation first! (" .. reasonStr .. ")", "error")
+        end
+        StealExecState.Status = "❌ Blocked: " .. reasonStr
+        return false, "blocked"
+    end
+
+    if not egg or not egg.Parent then
+        if Shared.Notify then Shared.Notify("❌ Egg not found", "error") end
+        return false, "not_found"
+    end
+
+    StealExecState.Busy = true
+    StealExecState.CurrentEggName = egg.Name
+    local isVolcanic = egg.Name:lower():find("volcan") ~= nil
+    StealExecState.Status = isVolcanic and "🌋 Stealing volcanic..." or "🎯 Stealing..."
+
+    task.spawn(function()
+        local ok, err
+        if isVolcanic then ok, err = seStealVolcanicEgg(egg)
+        else ok, err = seStealNormalEgg(egg) end
+
+        if not ok then
+            if Shared.Notify then Shared.Notify("❌ Steal failed: " .. tostring(err), "error") end
+            StealExecState.Status = "❌ " .. tostring(err)
+        else
+            if Shared.Notify then Shared.Notify("✅ Steal complete!", "success") end
+        end
+
+        StealExecState.Busy = false
+        StealExecState.CurrentEggName = nil
+    end)
+
+    return true, nil
+end
+
+function Features.getStealExecState()
+    return StealExecState
+end
+
+function Features.isAnyStealFeatureOn()
+    return isAnyStealFeatureOn()
+end
+
+-- ⭐ loop cuma buat update state (gak manggil GUI)
+function Features.startStealExecutor()
+    task.spawn(function()
+        while task.wait(1) do
+            -- no-op, state diupdate dari Features.stealEgg
+        end
+    end)
+end
+
+-- ============================================================
 -- FEATURES.INIT
 -- ============================================================
 function Features.Init(sharedState)
@@ -5102,6 +5443,7 @@ function Features.Init(sharedState)
     Features.startAutoHalloween()
     Features.startAutoYinRitual()
     Features.startInfinityJump()
+    Features.startStealExecutor() 
 
            -- ⭐ AUTO-ENABLE AUTO RIDE PET — LANGSUNG ON
     Shared.AutoRidePet_Enabled = true
