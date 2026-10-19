@@ -3424,6 +3424,7 @@ local function buildMainWindow(parent)
     end
 
     -- TAB INFO
+do
     local infoPage = createPage("Info")
     pages.Info = infoPage
 
@@ -3650,9 +3651,7 @@ local function buildMainWindow(parent)
         notify("✓ Discord link copied!", "success")
     end)
 
-    registerTab("Info", "ℹ", "Info")
-
-    -- Keep the Info tab independently scrollable all the way to the Discord copy button.
+       -- Keep the Info tab independently scrollable all the way to the Discord copy button.
     do
         local infoLayout = infoPage:FindFirstChildOfClass("UIListLayout")
         if infoLayout then
@@ -3667,6 +3666,8 @@ local function buildMainWindow(parent)
         end
     end
 
+    registerTab("Info", "ℹ", "Info")
+end
     -- Lightweight 3D egg preview used only by the prediction/info cards.
     -- It reads an existing rendered egg model when available and falls back to a simple 3D egg.
     local function makeEggPreview(parent, eggName)
@@ -4243,6 +4244,7 @@ local function buildMainWindow(parent)
     end
 
     -- TAB PREDIKSI
+do
     local predPage = createPage("Prediksi")
     pages.Prediksi = predPage
 
@@ -4452,8 +4454,10 @@ local function buildMainWindow(parent)
     end)
 
     registerTab("Prediksi", "◎", "Prediksi")
+end
 
     -- TAB EGG
+do
     local eggPage = createPage("Egg")
     pages.Egg = eggPage
 
@@ -4536,8 +4540,10 @@ local function buildMainWindow(parent)
     end)
 
     registerTab("Egg", "◯", "Egg")
+end
 
     -- TAB VISUAL
+do
     local visualPage = createPage("Visual")
     pages.Visual = visualPage
 
@@ -4553,8 +4559,10 @@ local function buildMainWindow(parent)
     makeToggle(petEspContent, "Show Speed", false, function(v) Shared.ESP_PetSpeed_Enabled = v end)
 
     registerTab("Visual", "◆", "Visual")
+end
 
     -- TAB AUTO
+do
     local autoPage = createPage("Auto")
     pages.Auto = autoPage
 
@@ -4781,6 +4789,7 @@ end)
     makeToggle(autoContent, "Auto Equip Best", false, function(v) Shared.AutoEquipBest_Enabled = v end)
 
     registerTab("Auto", "▶", "Auto")
+end
 
       -- ═══════════════════════════════════════════════════════════
     -- 🏆 TAB WEBHOOK — PLATINUM EDITION
@@ -5431,444 +5440,279 @@ end)
             descLbl.Parent = row
         end
 
-                -- Register tab
+                                -- Register tab
         registerTab("Webhook", "🔔", "Webhook")
     end
 
-    -- TAB SETTINGS
-    local setPage = createPage("Settings")
-    pages.Settings = setPage
+       -- TAB SETTINGS
+    do
+        local setPage = createPage("Settings")
+        pages.Settings = setPage
 
-    -- ===== ANTI-AFK CARD =====
-    local afkCard, afkContent = makeCard(setPage, "🛡 ANTI-AFK", 0)
+        -- ===== ANTI-AFK CARD =====
+        local afkCard, afkContent = makeCard(setPage, "🛡 ANTI-AFK", 0)
 
-    local afkLbl = Instance.new("TextLabel")
-    afkLbl.Size = UDim2.new(1, 0, 0, 16)
-    afkLbl.BackgroundTransparency = 1
-    afkLbl.Text = "Prevent kick due to idling for 20 minutes:"
-    afkLbl.TextColor3 = C.Muted
-    afkLbl.Font = Enum.Font.GothamSemibold
-    afkLbl.TextSize = CFG.FONT_MUTED
-    afkLbl.TextXAlignment = Enum.TextXAlignment.Left
-    afkLbl.ZIndex = 3
-    afkLbl.Parent = afkContent
-    registerTheme(afkLbl, "Muted", "TextColor3")
+        local afkLbl = Instance.new("TextLabel")
+        afkLbl.Size = UDim2.new(1, 0, 0, 16)
+        afkLbl.BackgroundTransparency = 1
+        afkLbl.Text = "Prevent kick due to idling for 20 minutes:"
+        afkLbl.TextColor3 = C.Muted
+        afkLbl.Font = Enum.Font.GothamSemibold
+        afkLbl.TextSize = CFG.FONT_MUTED
+        afkLbl.TextXAlignment = Enum.TextXAlignment.Left
+        afkLbl.ZIndex = 3
+        afkLbl.Parent = afkContent
+        registerTheme(afkLbl, "Muted", "TextColor3")
 
-    makeToggle(afkContent, "Enable Anti-AFK", true, function(v)
-        Shared.AntiAFK_Enabled = v
-        if v then
-            notify("🛡 Anti-AFK: ON", "success")
-        else
-            notify("🛡 Anti-AFK: OFF", "info")
-        end
-    end)
+        makeToggle(afkContent, "Enable Anti-AFK", true, function(v)
+            Shared.AntiAFK_Enabled = v
+            if v then notify("🛡 Anti-AFK: ON", "success")
+            else notify("🛡 Anti-AFK: OFF", "info") end
+        end)
 
-    -- ===== THEME CARD =====
-    local themeCard, themeContent = makeCard(setPage, "THEME", 1)
+        -- ===== THEME CARD =====
+        local themeCard, themeContent = makeCard(setPage, "THEME", 1)
 
-    local themeLbl = Instance.new("TextLabel")
-    themeLbl.Size = UDim2.new(1, 0, 0, 16)
-    themeLbl.BackgroundTransparency = 1
-    themeLbl.Text = "Select Theme:"
-    themeLbl.TextColor3 = C.Muted
-    themeLbl.Font = Enum.Font.GothamSemibold
-    themeLbl.TextSize = CFG.FONT_MUTED
-    themeLbl.TextXAlignment = Enum.TextXAlignment.Left
-    themeLbl.ZIndex = 3
-    themeLbl.Parent = themeContent
+        local themeLbl = Instance.new("TextLabel")
+        themeLbl.Size = UDim2.new(1, 0, 0, 16)
+        themeLbl.BackgroundTransparency = 1
+        themeLbl.Text = "Select Theme:"
+        themeLbl.TextColor3 = C.Muted
+        themeLbl.Font = Enum.Font.GothamSemibold
+        themeLbl.TextSize = CFG.FONT_MUTED
+        themeLbl.TextXAlignment = Enum.TextXAlignment.Left
+        themeLbl.ZIndex = 3
+        themeLbl.Parent = themeContent
 
-    local themeList = {"Brutal", "Ice", "Fire", "Pink", "Green", "Blue", "Mustard", "Olive"}
-    makeDropdownGlobal(themeContent, themeList, CurrentTheme, function(v)
-        applyTheme(v)
-        notify("Theme: " .. v, "success")
-    end)
+        local themeList = {"Brutal", "Ice", "Fire", "Pink", "Green", "Blue", "Mustard", "Olive"}
+        makeDropdownGlobal(themeContent, themeList, CurrentTheme, function(v)
+            applyTheme(v)
+            notify("Theme: " .. v, "success")
+        end)
 
+        -- ===== TITLE CARD =====
+        local titleCard, titleContent = makeCard(setPage, "👑 TITLE", 3)
 
-        -- ===== TITLE CARD v2 — SHOW + CUSTOM =====
-    local titleCard, titleContent = makeCard(setPage, "👑 TITLE", 3)
+        local titleLbl = Instance.new("TextLabel")
+        titleLbl.Size = UDim2.new(1, 0, 0, 16)
+        titleLbl.BackgroundTransparency = 1
+        titleLbl.Text = "Show title above character:"
+        titleLbl.TextColor3 = C.Muted
+        titleLbl.Font = Enum.Font.GothamSemibold
+        titleLbl.TextSize = CFG.FONT_MUTED
+        titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+        titleLbl.ZIndex = 3
+        titleLbl.Parent = titleContent
+        registerTheme(titleLbl, "Muted", "TextColor3")
 
-    local titleLbl = Instance.new("TextLabel")
-    titleLbl.Size = UDim2.new(1, 0, 0, 16)
-    titleLbl.BackgroundTransparency = 1
-    titleLbl.Text = "Show title above character:"
-    titleLbl.TextColor3 = C.Muted
-    titleLbl.Font = Enum.Font.GothamSemibold
-    titleLbl.TextSize = CFG.FONT_MUTED
-    titleLbl.TextXAlignment = Enum.TextXAlignment.Left
-    titleLbl.ZIndex = 3
-    titleLbl.Parent = titleContent
-    registerTheme(titleLbl, "Muted", "TextColor3")
+        makeToggle(titleContent, "Show Title", true, function(v)
+            Shared.ShowTitle = v
+            if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
+            if v then notify("👑 Title: ON", "success")
+            else notify("👑 Title: OFF", "info") end
+        end)
 
-    makeToggle(titleContent, "Show Title", true, function(v)
-        Shared.ShowTitle = v
-        if _G.VRILZ_RefreshTitle then
-            _G.VRILZ_RefreshTitle()
-        end
-        if v then
-            notify("👑 Title: ON", "success")
-        else
-            notify("👑 Title: OFF", "info")
-        end
-    end)
+        local customTitleHolder = Instance.new("Frame")
+        customTitleHolder.Name = "CustomTitleHolder"
+        customTitleHolder.Size = UDim2.new(1, 0, 0, 0)
+        customTitleHolder.AutomaticSize = Enum.AutomaticSize.Y
+        customTitleHolder.BackgroundTransparency = 1
+        customTitleHolder.ZIndex = 3
+        customTitleHolder.Parent = titleContent
 
-       -- ═══════════════════════════════════════════
-    -- CUSTOM TITLE INPUT — AUTO REFRESH
-    -- ═══════════════════════════════════════════
-    local customTitleHolder = Instance.new("Frame")
-    customTitleHolder.Name = "CustomTitleHolder"
-    customTitleHolder.Size = UDim2.new(1, 0, 0, 0)
-    customTitleHolder.AutomaticSize = Enum.AutomaticSize.Y
-    customTitleHolder.BackgroundTransparency = 1
-    customTitleHolder.ZIndex = 3
-    customTitleHolder.Parent = titleContent
+        local customTitleLayout = Instance.new("UIListLayout")
+        customTitleLayout.Padding = UDim.new(0, CFG.CARD_GAP)
+        customTitleLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        customTitleLayout.Parent = customTitleHolder
 
-    local customTitleLayout = Instance.new("UIListLayout")
-    customTitleLayout.Padding = UDim.new(0, CFG.CARD_GAP)
-    customTitleLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    customTitleLayout.Parent = customTitleHolder
-
-    local function rebuildCustomTitleUI()
-        -- Destroy children existing (kecuali layout)
-        for _, c in ipairs(customTitleHolder:GetChildren()) do
-            if not c:IsA("UIListLayout") then
-                c:Destroy()
+        local function rebuildCustomTitleUI()
+            for _, c in ipairs(customTitleHolder:GetChildren()) do
+                if not c:IsA("UIListLayout") then c:Destroy() end
             end
-        end
 
-        local canCustom = false
-        if LocalPlayer.UserId == OWNER_USERID then
-            canCustom = true
-        elseif Shared and Shared.KeyType then
-            local kt = tostring(Shared.KeyType):upper()
-            if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
+            local canCustom = false
+            if LocalPlayer.UserId == OWNER_USERID then
                 canCustom = true
+            elseif Shared and Shared.KeyType then
+                local kt = tostring(Shared.KeyType):upper()
+                if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
+                    canCustom = true
+                end
+            end
+
+            if canCustom then
+                local customLbl = Instance.new("TextLabel")
+                customLbl.Size = UDim2.new(1, 0, 0, 16)
+                customLbl.BackgroundTransparency = 1
+                customLbl.Text = "Custom Title (auto UPPERCASE, max 15):"
+                customLbl.TextColor3 = C.Accent
+                customLbl.Font = Enum.Font.GothamBold
+                customLbl.TextSize = CFG.FONT_MUTED
+                customLbl.TextXAlignment = Enum.TextXAlignment.Left
+                customLbl.LayoutOrder = 1
+                customLbl.Parent = customTitleHolder
+
+                local customBox = Instance.new("TextBox")
+                customBox.Size = UDim2.new(1, 0, 0, 34)
+                customBox.BackgroundColor3 = C.Surface3
+                customBox.BorderSizePixel = 0
+                customBox.Text = _G.VRILZ_CustomTitle or ""
+                customBox.PlaceholderText = "Enter Text"
+                customBox.PlaceholderColor3 = C.Muted
+                customBox.TextColor3 = C.Text
+                customBox.Font = Enum.Font.GothamBold
+                customBox.TextSize = CFG.FONT_LABEL
+                customBox.TextXAlignment = Enum.TextXAlignment.Center
+                customBox.ClearTextOnFocus = false
+                customBox.LayoutOrder = 2
+                customBox.Parent = customTitleHolder
+
+                local cbCorner = Instance.new("UICorner")
+                cbCorner.CornerRadius = UDim.new(0, 8)
+                cbCorner.Parent = customBox
+
+                local btnRow = Instance.new("Frame")
+                btnRow.Size = UDim2.new(1, 0, 0, 32)
+                btnRow.BackgroundTransparency = 1
+                btnRow.LayoutOrder = 3
+                btnRow.Parent = customTitleHolder
+
+                local saveBtn = Instance.new("TextButton")
+                saveBtn.Size = UDim2.new(0.48, 0, 1, 0)
+                saveBtn.BackgroundColor3 = C.Success
+                saveBtn.Text = "💾 SAVE"
+                saveBtn.TextColor3 = Color3.new(1, 1, 1)
+                saveBtn.Font = Enum.Font.GothamBold
+                saveBtn.TextSize = CFG.FONT_LABEL
+                saveBtn.BorderSizePixel = 0
+                saveBtn.Parent = btnRow
+
+                local clearBtn = Instance.new("TextButton")
+                clearBtn.Size = UDim2.new(0.48, 0, 1, 0)
+                clearBtn.Position = UDim2.new(0.52, 0, 0, 0)
+                clearBtn.BackgroundColor3 = C.Error
+                clearBtn.Text = "🗑 CLEAR"
+                clearBtn.TextColor3 = Color3.new(1, 1, 1)
+                clearBtn.Font = Enum.Font.GothamBold
+                clearBtn.TextSize = CFG.FONT_LABEL
+                clearBtn.BorderSizePixel = 0
+                clearBtn.Parent = btnRow
+
+                saveBtn.MouseButton1Click:Connect(function()
+                    local txt = customBox.Text:gsub("^%s+", ""):gsub("%s+$", "")
+                    if txt == "" then notify("❌ Empty!", "error") return end
+                    txt = txt:upper():sub(1, 15):gsub("[^%w%s]", "")
+                    customBox.Text = txt
+                    _G.VRILZ_CustomTitle = txt
+                    saveCustomTitle(txt)
+                    notify("✅ Saved: " .. txt, "success")
+                    if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
+                end)
+
+                clearBtn.MouseButton1Click:Connect(function()
+                    customBox.Text = ""
+                    clearCustomTitle()
+                    notify("🗑 Cleared", "info")
+                    if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
+                end)
+            else
+                local lockedFrame = Instance.new("Frame")
+                lockedFrame.Size = UDim2.new(1, 0, 0, 52)
+                lockedFrame.BackgroundColor3 = C.Surface3
+                lockedFrame.BackgroundTransparency = 0.5
+                lockedFrame.BorderSizePixel = 0
+                lockedFrame.Parent = customTitleHolder
+
+                local lc = Instance.new("UICorner")
+                lc.CornerRadius = UDim.new(0, 8)
+                lc.Parent = lockedFrame
+
+                local lt = Instance.new("TextLabel")
+                lt.Size = UDim2.new(1, -20, 0, 20)
+                lt.Position = UDim2.fromOffset(10, 8)
+                lt.BackgroundTransparency = 1
+                lt.Text = "🔒 Custom Title (Premium only)"
+                lt.TextColor3 = C.Muted
+                lt.Font = Enum.Font.GothamBold
+                lt.TextSize = CFG.FONT_LABEL
+                lt.TextXAlignment = Enum.TextXAlignment.Left
+                lt.Parent = lockedFrame
             end
         end
 
-        if canCustom then
-            -- ═══ UNLOCKED ═══
-            local customLbl = Instance.new("TextLabel")
-            customLbl.Size = UDim2.new(1, 0, 0, 16)
-            customLbl.BackgroundTransparency = 1
-            customLbl.Text = "Custom Title (auto UPPERCASE, max 15):"
-            customLbl.TextColor3 = C.Accent
-            customLbl.Font = Enum.Font.GothamBold
-            customLbl.TextSize = CFG.FONT_MUTED
-            customLbl.TextXAlignment = Enum.TextXAlignment.Left
-            customLbl.ZIndex = 3
-            customLbl.LayoutOrder = 1
-            customLbl.Parent = customTitleHolder
+        rebuildCustomTitleUI()
+        _G.VRILZ_RebuildCustomTitle = rebuildCustomTitleUI
 
-            local customBox = Instance.new("TextBox")
-            customBox.Size = UDim2.new(1, 0, 0, 34)
-            customBox.BackgroundColor3 = C.Surface3
-            customBox.BorderSizePixel = 0
-            customBox.Text = _G.VRILZ_CustomTitle or ""
-            customBox.PlaceholderText = "Enter Text"
-            customBox.PlaceholderColor3 = C.Muted
-            customBox.TextColor3 = C.Text
-            customBox.Font = Enum.Font.GothamBold
-            customBox.TextSize = CFG.FONT_LABEL
-            customBox.TextXAlignment = Enum.TextXAlignment.Center
-            customBox.ClearTextOnFocus = false
-            customBox.ZIndex = 3
-            customBox.LayoutOrder = 2
-            customBox.Parent = customTitleHolder
+        -- ===== STEAL MODE CARD =====
+        local stealModeCard, stealModeContent = makeCard(setPage, "STEAL MODE", 2)
 
-            local cbCorner = Instance.new("UICorner")
-            cbCorner.CornerRadius = UDim.new(0, 8)
-            cbCorner.Parent = customBox
+        local stealModeLbl = Instance.new("TextLabel")
+        stealModeLbl.Size = UDim2.new(1, 0, 0, 16)
+        stealModeLbl.BackgroundTransparency = 1
+        stealModeLbl.Text = "Select Steal Mode:"
+        stealModeLbl.TextColor3 = C.Muted
+        stealModeLbl.Font = Enum.Font.GothamSemibold
+        stealModeLbl.TextSize = CFG.FONT_MUTED
+        stealModeLbl.TextXAlignment = Enum.TextXAlignment.Left
+        stealModeLbl.Parent = stealModeContent
 
-            local cbStroke = Instance.new("UIStroke")
-            cbStroke.Color = C.Accent
-            cbStroke.Thickness = 1.5
-            cbStroke.Transparency = 0.3
-            cbStroke.Parent = customBox
+        local stealModeList = {"TP", "TP GLIDE", "Fly"}
+        makeDropdownGlobal(stealModeContent, stealModeList, Shared.StealMode or "TP", function(v)
+            Shared.StealMode = v
+            notify("Steal Mode: " .. v, "info")
+        end)
 
-            customBox:GetPropertyChangedSignal("Text"):Connect(function()
-                local current = customBox.Text
-                local upper = current:upper()
-                if #upper > 15 then upper = upper:sub(1, 15) end
-                upper = upper:gsub("[^%w%s]", "")
-                if current ~= upper then
-                    local cursorPos = customBox.CursorPosition
-                    customBox.Text = upper
-                    customBox.CursorPosition = math.min(cursorPos, #upper + 1)
-                end
-            end)
+        -- ===== LIVE CHAT CARD =====
+        local chatToggleCard, chatToggleContent = makeCard(setPage, "💬 LIVE CHAT", 5)
+        local liveChatWin = buildLiveChatWindow(screenGui)
 
-            local btnRow = Instance.new("Frame")
-            btnRow.Size = UDim2.new(1, 0, 0, 32)
-            btnRow.BackgroundTransparency = 1
-            btnRow.ZIndex = 3
-            btnRow.LayoutOrder = 3
-            btnRow.Parent = customTitleHolder
-
-            local saveBtn = Instance.new("TextButton")
-            saveBtn.Size = UDim2.new(0.48, 0, 1, 0)
-            saveBtn.Position = UDim2.new(0, 0, 0, 0)
-            saveBtn.BackgroundColor3 = C.Success
-            saveBtn.Text = "💾 SAVE"
-            saveBtn.TextColor3 = Color3.new(1, 1, 1)
-            saveBtn.Font = Enum.Font.GothamBold
-            saveBtn.TextSize = CFG.FONT_LABEL
-            saveBtn.BorderSizePixel = 0
-            saveBtn.ZIndex = 4
-            saveBtn.Parent = btnRow
-
-            local sbCorner = Instance.new("UICorner")
-            sbCorner.CornerRadius = UDim.new(0, 8)
-            sbCorner.Parent = saveBtn
-
-            local clearBtn = Instance.new("TextButton")
-            clearBtn.Size = UDim2.new(0.48, 0, 1, 0)
-            clearBtn.Position = UDim2.new(0.52, 0, 0, 0)
-            clearBtn.BackgroundColor3 = C.Error
-            clearBtn.Text = "🗑 CLEAR"
-            clearBtn.TextColor3 = Color3.new(1, 1, 1)
-            clearBtn.Font = Enum.Font.GothamBold
-            clearBtn.TextSize = CFG.FONT_LABEL
-            clearBtn.BorderSizePixel = 0
-            clearBtn.ZIndex = 4
-            clearBtn.Parent = btnRow
-
-            local clbCorner = Instance.new("UICorner")
-            clbCorner.CornerRadius = UDim.new(0, 8)
-            clbCorner.Parent = clearBtn
-
-            local isSaved = false
-            if _G.VRILZ_CustomTitle and _G.VRILZ_CustomTitle == customBox.Text then
-                isSaved = true
-                saveBtn.Text = "✅ SAVED"
-                saveBtn.BackgroundColor3 = C.Muted
-            end
-
-            local function updateSaveButton()
-                if isSaved then
-                    saveBtn.Text = "✅ SAVED"
-                    saveBtn.BackgroundColor3 = C.Muted
+        makeToggle(chatToggleContent, "Show Live Chat Window", false, function(v)
+            if liveChatWin then
+                liveChatWin.Visible = v
+                if v then
+                    pcall(function()
+                        if ChatClient and ChatClient.start then ChatClient.start() end
+                    end)
+                    notify("💬 Live Chat opened", "success")
                 else
-                    saveBtn.Text = "💾 SAVE"
-                    saveBtn.BackgroundColor3 = C.Success
+                    notify("💬 Live Chat closed", "info")
                 end
             end
+        end)
 
-            customBox:GetPropertyChangedSignal("Text"):Connect(function()
-                if isSaved and customBox.Text ~= _G.VRILZ_CustomTitle then
-                    isSaved = false
-                    updateSaveButton()
-                end
-            end)
+        local chatHint = Instance.new("TextLabel")
+        chatHint.Size = UDim2.new(1, 0, 0, 16)
+        chatHint.BackgroundTransparency = 1
+        chatHint.Text = "🌐 Global chat · all user vrilzhub"
+        chatHint.TextColor3 = C.Muted
+        chatHint.Font = Enum.Font.GothamSemibold
+        chatHint.TextSize = CFG.FONT_MUTED
+        chatHint.TextXAlignment = Enum.TextXAlignment.Left
+        chatHint.Parent = chatToggleContent
 
-            saveBtn.MouseButton1Click:Connect(function()
-                if isSaved then
-                    notify("ℹ️ Title already saved", "info")
-                    return
-                end
-                local txt = customBox.Text:gsub("^%s+", ""):gsub("%s+$", "")
-                if txt == "" then
-                    notify("❌ Title is empty!", "error")
-                    return
-                end
-                txt = txt:upper()
-                if #txt > 15 then
-                    txt = txt:sub(1, 15)
-                    notify("⚠️ Trimmed to 15 chars: " .. txt, "warning")
-                end
-                txt = txt:gsub("[^%w%s]", "")
-                if txt == "" then
-                    notify("❌ Only letters & numbers!", "error")
-                    return
-                end
-                customBox.Text = txt
-                _G.VRILZ_CustomTitle = txt
-                saveCustomTitle(txt)
-                isSaved = true
-                updateSaveButton()
-                notify("✅ Saved: " .. txt .. " (" .. #txt .. "/15) — permanent!", "success")
-                if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
-            end)
+        -- ===== GRAPHICS CARD =====
+        local fpsCard, fpsContent = makeCard(setPage, "⚡ GRAPHICS", 6)
+        local fpsWin = buildFPSWindow(screenGui)
+        UI._fpsWindow = fpsWin
 
-            clearBtn.MouseButton1Click:Connect(function()
-                customBox.Text = ""
-                clearCustomTitle()
-                isSaved = false
-                updateSaveButton()
-                notify("🗑 Title reset — you can SAVE again", "info")
-                if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
-            end)
+        makeToggle(fpsContent, "FPS Boost", false, function(v)
+            Shared.FPSBoost_Enabled = v
+            if v then gfx_enableFPS() else gfx_disableFPS() end
+        end)
 
-        else
-            -- ═══ LOCKED ═══
-            local lockedFrame = Instance.new("Frame")
-            lockedFrame.Size = UDim2.new(1, 0, 0, 52)
-            lockedFrame.BackgroundColor3 = C.Surface3
-            lockedFrame.BackgroundTransparency = 0.5
-            lockedFrame.BorderSizePixel = 0
-            lockedFrame.ZIndex = 3
-            lockedFrame.LayoutOrder = 1
-            lockedFrame.Parent = customTitleHolder
+        makeToggle(fpsContent, "4K HD Mode", false, function(v)
+            Shared.HD4K_Enabled = v
+            if v then gfx_enableHD() else gfx_disableHD() end
+        end)
 
-            local lockedCorner = Instance.new("UICorner")
-            lockedCorner.CornerRadius = UDim.new(0, 8)
-            lockedCorner.Parent = lockedFrame
+        makeToggle(fpsContent, "FPS Window", false, function(v)
+            if fpsWin then fpsWin.Visible = v end
+        end)
 
-            local lockedStroke = Instance.new("UIStroke")
-            lockedStroke.Color = C.Muted
-            lockedStroke.Thickness = 1
-            lockedStroke.Transparency = 0.6
-            lockedStroke.Parent = lockedFrame
-
-            local lockIcon = Instance.new("TextLabel")
-            lockIcon.Size = UDim2.fromOffset(28, 28)
-            lockIcon.Position = UDim2.fromOffset(10, 12)
-            lockIcon.BackgroundTransparency = 1
-            lockIcon.Text = "🔒"
-            lockIcon.TextColor3 = C.Muted
-            lockIcon.Font = Enum.Font.GothamBold
-            lockIcon.TextSize = 18
-            lockIcon.ZIndex = 4
-            lockIcon.Parent = lockedFrame
-
-            local lockTitle = Instance.new("TextLabel")
-            lockTitle.Size = UDim2.new(1, -50, 0, 16)
-            lockTitle.Position = UDim2.fromOffset(42, 9)
-            lockTitle.BackgroundTransparency = 1
-            lockTitle.Text = "CUSTOM TITLE LOCKED"
-            lockTitle.TextColor3 = C.Muted
-            lockTitle.Font = Enum.Font.GothamBold
-            lockTitle.TextSize = CFG.FONT_MUTED
-            lockTitle.TextXAlignment = Enum.TextXAlignment.Left
-            lockTitle.ZIndex = 4
-            lockTitle.Parent = lockedFrame
-
-            local lockDesc = Instance.new("TextLabel")
-            lockDesc.Size = UDim2.new(1, -50, 0, 22)
-            lockDesc.Position = UDim2.fromOffset(42, 25)
-            lockDesc.BackgroundTransparency = 1
-            lockDesc.Text = "This feature is exclusive to\nPremium keys only."
-            lockDesc.TextColor3 = C.Muted
-            lockDesc.Font = Enum.Font.GothamSemibold
-            lockDesc.TextSize = CFG.FONT_MUTED
-            lockDesc.TextWrapped = true
-            lockDesc.TextXAlignment = Enum.TextXAlignment.Left
-            lockDesc.TextYAlignment = Enum.TextYAlignment.Top
-            lockDesc.ZIndex = 4
-            lockDesc.Parent = lockedFrame
-        end
+        registerTab("Settings", "⚙", "Settings")
     end
 
-    rebuildCustomTitleUI()
-    _G.VRILZ_RebuildCustomTitle = rebuildCustomTitleUI
-
-    -- ===== STEAL MODE (BARU) =====
-    local stealModeCard, stealModeContent = makeCard(setPage, "STEAL MODE", 2)
-
-    local stealModeLbl = Instance.new("TextLabel")
-    stealModeLbl.Size = UDim2.new(1, 0, 0, 16)
-    stealModeLbl.BackgroundTransparency = 1
-    stealModeLbl.Text = "Select Steal Mode:"
-    stealModeLbl.TextColor3 = C.Muted
-    stealModeLbl.Font = Enum.Font.GothamSemibold
-    stealModeLbl.TextSize = CFG.FONT_MUTED
-    stealModeLbl.TextXAlignment = Enum.TextXAlignment.Left
-    stealModeLbl.ZIndex = 3
-    stealModeLbl.Parent = stealModeContent
-    registerTheme(stealModeLbl, "Muted", "TextColor3")
-
-    local stealModeList = {"TP", "TP GLIDE", "Fly"}
-        makeDropdownGlobal(stealModeContent, stealModeList, Shared.StealMode or "TP", function(v)
-        Shared.StealMode = v
-        if v == "Fly" then
-            notify(" Steal Mode: Fly (height 350)", "success")
-        elseif v == "TP GLIDE" then
-            notify(" Steal Mode: TP GLIDE (step 150)", "success")
-        else
-            notify(" Steal Mode: TP", "info")
-        end
-    end)
-
-    local stealModeNote = Instance.new("TextLabel")
-    stealModeNote.Size = UDim2.new(1, 0, 0, 42)
-    stealModeNote.BackgroundTransparency = 1
-    stealModeNote.Text = "TP = teleport langsung ke egg\nTP GLIDE = step-by-step 150 studs\nFly = naik 350 studs dulu, abis itu TP"
-    stealModeNote.TextColor3 = C.Muted
-    stealModeNote.Font = Enum.Font.GothamSemibold
-    stealModeNote.TextSize = CFG.FONT_MUTED
-    stealModeNote.TextWrapped = true
-    stealModeNote.TextXAlignment = Enum.TextXAlignment.Left
-    stealModeNote.TextYAlignment = Enum.TextYAlignment.Top
-    stealModeNote.LayoutOrder = 10
-    stealModeNote.ZIndex = 3
-    stealModeNote.Parent = stealModeContent
-    registerTheme(stealModeNote, "Muted", "TextColor3")
-  
-  -- ===== LIVE CHAT TOGGLE =====
-        local chatToggleCard, chatToggleContent = makeCard(setPage, "💬 LIVE CHAT", 5)
-
-    -- Buat window-nya dulu (hidden)
-    local liveChatWin = buildLiveChatWindow(screenGui)
-
-    makeToggle(chatToggleContent, "Show Live Chat Window", false, function(v)
-        if liveChatWin then
-            liveChatWin.Visible = v
-            if v then
-                -- Auto-start polling pas dinyalain
-                pcall(function()
-                    if ChatClient and ChatClient.start then
-                        ChatClient.start()
-                    end
-                end)
-                notify("💬 Live Chat opened", "success")
-            else
-                notify("💬 Live Chat closed", "info")
-            end
-        end
-    end)
-
-    local chatHint = Instance.new("TextLabel")
-    chatHint.Size = UDim2.new(1, 0, 0, 16)
-    chatHint.BackgroundTransparency = 1
-    chatHint.Text = "🌐 Global chat · all user vrilzhub"
-    chatHint.TextColor3 = C.Muted
-    chatHint.Font = Enum.Font.GothamSemibold
-    chatHint.TextSize = CFG.FONT_MUTED
-    chatHint.TextXAlignment = Enum.TextXAlignment.Left
-    chatHint.LayoutOrder = 10
-    chatHint.Parent = chatToggleContent
-    registerTheme(chatHint, "Muted", "TextColor3")
-
-    
-            local fpsCard, fpsContent = makeCard(setPage, "⚡ GRAPHICS", 6)
-
-    local fpsWin = buildFPSWindow(screenGui)
-    UI._fpsWindow = fpsWin
-
-    makeToggle(fpsContent, "FPS Boost", false, function(v)
-        Shared.FPSBoost_Enabled = v
-        if v then
-            gfx_enableFPS()
-        else
-            gfx_disableFPS()
-        end
-    end)
-
-    makeToggle(fpsContent, "4K HD Mode", false, function(v)
-        Shared.HD4K_Enabled = v
-        if v then
-            gfx_enableHD()
-        else
-            gfx_disableHD()
-        end
-    end)
-
-    makeToggle(fpsContent, "FPS Window", false, function(v)
-        if fpsWin then fpsWin.Visible = v end
-    end)
-
-     -- ============================================================
-    -- TAB EVENT (HALLOWEEN) — CUMA PANGGIL FUNCTION
-    -- ============================================================
+    -- ===== EVENT TAB =====
     do
         local eventPage = createPage("Event")
         pages.Event = eventPage
@@ -5876,321 +5720,258 @@ end)
         registerTab("Event", "🎃", "Event")
     end
 
-    -- ============================================================
-    -- TAB EGG MUTATION (BARU)
-    -- ============================================================
-do
-    local mutPage = createPage("EggMutation")
-    pages.EggMutation = mutPage
+    -- ===== EGG MUTATION TAB =====
+    do
+        local mutPage = createPage("EggMutation")
+        pages.EggMutation = mutPage
 
-        -- ===== CARD 0: AUTO STEAL (FILTER) =====
-    local mutStealCard, mutStealContent = makeCard(mutPage, "🎯 AUTO STEAL (FILTER)", 0)
+        local mutStealCard, mutStealContent = makeCard(mutPage, "🎯 AUTO STEAL (FILTER)", 0)
 
-    -- === CONTAINERS DULUAN ===
-    local raritySection = Instance.new("Frame")
-    raritySection.Size = UDim2.new(1, 0, 0, 0)
-    raritySection.AutomaticSize = Enum.AutomaticSize.Y
-    raritySection.BackgroundTransparency = 1
-    raritySection.LayoutOrder = 10
-    raritySection.ZIndex = 3
-    raritySection.Parent = mutStealContent
+        local raritySection = Instance.new("Frame")
+        raritySection.Size = UDim2.new(1, 0, 0, 0)
+        raritySection.AutomaticSize = Enum.AutomaticSize.Y
+        raritySection.BackgroundTransparency = 1
+        raritySection.LayoutOrder = 10
+        raritySection.Parent = mutStealContent
 
-    local rarityLayout = Instance.new("UIListLayout")
-    rarityLayout.Padding = UDim.new(0, CFG.CARD_GAP)
-    rarityLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    rarityLayout.Parent = raritySection
+        local rarityLayout = Instance.new("UIListLayout")
+        rarityLayout.Padding = UDim.new(0, CFG.CARD_GAP)
+        rarityLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        rarityLayout.Parent = raritySection
 
-    local nameSection = Instance.new("Frame")
-    nameSection.Size = UDim2.new(1, 0, 0, 0)
-    nameSection.AutomaticSize = Enum.AutomaticSize.Y
-    nameSection.BackgroundTransparency = 1
-    nameSection.LayoutOrder = 11
-    nameSection.ZIndex = 3
-    nameSection.Visible = false
-    nameSection.Parent = mutStealContent
+        local nameSection = Instance.new("Frame")
+        nameSection.Size = UDim2.new(1, 0, 0, 0)
+        nameSection.AutomaticSize = Enum.AutomaticSize.Y
+        nameSection.BackgroundTransparency = 1
+        nameSection.LayoutOrder = 11
+        nameSection.Visible = false
+        nameSection.Parent = mutStealContent
 
-    local nameLayout = Instance.new("UIListLayout")
-    nameLayout.Padding = UDim.new(0, CFG.CARD_GAP)
-    nameLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    nameLayout.Parent = nameSection
+        local nameLayout = Instance.new("UIListLayout")
+        nameLayout.Padding = UDim.new(0, CFG.CARD_GAP)
+        nameLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        nameLayout.Parent = nameSection
 
-    -- === SHOW/HIDE FUNCTION ===
-    local function updateSections(mode)
-        if mode == "Rarity" then
-            raritySection.Visible = true
-            nameSection.Visible = false
-        else
-            raritySection.Visible = false
-            nameSection.Visible = true
-        end
-    end
-
-    -- === MODE DROPDOWN ===
-    local modeLbl = Instance.new("TextLabel")
-    modeLbl.Size = UDim2.new(1, 0, 0, 16)
-    modeLbl.BackgroundTransparency = 1
-    modeLbl.Text = "Steal Mode:"
-    modeLbl.TextColor3 = C.Muted
-    modeLbl.Font = Enum.Font.GothamSemibold
-    modeLbl.TextSize = CFG.FONT_MUTED
-    modeLbl.TextXAlignment = Enum.TextXAlignment.Left
-    modeLbl.LayoutOrder = 1
-    modeLbl.ZIndex = 3
-    modeLbl.Parent = mutStealContent
-    registerTheme(modeLbl, "Muted", "TextColor3")
-
-    local modeHolder = Instance.new("Frame")
-    modeHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
-    modeHolder.BackgroundTransparency = 1
-    modeHolder.LayoutOrder = 2
-    modeHolder.ZIndex = 3
-    modeHolder.Parent = mutStealContent
-
-    makeDropdownGlobal(modeHolder, {"Rarity", "Name"}, Shared.MutationStealMode or "Rarity", function(v)
-        Shared.MutationStealMode = v
-        if v == "Rarity" then
-            notify("🎯 Mode: Steal by Rarity", "info")
-        else
-            notify("🎯 Mode: Steal by Name", "info")
-        end
-        updateSections(v)
-    end)
-
-    -- === TOGGLE ON/OFF ===
-    local stealToggleHolder = Instance.new("Frame")
-    stealToggleHolder.Size = UDim2.new(1, 0, 0, CFG.TOGGLE_H)
-    stealToggleHolder.BackgroundTransparency = 1
-    stealToggleHolder.LayoutOrder = 3
-    stealToggleHolder.ZIndex = 3
-    stealToggleHolder.Parent = mutStealContent
-
-    makeToggle(stealToggleHolder, "Auto Steal", false, function(v)
-        Shared.MutationSteal_Enabled = v
-        if v then
-            notify("🎯 Mutation Steal: ON", "success")
-        else
-            notify("🎯 Mutation Steal: OFF", "info")
-        end
-    end)
-
-    -- === RARITY SECTION ===
-    local rarityLbl = Instance.new("TextLabel")
-    rarityLbl.Size = UDim2.new(1, 0, 0, 16)
-    rarityLbl.BackgroundTransparency = 1
-    rarityLbl.Text = "Select Rarity:"
-    rarityLbl.TextColor3 = C.Muted
-    rarityLbl.Font = Enum.Font.GothamSemibold
-    rarityLbl.TextSize = CFG.FONT_MUTED
-    rarityLbl.TextXAlignment = Enum.TextXAlignment.Left
-    rarityLbl.LayoutOrder = 1
-    rarityLbl.ZIndex = 3
-    rarityLbl.Parent = raritySection
-    registerTheme(rarityLbl, "Muted", "TextColor3")
-
-    local rarityDropdownHolder = Instance.new("Frame")
-    rarityDropdownHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
-    rarityDropdownHolder.BackgroundTransparency = 1
-    rarityDropdownHolder.LayoutOrder = 2
-    rarityDropdownHolder.ZIndex = 3
-    rarityDropdownHolder.Parent = raritySection
-
-    makeDropdownMulti(rarityDropdownHolder, RarityList, Shared.SelectedRarities, nil, function(t) end)
-
-    -- === NAME SECTION ===
-    local nameLbl = Instance.new("TextLabel")
-    nameLbl.Size = UDim2.new(1, 0, 0, 16)
-    nameLbl.BackgroundTransparency = 1
-    nameLbl.Text = "Select Egg Name:"
-    nameLbl.TextColor3 = C.Muted
-    nameLbl.Font = Enum.Font.GothamSemibold
-    nameLbl.TextSize = CFG.FONT_MUTED
-    nameLbl.TextXAlignment = Enum.TextXAlignment.Left
-    nameLbl.LayoutOrder = 1
-    nameLbl.ZIndex = 3
-    nameLbl.Parent = nameSection
-    registerTheme(nameLbl, "Muted", "TextColor3")
-
-    local nameDropdownHolder = Instance.new("Frame")
-    nameDropdownHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
-    nameDropdownHolder.BackgroundTransparency = 1
-    nameDropdownHolder.LayoutOrder = 2
-    nameDropdownHolder.ZIndex = 3
-    nameDropdownHolder.Parent = nameSection
-
-    makeDropdownMulti(nameDropdownHolder, EggNames, Shared.MutationSelectedEggs, nil, function(t) end)
-
-    -- === INIT VISIBILITY ===
-    updateSections(Shared.MutationStealMode or "Rarity")
-
-    -- CARD 1: AUTO MUTATION
-    local mutCard, mutContent = makeCard(mutPage, "🔥 EGG MUTATION", 1)
-
-    makeToggle(mutContent, "Auto Mutation", false, function(v)
-        Shared.AutoMutation_Enabled = v
-        if v then
-            notify("🔥 Auto Mutation enabled", "success")
-        else
-            notify("🔥 Auto Mutation disabled", "info")
-        end
-    end)
-
-    makeToggle(mutContent, "Auto Return to Plot", false, function(v)
-        Shared.MutationReturn_Enabled = v
-        if v then
-            notify("🏠 Return to Plot enabled", "success")
-        end
-    end)
-
--- ⭐ RETURN MODE — Step / Instant
-local returnModeLbl = Instance.new("TextLabel")
-returnModeLbl.Size = UDim2.new(1, 0, 0, 16)
-returnModeLbl.BackgroundTransparency = 1
-returnModeLbl.Text = "Return Mode:"
-returnModeLbl.TextColor3 = C.Muted
-returnModeLbl.Font = Enum.Font.GothamSemibold
-returnModeLbl.TextSize = CFG.FONT_MUTED
-returnModeLbl.TextXAlignment = Enum.TextXAlignment.Left
-returnModeLbl.LayoutOrder = 5
-returnModeLbl.ZIndex = 3
-returnModeLbl.Parent = mutContent
-registerTheme(returnModeLbl, "Muted", "TextColor3")
-
-local returnModeHolder = Instance.new("Frame")
-returnModeHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
-returnModeHolder.BackgroundTransparency = 1
-returnModeHolder.LayoutOrder = 6
-returnModeHolder.ZIndex = 3
-returnModeHolder.Parent = mutContent
-
-    -- ═══════════════════════════════════════════
-    -- RETURN MODE — AUTO REFRESH
-    -- ═══════════════════════════════════════════
-    local returnModeInner = Instance.new("Frame")
-    returnModeInner.Size = UDim2.new(1, 0, 1, 0)
-    returnModeInner.BackgroundTransparency = 1
-    returnModeInner.ZIndex = 3
-    returnModeInner.Parent = returnModeHolder
-
-    local function rebuildReturnModeUI()
-        for _, c in ipairs(returnModeInner:GetChildren()) do
-            c:Destroy()
-        end
-
-        local isPremUser = false
-        if LocalPlayer.UserId == OWNER_USERID then
-            isPremUser = true
-        elseif Shared and Shared.KeyType then
-            local kt = tostring(Shared.KeyType):upper()
-            if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
-                isPremUser = true
-            end
-        end
-
-        if isPremUser then
-            makeDropdownGlobal(returnModeInner, {"Step", "Instant"}, Shared.ReturnMode or "Step", function(v)
-                Shared.ReturnMode = v
-                if v == "Instant" then
-                    notify("⚡ Return: INSTANT", "success")
-                else
-                    notify("🚶 Return: Step", "info")
-                end
-            end)
-        else
-            local lockedFrame = Instance.new("Frame")
-            lockedFrame.Size = UDim2.new(1, 0, 1, 0)
-            lockedFrame.BackgroundColor3 = C.Surface3
-            lockedFrame.BackgroundTransparency = 0.5
-            lockedFrame.BorderSizePixel = 0
-            lockedFrame.Parent = returnModeInner
-
-            local lkCorner = Instance.new("UICorner")
-            lkCorner.CornerRadius = UDim.new(0, 9)
-            lkCorner.Parent = lockedFrame
-
-            local lkStroke = Instance.new("UIStroke")
-            lkStroke.Color = C.Muted
-            lkStroke.Thickness = 1
-            lkStroke.Transparency = 0.6
-            lkStroke.Parent = lockedFrame
-
-            local lkLbl = Instance.new("TextLabel")
-            lkLbl.Size = UDim2.new(1, -20, 1, 0)
-            lkLbl.Position = UDim2.fromOffset(12, 0)
-            lkLbl.BackgroundTransparency = 1
-            lkLbl.Text = "🔒 Instant (Premium only)"
-            lkLbl.TextColor3 = C.Muted
-            lkLbl.Font = Enum.Font.GothamSemibold
-            lkLbl.TextSize = CFG.FONT_LABEL
-            lkLbl.TextXAlignment = Enum.TextXAlignment.Left
-            lkLbl.Parent = lockedFrame
-        end
-    end
-
-    rebuildReturnModeUI()
-    _G.VRILZ_RebuildReturnMode = rebuildReturnModeUI
-
-    -- CARD 2: INFO PANEL (state live)
-    local infoCard, infoContent = makeCard(mutPage, "📊 STATUS MUTATION", 2)
-
-    local mutInfoLbl = Instance.new("TextLabel")
-    mutInfoLbl.Size = UDim2.new(1, 0, 0, 90)
-    mutInfoLbl.BackgroundColor3 = C.Surface3
-    mutInfoLbl.BackgroundTransparency = 0.3
-    mutInfoLbl.BorderSizePixel = 0
-    mutInfoLbl.Text = "Loading..."
-    mutInfoLbl.TextColor3 = C.Text
-    mutInfoLbl.Font = Enum.Font.Code
-    mutInfoLbl.TextSize = CFG.FONT_MUTED
-    mutInfoLbl.TextXAlignment = Enum.TextXAlignment.Left
-    mutInfoLbl.TextYAlignment = Enum.TextYAlignment.Top
-    mutInfoLbl.LayoutOrder = 1
-    mutInfoLbl.ZIndex = 3
-    mutInfoLbl.Parent = infoContent
-    registerTheme(mutInfoLbl, "Text", "TextColor3")
-
-    local mutInfoCorner = Instance.new("UICorner")
-    mutInfoCorner.CornerRadius = UDim.new(0, 6)
-    mutInfoCorner.Parent = mutInfoLbl
-
-    local mutInfoPad = Instance.new("UIPadding")
-    mutInfoPad.PaddingLeft = UDim.new(0, 8)
-    mutInfoPad.PaddingTop = UDim.new(0, 6)
-    mutInfoPad.Parent = mutInfoLbl
-
-    -- Auto update info tiap 0.5 detik
-    task.spawn(function()
-        while mutInfoLbl.Parent do
-            task.wait(0.5)
-            local lines = {}
-            local F = getFeatures()
-
-            if F and F.isHoldingEgg then
-                local holding, eggName = F.isHoldingEgg()
-                table.insert(lines, "✋ Held: " .. (holding and ("YES " .. (eggName or "?")) or "no"))
+        local function updateSections(mode)
+            if mode == "Rarity" then
+                raritySection.Visible = true
+                nameSection.Visible = false
             else
-                table.insert(lines, "✋ Held: --")
+                raritySection.Visible = false
+                nameSection.Visible = true
             end
-
-            if F and F.getMutationState then
-                local state = F.getMutationState()
-                table.insert(lines, "🔒 Lock: " .. (state.EggLocked and "YES" or "no"))
-                table.insert(lines, "⏸ Paused: " .. (state.StealPaused and "YES" or "no"))
-                table.insert(lines, "▶ Running: " .. (state.Running and "YES" or "no"))
-            end
-
-            mutInfoLbl.Text = table.concat(lines, "\n")
         end
-    end)
-end
 
-                registerTab("EggMutation", "🔥", "Egg Mutation")
+        local modeLbl = Instance.new("TextLabel")
+        modeLbl.Size = UDim2.new(1, 0, 0, 16)
+        modeLbl.BackgroundTransparency = 1
+        modeLbl.Text = "Steal Mode:"
+        modeLbl.TextColor3 = C.Muted
+        modeLbl.Font = Enum.Font.GothamSemibold
+        modeLbl.TextSize = CFG.FONT_MUTED
+        modeLbl.TextXAlignment = Enum.TextXAlignment.Left
+        modeLbl.LayoutOrder = 1
+        modeLbl.Parent = mutStealContent
 
-            registerTab("Settings", "⚙", "Settings")
+        local modeHolder = Instance.new("Frame")
+        modeHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
+        modeHolder.BackgroundTransparency = 1
+        modeHolder.LayoutOrder = 2
+        modeHolder.Parent = mutStealContent
 
-    -- ⭐ Panggil GUI Egg Executor (di function terpisah biar gak exceed register)
+        makeDropdownGlobal(modeHolder, {"Rarity", "Name"}, Shared.MutationStealMode or "Rarity", function(v)
+            Shared.MutationStealMode = v
+            notify("🎯 Mode: " .. v, "info")
+            updateSections(v)
+        end)
+
+        local stealToggleHolder = Instance.new("Frame")
+        stealToggleHolder.Size = UDim2.new(1, 0, 0, CFG.TOGGLE_H)
+        stealToggleHolder.BackgroundTransparency = 1
+        stealToggleHolder.LayoutOrder = 3
+        stealToggleHolder.Parent = mutStealContent
+
+        makeToggle(stealToggleHolder, "Auto Steal", false, function(v)
+            Shared.MutationSteal_Enabled = v
+            if v then notify("🎯 Steal: ON", "success")
+            else notify("🎯 Steal: OFF", "info") end
+        end)
+
+        local rarityLbl = Instance.new("TextLabel")
+        rarityLbl.Size = UDim2.new(1, 0, 0, 16)
+        rarityLbl.BackgroundTransparency = 1
+        rarityLbl.Text = "Select Rarity:"
+        rarityLbl.TextColor3 = C.Muted
+        rarityLbl.Font = Enum.Font.GothamSemibold
+        rarityLbl.TextSize = CFG.FONT_MUTED
+        rarityLbl.TextXAlignment = Enum.TextXAlignment.Left
+        rarityLbl.LayoutOrder = 1
+        rarityLbl.Parent = raritySection
+
+        local rarityDropdownHolder = Instance.new("Frame")
+        rarityDropdownHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
+        rarityDropdownHolder.BackgroundTransparency = 1
+        rarityDropdownHolder.LayoutOrder = 2
+        rarityDropdownHolder.Parent = raritySection
+
+        makeDropdownMulti(rarityDropdownHolder, RarityList, Shared.SelectedRarities, nil, function(t) end)
+
+        local nameLbl = Instance.new("TextLabel")
+        nameLbl.Size = UDim2.new(1, 0, 0, 16)
+        nameLbl.BackgroundTransparency = 1
+        nameLbl.Text = "Select Egg Name:"
+        nameLbl.TextColor3 = C.Muted
+        nameLbl.Font = Enum.Font.GothamSemibold
+        nameLbl.TextSize = CFG.FONT_MUTED
+        nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+        nameLbl.LayoutOrder = 1
+        nameLbl.Parent = nameSection
+
+        local nameDropdownHolder = Instance.new("Frame")
+        nameDropdownHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
+        nameDropdownHolder.BackgroundTransparency = 1
+        nameDropdownHolder.LayoutOrder = 2
+        nameDropdownHolder.Parent = nameSection
+
+        makeDropdownMulti(nameDropdownHolder, EggNames, Shared.MutationSelectedEggs, nil, function(t) end)
+
+        updateSections(Shared.MutationStealMode or "Rarity")
+
+        -- Auto Mutation card
+        local mutCard, mutContent = makeCard(mutPage, "🔥 EGG MUTATION", 1)
+
+        makeToggle(mutContent, "Auto Mutation", false, function(v)
+            Shared.AutoMutation_Enabled = v
+            if v then notify("🔥 Auto Mutation: ON", "success")
+            else notify("🔥 Auto Mutation: OFF", "info") end
+        end)
+
+        makeToggle(mutContent, "Auto Return to Plot", false, function(v)
+            Shared.MutationReturn_Enabled = v
+            if v then notify("🏠 Return: ON", "success")
+            else notify("🏠 Return: OFF", "info") end
+        end)
+
+        local returnModeLbl = Instance.new("TextLabel")
+        returnModeLbl.Size = UDim2.new(1, 0, 0, 16)
+        returnModeLbl.BackgroundTransparency = 1
+        returnModeLbl.Text = "Return Mode:"
+        returnModeLbl.TextColor3 = C.Muted
+        returnModeLbl.Font = Enum.Font.GothamSemibold
+        returnModeLbl.TextSize = CFG.FONT_MUTED
+        returnModeLbl.TextXAlignment = Enum.TextXAlignment.Left
+        returnModeLbl.LayoutOrder = 5
+        returnModeLbl.Parent = mutContent
+
+        local returnModeHolder = Instance.new("Frame")
+        returnModeHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
+        returnModeHolder.BackgroundTransparency = 1
+        returnModeHolder.LayoutOrder = 6
+        returnModeHolder.Parent = mutContent
+
+        local returnModeInner = Instance.new("Frame")
+        returnModeInner.Size = UDim2.new(1, 0, 1, 0)
+        returnModeInner.BackgroundTransparency = 1
+        returnModeInner.Parent = returnModeHolder
+
+        local function rebuildReturnModeUI()
+            for _, c in ipairs(returnModeInner:GetChildren()) do c:Destroy() end
+
+            local isPremUser = false
+            if LocalPlayer.UserId == OWNER_USERID then
+                isPremUser = true
+            elseif Shared and Shared.KeyType then
+                local kt = tostring(Shared.KeyType):upper()
+                if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
+                    isPremUser = true
+                end
+            end
+
+            if isPremUser then
+                makeDropdownGlobal(returnModeInner, {"Step", "Instant"}, Shared.ReturnMode or "Step", function(v)
+                    Shared.ReturnMode = v
+                    notify("Return Mode: " .. v, "info")
+                end)
+            else
+                local lockedFrame = Instance.new("Frame")
+                lockedFrame.Size = UDim2.new(1, 0, 1, 0)
+                lockedFrame.BackgroundColor3 = C.Surface3
+                lockedFrame.BackgroundTransparency = 0.5
+                lockedFrame.BorderSizePixel = 0
+                lockedFrame.Parent = returnModeInner
+
+                local lk = Instance.new("UICorner")
+                lk.CornerRadius = UDim.new(0, 9)
+                lk.Parent = lockedFrame
+
+                local lkLbl = Instance.new("TextLabel")
+                lkLbl.Size = UDim2.new(1, -20, 1, 0)
+                lkLbl.Position = UDim2.fromOffset(12, 0)
+                lkLbl.BackgroundTransparency = 1
+                lkLbl.Text = "🔒 Instant (Premium only)"
+                lkLbl.TextColor3 = C.Muted
+                lkLbl.Font = Enum.Font.GothamSemibold
+                lkLbl.TextSize = CFG.FONT_LABEL
+                lkLbl.TextXAlignment = Enum.TextXAlignment.Left
+                lkLbl.Parent = lockedFrame
+            end
+        end
+
+        rebuildReturnModeUI()
+        _G.VRILZ_RebuildReturnMode = rebuildReturnModeUI
+
+        -- Status card
+        local infoCard, infoContent = makeCard(mutPage, "📊 STATUS MUTATION", 2)
+
+        local mutInfoLbl = Instance.new("TextLabel")
+        mutInfoLbl.Size = UDim2.new(1, 0, 0, 90)
+        mutInfoLbl.BackgroundColor3 = C.Surface3
+        mutInfoLbl.BackgroundTransparency = 0.3
+        mutInfoLbl.BorderSizePixel = 0
+        mutInfoLbl.Text = "Loading..."
+        mutInfoLbl.TextColor3 = C.Text
+        mutInfoLbl.Font = Enum.Font.Code
+        mutInfoLbl.TextSize = CFG.FONT_MUTED
+        mutInfoLbl.TextXAlignment = Enum.TextXAlignment.Left
+        mutInfoLbl.TextYAlignment = Enum.TextYAlignment.Top
+        mutInfoLbl.LayoutOrder = 1
+        mutInfoLbl.Parent = infoContent
+
+        local mic = Instance.new("UICorner")
+        mic.CornerRadius = UDim.new(0, 6)
+        mic.Parent = mutInfoLbl
+
+        task.spawn(function()
+            while mutInfoLbl.Parent do
+                task.wait(0.5)
+                local lines = {}
+                local F = getFeatures()
+
+                if F and F.isHoldingEgg then
+                    local holding, eggName = F.isHoldingEgg()
+                    table.insert(lines, "✋ Held: " .. (holding and ("YES " .. (eggName or "?")) or "no"))
+                else
+                    table.insert(lines, "✋ Held: --")
+                end
+
+                if F and F.getMutationState then
+                    local state = F.getMutationState()
+                    table.insert(lines, "🔒 Lock: " .. (state.EggLocked and "YES" or "no"))
+                    table.insert(lines, "⏸ Paused: " .. (state.StealPaused and "YES" or "no"))
+                    table.insert(lines, "▶ Running: " .. (state.Running and "YES" or "no"))
+                end
+
+                mutInfoLbl.Text = table.concat(lines, "\n")
+            end
+        end)
+
+        registerTab("EggMutation", "🔥", "Egg Mutation")
+    end
+
+    -- ⭐ Panggil GUI Egg Executor
     buildEggExecutorGUI(screenGui)
 
-        -- ⬇️ BUNGKUS DENGAN do...end BIAR VARIABEL DROP SETELAH BLOK INI
+    -- Drag handler
     do
         local dragging, dragInput, dragStart, startPos
         header.InputBegan:Connect(function(input)
@@ -6221,7 +6002,7 @@ end
                 )
             end
         end)
-    end  -- ← TAMBAH PENUTUP do...end
+    end
 
     return main
 end
