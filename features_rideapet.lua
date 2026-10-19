@@ -1105,8 +1105,6 @@ local function doReturnToPlot()
         print("[RETURN] ❌ MutationReturn_Enabled = false")
         return 
     end
-    
-    print("[RETURN] ▶ doReturnToPlot, mode =", Shared.ReturnMode, "holding =", isHoldingEggLocal())
 
     local mode = Shared.ReturnMode or "Step"
 
