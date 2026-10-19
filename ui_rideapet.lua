@@ -1,5 +1,5 @@
 -- ============================================================
--- VRILZHUB UI — RIDE A PET v2.1 (AUTO-DETECT PC & MOBILE)
+-- VRILZHUB UI — RIDE A PET v2.2 (AUTO-DETECT PC & MOBILE)
 -- PC: 800x580 | Mobile: 88% x 78% viewport
 -- ============================================================
 
@@ -2867,7 +2867,7 @@ local function buildMainWindow(parent)
     subtitle.Size = UDim2.new(0, 300, 0, 14)
     subtitle.Position = UDim2.fromOffset(IS_MOBILE and 48 or 58, IS_MOBILE and 26 or 28)
     subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Ride a Pet · v2.1"
+    subtitle.Text = "Ride a Pet · v2.2"
     subtitle.TextColor3 = C.Muted
     subtitle.Font = Enum.Font.GothamSemibold
     subtitle.TextSize = IS_MOBILE and 9 or 10
@@ -3570,10 +3570,10 @@ do
     local updateCard, updateContent = makeCard(infoPage, "📢 UPDATE INFORMATION", 2)
 
     local infoLines = {
-        "Version        : 2.1",
-        "Last Update    : 18 Okto 2026",
+        "Version        : 2.2",
+        "Last Update    : 19 Okto 2026",
         "Status         : Online ✅",
-        "Changelog      : Fly Chard, Tp Mode, Auto Hatch",
+        "Changelog      : Fly Chard, Tp Mode, Gui Stats",
         "                 Auto Event, Auto Yin, Auto Obby",
     }
     for i, line in ipairs(infoLines) do
@@ -5300,7 +5300,7 @@ end
                             },
                         },
                         footer = {
-                            text = "🏆 VRILZHUB PLATINUM  •  v2.1",
+                            text = "🏆 VRILZHUB PLATINUM  •  v2.2",
                         },
                         timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
                     }}
