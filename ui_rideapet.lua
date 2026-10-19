@@ -3665,8 +3665,6 @@ do
             task.defer(syncInfoCanvas)
         end
     end
-
-    registerTab("Info", "ℹ", "Info")
 end
     -- Lightweight 3D egg preview used only by the prediction/info cards.
     -- It reads an existing rendered egg model when available and falls back to a simple 3D egg.
@@ -4452,8 +4450,6 @@ do
             end
         end
     end)
-
-    registerTab("Prediksi", "◎", "Prediksi")
 end
 
     -- TAB EGG
@@ -4538,8 +4534,6 @@ do
             notify("Plant Filter: " .. v, "info")
         end
     end)
-
-    registerTab("Egg", "◯", "Egg")
 end
 
     -- TAB VISUAL
@@ -4557,8 +4551,6 @@ do
     makeToggle(petEspContent, "Show Name", false, function(v) Shared.ESP_PetName_Enabled = v end)
     makeToggle(petEspContent, "Show Cash", false, function(v) Shared.ESP_PetCash_Enabled = v end)
     makeToggle(petEspContent, "Show Speed", false, function(v) Shared.ESP_PetSpeed_Enabled = v end)
-
-    registerTab("Visual", "◆", "Visual")
 end
 
     -- TAB AUTO
@@ -4787,8 +4779,6 @@ end)
     end  -- ← PENUTUP do...end
 
     makeToggle(autoContent, "Auto Equip Best", false, function(v) Shared.AutoEquipBest_Enabled = v end)
-
-    registerTab("Auto", "▶", "Auto")
 end
 
       -- ═══════════════════════════════════════════════════════════
@@ -5439,9 +5429,6 @@ end
             descLbl.ZIndex = 4
             descLbl.Parent = row
         end
-
-                                -- Register tab
-        registerTab("Webhook", "🔔", "Webhook")
     end
 
        -- TAB SETTINGS
@@ -5708,8 +5695,6 @@ end
         makeToggle(fpsContent, "FPS Window", false, function(v)
             if fpsWin then fpsWin.Visible = v end
         end)
-
-        registerTab("Settings", "⚙", "Settings")
     end
 
     -- ===== EVENT TAB =====
@@ -5717,7 +5702,6 @@ end
         local eventPage = createPage("Event")
         pages.Event = eventPage
         buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti, notify)
-        registerTab("Event", "🎃", "Event")
     end
 
     -- ===== EGG MUTATION TAB =====
@@ -5964,9 +5948,24 @@ end
                 mutInfoLbl.Text = table.concat(lines, "\n")
             end
         end)
-
-        registerTab("EggMutation", "🔥", "Egg Mutation")
     end
+
+    registerTab("Info", "ℹ", "Info")
+    registerTab("Prediksi", "◎", "Prediksi")
+    registerTab("Egg", "◯", "Egg")
+    registerTab("Visual", "◆", "Visual")
+    registerTab("Auto", "▶", "Auto")
+    registerTab("Event", "🎃", "Event")
+    registerTab("EggMutation", "🔥", "Egg Mutation")
+    registerTab("Webhook", "🔔", "Webhook")
+    registerTab("Settings", "⚙", "Settings")
+
+    -- ⬇️ TAMBAH INI — auto buka tab Info pas pertama launch
+    task.defer(function()
+        if navs.Info and navs.Info.btn then
+            navs.Info.btn.MouseButton1Click:Fire()
+        end
+    end)
 
     -- ⭐ Panggil GUI Egg Executor
     buildEggExecutorGUI(screenGui)
