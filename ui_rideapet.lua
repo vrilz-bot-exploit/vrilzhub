@@ -6587,9 +6587,32 @@ local function buildLoadingScreen(parent)
         }):Play()
         task.wait(0.5)
 
-        if loading then loading:Destroy() end
+                if loading then loading:Destroy() end
         buildMainWindow(parent)
         notify("Welcome, " .. LocalPlayer.DisplayName, "success")
+
+        -- ⭐ FIX: Features.Init() HANYA dipanggil di sini
+        -- Setelah key valid + loading selesai + main window muncul
+        task.spawn(function()
+            task.wait(0.5)
+            local timeout = 0
+            while not _G.VRILZ_Features and timeout < 10 do
+                task.wait(0.5)
+                timeout = timeout + 0.5
+            end
+
+            if _G.VRILZ_Features and _G.VRILZ_Features.Init then
+                print("[UI] ✅ Starting Features (after key + loading)...")
+                local ok, err = pcall(function()
+                    _G.VRILZ_Features.Init(Shared)
+                end)
+                if not ok then
+                    warn("[UI] ❌ Features.Init failed: " .. tostring(err))
+                end
+            else
+                warn("[UI] ❌ _G.VRILZ_Features not loaded!")
+            end
+        end)
     end)
 end
 
