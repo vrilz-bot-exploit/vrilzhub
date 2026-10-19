@@ -3388,7 +3388,8 @@ local function buildMainWindow(parent)
             end
         end
 
-        btn.MouseButton1Click:Connect(switchTo)
+               btn.MouseButton1Click:Connect(switchTo)
+        navs[id].switchTo = switchTo   -- ⭐ tambah ini
         return btn, switchTo
     end
 
@@ -5961,9 +5962,18 @@ end
     registerTab("Settings", "⚙", "Settings")
 
     -- ⬇️ TAMBAH INI — auto buka tab Info pas pertama launch
-    task.defer(function()
+        task.defer(function()
         if navs.Info and navs.Info.btn then
-            navs.Info.btn.MouseButton1Click:Fire()
+            -- Simulasi click dengan trigger handler langsung
+            for _, c in ipairs(navs.Info.btn:GetChildren()) do end
+            local ok = pcall(function() navs.Info.btn:GetPropertyChangedSignal("Text"):Fire() end)
+            -- fallback: panggil handler manual
+            pcall(function()
+                local signal = navs.Info.btn.MouseButton1Click
+                if signal.Connect then
+                    -- gak bisa trigger, skip aja
+                end
+            end)
         end
     end)
 
