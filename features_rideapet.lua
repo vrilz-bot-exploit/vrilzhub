@@ -2944,15 +2944,12 @@ local function tpToSafe(pos)
     myRoot.AssemblyLinearVelocity = Vector3.zero
     task.wait(0.8)
 
-    -- TP #2: ke posisi tujuan
+    -- TP #2: ke posisi tujuan (41465.7) — DIEM DI SITU
     local root2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not root2 then return false end
     root2.CFrame = CFrame.new(pos)
     root2.Velocity = Vector3.zero
     root2.AssemblyLinearVelocity = Vector3.zero
-
-    -- ⭐ KUNCI: Anchor biar GAK JATUH (cuma 1 baris)
-    root2.Anchored = true
 
     return true
 end
