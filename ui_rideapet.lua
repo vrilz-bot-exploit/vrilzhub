@@ -8023,18 +8023,58 @@ local function a_BuildKeyUI(onSuccess)
     a_enableBlur()
 
     local mobile = a_isMobile()
-    local scale = a_getScale()
-    local padding = 14
-    local baseWindowHeight = mobile and math.clamp(360 * scale, 320, 400) or 360
-    local windowWidth = mobile and math.clamp(400 * scale, 320, 440) or 400
-    local windowHeight = baseWindowHeight
-    local elementHeight = mobile and math.clamp(56 * scale, 48, 62) or 56
-    local buttonHeight = mobile and math.clamp(42 * scale, 38, 48) or 42
-    local statusHeight = mobile and math.clamp(60 * scale, 52, 68) or 60
-    local userPanelWidth = 180
-    local changelogPanelWidth = 220
-    local gap = 12
+    local vp = A_WS.CurrentCamera and A_WS.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
 
+    -- ⭐ RESPONSIVE: hitung ukuran berdasarkan viewport HP asli
+    local padding = mobile and 10 or 14
+    local baseWindowHeight, windowWidth, windowHeight
+    local elementHeight, buttonHeight, statusHeight
+    local userPanelWidth, changelogPanelWidth, gap
+
+    if mobile then
+        -- HP kecil (viewport 400x800) → window ~92% lebar, tinggi 78%
+        windowWidth  = math.floor(math.clamp(vp.X * 0.92, 280, 420))
+        windowHeight = math.floor(math.clamp(vp.Y * 0.78, 300, 460))
+        baseWindowHeight = windowHeight
+        elementHeight = math.clamp(math.floor(vp.Y * 0.075), 42, 56)
+        buttonHeight  = math.clamp(math.floor(vp.Y * 0.06),  36, 46)
+        statusHeight  = math.clamp(math.floor(vp.Y * 0.08),  48, 64)
+        userPanelWidth      = math.clamp(math.floor(vp.X * 0.45), 130, 170)
+        changelogPanelWidth = math.clamp(math.floor(vp.X * 0.55), 150, 210)
+        gap = 8
+    else
+        -- PC: sama seperti sebelumnya
+        local scale = a_getScale()
+        baseWindowHeight = 360
+        windowWidth  = 400
+        windowHeight = 360
+        elementHeight = 56
+        buttonHeight  = 42
+        statusHeight  = 60
+        userPanelWidth      = 180
+        changelogPanelWidth = 220
+        gap = 12
+    end
+
+    -- ⭐ Kalau viewport SANGAT kecil (<360px lebar), shrink user/changelog panel
+    -- biar gak nabrak main window
+    local function getAvailableSideSpace()
+        return math.max(0, (vp.X - windowWidth) / 2 - 8)
+    end
+    if mobile then
+        local sideSpace = getAvailableSideSpace()
+        -- Kalau gak ada ruang buat 2 panel samping, sembunyikan changelog panel
+        if sideSpace < 60 then
+            changelogPanelWidth = 0
+        elseif sideSpace < 130 then
+            userPanelWidth      = math.clamp(sideSpace - 8, 100, 130)
+            changelogPanelWidth = 0
+        else
+            userPanelWidth      = math.clamp(sideSpace * 0.45, 100, 170)
+            changelogPanelWidth = math.clamp(sideSpace * 0.55, 120, 200)
+        end
+    end
+    
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "VH_KeySystem"
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -8183,12 +8223,12 @@ local function a_BuildKeyUI(onSuccess)
     end)
 
     local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, -90, 1, 0)
+    titleLabel.Size = UDim2.new(1, -70, 1, 0)
     titleLabel.Position = UDim2.new(0, padding + A_Appearance.IconSize.X.Offset + 10, 0, 0)
     titleLabel.BackgroundTransparency = 1
     titleLabel.Text = A_Appearance.Title
     titleLabel.TextColor3 = A_Theme.Text
-    titleLabel.TextSize = mobile and 24 or 26
+    titleLabel.TextSize = mobile and math.clamp(math.floor(windowWidth * 0.06), 18, 22) or 26
     titleLabel.Font = Enum.Font.ArimoBold
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     titleLabel.Parent = header
@@ -8238,7 +8278,7 @@ local function a_BuildKeyUI(onSuccess)
     statusLabel.BackgroundTransparency = 1
     statusLabel.Text = A_Appearance.Subtitle
     statusLabel.TextColor3 = A_Theme.StatusIdle
-    statusLabel.TextSize = mobile and 17 or 18
+    statusLabel.TextSize = mobile and math.clamp(math.floor(windowWidth * 0.042), 14, 17) or 18
     statusLabel.Font = Enum.Font.ArimoBold
     statusLabel.TextXAlignment = Enum.TextXAlignment.Left
     statusLabel.TextTruncate = Enum.TextTruncate.AtEnd
@@ -8270,7 +8310,7 @@ local function a_BuildKeyUI(onSuccess)
     textBox.TextColor3 = A_Theme.Text
     textBox.PlaceholderText = "Enter your key..."
     textBox.PlaceholderColor3 = A_Theme.TextDim
-    textBox.TextSize = mobile and 17 or 18
+    textBox.TextSize = mobile and math.clamp(math.floor(windowWidth * 0.045), 13, 17) or 18
     textBox.Font = Enum.Font.ArimoBold
     textBox.ClearTextOnFocus = false
     textBox.TextTruncate = Enum.TextTruncate.AtEnd
@@ -8319,7 +8359,7 @@ local function a_BuildKeyUI(onSuccess)
         layout.Padding = UDim.new(0, 8)
 
         local iconImg = Instance.new("ImageLabel")
-        iconImg.Size = UDim2.new(0, 18, 0, 18)
+        iconImg.Size = UDim2.new(0, mobile and math.clamp(math.floor(windowWidth * 0.045), 14, 18) or 18, 0, mobile and math.clamp(math.floor(windowWidth * 0.045), 14, 18) or 18)
         iconImg.BackgroundTransparency = 1
         iconImg.Image = a_getIcon(iconKey)
         iconImg.ImageColor3 = A_Theme.Text
@@ -8333,7 +8373,7 @@ local function a_BuildKeyUI(onSuccess)
         label.BackgroundTransparency = 1
         label.Text = text
         label.TextColor3 = A_Theme.Text
-        label.TextSize = mobile and 14 or 15
+        label.TextSize = mobile and math.clamp(math.floor(windowWidth * 0.038), 11, 14) or 15
         label.Font = Enum.Font.ArimoBold
         label.LayoutOrder = 2
         label.Parent = content
@@ -8349,9 +8389,12 @@ local function a_BuildKeyUI(onSuccess)
     local redeemBtn = createButton("Redeem Key", "shield", true, acquireStartY + buttonHeight + 5)
     local bottomY = acquireStartY + buttonHeight * 2 + 10
 
+        local iconBtnSize = mobile and math.clamp(math.floor(windowWidth * 0.09), 28, 36) or 36
+    local iconBtnGap  = mobile and math.clamp(math.floor(windowWidth * 0.028), 6, 12) or 8
+
     local userBtn = Instance.new("TextButton")
-    userBtn.Size = UDim2.new(0, 36, 0, 36)
-    userBtn.Position = UDim2.new(0.5, -44, 0, bottomY)
+    userBtn.Size = UDim2.fromOffset(iconBtnSize, iconBtnSize)
+    userBtn.Position = UDim2.new(0.5, -(iconBtnSize + iconBtnGap), 0, bottomY)
     userBtn.AnchorPoint = Vector2.new(0.5, 0)
     userBtn.BackgroundColor3 = A_Theme.Background
     userBtn.BorderSizePixel = 0
@@ -8361,7 +8404,7 @@ local function a_BuildKeyUI(onSuccess)
     Instance.new("UICorner", userBtn).CornerRadius = UDim.new(0, 4)
 
     local userIcon = Instance.new("ImageLabel")
-    userIcon.Size = UDim2.new(0, 18, 0, 18)
+    userIcon.Size = UDim2.fromOffset(iconBtnSize * 0.5, iconBtnSize * 0.5)
     userIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
     userIcon.AnchorPoint = Vector2.new(0.5, 0.5)
     userIcon.BackgroundTransparency = 1
@@ -8373,7 +8416,7 @@ local function a_BuildKeyUI(onSuccess)
     userBtn.MouseLeave:Connect(function() A_Tween:Create(userIcon, TweenInfo.new(0.15), {ImageColor3 = A_Theme.TextDim}):Play() end)
 
     local discordBtn = Instance.new("TextButton")
-    discordBtn.Size = UDim2.new(0, 36, 0, 36)
+    discordBtn.Size = UDim2.fromOffset(iconBtnSize, iconBtnSize)
     discordBtn.Position = UDim2.new(0.5, 0, 0, bottomY)
     discordBtn.AnchorPoint = Vector2.new(0.5, 0)
     discordBtn.BackgroundColor3 = A_Theme.Background
@@ -8384,7 +8427,7 @@ local function a_BuildKeyUI(onSuccess)
     Instance.new("UICorner", discordBtn).CornerRadius = UDim.new(0, 4)
 
     local discordIcon = Instance.new("ImageLabel")
-    discordIcon.Size = UDim2.new(0, 18, 0, 18)
+    discordIcon.Size = UDim2.fromOffset(iconBtnSize * 0.5, iconBtnSize * 0.5)
     discordIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
     discordIcon.AnchorPoint = Vector2.new(0.5, 0.5)
     discordIcon.BackgroundTransparency = 1
@@ -8396,8 +8439,8 @@ local function a_BuildKeyUI(onSuccess)
     discordBtn.MouseLeave:Connect(function() A_Tween:Create(discordIcon, TweenInfo.new(0.15), {ImageColor3 = A_Theme.Discord}):Play() end)
 
     local changelogBtn = Instance.new("TextButton")
-    changelogBtn.Size = UDim2.new(0, 36, 0, 36)
-    changelogBtn.Position = UDim2.new(0.5, 44, 0, bottomY)
+    changelogBtn.Size = UDim2.fromOffset(iconBtnSize, iconBtnSize)
+    changelogBtn.Position = UDim2.new(0.5, iconBtnSize + iconBtnGap, 0, bottomY)
     changelogBtn.AnchorPoint = Vector2.new(0.5, 0)
     changelogBtn.BackgroundColor3 = A_Theme.Background
     changelogBtn.BorderSizePixel = 0
@@ -8407,7 +8450,7 @@ local function a_BuildKeyUI(onSuccess)
     Instance.new("UICorner", changelogBtn).CornerRadius = UDim.new(0, 4)
 
     local changelogIcon = Instance.new("ImageLabel")
-    changelogIcon.Size = UDim2.new(0, 18, 0, 18)
+    changelogIcon.Size = UDim2.fromOffset(iconBtnSize * 0.5, iconBtnSize * 0.5)
     changelogIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
     changelogIcon.AnchorPoint = Vector2.new(0.5, 0.5)
     changelogIcon.BackgroundTransparency = 1
