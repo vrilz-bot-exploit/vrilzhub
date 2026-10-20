@@ -8025,26 +8025,25 @@ local function a_BuildKeyUI(onSuccess)
     local mobile = a_isMobile()
     local vp = A_WS.CurrentCamera and A_WS.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
 
-    -- ⭐ RESPONSIVE: hitung ukuran berdasarkan viewport HP asli
-    local padding = mobile and 10 or 14
+        -- ⭐ UKURAN KECIL — khusus HP. PC tetap sama.
+    local padding = mobile and 8 or 14
     local baseWindowHeight, windowWidth, windowHeight
     local elementHeight, buttonHeight, statusHeight
     local userPanelWidth, changelogPanelWidth, gap
 
     if mobile then
-        -- HP kecil (viewport 400x800) → window ~92% lebar, tinggi 78%
-        windowWidth  = math.floor(math.clamp(vp.X * 0.92, 280, 420))
-        windowHeight = math.floor(math.clamp(vp.Y * 0.78, 300, 460))
+        -- HP: window max 300px lebar, 340px tinggi. Jauh lebih kecil.
+        windowWidth  = math.floor(math.clamp(vp.X * 0.72, 240, 300))
+        windowHeight = math.floor(math.clamp(vp.Y * 0.55, 260, 340))
         baseWindowHeight = windowHeight
-        elementHeight = math.clamp(math.floor(vp.Y * 0.075), 42, 56)
-        buttonHeight  = math.clamp(math.floor(vp.Y * 0.06),  36, 46)
-        statusHeight  = math.clamp(math.floor(vp.Y * 0.08),  48, 64)
-        userPanelWidth      = math.clamp(math.floor(vp.X * 0.45), 130, 170)
-        changelogPanelWidth = math.clamp(math.floor(vp.X * 0.55), 150, 210)
-        gap = 8
+        elementHeight = math.clamp(math.floor(vp.Y * 0.052), 32, 40)   -- input tipis
+        buttonHeight  = math.clamp(math.floor(vp.Y * 0.043), 28, 34)   -- tombol tipis
+        statusHeight  = math.clamp(math.floor(vp.Y * 0.056), 34, 44)   -- status tipis
+        userPanelWidth      = math.clamp(math.floor(vp.X * 0.32), 100, 130)
+        changelogPanelWidth = math.clamp(math.floor(vp.X * 0.38), 110, 150)
+        gap = 6
     else
-        -- PC: sama seperti sebelumnya
-        local scale = a_getScale()
+        -- PC: SAMA PERSIS seperti sebelumnya (tidak diubah)
         baseWindowHeight = 360
         windowWidth  = 400
         windowHeight = 360
@@ -8056,22 +8055,21 @@ local function a_BuildKeyUI(onSuccess)
         gap = 12
     end
 
-    -- ⭐ Kalau viewport SANGAT kecil (<360px lebar), shrink user/changelog panel
-    -- biar gak nabrak main window
+    -- ⭐ Panel samping auto-hide kalau ruang sempit
     local function getAvailableSideSpace()
-        return math.max(0, (vp.X - windowWidth) / 2 - 8)
+        return math.max(0, (vp.X - windowWidth) / 2 - 6)
     end
     if mobile then
         local sideSpace = getAvailableSideSpace()
-        -- Kalau gak ada ruang buat 2 panel samping, sembunyikan changelog panel
-        if sideSpace < 60 then
+        if sideSpace < 40 then
+            userPanelWidth = 0
             changelogPanelWidth = 0
-        elseif sideSpace < 130 then
-            userPanelWidth      = math.clamp(sideSpace - 8, 100, 130)
+        elseif sideSpace < 90 then
+            userPanelWidth      = math.clamp(sideSpace - 4, 80, 100)
             changelogPanelWidth = 0
         else
-            userPanelWidth      = math.clamp(sideSpace * 0.45, 100, 170)
-            changelogPanelWidth = math.clamp(sideSpace * 0.55, 120, 200)
+            userPanelWidth      = math.clamp(sideSpace * 0.45, 90, 130)
+            changelogPanelWidth = math.clamp(sideSpace * 0.55, 110, 150)
         end
     end
     
@@ -8113,7 +8111,8 @@ local function a_BuildKeyUI(onSuccess)
        -- ===== VH LOGO (3D text + lightning) — header =====
     local logoHolder = Instance.new("Frame")
     logoHolder.Name = "VHLogoHeader"
-    logoHolder.Size = UDim2.fromOffset(30, 30)
+    local _logoHdr = mobile and math.clamp(math.floor(windowWidth * 0.078), 22, 28) or 30
+    logoHolder.Size = UDim2.fromOffset(_logoHdr, _logoHdr)
     logoHolder.Position = UDim2.new(0, padding, 0.5, 0)
     logoHolder.AnchorPoint = Vector2.new(0, 0.5)
     logoHolder.BackgroundColor3 = A_Theme.Background
@@ -8228,13 +8227,14 @@ local function a_BuildKeyUI(onSuccess)
     titleLabel.BackgroundTransparency = 1
     titleLabel.Text = A_Appearance.Title
     titleLabel.TextColor3 = A_Theme.Text
-    titleLabel.TextSize = mobile and math.clamp(math.floor(windowWidth * 0.06), 18, 22) or 26
+    titleLabel.TextSize = mobile and math.clamp(math.floor(windowWidth * 0.048), 14, 17) or 26
     titleLabel.Font = Enum.Font.ArimoBold
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     titleLabel.Parent = header
 
     local closeBtn = Instance.new("ImageButton")
-    closeBtn.Size = UDim2.new(0, 22, 0, 22)
+    local _clSz = mobile and math.clamp(math.floor(windowWidth * 0.06), 16, 22) or 22
+    closeBtn.Size = UDim2.fromOffset(_clSz, _clSz)
     closeBtn.Position = UDim2.new(1, -padding, 0.5, 0)
     closeBtn.AnchorPoint = Vector2.new(1, 0.5)
     closeBtn.BackgroundTransparency = 1
@@ -8245,7 +8245,7 @@ local function a_BuildKeyUI(onSuccess)
     closeBtn.MouseEnter:Connect(function() A_Tween:Create(closeBtn, TweenInfo.new(0.15), {ImageColor3 = A_Theme.Error}):Play() end)
     closeBtn.MouseLeave:Connect(function() A_Tween:Create(closeBtn, TweenInfo.new(0.15), {ImageColor3 = A_Theme.TextDim}):Play() end)
 
-    local contentStartY = 60
+    local contentStartY = mobile and math.clamp(math.floor(windowWidth * 0.16), 42, 52) or 60
 
     local statusFrame = Instance.new("Frame")
     statusFrame.Size = UDim2.new(0.94, 0, 0, statusHeight)
@@ -8263,8 +8263,9 @@ local function a_BuildKeyUI(onSuccess)
     statusStroke.Transparency = 0.8
 
     local statusIcon = Instance.new("ImageLabel")
-    statusIcon.Size = UDim2.new(0, 24, 0, 24)
-    statusIcon.Position = UDim2.new(0, 16, 0.5, 0)
+    local _stIco = mobile and math.clamp(math.floor(windowWidth * 0.065), 16, 22) or 24
+    statusIcon.Size = UDim2.fromOffset(_stIco, _stIco)
+    statusIcon.Position = UDim2.new(0, mobile and 10 or 16, 0.5, 0)
     statusIcon.AnchorPoint = Vector2.new(0, 0.5)
     statusIcon.BackgroundTransparency = 1
     statusIcon.Image = a_getIcon("lock")
@@ -8274,11 +8275,11 @@ local function a_BuildKeyUI(onSuccess)
 
     local statusLabel = Instance.new("TextLabel")
     statusLabel.Size = UDim2.new(1, -60, 1, 0)
-    statusLabel.Position = UDim2.new(0, 52, 0, 0)
+    statusLabel.Position = UDim2.new(0, mobile and (_stIco + 16) or 52, 0, 0)
     statusLabel.BackgroundTransparency = 1
     statusLabel.Text = A_Appearance.Subtitle
     statusLabel.TextColor3 = A_Theme.StatusIdle
-    statusLabel.TextSize = mobile and math.clamp(math.floor(windowWidth * 0.042), 14, 17) or 18
+    statusLabel.TextSize = mobile and math.clamp(math.floor(windowWidth * 0.034), 10, 13) or 18
     statusLabel.Font = Enum.Font.ArimoBold
     statusLabel.TextXAlignment = Enum.TextXAlignment.Left
     statusLabel.TextTruncate = Enum.TextTruncate.AtEnd
@@ -8310,7 +8311,7 @@ local function a_BuildKeyUI(onSuccess)
     textBox.TextColor3 = A_Theme.Text
     textBox.PlaceholderText = "Enter your key..."
     textBox.PlaceholderColor3 = A_Theme.TextDim
-    textBox.TextSize = mobile and math.clamp(math.floor(windowWidth * 0.045), 13, 17) or 18
+    textBox.TextSize = mobile and math.clamp(math.floor(windowWidth * 0.036), 10, 13) or 18
     textBox.Font = Enum.Font.ArimoBold
     textBox.ClearTextOnFocus = false
     textBox.TextTruncate = Enum.TextTruncate.AtEnd
@@ -8359,7 +8360,8 @@ local function a_BuildKeyUI(onSuccess)
         layout.Padding = UDim.new(0, 8)
 
         local iconImg = Instance.new("ImageLabel")
-        iconImg.Size = UDim2.new(0, mobile and math.clamp(math.floor(windowWidth * 0.045), 14, 18) or 18, 0, mobile and math.clamp(math.floor(windowWidth * 0.045), 14, 18) or 18)
+        local _btnIco = mobile and math.clamp(math.floor(windowWidth * 0.038), 11, 15) or 18
+        iconImg.Size = UDim2.fromOffset(_btnIco, _btnIco)
         iconImg.BackgroundTransparency = 1
         iconImg.Image = a_getIcon(iconKey)
         iconImg.ImageColor3 = A_Theme.Text
@@ -8373,7 +8375,7 @@ local function a_BuildKeyUI(onSuccess)
         label.BackgroundTransparency = 1
         label.Text = text
         label.TextColor3 = A_Theme.Text
-        label.TextSize = mobile and math.clamp(math.floor(windowWidth * 0.038), 11, 14) or 15
+        label.TextSize = mobile and math.clamp(math.floor(windowWidth * 0.032), 10, 12) or 15
         label.Font = Enum.Font.ArimoBold
         label.LayoutOrder = 2
         label.Parent = content
@@ -8389,8 +8391,8 @@ local function a_BuildKeyUI(onSuccess)
     local redeemBtn = createButton("Redeem Key", "shield", true, acquireStartY + buttonHeight + 5)
     local bottomY = acquireStartY + buttonHeight * 2 + 10
 
-        local iconBtnSize = mobile and math.clamp(math.floor(windowWidth * 0.09), 28, 36) or 36
-    local iconBtnGap  = mobile and math.clamp(math.floor(windowWidth * 0.028), 6, 12) or 8
+    local iconBtnSize = mobile and math.clamp(math.floor(windowWidth * 0.075), 22, 28) or 36
+    local iconBtnGap  = mobile and math.clamp(math.floor(windowWidth * 0.022), 5, 9) or 8
 
     local userBtn = Instance.new("TextButton")
     userBtn.Size = UDim2.fromOffset(iconBtnSize, iconBtnSize)
