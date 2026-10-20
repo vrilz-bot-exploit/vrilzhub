@@ -7248,23 +7248,129 @@ local function a_CreateDoorOverlay(parentFrame, width, height)
     rightDoor.ZIndex = 51
     rightDoor.Parent = overlay
 
+       -- ===== VH LOGO (3D text + lightning) — door overlay =====
     local logoSize = math.min(width, height) * 0.28
-    local logoImage = Instance.new("ImageLabel")
-    logoImage.Name = "DoorLogo"
-    logoImage.Size = UDim2.new(0, logoSize, 0, logoSize)
-    logoImage.Position = UDim2.new(0.5, 0, 0.5, 0)
-    logoImage.AnchorPoint = Vector2.new(0.5, 0.5)
-    logoImage.BackgroundTransparency = 1
-    logoImage.Image = a_getLogoIcon()
-    logoImage.ImageColor3 = A_Theme.Text
-    logoImage.ScaleType = Enum.ScaleType.Fit
-    logoImage.ZIndex = 54
-    logoImage.Parent = overlay
+    local logoHolder = Instance.new("Frame")
+    logoHolder.Name = "DoorLogo"
+    logoHolder.Size = UDim2.new(0, logoSize, 0, logoSize)
+    logoHolder.Position = UDim2.new(0.5, 0, 0.5, 0)
+    logoHolder.AnchorPoint = Vector2.new(0.5, 0.5)
+    logoHolder.BackgroundColor3 = A_Theme.Background
+    logoHolder.BackgroundTransparency = 0.1
+    logoHolder.BorderSizePixel = 0
+    logoHolder.ClipsDescendants = true
+    logoHolder.ZIndex = 54
+    logoHolder.Parent = overlay
+
+    local dlCorner = Instance.new("UICorner")
+    dlCorner.CornerRadius = UDim.new(0, 10)
+    dlCorner.Parent = logoHolder
+
+    local dlStroke = Instance.new("UIStroke")
+    dlStroke.Color = A_Theme.Accent
+    dlStroke.Thickness = 2
+    dlStroke.Transparency = 0.15
+    dlStroke.Parent = logoHolder
+
+    local dlTextSize = math.floor(logoSize * 0.42)
+
+    local dlShadow = Instance.new("TextLabel")
+    dlShadow.Size = UDim2.fromScale(1, 1)
+    dlShadow.Position = UDim2.fromOffset(2, 3)
+    dlShadow.BackgroundTransparency = 1
+    dlShadow.Text = "VH"
+    dlShadow.TextColor3 = Color3.fromRGB(0, 0, 0)
+    dlShadow.TextTransparency = 0.05
+    dlShadow.Font = Enum.Font.GothamBlack
+    dlShadow.TextSize = dlTextSize
+    dlShadow.ZIndex = 55
+    dlShadow.Parent = logoHolder
+
+    local dlDepth = Instance.new("TextLabel")
+    dlDepth.Size = UDim2.fromScale(1, 1)
+    dlDepth.Position = UDim2.fromOffset(1, 1)
+    dlDepth.BackgroundTransparency = 1
+    dlDepth.Text = "VH"
+    dlDepth.TextColor3 = A_Theme.Accent
+    dlDepth.Font = Enum.Font.GothamBlack
+    dlDepth.TextSize = dlTextSize
+    dlDepth.ZIndex = 56
+    dlDepth.Parent = logoHolder
+
+    local dlFace = Instance.new("TextLabel")
+    dlFace.Size = UDim2.fromScale(1, 1)
+    dlFace.BackgroundTransparency = 1
+    dlFace.Text = "VH"
+    dlFace.TextColor3 = A_Theme.Text
+    dlFace.Font = Enum.Font.GothamBlack
+    dlFace.TextSize = dlTextSize
+    dlFace.TextStrokeColor3 = A_Theme.Accent
+    dlFace.TextStrokeTransparency = 0
+    dlFace.ZIndex = 57
+    dlFace.Parent = logoHolder
+
+    local dlLightningHolder = Instance.new("Frame")
+    dlLightningHolder.Size = UDim2.fromScale(1, 1)
+    dlLightningHolder.BackgroundTransparency = 1
+    dlLightningHolder.ClipsDescendants = true
+    dlLightningHolder.ZIndex = 58
+    dlLightningHolder.Parent = logoHolder
+
+    local doorSegments = {
+        {0.18, 0.15, logoSize * 0.35, -30},
+        {0.80, 0.30, logoSize * 0.30, 35},
+        {0.15, 0.55, logoSize * 0.38, -25},
+        {0.85, 0.72, logoSize * 0.28, 30},
+        {0.50, 0.10, logoSize * 0.22, 0},
+    }
+
+    local dlBolts = {}
+    for _, seg in ipairs(doorSegments) do
+        local bolt = Instance.new("Frame")
+        bolt.AnchorPoint = Vector2.new(0.5, 0.5)
+        bolt.Size = UDim2.fromOffset(2, seg[3])
+        bolt.Position = UDim2.fromScale(seg[1], seg[2])
+        bolt.Rotation = seg[4]
+        bolt.BackgroundColor3 = Color3.fromRGB(170, 220, 255)
+        bolt.BackgroundTransparency = 1
+        bolt.BorderSizePixel = 0
+        bolt.ZIndex = 59
+        bolt.Parent = dlLightningHolder
+        local bc = Instance.new("UICorner")
+        bc.CornerRadius = UDim.new(1, 0)
+        bc.Parent = bolt
+        table.insert(dlBolts, bolt)
+    end
+
+    -- Lightning loop
+    task.spawn(function()
+        while logoHolder.Parent do
+            task.wait(math.random(12, 30) / 10)
+            if not logoHolder.Parent then break end
+            for _, bolt in ipairs(dlBolts) do
+                bolt.BackgroundTransparency = 0
+                task.wait(0.05)
+                bolt.BackgroundTransparency = 1
+            end
+            task.wait(0.08)
+            for _, bolt in ipairs(dlBolts) do
+                bolt.BackgroundTransparency = 0
+                task.wait(0.03)
+                bolt.BackgroundTransparency = 1
+            end
+        end
+    end)
 
     local halfWidth = math.ceil(width / 2)
 
-    local function openDoors(cb)
-        A_Tween:Create(logoImage, TweenInfo.new(0.2, Enum.EasingStyle.Quart), {ImageTransparency = 1}):Play()
+          local function openDoors(cb)
+        -- Fade out VH logo (pakai BackgroundTransparency + TextTransparency)
+        A_Tween:Create(logoHolder, TweenInfo.new(0.2, Enum.EasingStyle.Quart), {BackgroundTransparency = 1}):Play()
+        for _, child in ipairs(logoHolder:GetChildren()) do
+            if child:IsA("TextLabel") then
+                A_Tween:Create(child, TweenInfo.new(0.2, Enum.EasingStyle.Quart), {TextTransparency = 1}):Play()
+            end
+        end
         task.wait(0.25)
         A_Tween:Create(leftDoor, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Position = UDim2.new(0, -halfWidth, 0, 0)}):Play()
         A_Tween:Create(rightDoor, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Position = UDim2.new(1, 0, 0, 0)}):Play()
@@ -7273,15 +7379,27 @@ local function a_CreateDoorOverlay(parentFrame, width, height)
         if cb then cb() end
     end
 
-    local function closeDoors(cb)
+            local function closeDoors(cb)
         overlay.Visible = true
         leftDoor.Position = UDim2.new(0, -halfWidth, 0, 0)
         rightDoor.Position = UDim2.new(1, 0, 0, 0)
-        logoImage.ImageTransparency = 1
+        -- Reset VH logo ke kondisi transparan dulu
+        logoHolder.BackgroundTransparency = 1
+        for _, child in ipairs(logoHolder:GetChildren()) do
+            if child:IsA("TextLabel") then
+                child.TextTransparency = 1
+            end
+        end
         A_Tween:Create(leftDoor, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2.new(0, 0, 0, 0)}):Play()
         A_Tween:Create(rightDoor, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, 0, 0, 0)}):Play()
         task.wait(0.38)
-        A_Tween:Create(logoImage, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {ImageTransparency = 0}):Play()
+        -- Fade in VH logo
+        A_Tween:Create(logoHolder, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {BackgroundTransparency = 0.1}):Play()
+        for _, child in ipairs(logoHolder:GetChildren()) do
+            if child:IsA("TextLabel") then
+                A_Tween:Create(child, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {TextTransparency = 0}):Play()
+            end
+        end
         task.wait(0.3)
         if cb then cb() end
     end
@@ -7952,15 +8070,117 @@ local function a_BuildKeyUI(onSuccess)
     headerLine.BorderSizePixel = 0
     headerLine.Parent = header
 
-    local logo = Instance.new("ImageLabel")
-    logo.Size = A_Appearance.IconSize
-    logo.Position = UDim2.new(0, padding, 0.5, 0)
-    logo.AnchorPoint = Vector2.new(0, 0.5)
-    logo.BackgroundTransparency = 1
-    logo.Image = a_getLogoIcon()
-    logo.ImageColor3 = A_Theme.Text
-    logo.ScaleType = Enum.ScaleType.Fit
-    logo.Parent = header
+       -- ===== VH LOGO (3D text + lightning) — header =====
+    local logoHolder = Instance.new("Frame")
+    logoHolder.Name = "VHLogoHeader"
+    logoHolder.Size = UDim2.fromOffset(30, 30)
+    logoHolder.Position = UDim2.new(0, padding, 0.5, 0)
+    logoHolder.AnchorPoint = Vector2.new(0, 0.5)
+    logoHolder.BackgroundColor3 = A_Theme.Background
+    logoHolder.BackgroundTransparency = 0.15
+    logoHolder.BorderSizePixel = 0
+    logoHolder.ClipsDescendants = true
+    logoHolder.Parent = header
+
+    local lhCorner = Instance.new("UICorner")
+    lhCorner.CornerRadius = UDim.new(0, 6)
+    lhCorner.Parent = logoHolder
+
+    local lhStroke = Instance.new("UIStroke")
+    lhStroke.Color = A_Theme.Accent
+    lhStroke.Thickness = 1.5
+    lhStroke.Transparency = 0.2
+    lhStroke.Parent = logoHolder
+
+    -- Shadow (depth)
+    local lhShadow = Instance.new("TextLabel")
+    lhShadow.Size = UDim2.fromScale(1, 1)
+    lhShadow.Position = UDim2.fromOffset(1, 2)
+    lhShadow.BackgroundTransparency = 1
+    lhShadow.Text = "VH"
+    lhShadow.TextColor3 = Color3.fromRGB(0, 0, 0)
+    lhShadow.TextTransparency = 0.05
+    lhShadow.Font = Enum.Font.GothamBlack
+    lhShadow.TextSize = 14
+    lhShadow.ZIndex = 12
+    lhShadow.Parent = logoHolder
+
+    -- Depth accent (VH accent color)
+    local lhDepth = Instance.new("TextLabel")
+    lhDepth.Size = UDim2.fromScale(1, 1)
+    lhDepth.Position = UDim2.fromOffset(1, 1)
+    lhDepth.BackgroundTransparency = 1
+    lhDepth.Text = "VH"
+    lhDepth.TextColor3 = A_Theme.Accent
+    lhDepth.Font = Enum.Font.GothamBlack
+    lhDepth.TextSize = 14
+    lhDepth.ZIndex = 13
+    lhDepth.Parent = logoHolder
+
+    -- Face (white + accent stroke)
+    local lhFace = Instance.new("TextLabel")
+    lhFace.Size = UDim2.fromScale(1, 1)
+    lhFace.BackgroundTransparency = 1
+    lhFace.Text = "VH"
+    lhFace.TextColor3 = A_Theme.Text
+    lhFace.Font = Enum.Font.GothamBlack
+    lhFace.TextSize = 14
+    lhFace.TextStrokeColor3 = A_Theme.Accent
+    lhFace.TextStrokeTransparency = 0
+    lhFace.ZIndex = 14
+    lhFace.Parent = logoHolder
+
+    -- Lightning segments
+    local lhLightningHolder = Instance.new("Frame")
+    lhLightningHolder.Size = UDim2.fromScale(1, 1)
+    lhLightningHolder.BackgroundTransparency = 1
+    lhLightningHolder.ClipsDescendants = true
+    lhLightningHolder.ZIndex = 15
+    lhLightningHolder.Parent = logoHolder
+
+    local lightningSegments = {
+        {0.20, 0.15, 10, -30},
+        {0.78, 0.30, 9, 35},
+        {0.15, 0.55, 11, -25},
+        {0.82, 0.70, 8, 30},
+    }
+
+    local lhBolts = {}
+    for _, seg in ipairs(lightningSegments) do
+        local bolt = Instance.new("Frame")
+        bolt.AnchorPoint = Vector2.new(0.5, 0.5)
+        bolt.Size = UDim2.fromOffset(1.5, seg[3])
+        bolt.Position = UDim2.fromScale(seg[1], seg[2])
+        bolt.Rotation = seg[4]
+        bolt.BackgroundColor3 = Color3.fromRGB(170, 220, 255)
+        bolt.BackgroundTransparency = 1
+        bolt.BorderSizePixel = 0
+        bolt.ZIndex = 16
+        bolt.Parent = lhLightningHolder
+        local bc = Instance.new("UICorner")
+        bc.CornerRadius = UDim.new(1, 0)
+        bc.Parent = bolt
+        table.insert(lhBolts, bolt)
+    end
+
+    -- Lightning loop
+    task.spawn(function()
+        while logoHolder.Parent do
+            task.wait(math.random(15, 35) / 10)
+            if not logoHolder.Parent then break end
+            for _, bolt in ipairs(lhBolts) do
+                bolt.BackgroundTransparency = 0
+                task.wait(0.05)
+                bolt.BackgroundTransparency = 1
+            end
+            task.wait(0.08)
+            for _, bolt in ipairs(lhBolts) do
+                bolt.BackgroundTransparency = 0
+                task.wait(0.03)
+                bolt.BackgroundTransparency = 1
+            end
+        end
+    end)
 
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Size = UDim2.new(1, -90, 1, 0)
