@@ -2938,24 +2938,18 @@ local function tpToSafe(pos)
     local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not myRoot then return false end
 
-    local highPos = pos + Vector3.new(0, 250, 0)
-    myRoot.CFrame = CFrame.new(highPos)
+    -- TP #1: ke atas (render)
+    myRoot.CFrame = CFrame.new(pos + Vector3.new(0, 250, 0))
     myRoot.Velocity = Vector3.zero
     myRoot.AssemblyLinearVelocity = Vector3.zero
     task.wait(0.8)
 
+    -- TP #2: ke posisi tujuan — DIEM DI SITU
     local root2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not root2 then return false end
     root2.CFrame = CFrame.new(pos)
     root2.Velocity = Vector3.zero
     root2.AssemblyLinearVelocity = Vector3.zero
-    task.wait(0.5)
-
-    local rootAfter = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if rootAfter and rootAfter.Position.Y < pos.Y - 50 then
-        rootAfter.CFrame = CFrame.new(pos + Vector3.new(0, 50, 0))
-        task.wait(0.4)
-    end
 
     return true
 end
