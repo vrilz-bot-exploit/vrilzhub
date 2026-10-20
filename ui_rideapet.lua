@@ -2764,26 +2764,57 @@ local function buildMainWindow(parent)
     local screenGui = parent
     local viewport = (workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize) or Vector2.new(1280, 720)
 
-    local winW, winH
+        local winW, winH
     if IS_MOBILE then
-        winW = math.floor(viewport.X * CFG.WIN_W_PCT)
-        winH = math.floor(viewport.Y * CFG.WIN_H_PCT)
+        winW = math.floor(viewport.X * 0.92)
+        winH = math.floor(viewport.Y * 0.88)
     else
-        winW = math.min(CFG.WIN_W, math.floor(viewport.X * 0.7))
-        winH = math.min(CFG.WIN_H, math.floor(viewport.Y * 0.78))
+        winW = 677
+        winH = 644
     end
 
-    local main = Instance.new("Frame")
+       local main = Instance.new("Frame")
     main.Name = "MainWindow"
     main.AnchorPoint = Vector2.new(0.5, 0.5)
     main.Position = UDim2.fromScale(0.5, 0.5)
     main.Size = UDim2.fromOffset(winW, winH)
-    main.BackgroundColor3 = C.BG
+    main.BackgroundTransparency = 1
     main.BorderSizePixel = 0
     main.ZIndex = 1
-    main.Parent = screenGui
+        main.Parent = screenGui
     registerTheme(main, "BG", "BackgroundColor3")
 
+    -- ═══ CLIP PROXY BACKGROUND (Library UI) ═══
+    local windowClip = Instance.new("Frame")
+    windowClip.Name = "WindowClip"
+    windowClip.BackgroundTransparency = 1
+    windowClip.Size = UDim2.fromScale(1, 1)
+    windowClip.ZIndex = 1
+    windowClip.BorderSizePixel = 0
+    windowClip.ClipsDescendants = true
+    windowClip.Parent = main
+
+    local windowBG = Instance.new("Frame")
+    windowBG.Name = "WindowBG"
+    windowBG.BackgroundTransparency = 0.12
+    windowBG.Position = UDim2.fromOffset(-20, 0)
+    windowBG.Size = UDim2.new(1, 20, 1, 0)
+    windowBG.ZIndex = 1
+    windowBG.BorderSizePixel = 0
+    windowBG.BackgroundColor3 = C.BG
+    windowBG.Parent = windowClip
+    registerTheme(windowBG, "BG", "BackgroundColor3")
+
+    local bgCorner = Instance.new("UICorner")
+    bgCorner.CornerRadius = UDim.new(0, 6)
+    bgCorner.Parent = windowBG
+
+    local bgStroke = Instance.new("UIStroke")
+    bgStroke.Color = C.Accent
+    bgStroke.Thickness = 1.5
+    bgStroke.Transparency = 0.3
+    bgStroke.Parent = windowBG
+    registerTheme(bgStroke, "Accent", "Color")
     -- Soft 3D shadow behind the window (visual only).
     local shadow = Instance.new("Frame")
     shadow.Name = "WindowShadow"
@@ -2799,85 +2830,83 @@ local function buildMainWindow(parent)
     shadowCorner.CornerRadius = UDim.new(0, 24)
     shadowCorner.Parent = shadow
 
-    local bevel = Instance.new("Frame")
-    bevel.Name = "WindowBevel"
-    bevel.Size = UDim2.new(1, -2, 1, -2)
-    bevel.Position = UDim2.fromOffset(1, 1)
-    bevel.BackgroundTransparency = 1
-    bevel.BorderSizePixel = 0
-    bevel.ZIndex = 1
-    bevel.Parent = main
-    local bevelCorner = Instance.new("UICorner")
-    bevelCorner.CornerRadius = UDim.new(0, 21)
-    bevelCorner.Parent = bevel
-    local bevelStroke = Instance.new("UIStroke")
-    bevelStroke.Color = Color3.fromRGB(255, 255, 255)
-    bevelStroke.Thickness = 1
-    bevelStroke.Transparency = 0.88
-    bevelStroke.Parent = bevel
+       -- HEADER TIPIS (Library UI style)
+    local SIDEBAR_W = IS_MOBILE and 150 or 200
+    local HEADER_H = 52
 
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 18)
-    corner.Parent = main
-
-    local gradient = Instance.new("UIGradient")
-    gradient.Rotation = 90
-    gradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(23, 24, 29)),
-        ColorSequenceKeypoint.new(0.45, C.BG),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 6, 9)),
-    })
-    gradient.Parent = main
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = C.Accent
-    stroke.Thickness = 2.6
-    stroke.Transparency = 0.08
-    stroke.Parent = main
-    registerTheme(stroke, "Accent", "Color")
-
-    -- HEADER
     local header = Instance.new("Frame")
-    header.Size = UDim2.new(1, 0, 0, CFG.HEADER_H)
-    header.BackgroundColor3 = C.Surface
-    header.BorderSizePixel = 0
+    header.Name = "WindowHeader"
+    header.Size = UDim2.new(1, -SIDEBAR_W, 0, HEADER_H)
+    header.Position = UDim2.fromOffset(SIDEBAR_W, 0)
+    header.BackgroundTransparency = 1
     header.ZIndex = 10
     header.Parent = main
-    registerTheme(header, "Surface", "BackgroundColor3")
 
-    local headerCorner = Instance.new("UICorner")
-    headerCorner.CornerRadius = UDim.new(0, 18)
-    headerCorner.Parent = header
+    local title = Instance.new("TextLabel")
+    title.Name = "Title"
+    title.Size = UDim2.new(1, -120, 0, 20)
+    title.Position = UDim2.fromOffset(16, 8)
+    title.BackgroundTransparency = 1
+    title.Text = "VRILZHUB"
+    title.TextColor3 = C.Text
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = IS_MOBILE and 13 or 15
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.ZIndex = 11
+    title.Parent = header
+    registerTheme(title, "Text", "TextColor3")
 
-    local headerGradient = Instance.new("UIGradient")
-    headerGradient.Rotation = 0
-    headerGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 35)),
-        ColorSequenceKeypoint.new(0.5, C.Surface),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(12, 13, 17)),
-    })
-    headerGradient.Parent = header
+    local subtitle = Instance.new("TextLabel")
+    subtitle.Name = "SubTitle"
+    subtitle.Size = UDim2.new(1, -120, 0, 14)
+    subtitle.Position = UDim2.fromOffset(16, 28)
+    subtitle.BackgroundTransparency = 1
+    subtitle.Text = "Ride a Pet · v2.2"
+    subtitle.TextColor3 = C.Muted
+    subtitle.Font = Enum.Font.GothamSemibold
+    subtitle.TextSize = IS_MOBILE and 9 or 10
+    subtitle.TextXAlignment = Enum.TextXAlignment.Left
+    subtitle.ZIndex = 11
+    subtitle.Parent = header
+    registerTheme(subtitle, "Muted", "TextColor3")
 
-    local headerGlow = Instance.new("Frame")
-    headerGlow.Size = UDim2.new(1, -24, 0, 2)
-    headerGlow.Position = UDim2.new(0, 12, 1, -2)
-    headerGlow.BackgroundColor3 = C.Accent
-    headerGlow.BackgroundTransparency = 0.15
-    headerGlow.BorderSizePixel = 0
-    headerGlow.ZIndex = 12
-    headerGlow.Parent = header
-    local headerGlowCorner = Instance.new("UICorner")
-    headerGlowCorner.CornerRadius = UDim.new(1, 0)
-    headerGlowCorner.Parent = headerGlow
-    registerTheme(headerGlow, "Accent", "BackgroundColor3")
+    -- Tombol minimize
+    local minBtn = Instance.new("TextButton")
+    minBtn.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
+    minBtn.Position = UDim2.new(1, -(IS_MOBILE and 70 or 80), 0.5, -(IS_MOBILE and 14 or 16))
+    minBtn.BackgroundColor3 = C.Surface3
+    minBtn.Text = "−"
+    minBtn.TextColor3 = C.Text
+    minBtn.Font = Enum.Font.GothamBold
+    minBtn.TextSize = IS_MOBILE and 18 or 20
+    minBtn.BorderSizePixel = 0
+    minBtn.ZIndex = 14
+    minBtn.Parent = header
+    registerTheme(minBtn, "Surface3", "BackgroundColor3")
+    registerTheme(minBtn, "Text", "TextColor3")
 
-    local headerFix = Instance.new("Frame")
-    headerFix.Size = UDim2.new(1, 0, 0, 14)
-    headerFix.Position = UDim2.new(0, 0, 1, -14)
-    headerFix.BackgroundColor3 = C.Surface
-    headerFix.BorderSizePixel = 0
-    headerFix.ZIndex = 10
-    headerFix.Parent = header
+    local minCorner = Instance.new("UICorner")
+    minCorner.CornerRadius = UDim.new(0, 7)
+    minCorner.Parent = minBtn
+
+    -- Tombol close
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
+    closeBtn.Position = UDim2.new(1, -14, 0.5, -(IS_MOBILE and 14 or 16))
+    closeBtn.BackgroundColor3 = C.Surface3
+    closeBtn.Text = "×"
+    closeBtn.TextColor3 = C.Text
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = IS_MOBILE and 20 or 22
+    closeBtn.BorderSizePixel = 0
+    closeBtn.ZIndex = 14
+    closeBtn.Parent = header
+    registerTheme(closeBtn, "Surface3", "BackgroundColor3")
+    registerTheme(closeBtn, "Text", "TextColor3")
+
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 7)
+    closeCorner.Parent = closeBtn
 
     local logo = Instance.new("TextLabel")
     logo.Size = UDim2.fromOffset(IS_MOBILE and 30 or 36, IS_MOBILE and 30 or 36)
@@ -2921,80 +2950,6 @@ local function buildMainWindow(parent)
     subtitle.Parent = header
     registerTheme(subtitle, "Muted", "TextColor3")
 
-    -- PLAYER PROFILE CHIP
-    local profile = Instance.new("Frame")
-    profile.Name = "PlayerProfile"
-    local headerGap = IS_MOBILE and 10 or 14
-    local closeW = IS_MOBILE and 28 or 32
-    local minW = IS_MOBILE and 28 or 32
-    local closeRight = IS_MOBILE and 8 or 10
-    local closeLeft = -(closeRight + closeW)
-    local minLeft = closeLeft - headerGap - minW
-    local profileRight = minLeft - headerGap
-
-    profile.Size = UDim2.fromOffset(IS_MOBILE and 126 or 168, IS_MOBILE and 34 or 38)
-    profile.AnchorPoint = Vector2.new(1, 0.5)
-    profile.Position = UDim2.new(1, profileRight, 0.5, 0)
-    profile.BackgroundColor3 = C.Surface2
-    profile.BorderSizePixel = 0
-    profile.ZIndex = 12
-    profile.Parent = header
-    registerTheme(profile, "Surface2", "BackgroundColor3")
-    local profileCorner = Instance.new("UICorner")
-    profileCorner.CornerRadius = UDim.new(1, 0)
-    profileCorner.Parent = profile
-    local profileStroke = Instance.new("UIStroke")
-    profileStroke.Color = C.Accent
-    profileStroke.Thickness = 1
-    profileStroke.Transparency = 0.45
-    profileStroke.Parent = profile
-    registerTheme(profileStroke, "Accent", "Color")
-
-    local profileAvatar = Instance.new("ImageLabel")
-    profileAvatar.Size = UDim2.fromOffset(IS_MOBILE and 27 or 31, IS_MOBILE and 27 or 31)
-    profileAvatar.Position = UDim2.fromOffset(4, IS_MOBILE and 3.5 or 3.5)
-    profileAvatar.BackgroundColor3 = C.Surface3
-    profileAvatar.BorderSizePixel = 0
-    profileAvatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"
-    profileAvatar.ZIndex = 13
-    profileAvatar.Parent = profile
-    local profileAvatarCorner = Instance.new("UICorner")
-    profileAvatarCorner.CornerRadius = UDim.new(1, 0)
-    profileAvatarCorner.Parent = profileAvatar
-    local profileAvatarStroke = Instance.new("UIStroke")
-    profileAvatarStroke.Color = C.Accent2
-    profileAvatarStroke.Thickness = 1
-    profileAvatarStroke.Parent = profileAvatar
-    registerTheme(profileAvatarStroke, "Accent2", "Color")
-
-    local profileName = Instance.new("TextLabel")
-    profileName.Size = UDim2.new(1, -(IS_MOBILE and 60 or 68), 0, 16)
-    profileName.Position = UDim2.fromOffset(IS_MOBILE and 37 or 43, 4)
-    profileName.BackgroundTransparency = 1
-    profileName.Text = LocalPlayer.DisplayName
-    profileName.TextColor3 = C.Text
-    profileName.Font = Enum.Font.GothamBold
-    profileName.TextSize = IS_MOBILE and 10 or 11
-    profileName.TextXAlignment = Enum.TextXAlignment.Left
-    profileName.TextTruncate = Enum.TextTruncate.AtEnd
-    profileName.ZIndex = 13
-    profileName.Parent = profile
-    registerTheme(profileName, "Text", "TextColor3")
-
-    local profileUser = Instance.new("TextLabel")
-    profileUser.Size = UDim2.new(1, -(IS_MOBILE and 60 or 68), 0, 12)
-    profileUser.Position = UDim2.fromOffset(IS_MOBILE and 37 or 43, 20)
-    profileUser.BackgroundTransparency = 1
-    profileUser.Text = "@" .. LocalPlayer.Name
-    profileUser.TextColor3 = C.Muted
-    profileUser.Font = Enum.Font.GothamSemibold
-    profileUser.TextSize = IS_MOBILE and 8 or 9
-    profileUser.TextXAlignment = Enum.TextXAlignment.Left
-    profileUser.TextTruncate = Enum.TextTruncate.AtEnd
-    profileUser.ZIndex = 13
-    profileUser.Parent = profile
-    registerTheme(profileUser, "Muted", "TextColor3")
-
     local minBtn = Instance.new("TextButton")
     minBtn.Size = UDim2.fromOffset(minW, IS_MOBILE and 28 or 32)
     minBtn.Position = UDim2.new(1, minLeft, 0.5, -(IS_MOBILE and 14 or 16))
@@ -3032,102 +2987,93 @@ local function buildMainWindow(parent)
     closeCorner.Parent = closeBtn
 
     -- BODY
-    local body = Instance.new("Frame")
-    body.Size = UDim2.new(1, -20, 1, -(CFG.HEADER_H + 20))
-    body.Position = UDim2.new(0, 10, 0, CFG.HEADER_H + 10)
-    body.BackgroundTransparency = 1
-    body.ZIndex = 2
-    body.Parent = main
+        -- ═══ BODY (Library UI clip-proxy) ═══
+    -- Sidebar clip (kanan +20, di-clip → sudut kanan lurus)
+    local leftTabsClip = Instance.new("Frame")
+    leftTabsClip.Name = "LeftTabsClip"
+    leftTabsClip.Size = UDim2.fromOffset(SIDEBAR_W, winH)
+    leftTabsClip.Position = UDim2.fromOffset(0, 0)
+    leftTabsClip.BackgroundTransparency = 1
+    leftTabsClip.ZIndex = 2
+    leftTabsClip.BorderSizePixel = 0
+    leftTabsClip.ClipsDescendants = true
+    leftTabsClip.Parent = main
 
-    local sidebarW = CFG.SIDEBAR_W
-    -- SIDEBAR CONTAINER
-    local sidebar = Instance.new("Frame")
-    sidebar.Size = UDim2.new(0, sidebarW, 1, 0)
-    sidebar.BackgroundColor3 = C.Surface
-    sidebar.BorderSizePixel = 0
-    sidebar.ZIndex = 3
-    sidebar.ClipsDescendants = true
-    sidebar.Parent = body
-    registerTheme(sidebar, "Surface", "BackgroundColor3")
-
-    local sidebarCorner = Instance.new("UICorner")
-    sidebarCorner.CornerRadius = UDim.new(0, 14)
-    sidebarCorner.Parent = sidebar
-
-    local sidebarGradient = Instance.new("UIGradient")
-    sidebarGradient.Rotation = 90
-    sidebarGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(24, 25, 30)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 11, 14)),
-    })
-    sidebarGradient.Parent = sidebar
-
-    local sidebarStroke = Instance.new("UIStroke")
-    sidebarStroke.Color = C.Accent
-    sidebarStroke.Thickness = 1
-    sidebarStroke.Transparency = 0.7
-    sidebarStroke.Parent = sidebar
-    registerTheme(sidebarStroke, "Accent", "Color")
-
-    local sidebarGlow = Instance.new("Frame")
-    sidebarGlow.Size = UDim2.new(1, -18, 0, 2)
-    sidebarGlow.Position = UDim2.fromOffset(9, 1)
-    sidebarGlow.BackgroundColor3 = C.Accent2
-    sidebarGlow.BackgroundTransparency = 0.1
-    sidebarGlow.BorderSizePixel = 0
-    sidebarGlow.ZIndex = 5
-    sidebarGlow.Parent = sidebar
-    local sidebarGlowCorner = Instance.new("UICorner")
-    sidebarGlowCorner.CornerRadius = UDim.new(1, 0)
-    sidebarGlowCorner.Parent = sidebarGlow
-    registerTheme(sidebarGlow, "Accent2", "BackgroundColor3")
-
-    -- SCROLLING FRAME DI DALAM SIDEBAR
     local sidebarScroll = Instance.new("ScrollingFrame")
-    sidebarScroll.Size = UDim2.fromScale(1, 1)
-    sidebarScroll.BackgroundTransparency = 1
+    sidebarScroll.Name = "LeftTabs"
+    sidebarScroll.BackgroundTransparency = 0.15
+    sidebarScroll.Size = UDim2.new(1, 20, 1, 0)
+    sidebarScroll.ZIndex = 2
     sidebarScroll.BorderSizePixel = 0
+    sidebarScroll.BackgroundColor3 = C.Surface
+    sidebarScroll.Active = true
+    sidebarScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    sidebarScroll.CanvasSize = UDim2.fromOffset(0, 0)
     sidebarScroll.ScrollBarThickness = 2
     sidebarScroll.ScrollBarImageColor3 = C.Accent
-    sidebarScroll.ScrollBarImageTransparency = 0.5
-    sidebarScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-    sidebarScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    sidebarScroll.ZIndex = 4
-    sidebarScroll.Parent = sidebar
+    sidebarScroll.ScrollingDirection = Enum.ScrollingDirection.Y
+    sidebarScroll.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+    sidebarScroll.Parent = leftTabsClip
+    registerTheme(sidebarScroll, "Surface", "BackgroundColor3")
+    registerTheme(sidebarScroll, "Accent", "ScrollBarImageColor3")
+
+    local ltCorner = Instance.new("UICorner")
+    ltCorner.CornerRadius = UDim.new(0, 6)
+    ltCorner.Parent = sidebarScroll
 
     local sidebarLayout = Instance.new("UIListLayout")
-    sidebarLayout.Padding = UDim.new(0, 4)
-    sidebarLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    sidebarLayout.Padding = UDim.new(0, 8)
     sidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
     sidebarLayout.Parent = sidebarScroll
 
     local sidebarPad = Instance.new("UIPadding")
-    sidebarPad.PaddingTop = UDim.new(0, IS_MOBILE and 6 or 10)
-    sidebarPad.PaddingBottom = UDim.new(0, IS_MOBILE and 6 or 10)
-    sidebarPad.PaddingLeft = UDim.new(0, 6)
-    sidebarPad.PaddingRight = UDim.new(0, 6)
+    sidebarPad.PaddingTop = UDim.new(0, 12)
+    sidebarPad.PaddingBottom = UDim.new(0, 12)
+    sidebarPad.PaddingLeft = UDim.new(0, 12)
+    sidebarPad.PaddingRight = UDim.new(0, 12)
     sidebarPad.Parent = sidebarScroll
 
+    -- Logo sidebar (Library UI)
+    local sidebarLogo = Instance.new("ImageLabel")
+    sidebarLogo.Name = "SidebarLogo"
+    sidebarLogo.Size = UDim2.fromOffset(IS_MOBILE and 28 or 32, IS_MOBILE and 28 or 32)
+    sidebarLogo.Position = UDim2.fromOffset(0, 0)
+    sidebarLogo.BackgroundTransparency = 1
+    sidebarLogo.Image = "rbxassetid://95721401302279"
+    sidebarLogo.ScaleType = Enum.ScaleType.Fit
+    sidebarLogo.LayoutOrder = -100
+    sidebarLogo.ZIndex = 3
+    sidebarLogo.Parent = sidebarScroll
+
+    -- Content area
+    local body = Instance.new("Frame")
+    body.Name = "Body"
+    body.Size = UDim2.new(1, -SIDEBAR_W, 1, -HEADER_H)
+    body.Position = UDim2.fromOffset(SIDEBAR_W, HEADER_H)
+    body.BackgroundTransparency = 1
+    body.ZIndex = 2
+    body.Parent = main
+
     local pageHolder = Instance.new("ScrollingFrame")
-    pageHolder.Size = UDim2.new(1, -(sidebarW + 10), 1, 0)
-    pageHolder.Position = UDim2.new(0, sidebarW + 10, 0, 0)
+    pageHolder.Name = "PageHolder"
+    pageHolder.Size = UDim2.fromScale(1, 1)
     pageHolder.BackgroundTransparency = 1
     pageHolder.BorderSizePixel = 0
     pageHolder.ScrollBarThickness = 4
     pageHolder.ScrollBarImageColor3 = C.Accent
-    pageHolder.CanvasSize = UDim2.new(0, 0, 0, 0)
+    pageHolder.CanvasSize = UDim2.fromOffset(0, 0)
     pageHolder.AutomaticCanvasSize = Enum.AutomaticSize.Y
     pageHolder.ZIndex = 3
     pageHolder.Parent = body
     registerTheme(pageHolder, "Accent", "ScrollBarImageColor3")
 
     local pageHolderPad = Instance.new("UIPadding")
-    pageHolderPad.PaddingTop = UDim.new(0, 4)
+    pageHolderPad.PaddingTop = UDim.new(0, 10)
     pageHolderPad.PaddingBottom = UDim.new(0, 40)
-    pageHolderPad.PaddingLeft = UDim.new(0, IS_MOBILE and 6 or 10)
-    pageHolderPad.PaddingRight = UDim.new(0, IS_MOBILE and 6 or 10)
+    pageHolderPad.PaddingLeft = UDim.new(0, IS_MOBILE and 8 or 12)
+    pageHolderPad.PaddingRight = UDim.new(0, IS_MOBILE and 8 or 12)
     pageHolderPad.Parent = pageHolder
-
+    
     if not IS_MOBILE then
         local resizeHandle = Instance.new("TextButton")
         resizeHandle.Size = UDim2.fromOffset(22, 22)
@@ -3351,8 +3297,8 @@ local function buildMainWindow(parent)
     local pages = {}
     local navs = {}
 
-    local function registerTab(id, icon, label)
-        local tabH = CFG.TAB_H
+        local function registerTab(id, icon, label)
+        local tabH = IS_MOBILE and 36 or 40
         local btn = Instance.new("TextButton")
         btn.Size = UDim2.new(1, 0, 0, tabH)
         btn.BackgroundColor3 = C.Surface3
@@ -3364,7 +3310,7 @@ local function buildMainWindow(parent)
         registerTheme(btn, "Surface3", "BackgroundColor3")
 
         local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 11)
+        corner.CornerRadius = UDim.new(0, 8)
         corner.Parent = btn
 
         local tabStroke = Instance.new("UIStroke")
@@ -3375,47 +3321,37 @@ local function buildMainWindow(parent)
         registerTheme(tabStroke, "Accent", "Color")
 
         local ic = Instance.new("TextLabel")
-        if CFG.TAB_SHOW_LABEL then
-            ic.Size = UDim2.fromOffset(28, tabH)
-            ic.Position = UDim2.fromOffset(10, 0)
-        else
-            ic.Size = UDim2.fromScale(1, 1)
-            ic.Position = UDim2.fromOffset(0, 0)
-        end
+        ic.Size = UDim2.fromOffset(24, tabH)
+        ic.Position = UDim2.fromOffset(8, 0)
         ic.BackgroundTransparency = 1
         ic.Text = icon
-        ic.TextSize = CFG.TAB_ICON
+        ic.TextSize = IS_MOBILE and 14 or 16
         ic.Font = Enum.Font.GothamBold
         ic.TextColor3 = C.Accent
         ic.ZIndex = 6
         ic.Parent = btn
         registerTheme(ic, "Accent", "TextColor3")
 
-        if CFG.TAB_SHOW_LABEL then
-            local lbl = Instance.new("TextLabel")
-            lbl.Size = UDim2.new(1, -44, 1, 0)
-            lbl.Position = UDim2.fromOffset(42, 0)
-            lbl.BackgroundTransparency = 1
-            lbl.Text = label
-            lbl.TextColor3 = C.Muted
-            lbl.TextSize = CFG.FONT_LABEL
-            lbl.Font = Enum.Font.GothamSemibold
-            lbl.TextXAlignment = Enum.TextXAlignment.Left
-            lbl.ZIndex = 6
-            lbl.Parent = btn
-            registerTheme(lbl, "Muted", "TextColor3")
-            navs[id] = {btn = btn, ic = ic, lbl = lbl}
-        else
-            navs[id] = {btn = btn, ic = ic, lbl = nil}
-        end
+        local lbl = Instance.new("TextLabel")
+        lbl.Size = UDim2.new(1, -40, 1, 0)
+        lbl.Position = UDim2.fromOffset(36, 0)
+        lbl.BackgroundTransparency = 1
+        lbl.Text = label
+        lbl.TextColor3 = C.Muted
+        lbl.TextSize = IS_MOBILE and 10 or 11
+        lbl.Font = Enum.Font.GothamSemibold
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+        lbl.TextTruncate = Enum.TextTruncate.AtEnd
+        lbl.ZIndex = 6
+        lbl.Parent = btn
+        registerTheme(lbl, "Muted", "TextColor3")
+        navs[id] = {btn = btn, ic = ic, lbl = lbl}
 
-              local function switchTo()
+        local function switchTo()
             for n, p in pairs(pages) do
                 if p then p.Visible = false end
             end
-            if pages[id] then
-                pages[id].Visible = true
-            end
+            if pages[id] then pages[id].Visible = true end
             for n, x in pairs(navs) do
                 if n == id then
                     x.btn.BackgroundColor3 = C.Accent
@@ -3433,8 +3369,8 @@ local function buildMainWindow(parent)
             end
         end
 
-               btn.MouseButton1Click:Connect(switchTo)
-        navs[id].switchTo = switchTo   -- ⭐ tambah ini
+        btn.MouseButton1Click:Connect(switchTo)
+        navs[id].switchTo = switchTo
         return btn, switchTo
     end
 
@@ -5996,15 +5932,15 @@ end
         end)
     end
 
-    registerTab("Info", "ℹ", "Info")
-    registerTab("Prediksi", "◎", "Prediksi")
-    registerTab("Egg", "◯", "Egg")
-    registerTab("Visual", "◆", "Visual")
-    registerTab("Auto", "▶", "Auto")
-    registerTab("Event", "🎃", "Event")
-    registerTab("EggMutation", "🔥", "Egg Mutation")
-    registerTab("Webhook", "🔔", "Webhook")
-    registerTab("Settings", "⚙", "Settings")
+    registerTab("Info", "i", "Info")
+    registerTab("Prediksi", "P", "Prediksi")
+    registerTab("Egg", "E", "Egg")
+    registerTab("Visual", "V", "Visual")
+    registerTab("Auto", "A", "Auto")
+    registerTab("Event", "EV", "Event")
+    registerTab("EggMutation", "M", "Egg Mutation")
+    registerTab("Webhook", "W", "Webhook")
+    registerTab("Settings", "S", "Settings")
 
     -- ⬇️ TAMBAH INI — auto buka tab Info pas pertama launch
         task.defer(function()
