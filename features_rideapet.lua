@@ -2935,8 +2935,10 @@ local function getWaitNotifText()
 end
 
 local function tpToSafe(pos)
-    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not myRoot then return false end
+    local char = LocalPlayer.Character
+    local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if not myRoot or not hum then return false end
 
     -- ═══ TP #1: ke atas (render) ═══
     myRoot.CFrame = CFrame.new(pos + Vector3.new(0, 250, 0))
@@ -2946,20 +2948,23 @@ local function tpToSafe(pos)
 
     -- ═══ TP #2: ke posisi tujuan ═══
     local root2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not root2 then return false end
-    root2.CFrame = CFrame.new(pos)
-    root2.Velocity = Vector3.zero
-    root2.AssemblyLinearVelocity = Vector3.zero
+    local hum2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if not root2 or not hum2 then return false end
 
-    -- ═══ FLY MODE: "terbang" di posisi (gak jatuh) ═══
+    -- Pasang fly (urut kayak fly_start)
+    pcall(function()
+        hum2.PlatformStand = false
+        hum2:ChangeState(Enum.HumanoidStateType.Physics)
+    end)
+
     -- Hapus force lama
     for _, c in ipairs(root2:GetChildren()) do
-        if c.Name == "Vrilz_MutFlyBV" or c.Name == "Vrilz_MutFlyBG" then
+        if c:IsA("BodyVelocity") or c:IsA("BodyGyro") or c:IsA("BodyPosition") then
             c:Destroy()
         end
     end
 
-    -- BodyVelocity: nahan di posisi (velocity 0 = "terbang diam")
+    -- BodyVelocity
     local bv = Instance.new("BodyVelocity")
     bv.Name = "Vrilz_MutFlyBV"
     bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
@@ -2967,7 +2972,7 @@ local function tpToSafe(pos)
     bv.P = 10000
     bv.Parent = root2
 
-    -- BodyGyro: biar gak muter aneh pas "terbang"
+    -- BodyGyro
     local bg = Instance.new("BodyGyro")
     bg.Name = "Vrilz_MutFlyBG"
     bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
@@ -2976,10 +2981,33 @@ local function tpToSafe(pos)
     bg.CFrame = root2.CFrame
     bg.Parent = root2
 
+    -- Set CFrame terakhir (biar fly nempel)
+    root2.CFrame = CFrame.new(pos)
+    root2.Velocity = Vector3.zero
+    root2.AssemblyLinearVelocity = Vector3.zero
+
+    -- ═══ AUTO LEPAS FLY setelah 3 detik ═══
+    task.delay(3, function()
+        local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local humL = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hrp then
+            local bvNow = hrp:FindFirstChild("Vrilz_MutFlyBV")
+            if bvNow then bvNow:Destroy() end
+            local bgNow = hrp:FindFirstChild("Vrilz_MutFlyBG")
+            if bgNow then bgNow:Destroy() end
+        end
+        if humL then
+            pcall(function()
+                humL.PlatformStand = false
+                humL:ChangeState(Enum.HumanoidStateType.Freefall)
+            end)
+        end
+        print("[TP] 🕊 Fly released (auto 3s)")
+    end)
+
     print("[TP] ✅ Fly mode di:", pos)
     return true
 end
-
 local function runMutationOnce()
     MutationState.Running = true
 
