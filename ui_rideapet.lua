@@ -8039,9 +8039,9 @@ local function a_BuildKeyUI(onSuccess)
     local userPanelWidth, changelogPanelWidth, gap
 
     if mobile then
-        -- HP: window max 300px lebar, 340px tinggi. Jauh lebih kecil.
-        windowWidth  = math.floor(math.clamp(vp.X * 0.72, 240, 300))
-        windowHeight = math.floor(math.clamp(vp.Y * 0.55, 260, 340))
+        -- HP: window lebih kecil lagi
+        windowWidth  = math.floor(math.clamp(vp.X * 0.64, 220, 270))
+        windowHeight = math.floor(math.clamp(vp.Y * 0.50, 240, 310))
         baseWindowHeight = windowHeight
         elementHeight = math.clamp(math.floor(vp.Y * 0.052), 32, 40)   -- input tipis
         buttonHeight  = math.clamp(math.floor(vp.Y * 0.043), 28, 34)   -- tombol tipis
