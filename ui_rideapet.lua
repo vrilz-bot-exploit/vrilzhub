@@ -6263,10 +6263,11 @@ local function verifyKeyWithServer(key)
 end
 
 -- Mengecek key yang SUDAH pernah diredeem tanpa membuat redeem kedua.
+-- Return: (valid, message, data, isNetworkError)
 local function verifySavedKeyWithServer(key)
     key = tostring(key or ""):gsub("^%s+", ""):gsub("%s+$", ""):upper()
     if key == "" then
-        return false, "Saved key is empty."
+        return false, "Saved key is empty.", nil, false
     end
 
     local HttpService = game:GetService("HttpService")
@@ -6303,8 +6304,9 @@ local function verifySavedKeyWithServer(key)
         }
     end)
 
+    -- ⭐ Network / request gagal total → bukan invalid key
     if not ok or not response then
-        return false, "Cannot verify saved key."
+        return false, "Cannot verify saved key (network).", nil, true
     end
 
     local status = tonumber(response.StatusCode or response.Status or 0) or 0
@@ -6313,18 +6315,37 @@ local function verifySavedKeyWithServer(key)
         return HttpService:JSONDecode(body)
     end)
 
-    if decodedOk and type(data) == "table" then
-        if data.success == true then
-            return true, data.message or "Key is still active.", data
+    -- ⭐ Server error 5xx → network/server issue, bukan invalid
+    if status >= 500 then
+        return false, "Key server error [HTTP " .. tostring(status) .. "]", nil, true
+    end
+
+    -- ⭐ Response bukan JSON valid → anggap network error
+    if not decodedOk or type(data) ~= "table" then
+        if status >= 200 and status < 300 then
+            return false, "Invalid Key System response.", nil, true
         end
-        return false, data.message or "Invalid key.", data
+        return false, "Invalid key.", nil, false
     end
 
-    if status >= 200 and status < 300 then
-        return false, "Invalid Key System response."
+    if data.success == true then
+        return true, data.message or "Key is still active.", data, false
     end
 
-    return false, "Invalid key."
+    -- ⭐ Cek apakah ini network-ish error dari server
+    local msg = tostring(data.message or "")
+    local msgLower = msg:lower()
+    if msgLower:find("network")
+        or msgLower:find("timeout")
+        or msgLower:find("connect")
+        or msgLower:find("server")
+        or msgLower:find("unavailable")
+    then
+        return false, msg, data, true
+    end
+
+    -- ⭐ Invalid key beneran
+    return false, msg ~= "" and msg or "Invalid key.", data, false
 end
 
 -- ============================================================
@@ -8765,86 +8786,109 @@ function UI.Init(sharedState)
     end
        -- Sinkron: restore saved key DULU, baru evaluasi premium.
     local function restoreSavedKeySync()
-        local savedKey = loadSavedKey()
-        if not savedKey then
-            Shared.KeyType = Shared.KeyType or "FREE"
-            Shared.KeyExpiresAt = Shared.KeyExpiresAt or 0
-            Shared.KeyValue = nil
-            Shared._RealKeyType = Shared.KeyType
-            Shared._RealKeyExpiresAt = Shared.KeyExpiresAt
-            return
-        end
+    local savedKey = loadSavedKey()
 
-        Shared.KeyValue = savedKey
-        local valid, message, data = verifySavedKeyWithServer(savedKey)
+    -- ═══ CASE 1: gak ada key tersimpan ═══
+    if not savedKey then
+        Shared.KeyType = Shared.KeyType or "FREE"
+        Shared.KeyExpiresAt = Shared.KeyExpiresAt or 0
+        Shared.KeyValue = nil
+        Shared._RealKeyType = Shared.KeyType
+        Shared._RealKeyExpiresAt = Shared.KeyExpiresAt
+        print("[KEY] No saved key found.")
+        return
+    end
 
-        if valid and data then
-            applyKeyInfo(data, savedKey)
-            print("[KEY] Restored:", Shared.KeyType)
-        else
-            -- ⭐ BEDAIN: network error vs key beneran invalid
-            local isNetworkError = false
-            if type(message) == "string" then
-                if message:find("Cannot verify")
-                    or message:find("Cannot connect")
-                    or message:find("network")
-                    or message:find("timeout") then
-                    isNetworkError = true
-                end
-            end
+    -- ═══ CASE 2: ada key tersimpan ═══
+    Shared.KeyValue = savedKey
+    local valid, message, data, isNetworkError = verifySavedKeyWithServer(savedKey)
 
-            if isNetworkError then
-                -- Server down / no internet → JANGAN clear key
-                -- Asumsi optimis: anggap masih valid
-                print("[KEY] Verify failed (network). Keeping saved key:", message)
-                Shared.KeyType = Shared.KeyType or "PREMIUM"
-                Shared.KeyExpiresAt = Shared.KeyExpiresAt or 0
-            else
-                -- Key beneran invalid / expired → clear
+    -- ⭐ Jika VALID → langsung set key info, JANGAN hapus file
+    if valid and data then
+        applyKeyInfo(data, savedKey)
+        print("[KEY] ✅ Restored saved key:", Shared.KeyType)
+        Shared._RealKeyType = Shared.KeyType
+        Shared._RealKeyExpiresAt = Shared.KeyExpiresAt or 0
+        return
+    end
+
+    -- ⭐ Cek expiry lokal dulu kalau server kasih data
+    if data and type(data) == "table" then
+        local expiresAt = tonumber(data.expires_at or data.expiry or 0) or 0
+        if expiresAt > 0 then
+            local nowMs = os.time() * 1000
+            if expiresAt <= nowMs then
+                -- Key BENERAN expired → clear
                 clearSavedKey()
                 Shared.KeyType = "FREE"
                 Shared.KeyExpiresAt = 0
-                print("[KEY] Saved key expired/invalid:", message)
+                print("[KEY] ❌ Saved key EXPIRED (local check).")
+                Shared._RealKeyType = "FREE"
+                Shared._RealKeyExpiresAt = 0
+                return
             end
         end
+    end
 
+    -- ⭐ NETWORK ERROR → JANGAN clear, anggap masih valid
+    if isNetworkError then
+        print("[KEY] ⚠️ Verify failed (network). Keeping saved key:", message)
+        -- Optimistic: anggap key masih valid dengan type default PREMIUM
+        Shared.KeyType = Shared.KeyType or "PREMIUM"
+        Shared.KeyExpiresAt = Shared.KeyExpiresAt or 0
         Shared._RealKeyType = Shared.KeyType
         Shared._RealKeyExpiresAt = Shared.KeyExpiresAt or 0
+        return
     end
+
+    -- ⭐ INVALID KEY (bukan network) → clear
+    clearSavedKey()
+    Shared.KeyType = "FREE"
+    Shared.KeyExpiresAt = 0
+    print("[KEY] ❌ Saved key INVALID:", message)
+    Shared._RealKeyType = "FREE"
+    Shared._RealKeyExpiresAt = 0
+end
 
     -- ============================================================
     -- ⭐ STARTUP
     -- ============================================================
-    restoreSavedKeySync()                       -- 1. Restore key dulu (sinkron)
-    local premiumNow = isPremiumTimeNow()       -- 2. Baru cek jam
-    Shared._PremiumAutoUnlock = premiumNow
+   restoreSavedKeySync()                       -- 1. Restore key dulu (sinkron)
+local premiumNow = isPremiumTimeNow()       -- 2. Baru cek jam
+Shared._PremiumAutoUnlock = premiumNow
 
-    local hasRealPremium = isRealPremiumKey(Shared._RealKeyType)
+local hasRealPremium = isRealPremiumKey(Shared._RealKeyType)
+local hasAnySavedKey = loadSavedKey() ~= nil
 
-    if hasRealPremium then
-        -- ═══ User PREMIUM asli → selalu masuk, fitur premium aktif ═══
-        Shared.KeyType = Shared._RealKeyType
-        Shared.KeyExpiresAt = Shared._RealKeyExpiresAt or 0
-        startLoading()
+-- ⭐ FIX: user yang punya key tersimpan (FREE/PREMIUM) & gak expired
+-- harus langsung loading, gak perlu masukin key lagi
+local hasValidSavedKey = hasAnySavedKey and (Shared.KeyType == "FREE" or Shared.KeyType == "PREMIUM" or Shared.KeyType == "VIP" or Shared.KeyType == "OWNER")
 
-    elseif premiumNow then
-        -- ═══ User FREE + jam auto-unlock → bypass key, buka premium ═══
-        Shared.KeyType = "PREMIUM"
-        Shared.KeyExpiresAt = 0
-        task.spawn(function()
-            task.wait(1.5)
-            if Shared.Notify then
-                Shared.Notify("👑 PREMIUM AUTO-UNLOCK (Sabtu 19:50–23:59 WIB)", "success")
-            end
-        end)
-        startLoading()
+if hasRealPremium or hasValidSavedKey then
+    -- ═══ User punya key valid ═══
+    Shared.KeyType = Shared._RealKeyType
+    Shared.KeyExpiresAt = Shared._RealKeyExpiresAt or 0
+    print("[KEY] ✅ Auto-login with saved key:", Shared.KeyType)
+    startLoading()
 
-    else
-        -- ═══ User FREE + bukan jam auto-unlock → key window ═══
-        Shared.KeyType = "FREE"
-        Shared.KeyExpiresAt = 0
-        showKeyWindow()
-    end
+elseif premiumNow then
+    -- ═══ User FREE + jam auto-unlock → bypass key, buka premium ═══
+    Shared.KeyType = "PREMIUM"
+    Shared.KeyExpiresAt = 0
+    task.spawn(function()
+        task.wait(1.5)
+        if Shared.Notify then
+            Shared.Notify("👑 PREMIUM AUTO-UNLOCK (Sabtu 19:50–23:59 WIB)", "success")
+        end
+    end)
+    startLoading()
+
+else
+    -- ═══ User FREE + bukan jam auto-unlock + gak ada key tersimpan → key window ═══
+    Shared.KeyType = "FREE"
+    Shared.KeyExpiresAt = 0
+    showKeyWindow()
+end
 
                -- ⭐ LOOP TRANSISI (tiap 30 detik, tanpa network call)
         -- ============================================================
