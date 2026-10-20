@@ -7493,17 +7493,21 @@ local function a_CreateChangelogPanel(parent, windowWidth, panelHeight, panelWid
     scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
     scrollFrame.Parent = panel
 
-    local sp = Instance.new("UIPadding", scrollFrame)
-    sp.PaddingLeft = UDim.new(0, 10)
-    sp.PaddingRight = UDim.new(0, 10)
-    sp.PaddingTop = UDim.new(0, 5)
-    sp.PaddingBottom = UDim.new(0, 5)
+       local isMobCL = a_isMobile()
+local clPadSide  = isMobCL and 14 or 10
+local clPadTopBot = isMobCL and 8  or 5
+local clGap      = isMobCL and 14 or 10
 
-    local cl = Instance.new("UIListLayout", scrollFrame)
-    cl.Padding = UDim.new(0, 10)
-    cl.SortOrder = Enum.SortOrder.LayoutOrder
+local sp = Instance.new("UIPadding", scrollFrame)
+sp.PaddingLeft   = UDim.new(0, clPadSide)
+sp.PaddingRight  = UDim.new(0, clPadSide)
+sp.PaddingTop    = UDim.new(0, clPadTopBot)
+sp.PaddingBottom = UDim.new(0, clPadTopBot)
 
-    for i, update in ipairs(A_Changelog) do
+local cl = Instance.new("UIListLayout", scrollFrame)
+cl.Padding = UDim.new(0, clGap)
+cl.SortOrder = Enum.SortOrder.LayoutOrder
+        for i, update in ipairs(A_Changelog) do
         local entry = Instance.new("Frame")
         entry.Size = UDim2.new(1, 0, 0, 0)
         entry.AutomaticSize = Enum.AutomaticSize.Y
@@ -7512,10 +7516,10 @@ local function a_CreateChangelogPanel(parent, windowWidth, panelHeight, panelWid
         entry.Parent = scrollFrame
 
         local el = Instance.new("UIListLayout", entry)
-        el.Padding = UDim.new(0, 5)
+        el.Padding = UDim.new(0, isMobCL and 8 or 5)
 
         local vLbl = Instance.new("TextLabel")
-        vLbl.Size = UDim2.new(1, 0, 0, 22)
+        vLbl.Size = UDim2.new(1, 0, 0, isMobCL and 28 or 22)
         vLbl.BackgroundTransparency = 1
         vLbl.Text = update.Version .. "  •  " .. update.Date
         vLbl.TextColor3 = A_Theme.Accent
@@ -7578,12 +7582,15 @@ local function a_CreateUserInfoPanel(parent, windowWidth, panelHeight, panelWidt
     panelWidth = panelWidth or 180
     local isOpen = startOpen or false
     local isCompact = panelHeight < 300
-    local avatarSize = isCompact and 42 or 55
-    local fieldHeight = isCompact and 24 or 28
-    local titleSize = isCompact and 8 or 9
-    local valueSize = isCompact and 10 or 11
-    local welcomeSize = isCompact and 11 or 12
-    local spacing = isCompact and 3 or 5
+local isMobPanel = a_isMobile()
+
+-- ⭐ Mobile: paksa ukuran PC-style, gak peduli compact atau nggak
+local avatarSize  = (isMobPanel or not isCompact) and 52 or 42
+local fieldHeight = (isMobPanel or not isCompact) and 27 or 24
+local titleSize   = (isMobPanel or not isCompact) and 9  or 8
+local valueSize   = (isMobPanel or not isCompact) and 11 or 10
+local welcomeSize = (isMobPanel or not isCompact) and 12 or 11
+local spacing     = (isMobPanel or not isCompact) and 5  or 3
 
     local panel = Instance.new("Frame")
     panel.Name = "UserInfoPanel"
@@ -8060,18 +8067,22 @@ local function a_BuildKeyUI(onSuccess)
         return math.max(0, (vp.X - windowWidth) / 2 - 6)
     end
     if mobile then
-        local sideSpace = getAvailableSideSpace()
-        if sideSpace < 40 then
-            userPanelWidth = 0
-            changelogPanelWidth = 0
-        elseif sideSpace < 90 then
-            userPanelWidth      = math.clamp(sideSpace - 4, 80, 100)
-            changelogPanelWidth = 0
-        else
-            userPanelWidth      = math.clamp(sideSpace * 0.45, 90, 130)
-            changelogPanelWidth = math.clamp(sideSpace * 0.55, 110, 150)
-        end
+    local sideSpace = getAvailableSideSpace()
+    -- ⭐ Mobile: perkecil window utama dulu biar panel samping dapat ruang lebih lebar
+    if sideSpace < 60 then
+        -- Sempit banget → matikan panel samping (biar gak dempet)
+        userPanelWidth = 0
+        changelogPanelWidth = 0
+    elseif sideSpace < 140 then
+        -- Sedang → panel kiri saja (user info), lebih lebar dari sebelumnya
+        userPanelWidth      = math.clamp(sideSpace - 8, 110, 160)
+        changelogPanelWidth = 0
+    else
+        -- Lega → dua panel, proporsi lebih seimbang
+        userPanelWidth      = math.clamp(sideSpace * 0.46, 130, 180)
+        changelogPanelWidth = math.clamp(sideSpace * 0.54, 150, 200)
     end
+end
     
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "VH_KeySystem"
