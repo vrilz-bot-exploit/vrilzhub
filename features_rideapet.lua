@@ -2944,13 +2944,39 @@ local function tpToSafe(pos)
     myRoot.AssemblyLinearVelocity = Vector3.zero
     task.wait(0.8)
 
-    -- TP #2: ke posisi tujuan (41465.7) — DIEM DI SITU
+    -- TP #2: ke posisi tujuan
     local root2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not root2 then return false end
     root2.CFrame = CFrame.new(pos)
     root2.Velocity = Vector3.zero
     root2.AssemblyLinearVelocity = Vector3.zero
 
+    -- ═══ HOVER MODE — "terbang" di posisi ═══
+    -- Hapus force lama kalau ada
+    for _, c in ipairs(root2:GetChildren()) do
+        if c.Name == "Vrilz_HoverBV" or c.Name == "Vrilz_HoverBG" then
+            c:Destroy()
+        end
+    end
+
+    -- BodyVelocity: nahan di posisi (velocity 0)
+    local bv = Instance.new("BodyVelocity")
+    bv.Name = "Vrilz_HoverBV"
+    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bv.Velocity = Vector3.zero
+    bv.P = 10000
+    bv.Parent = root2
+
+    -- BodyGyro: biar gak muter/miring
+    local bg = Instance.new("BodyGyro")
+    bg.Name = "Vrilz_HoverBG"
+    bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+    bg.P = 5000
+    bg.D = 500
+    bg.CFrame = root2.CFrame
+    bg.Parent = root2
+
+    print("[TP] ✅ Hover mode di:", pos)
     return true
 end
 
