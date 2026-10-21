@@ -3774,7 +3774,7 @@ local function halloweenReturnToBase()
         -- ⭐ VOID: hitung step dinamis agar total return ~6.5s
         local targetPosVoid = base.Position + Vector3.new(0, FLY_HEIGHT, 0)
         local totalDistVoid = (root.Position - targetPosVoid).Magnitude
-        local TARGET_TIME = 6.5          -- total waktu return (detik)
+        local TARGET_TIME = 7.5          -- total waktu return (detik)
         local WAIT_PER_STEP = 0.04       -- delay per step
 
         local rawSteps = math.max(1, math.floor(TARGET_TIME / WAIT_PER_STEP))
