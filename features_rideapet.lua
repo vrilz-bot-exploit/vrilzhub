@@ -3764,26 +3764,11 @@ local function halloweenReturnToBase()
     local hum = char and char:FindFirstChildOfClass("Humanoid")
     if not root then return false end
 
-        -- ⭐ Config — TP VOID return ~6.5 detik total
+            -- ⭐ Config — TP VOID return (sedikit lebih cepat, ~0.75s di jarak dekat)
     local isVoid = (HalloweenState.TPMethod == "VOID") and isPremiumUser()
     local FLY_HEIGHT = 40
-    local FLY_STEP
-    local FLY_WAIT
-
-    if isVoid then
-        -- ⭐ VOID: hitung step dinamis agar total return ~6.5s
-        local targetPosVoid = base.Position + Vector3.new(0, FLY_HEIGHT, 0)
-        local totalDistVoid = (root.Position - targetPosVoid).Magnitude
-        local TARGET_TIME = 7.5          -- total waktu return (detik)
-        local WAIT_PER_STEP = 0.04       -- delay per step
-
-        local rawSteps = math.max(1, math.floor(TARGET_TIME / WAIT_PER_STEP))
-        FLY_STEP = math.max(100, math.ceil(totalDistVoid / rawSteps))  -- min 100 studs
-        FLY_WAIT = WAIT_PER_STEP
-    else
-        FLY_STEP = 75
-        FLY_WAIT = 0.08
-    end
+    local FLY_STEP = 75
+    local FLY_WAIT = isVoid and 0.075 or 0.08   -- VOID: 0.075s, non-VOID: 0.08s
 
     -- ⭐ STEP 1: Terbang naik 30 studs dulu
     local startY = root.Position.Y
