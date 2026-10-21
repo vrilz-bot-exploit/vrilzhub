@@ -3764,10 +3764,11 @@ local function halloweenReturnToBase()
     local hum = char and char:FindFirstChildOfClass("Humanoid")
     if not root then return false end
 
-    -- ⭐ Config
-    local FLY_HEIGHT = 40        -- terbang naik 30 studs dari tanah
-    local FLY_STEP = 75         -- jarak per step terbang (studs)
-    local FLY_WAIT = 0.08        -- delay per step
+    -- ⭐ Config — TP VOID dapat return lebih cepat
+    local isVoid = (HalloweenState.TPMethod == "VOID") and isPremiumUser()
+    local FLY_HEIGHT = 40                                  -- terbang naik 40 studs dari tanah
+    local FLY_STEP = isVoid and 120 or 75                  -- VOID: step lebih jauh (120 vs 75)
+    local FLY_WAIT = isVoid and 0.05 or 0.08               -- VOID: delay lebih cepat (0.05 vs 0.08)
 
     -- ⭐ STEP 1: Terbang naik 30 studs dulu
     local startY = root.Position.Y
