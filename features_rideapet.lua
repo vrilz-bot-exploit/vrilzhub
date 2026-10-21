@@ -2935,27 +2935,27 @@ local function getWaitNotifText()
 end
 
 local function tpToSafe(pos)
-    local myRoot = ...:FindFirstChild("HumanoidRootPart")
+    local char = LocalPlayer.Character
+    local myRoot = char and char:FindFirstChild("HumanoidRootPart")
     if not myRoot then return false end
 
-    local highPos = pos + Vector3.new(0, 250, 0)
-    myRoot.CFrame = CFrame.new(highPos)
+    -- ═══ TP #1: ke atas (render) ═══
+    myRoot.CFrame = CFrame.new(pos + Vector3.new(0, 250, 0))
     myRoot.Velocity = Vector3.zero
     myRoot.AssemblyLinearVelocity = Vector3.zero
     task.wait(0.8)
 
-    local root2 = ...
-    root2.CFrame = CFrame.new(pos)
-    root2.Velocity = Vector3.zero
-    root2.AssemblyLinearVelocity = Vector3.zero
-    task.wait(0.5)
-
-    -- fallback kalau jatuh terlalu dalam
-    local rootAfter = ...
-    if rootAfter and rootAfter.Position.Y < pos.Y - 50 then
-        rootAfter.CFrame = CFrame.new(pos + Vector3.new(0, 50, 0))
-        task.wait(0.4)
+    -- ═══ TP #2: ke pos tujuan + LOOP DIEM di situ 3 detik ═══
+    local startTime = os.clock()
+    while os.clock() - startTime < 3.0 do
+        local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if not r then break end
+        r.CFrame = CFrame.new(pos)
+        r.Velocity = Vector3.zero
+        r.AssemblyLinearVelocity = Vector3.zero
+        task.wait(0.05)
     end
+
     return true
 end
 
