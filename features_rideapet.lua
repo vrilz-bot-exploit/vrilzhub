@@ -3560,7 +3560,7 @@ local HalloweenState = {
     Claimed = 0,
     RareClaimed = 0,
     CandyTypes = {},
-    TPMethod = "TP100",   -- "TP100" (free) atau "TP180" (premium)
+    TPMethod = "TP100",   -- "TP100" (free), "TP180" (premium), "VOID" (premium instant)
 }
 
 -- ⭐ RARITY MAPPING
@@ -3720,6 +3720,26 @@ end
 -- ⭐ TP MAIN FUNCTION — pilih metode
 local function halloweenTpJumpTo(targetPos)
     local method = HalloweenState.TPMethod or "TP100"
+
+    -- ⭐ TP VOID — INSTANT TP (khusus premium)
+    if method == "VOID" then
+        if not isPremiumUser() then
+            -- Fallback kalau bukan premium → TP100
+            return halloweenTpStep(targetPos, HalloweenCfg.TP_STEP_FREE, 0.08)
+        else
+            -- PREMIUM: TP LANGSUNG tanpa step
+            local char = LocalPlayer.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            if root then
+                root.CFrame = CFrame.new(targetPos + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0))
+                root.Velocity = Vector3.zero
+                root.AssemblyLinearVelocity = Vector3.zero
+                task.wait(0.1)
+                return true
+            end
+            return false
+        end
+    end
 
     if method == "TP180" then
         if not isPremiumUser() then
@@ -4140,7 +4160,12 @@ end
                 [4] = "Legendary",
             })[highestRarity] or ("Tier " .. highestRarity)
 
-            local methodLabel = HalloweenState.TPMethod == "TP180" and "TP FAST" or "TP GLIDE"
+            local methodLabel = "TP GLIDE"
+if HalloweenState.TPMethod == "TP180" then
+    methodLabel = "TP FAST"
+elseif HalloweenState.TPMethod == "VOID" then
+    methodLabel = "TP VOID"
+end
 
             HalloweenState.Status = string.format(
                 "🎯 %s [%s] — %d candy",
