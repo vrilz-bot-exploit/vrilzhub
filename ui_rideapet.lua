@@ -1950,32 +1950,41 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
         tpMethodHolder.Parent = eventContent
 
         local tpMethodList = {
-            "TP GLIDE",
-            "TP FAST"
-        }
+    "TP GLIDE",
+    "TP FAST",
+    "TP VOID ⚡"
+}
 
-        local currentMethod = "TP GLIDE"
-        if Shared and Shared.TP_Method == "TP180" then
-            currentMethod = "TP FAST"
-        end
+local currentMethod = "TP GLIDE"
+if Shared and Shared.TP_Method == "TP180" then
+    currentMethod = "TP FAST"
+elseif Shared and Shared.TP_Method == "VOID" then
+    currentMethod = "TP VOID ⚡"
+end
 
         makeDropdownGlobal(tpMethodHolder, tpMethodList, currentMethod, function(v)
-            local F = getFeatures()
-            if v:find("TP FAST") then
-                if F and F.getHalloweenState then
-                    F.getHalloweenState().TPMethod = "TP180"
-                end
-                Shared.TP_Method = "TP180"
-                notify("TP Method: TP FAST", "success")
-            else
-                if F and F.getHalloweenState then
-                    F.getHalloweenState().TPMethod = "TP100"
-                end
-                Shared.TP_Method = "TP100"
-                notify("TP Method: TP GLIDE", "info")
-            end
-        end)
-
+    local F = getFeatures()
+    if v:find("TP VOID") then
+        if F and F.getHalloweenState then
+            F.getHalloweenState().TPMethod = "VOID"
+        end
+        Shared.TP_Method = "VOID"
+        notify("⚡ TP Method: TP VOID (Instant)", "success")
+    elseif v:find("TP FAST") then
+        if F and F.getHalloweenState then
+            F.getHalloweenState().TPMethod = "TP180"
+        end
+        Shared.TP_Method = "TP180"
+        notify("TP Method: TP FAST", "success")
+    else
+        if F and F.getHalloweenState then
+            F.getHalloweenState().TPMethod = "TP100"
+        end
+        Shared.TP_Method = "TP100"
+        notify("TP Method: TP GLIDE", "info")
+    end
+end)
+        
     else
         -- Non-premium: locked frame
         local lockedFrame = Instance.new("Frame")
