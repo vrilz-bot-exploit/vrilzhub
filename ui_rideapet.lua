@@ -6057,8 +6057,8 @@ end
     registerTab("Egg", "◯", "Egg")
     registerTab("Visual", "◆", "Visual")
     registerTab("Auto", "▶", "Auto")
-    registerTab("Event", "🎃", "Event")
-    registerTab("EggMutation", "122669828593160", "Egg Mutation", true)
+    registerTab("Event", "6034684930", "Event", true)
+    registerTab("EggMutation", "89965059528921", "Combat", true)
     registerTab("Webhook", "🔔", "Webhook")
     registerTab("Settings", "⚙", "Settings")
 
