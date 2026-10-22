@@ -3454,7 +3454,8 @@ if isAsset then
             end
         end
 
-        local function switchTo()
+                local function switchTo()
+            print("[TAB] Switching to:", id)
             for n, p in pairs(pages) do
                 if p then p.Visible = false end
             end
@@ -3462,29 +3463,35 @@ if isAsset then
                 pages[id].Visible = true
             end
             for n, x in pairs(navs) do
-if n == id then
-    x.btn.BackgroundColor3 = C.Accent
-    x.btn.BackgroundTransparency = 0
-    if x.isAsset then
-        x.ic.ImageColor3 = Color3.new(1, 1, 1)   -- aktif: putih
-    else
-        x.ic.TextColor3 = Color3.new(1, 1, 1)
-    end
-    if x.btn:FindFirstChildOfClass("UIStroke") then x.btn:FindFirstChildOfClass("UIStroke").Transparency = 0.15 end
-    if x.lbl then x.lbl.TextColor3 = Color3.new(1, 1, 1) end
-else
-    x.btn.BackgroundColor3 = C.Surface3
-    x.btn.BackgroundTransparency = 0.5
-    if x.isAsset then
-        x.ic.ImageColor3 = Color3.fromRGB(255, 255, 255)  -- idle: tetap putih (asset asli)
-    else
-        x.ic.TextColor3 = C.Accent
-    end
-                        if x.btn:FindFirstChildOfClass("UIStroke") then x.btn:FindFirstChildOfClass("UIStroke").Transparency = 0.82 end
+                if n == id then
+                    x.btn.BackgroundColor3 = C.Accent
+                    x.btn.BackgroundTransparency = 0
+                    if x.isAsset then
+                        x.ic.ImageColor3 = Color3.new(1, 1, 1)
+                    else
+                        x.ic.TextColor3 = Color3.new(1, 1, 1)
+                    end
+                    if x.btn:FindFirstChildOfClass("UIStroke") then x.btn:FindFirstChildOfClass("UIStroke").Transparency = 0.15 end
+                    if x.lbl then x.lbl.TextColor3 = Color3.new(1, 1, 1) end
+                else
+                    x.btn.BackgroundColor3 = C.Surface3
+                    x.btn.BackgroundTransparency = 0.5
+                    if x.isAsset then
+                        x.ic.ImageColor3 = Color3.fromRGB(255, 255, 255)
+                    else
+                        x.ic.TextColor3 = C.Accent
+                    end
+                    if x.btn:FindFirstChildOfClass("UIStroke") then x.btn:FindFirstChildOfClass("UIStroke").Transparency = 0.82 end
                     if x.lbl then x.lbl.TextColor3 = C.Muted end
                 end
             end
         end
+
+        btn.MouseButton1Click:Connect(switchTo)
+
+        -- ⭐ TAMBAH 2 BARIS INI
+        _G.VRILZ_SwitchTab = _G.VRILZ_SwitchTab or {}
+        _G.VRILZ_SwitchTab[id] = switchTo
     end
 
     local function createPage(name)
@@ -6055,19 +6062,15 @@ end
     registerTab("Webhook", "🔔", "Webhook")
     registerTab("Settings", "⚙", "Settings")
 
-    -- ⬇️ TAMBAH INI — auto buka tab Info pas pertama launch
-        task.defer(function()
-        if navs.Info and navs.Info.btn then
-            -- Simulasi click dengan trigger handler langsung
-            for _, c in ipairs(navs.Info.btn:GetChildren()) do end
-            local ok = pcall(function() navs.Info.btn:GetPropertyChangedSignal("Text"):Fire() end)
-            -- fallback: panggil handler manual
-            pcall(function()
-                local signal = navs.Info.btn.MouseButton1Click
-                if signal.Connect then
-                    -- gak bisa trigger, skip aja
-                end
-            end)
+        -- ⭐ AUTO BUKA TAB INFO PAS PERTAMA LAUNCH
+    task.defer(function()
+        if _G.VRILZ_SwitchTab and _G.VRILZ_SwitchTab.Info then
+            local ok, err = pcall(_G.VRILZ_SwitchTab.Info)
+            if not ok then
+                warn("[TAB] Auto-open Info failed: " .. tostring(err))
+            end
+        else
+            warn("[TAB] _G.VRILZ_SwitchTab.Info not registered!")
         end
     end)
 
