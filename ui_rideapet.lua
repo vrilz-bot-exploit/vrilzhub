@@ -3480,11 +3480,12 @@ else
     else
         x.ic.TextColor3 = C.Accent
     end
-    if x.btn:FindFirstChildOfClass("UIStroke") then x.btn:FindFirstChildOfClass("UIStroke").Transparency = 0.82 end
-    if x.lbl then x.lbl.TextColor3 = C.Muted end
-end
+                        if x.btn:FindFirstChildOfClass("UIStroke") then x.btn:FindFirstChildOfClass("UIStroke").Transparency = 0.82 end
+                    if x.lbl then x.lbl.TextColor3 = C.Muted end
+                end
             end
         end
+    end
 
     local function createPage(name)
         local page = Instance.new("ScrollingFrame")
