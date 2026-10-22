@@ -156,7 +156,7 @@ local Themes = {
     },
 }
 
-local CurrentTheme = "Brutal"
+local CurrentTheme = "Ice"
 local C = Themes[CurrentTheme]
 
 local ThemeWidgets = {}
@@ -4300,6 +4300,7 @@ end
 do
     local predPage = createPage("Prediksi")
     pages.Prediksi = predPage
+    predPage.Visible = false
 
     local eggInMapCard, eggInMapContent = makeCard(predPage, "EGG SPAWN ON MAP", 1)
 
@@ -4507,9 +4508,9 @@ do
     end)
 end
 
-    -- TAB EGG
+    -- TAB COMBAT (existing egg teleport / egg tools)
 do
-    local eggPage = createPage("Egg")
+    local eggPage = createPage("Combat")
     pages.Egg = eggPage
 
     local eggEspCard, eggEspContent = makeCard(eggPage, "EGG ESP", 1)
@@ -6005,14 +6006,28 @@ end
         end)
     end
 
-    registerTab("Info", "ℹ", "Info")
-    registerTab("Prediksi", "◎", "Prediksi")
-    registerTab("Egg", "◯", "Egg")
-    registerTab("Visual", "◆", "Visual")
+    -- Redesigned navigation: keep feature IDs intact so existing callbacks remain connected.
+    -- Move all Egg Mutation UI controls into Auto without rebuilding or disconnecting callbacks.
+    do
+        local autoPage = pages.Auto
+        local mutPage = pages.EggMutation
+        if autoPage and mutPage then
+            for _, child in ipairs(mutPage:GetChildren()) do
+                if child:IsA("GuiObject") then
+                    child.Parent = autoPage
+                end
+            end
+            mutPage:Destroy()
+            pages.EggMutation = nil
+        end
+    end
+
+    registerTab("Info", "ℹ", "Main")
+    registerTab("Egg", "◯", "Combat")
     registerTab("Auto", "▶", "Auto")
+    registerTab("Visual", "◆", "Visual")
     registerTab("Event", "🎃", "Event")
-    registerTab("EggMutation", "🔥", "Egg Mutation")
-    registerTab("Webhook", "🔔", "Webhook")
+    registerTab("Webhook", "🔔", "Server")
     registerTab("Settings", "⚙", "Settings")
 
     -- ⬇️ TAMBAH INI — auto buka tab Info pas pertama launch
@@ -6030,6 +6045,11 @@ end
             end)
         end
     end)
+
+    -- Open Main by default.
+    if navs.Info and navs.Info.switchTo then
+        navs.Info.switchTo()
+    end
 
     -- Drag handler
     do
