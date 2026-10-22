@@ -3252,58 +3252,86 @@ local function buildMainWindow(parent)
     vhFace.Parent = openBtn
     registerTheme(vhFace, "Accent", "TextStrokeColor3")
 
+        local lightningLoopThread = nil -- ⚡ Variabel buat nyimpen thread loop
+
     local function playMinimizeLightning()
-        -- Lightweight visual strike: a few short UI segments, then cleanup.
-        local holder = Instance.new("Frame")
-        holder.Name = "MinimizeLightning"
-        holder.Size = UDim2.fromScale(1, 1)
-        holder.BackgroundTransparency = 1
-        holder.ClipsDescendants = true
-        holder.ZIndex = 410
-        holder.Parent = openBtn
-
-        local segments = {
-            {0.46, 0.18, 18, -28},
-            {0.56, 0.39, 15, 24},
-            {0.48, 0.58, 16, -22},
-            {0.57, 0.77, 13, 26},
-        }
-
-        for _, seg in ipairs(segments) do
-            local bolt = Instance.new("Frame")
-            bolt.AnchorPoint = Vector2.new(0.5, 0.5)
-            bolt.Size = UDim2.fromOffset(2, seg[3])
-            bolt.Position = UDim2.fromScale(seg[1], seg[2])
-            bolt.Rotation = seg[4]
-            bolt.BackgroundColor3 = Color3.fromRGB(170, 220, 255)
-            bolt.BorderSizePixel = 0
-            bolt.ZIndex = 411
-            bolt.Parent = holder
-            local bc = Instance.new("UICorner")
-            bc.CornerRadius = UDim.new(1, 0)
-            bc.Parent = bolt
+        -- Matiin loop sebelumnya kalau ada
+        if lightningLoopThread then
+            task.cancel(lightningLoopThread)
+            lightningLoopThread = nil
         end
 
-        local flash = Instance.new("Frame")
-        flash.Size = UDim2.fromScale(1, 1)
-        flash.BackgroundColor3 = C.Accent
-        flash.BackgroundTransparency = 0.9
-        flash.BorderSizePixel = 0
-        flash.ZIndex = 410
-        flash.Parent = holder
-        local fc = Instance.new("UICorner")
-        fc.CornerRadius = UDim.new(0, 16)
-        fc.Parent = flash
+        -- Mulai loop petir merah nyambar terus-terusan
+        lightningLoopThread = task.spawn(function()
+            while openBtn.Visible do
+                -- 1. Efek Getar VH
+                local origPos = openBtn.Position
+                task.spawn(function()
+                    for i = 1, 4 do
+                        openBtn.Position = origPos + UDim2.fromOffset(math.random(-3, 3), math.random(-3, 3))
+                        task.wait(0.03)
+                    end
+                    openBtn.Position = origPos
+                end)
 
-        task.spawn(function()
-            TweenService:Create(flash, TweenInfo.new(0.10), {BackgroundTransparency = 1}):Play()
-            for _, child in ipairs(holder:GetChildren()) do
-                if child:IsA("Frame") and child ~= flash then
-                    TweenService:Create(child, TweenInfo.new(0.16), {BackgroundTransparency = 1}):Play()
+                -- 2. Efek Petir Merah
+                local holder = Instance.new("Frame")
+                holder.Name = "MinimizeLightning"
+                holder.Size = UDim2.fromScale(1, 1)
+                holder.BackgroundTransparency = 1
+                holder.ClipsDescendants = true
+                holder.ZIndex = 410
+                holder.Parent = openBtn
+
+                local segments = {
+                    {0.46, 0.18, 18, -28},
+                    {0.56, 0.39, 15, 24},
+                    {0.48, 0.58, 16, -22},
+                    {0.57, 0.77, 13, 26},
+                }
+
+                for _, seg in ipairs(segments) do
+                    local bolt = Instance.new("Frame")
+                    bolt.AnchorPoint = Vector2.new(0.5, 0.5)
+                    bolt.Size = UDim2.fromOffset(2, seg[3])
+                    bolt.Position = UDim2.fromScale(seg[1], seg[2])
+                    bolt.Rotation = seg[4]
+                    bolt.BackgroundColor3 = Color3.fromRGB(255, 30, 30) -- ⚡ MERAH
+                    bolt.BorderSizePixel = 0
+                    bolt.ZIndex = 411
+                    bolt.Parent = holder
+                    local bc = Instance.new("UICorner")
+                    bc.CornerRadius = UDim.new(1, 0)
+                    bc.Parent = bolt
                 end
+
+                -- 3. Kilatan Merah
+                local flash = Instance.new("Frame")
+                flash.Size = UDim2.fromScale(1, 1)
+                flash.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+                flash.BackgroundTransparency = 0.8
+                flash.BorderSizePixel = 0
+                flash.ZIndex = 410
+                flash.Parent = holder
+                local fc = Instance.new("UICorner")
+                fc.CornerRadius = UDim.new(0, 16)
+                fc.Parent = flash
+
+                -- 4. Animasi Hilang
+                TweenService:Create(flash, TweenInfo.new(0.15), {BackgroundTransparency = 1}):Play()
+                for _, child in ipairs(holder:GetChildren()) do
+                    if child:IsA("Frame") and child ~= flash then
+                        TweenService:Create(child, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
+                    end
+                end
+                
+                -- Jeda sebelum nyambar lagi (acak biar natural)
+                task.wait(math.random(3, 10) / 10) 
+                if holder then holder:Destroy() end
+
+                -- Jeda antar sambaran
+                task.wait(math.random(5, 15) / 10)
             end
-            task.wait(0.18)
-            if holder then holder:Destroy() end
         end)
     end
 
@@ -3455,7 +3483,6 @@ if isAsset then
         end
 
                 local function switchTo()
-            print("[TAB] Switching to:", id)
             for n, p in pairs(pages) do
                 if p then p.Visible = false end
             end
@@ -6055,10 +6082,10 @@ end
     registerTab("Info", "ℹ", "Info")
     registerTab("Prediksi", "◎", "Prediksi")
     registerTab("Egg", "◯", "Egg")
-    registerTab("Visual", "10734897287", "Visual", true)
+    registerTab("Visual", "77400125196692", "Visual", true)
     registerTab("Auto", "▶", "Auto")
-    registerTab("Event", "13365961054", "Event", true)  
-    registerTab("EggMutation", "10734895657", "Combat", true)  
+    registerTab("Event", "13363104307", "Event", true)  
+    registerTab("EggMutation", "13363109638", "Combat", true)  
     registerTab("Webhook", "🔔", "Webhook")
     registerTab("Settings", "⚙", "Settings")
 
