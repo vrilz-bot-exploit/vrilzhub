@@ -3360,7 +3360,7 @@ local function buildMainWindow(parent)
     local pages = {}
     local navs = {}
 
-    local function registerTab(id, icon, label)
+        local function registerTab(id, icon, label, isAsset)
         local tabH = CFG.TAB_H
         local btn = Instance.new("TextButton")
         btn.Size = UDim2.new(1, 0, 0, tabH)
@@ -3383,42 +3383,78 @@ local function buildMainWindow(parent)
         tabStroke.Parent = btn
         registerTheme(tabStroke, "Accent", "Color")
 
-        local ic = Instance.new("TextLabel")
-        if CFG.TAB_SHOW_LABEL then
-            ic.Size = UDim2.fromOffset(28, tabH)
-            ic.Position = UDim2.fromOffset(10, 0)
-        else
-            ic.Size = UDim2.fromScale(1, 1)
-            ic.Position = UDim2.fromOffset(0, 0)
-        end
-        ic.BackgroundTransparency = 1
-        ic.Text = icon
-        ic.TextSize = CFG.TAB_ICON
-        ic.Font = Enum.Font.GothamBold
-        ic.TextColor3 = C.Accent
-        ic.ZIndex = 6
-        ic.Parent = btn
-        registerTheme(ic, "Accent", "TextColor3")
+        -- ⭐ LOGIKA BARU: Cek apakah pakai Asset ID (gambar) atau Emoji (text)
+if isAsset then
+    local ic = Instance.new("ImageLabel")
+    if CFG.TAB_SHOW_LABEL then
+        ic.Size = UDim2.fromOffset(24, 24)
+        ic.Position = UDim2.fromOffset(10, (tabH - 24) / 2)
+    else
+        ic.Size = UDim2.fromOffset(24, 24)
+        ic.Position = UDim2.new(0.5, -12, 0.5, -12)
+    end
+    ic.BackgroundTransparency = 1
+    ic.Image = "rbxassetid://" .. icon
+    ic.ImageColor3 = Color3.new(1, 1, 1)  -- ✅ putih = warna asli asset
+    ic.ZIndex = 6
+    ic.Parent = btn
 
-        if CFG.TAB_SHOW_LABEL then
-            local lbl = Instance.new("TextLabel")
-            lbl.Size = UDim2.new(1, -44, 1, 0)
-            lbl.Position = UDim2.fromOffset(42, 0)
-            lbl.BackgroundTransparency = 1
-            lbl.Text = label
-            lbl.TextColor3 = C.Muted
-            lbl.TextSize = CFG.FONT_LABEL
-            lbl.Font = Enum.Font.GothamSemibold
-            lbl.TextXAlignment = Enum.TextXAlignment.Left
-            lbl.ZIndex = 6
-            lbl.Parent = btn
-            registerTheme(lbl, "Muted", "TextColor3")
-            navs[id] = {btn = btn, ic = ic, lbl = lbl}
+            if CFG.TAB_SHOW_LABEL then
+                local lbl = Instance.new("TextLabel")
+                lbl.Size = UDim2.new(1, -44, 1, 0)
+                lbl.Position = UDim2.fromOffset(42, 0)
+                lbl.BackgroundTransparency = 1
+                lbl.Text = label
+                lbl.TextColor3 = C.Muted
+                lbl.TextSize = CFG.FONT_LABEL
+                lbl.Font = Enum.Font.GothamSemibold
+                lbl.TextXAlignment = Enum.TextXAlignment.Left
+                lbl.ZIndex = 6
+                lbl.Parent = btn
+                registerTheme(lbl, "Muted", "TextColor3")
+                navs[id] = {btn = btn, ic = ic, lbl = lbl, isAsset = true}
+            else
+                navs[id] = {btn = btn, ic = ic, lbl = nil, isAsset = true}
+            end
         else
-            navs[id] = {btn = btn, ic = ic, lbl = nil}
+            -- Mode lama (Emoji / Teks)
+            local ic = Instance.new("TextLabel")
+            if CFG.TAB_SHOW_LABEL then
+                ic.Size = UDim2.fromOffset(28, tabH)
+                ic.Position = UDim2.fromOffset(10, 0)
+            else
+                ic.Size = UDim2.fromScale(1, 1)
+                ic.Position = UDim2.fromOffset(0, 0)
+            end
+            ic.BackgroundTransparency = 1
+            ic.Text = icon
+            ic.TextSize = CFG.TAB_ICON
+            ic.Font = Enum.Font.GothamBold
+            ic.TextColor3 = C.Accent
+            ic.ZIndex = 6
+            ic.Parent = btn
+            registerTheme(ic, "Accent", "TextColor3")
+
+            if CFG.TAB_SHOW_LABEL then
+                local lbl = Instance.new("TextLabel")
+                lbl.Size = UDim2.new(1, -44, 1, 0)
+                lbl.Position = UDim2.fromOffset(42, 0)
+                lbl.BackgroundTransparency = 1
+                lbl.Text = label
+                lbl.TextColor3 = C.Muted
+                lbl.TextSize = CFG.FONT_LABEL
+                lbl.Font = Enum.Font.GothamSemibold
+                lbl.TextXAlignment = Enum.TextXAlignment.Left
+                lbl.ZIndex = 6
+                lbl.Parent = btn
+                registerTheme(lbl, "Muted", "TextColor3")
+                navs[id] = {btn = btn, ic = ic, lbl = lbl, isAsset = false}
+            else
+                navs[id] = {btn = btn, ic = ic, lbl = nil, isAsset = false}
+            end
         end
 
-              local function switchTo()
+        local function switchTo()
             for n, p in pairs(pages) do
                 if p then p.Visible = false end
             end
@@ -3426,26 +3462,29 @@ local function buildMainWindow(parent)
                 pages[id].Visible = true
             end
             for n, x in pairs(navs) do
-                if n == id then
-                    x.btn.BackgroundColor3 = C.Accent
-                    x.btn.BackgroundTransparency = 0
-                    x.ic.TextColor3 = Color3.new(1, 1, 1)
-                    if x.btn:FindFirstChildOfClass("UIStroke") then x.btn:FindFirstChildOfClass("UIStroke").Transparency = 0.15 end
-                    if x.lbl then x.lbl.TextColor3 = Color3.new(1, 1, 1) end
-                else
-                    x.btn.BackgroundColor3 = C.Surface3
-                    x.btn.BackgroundTransparency = 0.5
-                    x.ic.TextColor3 = C.Accent
-                    if x.btn:FindFirstChildOfClass("UIStroke") then x.btn:FindFirstChildOfClass("UIStroke").Transparency = 0.82 end
-                    if x.lbl then x.lbl.TextColor3 = C.Muted end
-                end
+if n == id then
+    x.btn.BackgroundColor3 = C.Accent
+    x.btn.BackgroundTransparency = 0
+    if x.isAsset then
+        x.ic.ImageColor3 = Color3.new(1, 1, 1)   -- aktif: putih
+    else
+        x.ic.TextColor3 = Color3.new(1, 1, 1)
+    end
+    if x.btn:FindFirstChildOfClass("UIStroke") then x.btn:FindFirstChildOfClass("UIStroke").Transparency = 0.15 end
+    if x.lbl then x.lbl.TextColor3 = Color3.new(1, 1, 1) end
+else
+    x.btn.BackgroundColor3 = C.Surface3
+    x.btn.BackgroundTransparency = 0.5
+    if x.isAsset then
+        x.ic.ImageColor3 = Color3.fromRGB(255, 255, 255)  -- idle: tetap putih (asset asli)
+    else
+        x.ic.TextColor3 = C.Accent
+    end
+    if x.btn:FindFirstChildOfClass("UIStroke") then x.btn:FindFirstChildOfClass("UIStroke").Transparency = 0.82 end
+    if x.lbl then x.lbl.TextColor3 = C.Muted end
+end
             end
         end
-
-               btn.MouseButton1Click:Connect(switchTo)
-        navs[id].switchTo = switchTo   -- ⭐ tambah ini
-        return btn, switchTo
-    end
 
     local function createPage(name)
         local page = Instance.new("ScrollingFrame")
@@ -6011,7 +6050,7 @@ end
     registerTab("Visual", "◆", "Visual")
     registerTab("Auto", "▶", "Auto")
     registerTab("Event", "🎃", "Event")
-    registerTab("EggMutation", "🔥", "Egg Mutation")
+    registerTab("EggMutation", "122669828593160", "Egg Mutation", true)
     registerTab("Webhook", "🔔", "Webhook")
     registerTab("Settings", "⚙", "Settings")
 
