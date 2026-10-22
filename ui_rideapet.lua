@@ -6082,10 +6082,10 @@ end
     registerTab("Info", "ℹ", "Info")
     registerTab("Prediksi", "◎", "Prediksi")
     registerTab("Egg", "◯", "Egg")
-    registerTab("Visual", "👁️", "Visual", true)
+    registerTab("Visual", "👁️", "Visual")
     registerTab("Auto", "▶", "Auto")
-    registerTab("Event", "👻", "Event", true)  
-    registerTab("EggMutation", "⚔️", "EggMutation", true)  
+    registerTab("Event", "👻", "Event")  
+    registerTab("EggMutation", "⚔️", "EggMutation")  
     registerTab("Webhook", "🔔", "Webhook")
     registerTab("Settings", "⚙", "Settings")
 
