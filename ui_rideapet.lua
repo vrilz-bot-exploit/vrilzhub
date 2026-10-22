@@ -1,16 +1,29 @@
 --мхуй
+local _cloneref_safe = (type(cloneref) == "function") and cloneref or nil
+if type(gethui) ~= "function" then gethui = nil end
+if type(isfile) ~= "function" then isfile = function() return false end end
+if type(isfolder) ~= "function" then isfolder = function() return false end end
+if type(readfile) ~= "function" then readfile = function() return "" end end
+if type(writefile) ~= "function" then writefile = function() end end
+if type(delfile) ~= "function" then delfile = function() end end
+if type(listfiles) ~= "function" then listfiles = function() return {} end end
+if type(makefolder) ~= "function" then makefolder = function() end end
+if type(getcustomasset) ~= "function" then getcustomasset = function() error("getcustomasset unsupported") end end
+
 local Library do 
     local Workspace = game:GetService("Workspace")
     local UserInputService = game:GetService("UserInputService")
     local Players = game:GetService("Players")
     local HttpService = game:GetService("HttpService")
     local RunService = game:GetService("RunService")
-    local CoreGui = cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
+    local CoreGui = _cloneref_safe and _cloneref_safe(game:GetService("CoreGui")) or game:GetService("CoreGui")
     local TweenService = game:GetService("TweenService")
     local Lighting = game:GetService("Lighting")
 
-    gethui = gethui or function()
-        return CoreGui
+        if type(gethui) ~= "function" then
+        gethui = function()
+            return CoreGui
+        end
     end
     
 
