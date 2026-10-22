@@ -712,6 +712,22 @@ local Library do
             ["Light"] = Light
         }
 
+    -- ═══════════════════════════════════════════════════════════
+    -- FIX: definisi Folders + auto-create folder (WAJIB)
+    -- Harus SEBELUM Library.Holder dan sebelum CustomFont dipakai
+    -- ═══════════════════════════════════════════════════════════
+    Library.Folders = {
+        Assets  = "VRILZ_Assets",
+        Configs = "VRILZ_Configs",
+    }
+    pcall(function()
+        if makefolder and isfolder then
+            if not isfolder(Library.Folders.Assets)  then makefolder(Library.Folders.Assets) end
+            if not isfolder(Library.Folders.Configs) then makefolder(Library.Folders.Configs) end
+        end
+    end)
+    -- ═══════════════════════════════════════════════════════════
+                        
         Library.Font = SemiBold
     end
 
@@ -2584,7 +2600,7 @@ local Library do
                     Library.Flags["UIScale"] = 0.56
                 end
 
-                Items["MainFrame"]:MakeResizeable(Vector2New(Items["MainFrame"].Instance.AbsoluteSize.X, Items["MainFrame"].Instance.AbsoluteSize.Y), Vector2New(9999, 9999), OriginalSizes)
+                Items["MainFrame"]:MakeResizeable(Vector2New(Items["MainFrame"].Instance.AbsoluteSize.X, Items["MainFrame"].Instance.AbsoluteSize.Y), Vector2New(9999, 9999), nil)
                 Library:MakeBlurred(Items["MainFrame"], Window)
 
                 -- ФОН ОКНА через клип-прокси: видимый фон — WindowBG, он на 20px шире ВЛЕВО и обрезан
@@ -3960,10 +3976,9 @@ local Library do
                 -- 2) твины элементов (как было)
                 for __, Value in Window.Pages do
                     if Value.Active then
-                        for _, Value2 in Value.Sections do
+                                                for _, Value2 in Value.Sections do
                             task.spawn(function()
                                 Value2:TweenElements(true)
-                                Library:RefreshConfigsList(ConfigsDropdown)
                             end)
                         end
                     end
