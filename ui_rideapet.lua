@@ -3995,10 +3995,16 @@ do
     local explCard, explContent = makeCard(infoRight, "🎮 EXPLOIT SUPPORT", 1)
 
     local explLines = {
-        "✅ Delta       ✅ Fluxus",
-        "✅ Xeno        ✅ Codex",
-        "✅ Solara      ✅ Wave",
-    }
+    "✅ Delta       ✅ Fluxus",
+    "✅ Xeno        ✅ Codex",
+    "✅ Solara      ✅ Wave",
+    "✅ Madium      ✅ Real",
+    "✅ Potasium    ✅ AWP",
+    "✅ Hydrogen    ✅ Velocity",
+    "✅ Wave        ✅ Swift",
+    "✅ Trigon      ✅ Cryptic",
+    "✅ Arceus      ✅ Nihon",
+}
     for i, line in ipairs(explLines) do
         local lbl = Instance.new("TextLabel")
         lbl.Size = UDim2.new(1, 0, 0, 14)
