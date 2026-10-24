@@ -3358,7 +3358,6 @@ end)
     vhShadow.Font = Enum.Font.GothamBlack
     vhShadow.ZIndex = 401
     vhShadow.Parent = openBtn
-    registerTheme(vhShadow, "Accent", "TextColor3")
 
     local vhDepth = Instance.new("TextLabel")
     vhDepth.Name = "VH3DDepth"
@@ -3375,19 +3374,19 @@ end)
     registerTheme(vhDepth, "Accent", "TextColor3")
 
     local vhFace = Instance.new("TextLabel")
-vhFace.Name = "VH3DFace"
-vhFace.Size = UDim2.fromScale(1, 1)
-vhFace.Position = UDim2.fromOffset(0, 0)
-vhFace.BackgroundTransparency = 1
-vhFace.Text = "VH"
-vhFace.TextColor3 = C.Accent  -- ⭐ GANTI KE ACCENT (atau C.Accent2)
-vhFace.TextSize = IS_MOBILE and 22 or 26
-vhFace.Font = Enum.Font.GothamBlack
-vhFace.TextStrokeColor3 = C.Accent
-vhFace.TextStrokeTransparency = 0
-vhFace.ZIndex = 403
-vhFace.Parent = openBtn
-registerTheme(vhFace, "Accent", "TextColor3")  -- ⭐ TAMBAH INI
+    vhFace.Name = "VH3DFace"
+    vhFace.Size = UDim2.fromScale(1, 1)
+    vhFace.Position = UDim2.fromOffset(0, 0)
+    vhFace.BackgroundTransparency = 1
+    vhFace.Text = "VH"
+    vhFace.TextColor3 = Color3.fromRGB(255, 255, 255)
+    vhFace.TextSize = IS_MOBILE and 22 or 26
+    vhFace.Font = Enum.Font.GothamBlack
+    vhFace.TextStrokeColor3 = C.Accent
+    vhFace.TextStrokeTransparency = 0
+    vhFace.ZIndex = 403
+    vhFace.Parent = openBtn
+    registerTheme(vhFace, "Accent", "TextStrokeColor3")
 
         local lightningLoopThread = nil -- ⚡ Variabel buat nyimpen thread loop
 
