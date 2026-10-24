@@ -1819,7 +1819,7 @@ end
 -- ============================================================
 -- BUILD EVENT TAB (HALLOWEEN) — RARITY-BASED
 -- ============================================================
-local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti, notify)
+local function buildEventTab(eventLeft, eventRight, makeCard, makeToggle, makeDropdownMulti, notify)
     local C_local = C
 
     -- Scan candy types from workspace
@@ -1855,17 +1855,18 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
 
     local candyTypes = scanCandyTypes()
 
-    -- CARD 1: AUTO HALLOWEEN
-    local eventCard, eventContent = makeCard(eventPage, "🎃 AUTO HALLOWEEN", 1)
+    -- ═══════════════════════════════════════════
+    -- ═══ KOLOM KIRI ═══
+    -- ═══════════════════════════════════════════
+    local eventCard, eventContent = makeCard(eventLeft, "🎃 AUTO HALLOWEEN", 1)
 
-        makeToggle(eventContent, "Auto Claim Candy", false, function(v)
+    makeToggle(eventContent, "Auto Claim Candy", false, function(v)
         local F = getFeatures()
         if F and F.getHalloweenState then F.getHalloweenState().Enabled = v end
         if v then notify("Halloween Auto: ON", "success")
         else notify("Halloween Auto: OFF", "info") end
     end)
 
-    -- ⭐ AUTO YIN RITUAL — dipindah ke card ini
     makeToggle(eventContent, "Auto Yin Ritual", false, function(v)
         Shared.YinRitual_Enabled = v
         local F = getFeatures()
@@ -1874,13 +1875,12 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
         else notify("🔮 Yin Ritual: OFF", "info") end
     end)
 
-     -- ⭐ AUTO OBBY (TALK + FINISH)
     makeToggle(eventContent, "Auto Obby (Talk + Finish)", false, function(v)
         if v then
             notify("🏃 Auto Obby: ON - Starting...", "success")
             task.spawn(function()
                 local F = getFeatures()
-                if F and F.startAutoObby then 
+                if F and F.startAutoObby then
                     F.startAutoObby()
                 end
             end)
@@ -1904,8 +1904,10 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     eventNote.Parent = eventContent
     registerTheme(eventNote, "Muted", "TextColor3")
 
-    -- CARD 2: CANDY SELECT
-    local eventCandyCard, eventCandyContent = makeCard(eventPage, "🍬 CANDY SELECT", 2)
+    -- ═══════════════════════════════════════════
+    -- ═══ KOLOM KANAN ═══
+    -- ═══════════════════════════════════════════
+    local eventCandyCard, eventCandyContent = makeCard(eventRight, "🍬 CANDY SELECT", 1)
 
     -- TP Method section
     local tpMethodLbl = Instance.new("TextLabel")
@@ -1918,10 +1920,9 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     tpMethodLbl.TextXAlignment = Enum.TextXAlignment.Left
     tpMethodLbl.LayoutOrder = 11
     tpMethodLbl.ZIndex = 3
-    tpMethodLbl.Parent = eventContent
+    tpMethodLbl.Parent = eventCandyContent
     registerTheme(tpMethodLbl, "Muted", "TextColor3")
 
-        local F_check = getFeatures()
     local isPrem = false
     if LocalPlayer.UserId == OWNER_USERID then
         isPrem = true
@@ -1933,52 +1934,45 @@ local function buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti,
     end
 
     if isPrem then
-        -- Premium user
         local tpMethodHolder = Instance.new("Frame")
         tpMethodHolder.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
         tpMethodHolder.BackgroundTransparency = 1
         tpMethodHolder.LayoutOrder = 12
         tpMethodHolder.ZIndex = 3
-        tpMethodHolder.Parent = eventContent
+        tpMethodHolder.Parent = eventCandyContent
 
-        local tpMethodList = {
-    "TP GLIDE",
-    "TP FAST",
-    "TP VOID ⚡"
-}
+        local tpMethodList = {"TP GLIDE", "TP FAST", "TP VOID ⚡"}
 
-local currentMethod = "TP GLIDE"
-if Shared and Shared.TP_Method == "TP180" then
-    currentMethod = "TP FAST"
-elseif Shared and Shared.TP_Method == "VOID" then
-    currentMethod = "TP VOID ⚡"
-end
+        local currentMethod = "TP GLIDE"
+        if Shared and Shared.TP_Method == "TP180" then
+            currentMethod = "TP FAST"
+        elseif Shared and Shared.TP_Method == "VOID" then
+            currentMethod = "TP VOID ⚡"
+        end
 
         makeDropdownGlobal(tpMethodHolder, tpMethodList, currentMethod, function(v)
-    local F = getFeatures()
-    if v:find("TP VOID") then
-        if F and F.getHalloweenState then
-            F.getHalloweenState().TPMethod = "VOID"
-        end
-        Shared.TP_Method = "VOID"
-        notify("⚡ TP Method: TP VOID (Instant)", "success")
-    elseif v:find("TP FAST") then
-        if F and F.getHalloweenState then
-            F.getHalloweenState().TPMethod = "TP180"
-        end
-        Shared.TP_Method = "TP180"
-        notify("TP Method: TP FAST", "success")
+            local F = getFeatures()
+            if v:find("TP VOID") then
+                if F and F.getHalloweenState then
+                    F.getHalloweenState().TPMethod = "VOID"
+                end
+                Shared.TP_Method = "VOID"
+                notify("⚡ TP Method: TP VOID (Instant)", "success")
+            elseif v:find("TP FAST") then
+                if F and F.getHalloweenState then
+                    F.getHalloweenState().TPMethod = "TP180"
+                end
+                Shared.TP_Method = "TP180"
+                notify("TP Method: TP FAST", "success")
+            else
+                if F and F.getHalloweenState then
+                    F.getHalloweenState().TPMethod = "TP100"
+                end
+                Shared.TP_Method = "TP100"
+                notify("TP Method: TP GLIDE", "info")
+            end
+        end)
     else
-        if F and F.getHalloweenState then
-            F.getHalloweenState().TPMethod = "TP100"
-        end
-        Shared.TP_Method = "TP100"
-        notify("TP Method: TP GLIDE", "info")
-    end
-end)
-        
-    else
-        -- Non-premium: locked frame
         local lockedFrame = Instance.new("Frame")
         lockedFrame.Size = UDim2.new(1, 0, 0, 60)
         lockedFrame.BackgroundColor3 = C_local.Surface3
@@ -1986,7 +1980,7 @@ end)
         lockedFrame.BorderSizePixel = 0
         lockedFrame.LayoutOrder = 12
         lockedFrame.ZIndex = 3
-        lockedFrame.Parent = eventContent
+        lockedFrame.Parent = eventCandyContent
         registerTheme(lockedFrame, "Surface3", "BackgroundColor3")
 
         local lockedCorner = Instance.new("UICorner")
@@ -2011,7 +2005,7 @@ end)
         lockIcon.Parent = lockedFrame
         registerTheme(lockIcon, "Muted", "TextColor3")
 
-                local lockTitle = Instance.new("TextLabel")
+        local lockTitle = Instance.new("TextLabel")
         lockTitle.Size = UDim2.new(1, -50, 0, 18)
         lockTitle.Position = UDim2.fromOffset(42, 14)
         lockTitle.BackgroundTransparency = 1
@@ -2039,7 +2033,7 @@ end)
         lockDesc.Parent = lockedFrame
         registerTheme(lockDesc, "Muted", "TextColor3")
     end
-        
+
     -- Candy select label
     local eventCandyLbl = Instance.new("TextLabel")
     eventCandyLbl.Size = UDim2.new(1, 0, 0, 16)
@@ -2085,10 +2079,10 @@ end)
         end
     end)
 
-       -- CARD 3: STATUS (GABUNGAN HALLOWEEN + YIN)
-    local eventStatusCard, eventStatusContent = makeCard(eventPage, "📊 STATUS", 3)
+    -- ═══ STATUS CARD (kanan bawah) ═══
+    local eventStatusCard, eventStatusContent = makeCard(eventRight, "📊 STATUS", 2)
     local eventStatusLbl = Instance.new("TextLabel")
-    eventStatusLbl.Size = UDim2.new(1, 0, 0, 110)     -- ⭐ dari 50 → 110
+    eventStatusLbl.Size = UDim2.new(1, 0, 0, 110)
     eventStatusLbl.BackgroundColor3 = C_local.Surface3
     eventStatusLbl.BackgroundTransparency = 0.3
     eventStatusLbl.BorderSizePixel = 0
@@ -2117,7 +2111,6 @@ end)
             local F = getFeatures()
             local lines = {}
 
-            -- 🎃 HALLOWEEN
             if F and F.getHalloweenState then
                 local s = F.getHalloweenState()
                 table.insert(lines, "🎃 " .. (s.Status or "Idle"))
@@ -2125,7 +2118,6 @@ end)
                     s.Claimed or 0, s.RareClaimed or 0))
             end
 
-            -- 🔮 YIN RITUAL
             if F and F.getYinRitualState then
                 local y = F.getYinRitualState()
                 table.insert(lines, "🔮 " .. (y.Status or "Idle"))
@@ -6014,19 +6006,19 @@ end
         end)
     end
 
-    -- ===== EVENT TAB =====
+        -- ===== EVENT TAB =====
     do
-        local eventPage = createPage("Event")
+        local eventPage, eventLeft, eventRight = createTwoColumnPage("Event")
         pages.Event = eventPage
-        buildEventTab(eventPage, makeCard, makeToggle, makeDropdownMulti, notify)
+        buildEventTab(eventLeft, eventRight, makeCard, makeToggle, makeDropdownMulti, notify)
     end
 
-    -- ===== EGG MUTATION TAB =====
+        -- ===== EGG MUTATION TAB =====
     do
-        local mutPage = createPage("EggMutation")
+        local mutPage, mutLeft, mutRight = createTwoColumnPage("EggMutation")
         pages.EggMutation = mutPage
 
-        local mutStealCard, mutStealContent = makeCard(mutPage, "🎯 AUTO STEAL (FILTER)", 0)
+        local mutStealCard, mutStealContent = makeCard(mutLeft, "🎯 AUTO STEAL (FILTER)", 0)
 
         local raritySection = Instance.new("Frame")
         raritySection.Size = UDim2.new(1, 0, 0, 0)
@@ -6139,7 +6131,7 @@ end
         updateSections(Shared.MutationStealMode or "Rarity")
 
         -- Auto Mutation card
-        local mutCard, mutContent = makeCard(mutPage, "🔥 EGG MUTATION", 1)
+        local mutCard, mutContent = makeCard(mutRight, "🔥 EGG MUTATION", 1)
 
         makeToggle(mutContent, "Auto Mutation", false, function(v)
             Shared.AutoMutation_Enabled = v
@@ -6222,7 +6214,8 @@ end
         _G.VRILZ_RebuildReturnMode = rebuildReturnModeUI
 
         -- Status card
-        local infoCard, infoContent = makeCard(mutPage, "📊 STATUS MUTATION", 2)
+        -- Status card
+        local infoCard, infoContent = makeCard(mutRight, "📊 STATUS MUTATION", 2)
 
         local mutInfoLbl = Instance.new("TextLabel")
         mutInfoLbl.Size = UDim2.new(1, 0, 0, 90)
