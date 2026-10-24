@@ -1,5 +1,5 @@
 -- ============================================================
--- VRILZHUB UI — RIDE A PET v2.2 (AUTO-DETECT PC & MOBILE)
+-- VRILZHUB UI — RIDE A PET v2.3 (AUTO-DETECT PC & MOBILE)
 -- PC: 800x580 | Mobile: 88% x 78% viewport
 -- ============================================================
 
@@ -3089,7 +3089,7 @@ end)
     subtitle.Size = UDim2.new(0, 300, 0, 14)
     subtitle.Position = UDim2.fromOffset(IS_MOBILE and 48 or 58, IS_MOBILE and 26 or 28)
     subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Ride a Pet · v2.2"
+    subtitle.Text = "Ride a Pet · v2.3"
     subtitle.TextColor3 = C.Muted
     subtitle.Font = Enum.Font.GothamSemibold
     subtitle.TextSize = IS_MOBILE and 9 or 10
@@ -3969,11 +3969,11 @@ do
     local updateCard, updateContent = makeCard(infoLeft, "📢 UPDATE INFORMATION", 2)
 
     local infoLines = {
-        "Version        : 2.2",
-        "Last Update    : 19 Okt 2026",
+        "Version        : 2.3",
+        "Last Update    : 24 Okt 2026",
         "Status         : Online ✅",
-        "Changelog      : Fly Chard, Tp Mode, Gui Stats",
-        "                 Auto Event, Auto Yin, Auto Obby",
+        "Changelog      : Fly Chard, Webhook, Auto Crash",
+        "                  Auto Event, Auto Yin, Auto Obby",
     }
     for i, line in ipairs(infoLines) do
         local lbl = Instance.new("TextLabel")
@@ -5682,7 +5682,7 @@ end)
                             },
                         },
                         footer = {
-                            text = "🏆 VRILZHUB PLATINUM  •  v2.2",
+                            text = "🏆 VRILZHUB PLATINUM  •  v2.3",
                         },
                         timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
                     }}
@@ -7162,7 +7162,7 @@ local A_Links = {
 -- Changelog VRILZHUB
 local A_Changelog = {
     {
-        Version = "v2.2",
+        Version = "v2.3",
         Date = "19 Okt 2026",
         Changes = {
             "Fly Chard (Character Fly)",
