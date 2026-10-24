@@ -23,8 +23,8 @@ local IS_MOBILE = UserInputService.TouchEnabled and not UserInputService.Keyboar
 -- ====== UI CONFIG ======
 local UI_CONFIG = {
     MOBILE = {
-    WIN_W = 420,   -- dari 340 → 420
-    WIN_H = 620,   -- dari 480 → 620
+    WIN_W = 520,   -- dari 340 → 420
+    WIN_H = 720,   -- dari 480 → 620
     -- Note: di HP viewport < 452px, ini otomatis di-clamp jadi viewport.X - 32
 
     SIDEBAR_W = 64,     -- dari 58 → 64 (biar icon tab gak kejepit)
@@ -2788,10 +2788,8 @@ local function buildMainWindow(parent)
 
     local winW, winH
 if IS_MOBILE then
-    -- ⭐ FIXED width kayak PC, tapi clamp biar gak lebih besar dari layar
-    -- Kurangi margin 16px kiri-kanan biar gak nempel tepi
-    local maxW = viewport.X - 32
-    local maxH = viewport.Y - 120  -- kasih ruang atas-bawah
+    local maxW = viewport.X - 8       -- ← cuma 4px kiri-kanan
+    local maxH = viewport.Y - 20      -- ← cuma 10px atas-bawah
     winW = math.min(CFG.WIN_W, maxW)
     winH = math.min(CFG.WIN_H, maxH)
 else
