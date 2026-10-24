@@ -3690,12 +3690,84 @@ if isAsset then
         return page
     end
 
-    -- TAB INFO
+-- ===== 2-COLUMN PAGE HELPER (khusus tab Info) =====
+local function createTwoColumnPage(name)
+    local page = Instance.new("ScrollingFrame")
+    page.Name = name
+    page.Size = UDim2.fromScale(1, 1)
+    page.BackgroundTransparency = 1
+    page.BorderSizePixel = 0
+    page.ScrollBarThickness = 4
+    page.ScrollBarImageColor3 = C.Accent
+    page.CanvasSize = UDim2.new(0, 0, 0, 0)
+    page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    page.ScrollingDirection = Enum.ScrollingDirection.Y
+    page.ScrollingEnabled = true
+    page.Visible = false
+    page.ZIndex = 7
+    page.Parent = pageHolder
+
+    -- Layout horizontal: kiri | kanan
+    local row = Instance.new("Frame")
+    row.Size = UDim2.new(1, 0, 0, 0)
+    row.AutomaticSize = Enum.AutomaticSize.Y
+    row.BackgroundTransparency = 1
+    row.ZIndex = 7
+    row.Parent = page
+
+    local rowLayout = Instance.new("UIListLayout")
+    rowLayout.FillDirection = Enum.FillDirection.Horizontal
+    rowLayout.Padding = UDim.new(0, IS_MOBILE and 8 or 12)
+    rowLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    rowLayout.Parent = row
+
+    -- Kolom kiri
+    local leftCol = Instance.new("Frame")
+    leftCol.Name = "LeftColumn"
+    leftCol.Size = UDim2.new(0.5, -(IS_MOBILE and 4 or 6), 0, 0)
+    leftCol.AutomaticSize = Enum.AutomaticSize.Y
+    leftCol.BackgroundTransparency = 1
+    leftCol.LayoutOrder = 1
+    leftCol.ZIndex = 7
+    leftCol.Parent = row
+
+    local leftLayout = Instance.new("UIListLayout")
+    leftLayout.Padding = UDim.new(0, IS_MOBILE and 8 or 12)
+    leftLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    leftLayout.Parent = leftCol
+
+    -- Kolom kanan
+    local rightCol = Instance.new("Frame")
+    rightCol.Name = "RightColumn"
+    rightCol.Size = UDim2.new(0.5, -(IS_MOBILE and 4 or 6), 0, 0)
+    rightCol.AutomaticSize = Enum.AutomaticSize.Y
+    rightCol.BackgroundTransparency = 1
+    rightCol.LayoutOrder = 2
+    rightCol.ZIndex = 7
+    rightCol.Parent = row
+
+    local rightLayout = Instance.new("UIListLayout")
+    rightLayout.Padding = UDim.new(0, IS_MOBILE and 8 or 12)
+    rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    rightLayout.Parent = rightCol
+
+    -- Sync canvas height
+    local function syncCanvas()
+        page.CanvasSize = UDim2.new(0, 0, 0, rowLayout.AbsoluteContentSize.Y + 120)
+    end
+    rowLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(syncCanvas)
+    task.defer(syncCanvas)
+
+    return page, leftCol, rightCol
+end
+
+-- TAB INFO (2 KOLOM)
 do
-    local infoPage = createPage("Info")
+    local infoPage, infoLeft, infoRight = createTwoColumnPage("Info")
     pages.Info = infoPage
 
-    local infoCard, infoContent = makeCard(infoPage, "CLIENT INFORMATION", 1)
+    -- ═══ KOLOM KIRI ═══
+    local infoCard, infoContent = makeCard(infoLeft, "CLIENT INFORMATION", 1)
 
     local avRow = Instance.new("Frame")
     avRow.Size = UDim2.new(1, 0, 0, IS_MOBILE and 60 or 70)
@@ -3745,6 +3817,7 @@ do
     nameLbl.Font = Enum.Font.GothamBold
     nameLbl.TextSize = IS_MOBILE and 13 or 15
     nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+    nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
     nameLbl.ZIndex = 3
     nameLbl.Parent = avRow
     registerTheme(nameLbl, "Text", "TextColor3")
@@ -3758,6 +3831,7 @@ do
     userLbl.Font = Enum.Font.GothamSemibold
     userLbl.TextSize = IS_MOBILE and 10 or 11
     userLbl.TextXAlignment = Enum.TextXAlignment.Left
+    userLbl.TextTruncate = Enum.TextTruncate.AtEnd
     userLbl.ZIndex = 3
     userLbl.Parent = avRow
     registerTheme(userLbl, "Muted", "TextColor3")
@@ -3810,7 +3884,7 @@ do
             local hours = math.floor((secondsLeft % 86400) / 3600)
             local mins = math.floor((secondsLeft % 3600) / 60)
             local expiryText = os.date("%d/%m/%Y %H:%M:%S", math.floor(expiresAt / 1000))
-            keyExpiryLbl.Text = string.format("Expired: %s | Remaining: %dd %02dj %02dm", expiryText, days, hours, mins)
+            keyExpiryLbl.Text = string.format("Expired: %s\nRemaining: %dd %02dj %02dm", expiryText, days, hours, mins)
             if secondsLeft <= 0 then
                 keyExpiryLbl.Text = "Expired: KEY EXPIRED"
                 keyExpiryLbl.TextColor3 = C.Error
@@ -3834,11 +3908,12 @@ do
         end
     end)
 
-    local updateCard, updateContent = makeCard(infoPage, "📢 UPDATE INFORMATION", 2)
+    -- ⭐ Card update info (kiri bawah)
+    local updateCard, updateContent = makeCard(infoLeft, "📢 UPDATE INFORMATION", 2)
 
     local infoLines = {
         "Version        : 2.2",
-        "Last Update    : 19 Okto 2026",
+        "Last Update    : 19 Okt 2026",
         "Status         : Online ✅",
         "Changelog      : Fly Chard, Tp Mode, Gui Stats",
         "                 Auto Event, Auto Yin, Auto Obby",
@@ -3852,13 +3927,15 @@ do
         lbl.Font = Enum.Font.GothamSemibold
         lbl.TextSize = CFG.FONT_MUTED
         lbl.TextXAlignment = Enum.TextXAlignment.Left
+        lbl.TextWrapped = true
         lbl.LayoutOrder = i
         lbl.ZIndex = 3
         lbl.Parent = updateContent
         registerTheme(lbl, "Muted", "TextColor3")
     end
 
-    local explCard, explContent = makeCard(infoPage, "🎮 EXPLOIT SUPPORT", 3)
+    -- ═══ KOLOM KANAN ═══
+    local explCard, explContent = makeCard(infoRight, "🎮 EXPLOIT SUPPORT", 1)
 
     local explLines = {
         "✅ Delta       ✅ Fluxus",
@@ -3880,7 +3957,8 @@ do
         registerTheme(lbl, "Muted", "TextColor3")
     end
 
-    local discordCard, discordContent = makeCard(infoPage, "💬 JOIN DISCORD", 4)
+    -- ⭐ Discord card (kanan bawah)
+    local discordCard, discordContent = makeCard(infoRight, "💬 JOIN DISCORD", 2)
     local DISCORD_LINK = "https://discord.gg/psWhrYWbq"
 
     local discordLinkLbl = Instance.new("TextLabel")
@@ -3917,6 +3995,7 @@ do
         pcall(function() setclipboard(DISCORD_LINK) end)
         notify("✓ Discord link copied!", "success")
     end)
+end
 
        -- Keep the Info tab independently scrollable all the way to the Discord copy button.
     do
