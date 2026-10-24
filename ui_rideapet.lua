@@ -493,6 +493,7 @@ local function makeCard(parent, title, layoutOrder)
     card.ZIndex = 1
     card.Parent = parent
     registerTheme(card, "Surface", "BackgroundColor3")
+    card.BackgroundTransparency = 0.55
 
     -- Layered card depth: soft shadow + glossy surface.
     local cardShadow = Instance.new("Frame")
@@ -519,7 +520,6 @@ local function makeCard(parent, title, layoutOrder)
         ColorSequenceKeypoint.new(0.55, C.Surface),
         ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 11, 14)),
     })
-    cardGradient.Parent = card
 
     local gloss = Instance.new("Frame")
     gloss.Name = "Gloss"
@@ -549,6 +549,7 @@ local function makeCard(parent, title, layoutOrder)
     headerFrame.ZIndex = 2
     headerFrame.Parent = card
     registerTheme(headerFrame, "Surface2", "BackgroundColor3")
+    headerFrame.BackgroundTransparency = 0.45
 
     local headerGradient = Instance.new("UIGradient")
     headerGradient.Rotation = 0
@@ -557,7 +558,6 @@ local function makeCard(parent, title, layoutOrder)
         ColorSequenceKeypoint.new(0.55, C.Surface2),
         ColorSequenceKeypoint.new(1, Color3.fromRGB(18, 18, 22)),
     })
-    headerGradient.Parent = headerFrame
 
     local headerCorner = Instance.new("UICorner")
     headerCorner.CornerRadius = UDim.new(0, 13)
@@ -719,15 +719,7 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     container.ZIndex = 3
     container.Parent = anchorFrame
     registerTheme(container, "Surface3", "BackgroundColor3")
-
-    local dropGradient = Instance.new("UIGradient")
-    dropGradient.Rotation = 0
-    dropGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 35, 40)),
-        ColorSequenceKeypoint.new(0.5, C.Surface3),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 21, 25)),
-    })
-    dropGradient.Parent = container
+    container.BackgroundTransparency = 0.55
 
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 9)
@@ -2783,16 +2775,45 @@ local function buildMainWindow(parent)
     end
 
     local main = Instance.new("Frame")
-    main.Name = "MainWindow"
-    main.AnchorPoint = Vector2.new(0.5, 0.5)
-    main.Position = UDim2.fromScale(0.5, 0.5)
-    main.Size = UDim2.fromOffset(winW, winH)
-    main.BackgroundColor3 = C.BG
-    main.BorderSizePixel = 0
-    main.ZIndex = 1
-    main.Parent = screenGui
-    registerTheme(main, "BG", "BackgroundColor3")
+main.Name = "MainWindow"
+main.AnchorPoint = Vector2.new(0.5, 0.5)
+main.Position = UDim2.fromScale(0.5, 0.5)
+main.Size = UDim2.fromOffset(winW, winH)
+main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+main.BorderSizePixel = 0
+main.ZIndex = 1
+main.Parent = screenGui
+registerTheme(main, "BG", "BackgroundColor3")
 
+-- ⭐⭐⭐ FOTO ANIME BACKGROUND ⭐⭐⭐
+local animeBg = Instance.new("ImageLabel")
+animeBg.Name = "AnimeBackground"
+animeBg.Size = UDim2.fromScale(1, 1)
+animeBg.Position = UDim2.fromScale(0, 0)
+animeBg.BackgroundTransparency = 1
+animeBg.Image = "rbxassetid://GANTI_ID_FOTO_ANIME_LU"  -- ← GANTI DI SINI
+animeBg.ScaleType = Enum.ScaleType.Crop
+animeBg.ZIndex = 1
+animeBg.Parent = main
+
+local animeBgCorner = Instance.new("UICorner")
+animeBgCorner.CornerRadius = UDim.new(0, 18)
+animeBgCorner.Parent = animeBg
+
+-- ⭐ Overlay gelap tipis biar teks kebaca
+local animeOverlay = Instance.new("Frame")
+animeOverlay.Name = "AnimeOverlay"
+animeOverlay.Size = UDim2.fromScale(1, 1)
+animeOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+animeOverlay.BackgroundTransparency = 0.4 -- 0.4 = gelap 40% (sesuaikan)
+animeOverlay.BorderSizePixel = 0
+animeOverlay.ZIndex = 2
+animeOverlay.Parent = main
+
+local animeOverlayCorner = Instance.new("UICorner")
+animeOverlayCorner.CornerRadius = UDim.new(0, 18)
+animeOverlayCorner.Parent = animeOverlay
+-- ⭐⭐⭐ END FOTO ANIME ⭐⭐⭐
     -- Soft 3D shadow behind the window (visual only).
     local shadow = Instance.new("Frame")
     shadow.Name = "WindowShadow"
@@ -2836,7 +2857,6 @@ local function buildMainWindow(parent)
         ColorSequenceKeypoint.new(0.45, C.BG),
         ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 6, 9)),
     })
-    gradient.Parent = main
 
     local stroke = Instance.new("UIStroke")
     stroke.Color = C.Accent
@@ -2853,19 +2873,11 @@ local function buildMainWindow(parent)
     header.ZIndex = 10
     header.Parent = main
     registerTheme(header, "Surface", "BackgroundColor3")
+    header.BackgroundTransparency = 0.35
 
     local headerCorner = Instance.new("UICorner")
     headerCorner.CornerRadius = UDim.new(0, 18)
     headerCorner.Parent = header
-
-    local headerGradient = Instance.new("UIGradient")
-    headerGradient.Rotation = 0
-    headerGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 35)),
-        ColorSequenceKeypoint.new(0.5, C.Surface),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(12, 13, 17)),
-    })
-    headerGradient.Parent = header
 
     local headerGlow = Instance.new("Frame")
     headerGlow.Size = UDim2.new(1, -24, 0, 2)
@@ -2883,7 +2895,7 @@ local function buildMainWindow(parent)
     local headerFix = Instance.new("Frame")
     headerFix.Size = UDim2.new(1, 0, 0, 14)
     headerFix.Position = UDim2.new(0, 0, 1, -14)
-    headerFix.BackgroundColor3 = C.Surface
+    headerFix.BackgroundTransparency = 1
     headerFix.BorderSizePixel = 0
     headerFix.ZIndex = 10
     headerFix.Parent = header
@@ -3058,18 +3070,11 @@ local function buildMainWindow(parent)
     sidebar.ClipsDescendants = true
     sidebar.Parent = body
     registerTheme(sidebar, "Surface", "BackgroundColor3")
+    sidebar.BackgroundTransparency = 0.5
 
     local sidebarCorner = Instance.new("UICorner")
     sidebarCorner.CornerRadius = UDim.new(0, 14)
     sidebarCorner.Parent = sidebar
-
-    local sidebarGradient = Instance.new("UIGradient")
-    sidebarGradient.Rotation = 90
-    sidebarGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(24, 25, 30)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 11, 14)),
-    })
-    sidebarGradient.Parent = sidebar
 
     local sidebarStroke = Instance.new("UIStroke")
     sidebarStroke.Color = C.Accent
@@ -3393,7 +3398,7 @@ local function buildMainWindow(parent)
         local btn = Instance.new("TextButton")
         btn.Size = UDim2.new(1, 0, 0, tabH)
         btn.BackgroundColor3 = C.Surface3
-        btn.BackgroundTransparency = 0.5
+        btn.BackgroundTransparency = 0.7
         btn.Text = ""
         btn.AutoButtonColor = false
         btn.ZIndex = 5
@@ -3492,7 +3497,7 @@ if isAsset then
             for n, x in pairs(navs) do
                 if n == id then
                     x.btn.BackgroundColor3 = C.Accent
-                    x.btn.BackgroundTransparency = 0
+                    x.btn.BackgroundTransparency = 0.35
                     if x.isAsset then
                         x.ic.ImageColor3 = Color3.new(1, 1, 1)
                     else
