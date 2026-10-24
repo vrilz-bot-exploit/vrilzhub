@@ -5410,6 +5410,14 @@ end
                 notify("🔔 Webhook: OFFLINE", "info")
             end
         end)
+makeToggle(toggleContent, "Ping @everyone", Shared.WebhookMentionEveryone or false, function(v)
+    Shared.WebhookMentionEveryone = v
+    if v then
+        notify("🔔 @everyone ping: ON", "success")
+    else
+        notify("🔕 @everyone ping: OFF", "info")
+    end
+end)
 
         -- ╔═══════════════════════════════════════════════════════╗
         -- ║  URL INPUT — Platinum Style                            ║
