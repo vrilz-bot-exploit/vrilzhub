@@ -23,19 +23,49 @@ local IS_MOBILE = UserInputService.TouchEnabled and not UserInputService.Keyboar
 -- ====== UI CONFIG ======
 local UI_CONFIG = {
     MOBILE = {
-        WIN_W_PCT = 0.92, WIN_H_PCT = 0.88,
-        SIDEBAR_W = 78, TAB_H = 42, TAB_ICON = 18, TAB_SHOW_LABEL = false,
-        CARD_HEADER = 34, CARD_PAD_TOP = 10, CARD_PAD_BOT = 12, CARD_PAD_SIDE = 12,
-        CARD_GAP = 8, TOGGLE_H = 38, TOGGLE_W = 50, TOGGLE_KNOB = 20,
-        DROPDOWN_H = 42, DROPDOWN_ITEM = 32, DROPDOWN_POPUP_W = 154, ACTION_H = 36,
-        FONT_TITLE = 13, FONT_LABEL = 11, FONT_MUTED = 9, FONT_SMALL = 10,
-        FONT_MED = 11, FONT_LARGE = 14,
-        HEADER_H = 40, SEARCH_H = 30, NOTIF_W = 300, NOTIF_H = 52, OPEN_BTN = 52,
-        -- LIVE CHAT
-        CHAT_MSG_H = 46, CHAT_AVATAR = 22, CHAT_FONT = 10, CHAT_NAME_FONT = 10,
-        CHAT_INPUT_H = 34, CHAT_SEND_W = 46, CHAT_BUBBLE_PAD = 8,
-        CHAT_MAX_MSG = 80, CHAT_SHOW_AVATAR = false, CHAT_PANEL_H = 340,
-    },
+    -- ⭐ FIXED SIZE kayak PC, tapi kecilin — biar gak lebar full screen
+    WIN_W = 340,   -- lebar window (px, gak peduli layar HP)
+    WIN_H = 480,   -- tinggi window
+    -- kalau layar HP lebih kecil dari ini, otomatis di-clamp di buildMainWindow
+
+    SIDEBAR_W = 58,        -- sidebar lebih tipis (dari 78)
+    TAB_H = 38,
+    TAB_ICON = 16,
+    TAB_SHOW_LABEL = false,
+    CARD_HEADER = 30,
+    CARD_PAD_TOP = 8,
+    CARD_PAD_BOT = 10,
+    CARD_PAD_SIDE = 10,
+    CARD_GAP = 7,
+    TOGGLE_H = 34,
+    TOGGLE_W = 46,
+    TOGGLE_KNOB = 18,
+    DROPDOWN_H = 38,
+    DROPDOWN_ITEM = 30,
+    DROPDOWN_POPUP_W = 140,
+    ACTION_H = 32,
+    FONT_TITLE = 12,
+    FONT_LABEL = 11,
+    FONT_MUTED = 9,
+    FONT_SMALL = 10,
+    FONT_MED = 11,
+    FONT_LARGE = 13,
+    HEADER_H = 36,
+    SEARCH_H = 28,
+    NOTIF_W = 260,
+    NOTIF_H = 46,
+    OPEN_BTN = 48,
+    CHAT_MSG_H = 42,
+    CHAT_AVATAR = 20,
+    CHAT_FONT = 10,
+    CHAT_NAME_FONT = 10,
+    CHAT_INPUT_H = 32,
+    CHAT_SEND_W = 44,
+    CHAT_BUBBLE_PAD = 6,
+    CHAT_MAX_MSG = 80,
+    CHAT_SHOW_AVATAR = false,
+    CHAT_PANEL_H = 320,
+},
     PC = {
         WIN_W = 800, WIN_H = 580,
         SIDEBAR_W = 152, TAB_H = 46, TAB_ICON = 17, TAB_SHOW_LABEL = true,
@@ -2758,13 +2788,17 @@ local function buildMainWindow(parent)
     local viewport = (workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize) or Vector2.new(1280, 720)
 
     local winW, winH
-    if IS_MOBILE then
-        winW = math.floor(viewport.X * CFG.WIN_W_PCT)
-        winH = math.floor(viewport.Y * CFG.WIN_H_PCT)
-    else
-        winW = math.min(CFG.WIN_W, math.floor(viewport.X * 0.7))
-        winH = math.min(CFG.WIN_H, math.floor(viewport.Y * 0.78))
-    end
+if IS_MOBILE then
+    -- ⭐ FIXED width kayak PC, tapi clamp biar gak lebih besar dari layar
+    -- Kurangi margin 16px kiri-kanan biar gak nempel tepi
+    local maxW = viewport.X - 32
+    local maxH = viewport.Y - 120  -- kasih ruang atas-bawah
+    winW = math.min(CFG.WIN_W, maxW)
+    winH = math.min(CFG.WIN_H, maxH)
+else
+    winW = math.min(CFG.WIN_W, math.floor(viewport.X * 0.7))
+    winH = math.min(CFG.WIN_H, math.floor(viewport.Y * 0.78))
+end
 
     local main = Instance.new("Frame")
 main.Name = "MainWindow"
@@ -4100,8 +4134,8 @@ end
         local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
         local isMob = IS_MOBILE
 
-        local winW = isMob and math.floor(viewport.X * 0.92) or math.min(520, math.floor(viewport.X * 0.55))
-        local winH = isMob and math.floor(viewport.Y * 0.7) or 520
+        local winW = isMob and math.min(340, viewport.X - 32) or math.min(520, math.floor(viewport.X * 0.55))
+        local winH = isMob and math.min(420, viewport.Y - 160) or 520
 
         -- ===== WINDOW UTAMA =====
         local win = Instance.new("Frame")
