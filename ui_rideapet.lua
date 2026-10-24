@@ -6998,73 +6998,302 @@ local function verifySavedKeyWithServer(key)
 end
 
 -- ============================================================
--- LOADING SCREEN BRUTAL
+-- 🌌 LOADING SCREEN v2 — BULAN + METEOR SHOWER
 -- ============================================================
 local function buildLoadingScreen(parent)
     local viewport = (workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize) or Vector2.new(1280, 720)
 
     local winW = IS_MOBILE and 280 or 360
-    local winH = IS_MOBILE and 200 or 240
+    local winH = IS_MOBILE and 240 or 280
 
+    -- ═══ MAIN CONTAINER ═══
     local loading = Instance.new("Frame")
     loading.Name = "LoadingScreen"
     loading.AnchorPoint = Vector2.new(0.5, 0.5)
     loading.Position = UDim2.fromScale(0.5, 0.5)
     loading.Size = UDim2.fromOffset(0, 0)
-    loading.BackgroundColor3 = Color3.fromRGB(5, 0, 2)
+    loading.BackgroundColor3 = Color3.fromRGB(5, 8, 20)
     loading.BorderSizePixel = 0
     loading.ZIndex = 300
     loading.ClipsDescendants = true
     loading.Parent = parent
 
+    -- ═══ DEEP SPACE GRADIENT ═══
+    local bgGradient = Instance.new("UIGradient")
+    bgGradient.Rotation = 115
+    bgGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 20, 45)),
+        ColorSequenceKeypoint.new(0.4, Color3.fromRGB(8, 12, 30)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(2, 3, 10)),
+    })
+    bgGradient.Parent = loading
+
+    -- ═══ STROKE (neon cyan) ═══
     local stroke1 = Instance.new("UIStroke")
-    stroke1.Color = Color3.fromRGB(255, 30, 60)
-    stroke1.Thickness = 3
-    stroke1.Transparency = 0
+    stroke1.Color = Color3.fromRGB(80, 200, 255)
+    stroke1.Thickness = 2.5
+    stroke1.Transparency = 0.1
     stroke1.Parent = loading
 
     local stroke2 = Instance.new("UIStroke")
     stroke2.Color = Color3.fromRGB(255, 255, 255)
     stroke2.Thickness = 1
-    stroke2.Transparency = 0.7
+    stroke2.Transparency = 0.8
     stroke2.Parent = loading
 
-    local topBar = Instance.new("Frame")
-    topBar.Size = UDim2.new(1, 0, 0, 4)
-    topBar.Position = UDim2.fromOffset(0, 0)
-    topBar.BackgroundColor3 = Color3.fromRGB(255, 30, 60)
-    topBar.BorderSizePixel = 0
-    topBar.ZIndex = 310
-    topBar.Parent = loading
+    -- ═══ STARFIELD (bintang statis) ═══
+    local starfield = Instance.new("Frame")
+    starfield.Size = UDim2.fromScale(1, 1)
+    starfield.BackgroundTransparency = 1
+    starfield.ZIndex = 301
+    starfield.ClipsDescendants = true
+    starfield.Parent = loading
 
-    local botBar = Instance.new("Frame")
-    botBar.Size = UDim2.new(1, 0, 0, 4)
-    botBar.Position = UDim2.new(0, 0, 1, -4)
-    botBar.BackgroundColor3 = Color3.fromRGB(255, 30, 60)
-    botBar.BorderSizePixel = 0
-    botBar.ZIndex = 310
-    botBar.Parent = loading
+    for i = 1, 60 do
+        local star = Instance.new("Frame")
+        local sz = math.random(1, 3)
+        star.Size = UDim2.fromOffset(sz, sz)
+        star.Position = UDim2.fromScale(math.random(0, 100) / 100, math.random(0, 100) / 100)
+        star.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        star.BackgroundTransparency = math.random(20, 70) / 100
+        star.BorderSizePixel = 0
+        star.ZIndex = 302
+        star.Parent = starfield
 
-    local function makeBracket(posX, posY, sizeX, sizeY)
-        local b = Instance.new("Frame")
-        b.Size = UDim2.fromOffset(sizeX, sizeY)
-        b.Position = UDim2.fromOffset(posX, posY)
-        b.BackgroundColor3 = Color3.fromRGB(255, 30, 60)
-        b.BorderSizePixel = 0
-        b.ZIndex = 311
-        b.Parent = loading
-        return b
+        local sc = Instance.new("UICorner")
+        sc.CornerRadius = UDim.new(1, 0)
+        sc.Parent = star
+
+        -- Twinkle animation
+        task.spawn(function()
+            local baseTrans = star.BackgroundTransparency
+            while star.Parent do
+                task.wait(math.random(15, 40) / 10)
+                if not star.Parent then break end
+                TweenService:Create(star, TweenInfo.new(0.6), {BackgroundTransparency = baseTrans - 0.3}):Play()
+                task.wait(0.6)
+                TweenService:Create(star, TweenInfo.new(0.6), {BackgroundTransparency = baseTrans}):Play()
+            end
+        end)
     end
 
-    makeBracket(6, 6, 22, 2)
-    makeBracket(6, 6, 2, 22)
-    makeBracket(winW - 28, 6, 22, 2)
-    makeBracket(winW - 8, 6, 2, 22)
-    makeBracket(6, winH - 8, 22, 2)
-    makeBracket(6, winH - 28, 2, 22)
-    makeBracket(winW - 28, winH - 8, 22, 2)
-    makeBracket(winW - 8, winH - 28, 2, 22)
+    -- ═══ MOON (bulan glow) ═══
+    local moonSize = IS_MOBILE and 80 or 110
+    local moonX = winW * 0.72
+    local moonY = winH * 0.22
 
+    -- Outer glow (halo)
+    local moonGlow = Instance.new("Frame")
+    moonGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+    moonGlow.Position = UDim2.fromOffset(moonX, moonY)
+    moonGlow.Size = UDim2.fromOffset(moonSize + 60, moonSize + 60)
+    moonGlow.BackgroundColor3 = Color3.fromRGB(150, 200, 255)
+    moonGlow.BackgroundTransparency = 0.85
+    moonGlow.BorderSizePixel = 0
+    moonGlow.ZIndex = 303
+    moonGlow.Parent = loading
+    local mg1c = Instance.new("UICorner")
+    mg1c.CornerRadius = UDim.new(1, 0)
+    mg1c.Parent = moonGlow
+
+    -- Mid glow
+    local moonGlow2 = Instance.new("Frame")
+    moonGlow2.AnchorPoint = Vector2.new(0.5, 0.5)
+    moonGlow2.Position = UDim2.fromOffset(moonX, moonY)
+    moonGlow2.Size = UDim2.fromOffset(moonSize + 25, moonSize + 25)
+    moonGlow2.BackgroundColor3 = Color3.fromRGB(180, 220, 255)
+    moonGlow2.BackgroundTransparency = 0.7
+    moonGlow2.BorderSizePixel = 0
+    moonGlow2.ZIndex = 304
+    moonGlow2.Parent = loading
+    local mg2c = Instance.new("UICorner")
+    mg2c.CornerRadius = UDim.new(1, 0)
+    mg2c.Parent = moonGlow2
+
+    -- Moon body
+    local moon = Instance.new("Frame")
+    moon.AnchorPoint = Vector2.new(0.5, 0.5)
+    moon.Position = UDim2.fromOffset(moonX, moonY)
+    moon.Size = UDim2.fromOffset(moonSize, moonSize)
+    moon.BackgroundColor3 = Color3.fromRGB(240, 245, 255)
+    moon.BorderSizePixel = 0
+    moon.ZIndex = 305
+    moon.Parent = loading
+    local moonCorner = Instance.new("UICorner")
+    moonCorner.CornerRadius = UDim.new(1, 0)
+    moonCorner.Parent = moon
+
+    -- Moon gradient (3D effect)
+    local moonGradient = Instance.new("UIGradient")
+    moonGradient.Rotation = 135
+    moonGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(220, 230, 250)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(140, 160, 200)),
+    })
+    moonGradient.Parent = moon
+
+    -- Moon craters
+    local craters = {
+        {0.3, 0.3, 0.15},
+        {0.65, 0.45, 0.12},
+        {0.5, 0.65, 0.10},
+        {0.25, 0.55, 0.08},
+    }
+    for _, crater in ipairs(craters) do
+        local c = Instance.new("Frame")
+        c.AnchorPoint = Vector2.new(0.5, 0.5)
+        c.Position = UDim2.fromScale(crater[1], crater[2])
+        c.Size = UDim2.fromScale(crater[3], crater[3])
+        c.BackgroundColor3 = Color3.fromRGB(180, 195, 225)
+        c.BackgroundTransparency = 0.3
+        c.BorderSizePixel = 0
+        c.ZIndex = 306
+        c.Parent = moon
+        local cc = Instance.new("UICorner")
+        cc.CornerRadius = UDim.new(1, 0)
+        cc.Parent = c
+    end
+
+    -- Moon pulse glow
+    task.spawn(function()
+        while moonGlow.Parent do
+            moonGlow.BackgroundTransparency = 0.85
+            TweenService:Create(moonGlow, TweenInfo.new(2.5), {BackgroundTransparency = 0.92}):Play()
+            task.wait(2.5)
+        end
+    end)
+
+    -- ═══ METEOR SHOWER (jatuh terus-terusan) ═══
+    local meteorLayer = Instance.new("Frame")
+    meteorLayer.Size = UDim2.fromScale(1, 1)
+    meteorLayer.BackgroundTransparency = 1
+    meteorLayer.ZIndex = 310
+    meteorLayer.ClipsDescendants = true
+    meteorLayer.Parent = loading
+
+    local meteorActive = true
+    loading.Destroying:Connect(function()
+        meteorActive = false
+    end)
+
+    local function spawnMeteor()
+        if not meteorActive or not meteorLayer.Parent then return end
+
+        local meteor = Instance.new("Frame")
+        meteor.AnchorPoint = Vector2.new(0.5, 0.5)
+        
+        -- Start position (random top area)
+        local startX = math.random(-100, winW + 100)
+        local startY = -50
+        meteor.Position = UDim2.fromOffset(startX, startY)
+        meteor.Size = UDim2.fromOffset(3, 3)
+        meteor.BackgroundColor3 = Color3.fromRGB(200, 230, 255)
+        meteor.BorderSizePixel = 0
+        meteor.Rotation = 45
+        meteor.ZIndex = 311
+        meteor.Parent = meteorLayer
+
+        local mc = Instance.new("UICorner")
+        mc.CornerRadius = UDim.new(1, 0)
+        mc.Parent = meteor
+
+        -- Meteor head glow
+        local headGlow = Instance.new("Frame")
+        headGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+        headGlow.Position = UDim2.fromScale(0.5, 0.5)
+        headGlow.Size = UDim2.fromOffset(12, 12)
+        headGlow.BackgroundColor3 = Color3.fromRGB(180, 220, 255)
+        headGlow.BackgroundTransparency = 0.5
+        headGlow.BorderSizePixel = 0
+        headGlow.ZIndex = 310
+        headGlow.Parent = meteor
+        local hgc = Instance.new("UICorner")
+        hgc.CornerRadius = UDim.new(1, 0)
+        hgc.Parent = headGlow
+
+        -- Trail (fire tail)
+        local trail = Instance.new("Frame")
+        trail.AnchorPoint = Vector2.new(1, 0.5)
+        trail.Position = UDim2.fromScale(0.5, 0.5)
+        trail.Size = UDim2.fromOffset(math.random(40, 90), 2)
+        trail.BackgroundColor3 = Color3.fromRGB(150, 200, 255)
+        trail.BackgroundTransparency = 0.3
+        trail.BorderSizePixel = 0
+        trail.ZIndex = 309
+        trail.Parent = meteor
+
+        local trailGrad = Instance.new("UIGradient")
+        trailGrad.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 1),
+            NumberSequenceKeypoint.new(0.3, 0.2),
+            NumberSequenceKeypoint.new(1, 0),
+        })
+        trailGrad.Parent = trail
+
+        -- Trail sparks (3-5 titik)
+        for i = 1, math.random(3, 5) do
+            local spark = Instance.new("Frame")
+            spark.AnchorPoint = Vector2.new(0.5, 0.5)
+            spark.Position = UDim2.new(1, math.random(-40, -10), 0.5, math.random(-3, 3))
+            spark.Size = UDim2.fromOffset(math.random(2, 4), math.random(2, 4))
+            spark.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            spark.BackgroundTransparency = 0.4
+            spark.BorderSizePixel = 0
+            spark.ZIndex = 308
+            spark.Parent = meteor
+            local sc = Instance.new("UICorner")
+            sc.CornerRadius = UDim.new(1, 0)
+            sc.Parent = spark
+        end
+
+        -- Duration & end position
+        local duration = math.random(120, 200) / 100
+        local endX = startX + math.random(-80, 80)
+        local endY = winH + 100
+
+        -- Animate fall
+        TweenService:Create(meteor, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
+            Position = UDim2.fromOffset(endX, endY),
+            Rotation = 45,
+        }):Play()
+
+        -- Fade out near end
+        task.delay(duration * 0.8, function()
+            if meteor.Parent then
+                TweenService:Create(meteor, TweenInfo.new(duration * 0.2), {
+                    BackgroundTransparency = 1,
+                }):Play()
+                TweenService:Create(headGlow, TweenInfo.new(duration * 0.2), {
+                    BackgroundTransparency = 1,
+                }):Play()
+                TweenService:Create(trail, TweenInfo.new(duration * 0.2), {
+                    BackgroundTransparency = 1,
+                }):Play()
+            end
+        end)
+
+        -- Cleanup
+        task.delay(duration + 0.1, function()
+            if meteor then meteor:Destroy() end
+        end)
+    end
+
+    -- Meteor spawner loop (continuous)
+    task.spawn(function()
+        task.wait(0.3)  -- delay awal
+        while meteorActive do
+            spawnMeteor()
+            -- Spawn 1-2 meteor sekaligus, dengan jeda acak
+            if math.random() < 0.3 then
+                task.wait(0.1)
+                spawnMeteor()
+            end
+            task.wait(math.random(30, 90) / 100)
+        end
+    end)
+
+    -- ═══ SCANLINES (subtle) ═══
     local scanlines = Instance.new("Frame")
     scanlines.Size = UDim2.fromScale(1, 1)
     scanlines.BackgroundTransparency = 1
@@ -7072,32 +7301,41 @@ local function buildLoadingScreen(parent)
     scanlines.ClipsDescendants = true
     scanlines.Parent = loading
 
-    for i = 0, math.floor(winH / 4) do
+    for i = 0, math.floor(winH / 5) do
         local line = Instance.new("Frame")
         line.Size = UDim2.new(1, 0, 0, 1)
-        line.Position = UDim2.fromOffset(0, i * 4)
+        line.Position = UDim2.fromOffset(0, i * 5)
         line.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        line.BackgroundTransparency = 0.65
+        line.BackgroundTransparency = 0.85
         line.BorderSizePixel = 0
         line.ZIndex = 320
         line.Parent = scanlines
     end
 
+    -- ═══ NOISE ═══
     local noise = Instance.new("Frame")
     noise.Size = UDim2.fromScale(1, 1)
     noise.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    noise.BackgroundTransparency = 0.93
+    noise.BackgroundTransparency = 0.94
     noise.BorderSizePixel = 0
     noise.ZIndex = 319
     noise.Parent = loading
 
+    task.spawn(function()
+        while noise.Parent do
+            task.wait(0.06)
+            noise.BackgroundTransparency = 0.90 + math.random() * 0.06
+        end
+    end)
+
+    -- ═══ GLITCH BARS ═══
     local glitchBars = {}
-    for i = 1, 6 do
+    for i = 1, 4 do
         local bar = Instance.new("Frame")
-        bar.Size = UDim2.new(1, 0, 0, math.random(2, 5))
+        bar.Size = UDim2.new(1, 0, 0, math.random(2, 4))
         bar.Position = UDim2.fromScale(0, math.random())
-        bar.BackgroundColor3 = Color3.fromRGB(255, 30, 60)
-        bar.BackgroundTransparency = 0.4
+        bar.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
+        bar.BackgroundTransparency = 0.6
         bar.BorderSizePixel = 0
         bar.ZIndex = 330
         bar.Visible = false
@@ -7105,9 +7343,25 @@ local function buildLoadingScreen(parent)
         table.insert(glitchBars, bar)
     end
 
+    task.spawn(function()
+        while loading.Parent do
+            task.wait(math.random(15, 40) / 100)
+            for _, bar in ipairs(glitchBars) do
+                if math.random() < 0.3 then
+                    bar.Visible = true
+                    bar.Position = UDim2.fromScale(0, math.random())
+                    bar.Size = UDim2.new(1, 0, 0, math.random(2, 6))
+                    task.wait(0.03)
+                    bar.Visible = false
+                end
+            end
+        end
+    end)
+
+    -- ═══ VH LOGO (3D + petir) ═══
     local vHolder = Instance.new("Frame")
-    vHolder.Size = UDim2.fromScale(1, 0.55)
-    vHolder.Position = UDim2.fromScale(0, 0.15)
+    vHolder.Size = UDim2.fromScale(1, 0.5)
+    vHolder.Position = UDim2.fromScale(0, 0.18)
     vHolder.BackgroundTransparency = 1
     vHolder.ZIndex = 305
     vHolder.Parent = loading
@@ -7116,7 +7370,7 @@ local function buildLoadingScreen(parent)
     vGlow.Size = UDim2.fromScale(1, 1)
     vGlow.BackgroundTransparency = 1
     vGlow.Text = "V"
-    vGlow.TextColor3 = Color3.fromRGB(255, 30, 60)
+    vGlow.TextColor3 = Color3.fromRGB(100, 200, 255)
     vGlow.TextTransparency = 0.3
     vGlow.Font = Enum.Font.GothamBlack
     vGlow.TextSize = 1
@@ -7157,109 +7411,111 @@ local function buildLoadingScreen(parent)
     vLabel.ZIndex = 306
     vLabel.Parent = vHolder
 
-    local lightningHolder = Instance.new("Frame")
-    lightningHolder.Size = UDim2.fromScale(1, 1)
-    lightningHolder.BackgroundTransparency = 1
-    lightningHolder.ZIndex = 340
-    lightningHolder.ClipsDescendants = true
-    lightningHolder.Parent = loading
+    -- Glitch anim
+    task.spawn(function()
+        while loading.Parent do
+            task.wait(math.random(8, 20) / 100)
+            local offset = math.random(1, 4)
+            vRed.Position = UDim2.fromOffset(-offset, 0)
+            vBlue.Position = UDim2.fromOffset(offset, 0)
+            task.wait(0.05)
+            vRed.Position = UDim2.fromOffset(-1, 0)
+            vBlue.Position = UDim2.fromOffset(1, 0)
+        end
+    end)
 
-    local function createLightning()
-        local bolt = Instance.new("Frame")
-        bolt.BackgroundTransparency = 1
-        bolt.Size = UDim2.fromScale(1, 1)
-        bolt.ZIndex = 341
-        bolt.Parent = lightningHolder
+    -- Glow pulse
+    task.spawn(function()
+        while loading.Parent do
+            task.wait(0.6)
+            TweenService:Create(vGlow, TweenInfo.new(0.6), {TextTransparency = 0.05}):Play()
+            task.wait(0.6)
+            TweenService:Create(vGlow, TweenInfo.new(0.6), {TextTransparency = 0.4}):Play()
+        end
+    end)
 
-        local segments = 8
-        local startX = winW * 0.5
-        local startY = 0
-        local endX = winW * 0.5
-        local endY = winH * 0.5
-
-        for i = 1, segments do
-            local t1 = (i - 1) / segments
-            local t2 = i / segments
-            local x1 = startX + (endX - startX) * t1 + math.random(-20, 20)
-            local y1 = startY + (endY - startY) * t1
-            local x2 = startX + (endX - startX) * t2 + math.random(-20, 20)
-            local y2 = startY + (endY - startY) * t2
-
-            local dx = x2 - x1
-            local dy = y2 - y1
-            local length = math.sqrt(dx * dx + dy * dy)
-            local angle = math.atan2(dy, dx)
-
-            local seg = Instance.new("Frame")
-            seg.Size = UDim2.fromOffset(length, 2)
-            seg.Position = UDim2.fromOffset((x1 + x2) / 2 - length / 2, (y1 + y2) / 2 - 1)
-            seg.Rotation = math.deg(angle)
-            seg.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            seg.BorderSizePixel = 0
-            seg.ZIndex = 342
-            seg.Parent = bolt
-
-            local glowSeg = Instance.new("Frame")
-            glowSeg.Size = UDim2.fromOffset(length + 4, 6)
-            glowSeg.Position = UDim2.fromOffset((x1 + x2) / 2 - (length + 4) / 2, (y1 + y2) / 2 - 3)
-            glowSeg.Rotation = math.deg(angle)
-            glowSeg.BackgroundColor3 = Color3.fromRGB(255, 30, 60)
-            glowSeg.BackgroundTransparency = 0.5
-            glowSeg.BorderSizePixel = 0
-            glowSeg.ZIndex = 341
-            glowSeg.Parent = bolt
+    -- Grow animation
+    task.spawn(function()
+        local endSize = IS_MOBILE and 100 or 130
+        local steps = 40
+        for i = 1, steps do
+            task.wait(1.0 / steps)
+            local t = i / steps
+            local eased = 1 - (1 - t) ^ 3
+            local size = 1 + (endSize - 1) * eased
+            vLabel.TextSize = size
+            vGlow.TextSize = size
+            vRed.TextSize = size
+            vBlue.TextSize = size
         end
 
-        TweenService:Create(bolt, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-        for _, child in ipairs(bolt:GetChildren()) do
-            if child:IsA("Frame") then
-                TweenService:Create(child, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-            end
+        -- Final shake
+        task.wait(0.2)
+        for i = 1, 6 do
+            vLabel.Position = UDim2.fromOffset(math.random(-5, 5), math.random(-5, 5))
+            task.wait(0.04)
+            vLabel.Position = UDim2.fromOffset(0, 0)
         end
-        task.delay(0.4, function()
-            if bolt then bolt:Destroy() end
-        end)
-    end
+    end)
 
+    -- ═══ LOADING TEXT (bottom) ═══
     local loadingText = Instance.new("TextLabel")
     loadingText.Size = UDim2.new(1, -20, 0, 18)
     loadingText.Position = UDim2.new(0, 10, 0, winH - 68)
     loadingText.BackgroundTransparency = 1
     loadingText.Text = "LOADING..."
-    loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    loadingText.TextColor3 = Color3.fromRGB(200, 230, 255)
     loadingText.Font = Enum.Font.GothamBlack
     loadingText.TextSize = IS_MOBILE and 11 or 12
     loadingText.TextXAlignment = Enum.TextXAlignment.Left
     loadingText.ZIndex = 306
     loadingText.Parent = loading
 
+    -- Progress bar bg
     local barBg = Instance.new("Frame")
     barBg.Size = UDim2.new(1, -20, 0, 6)
     barBg.Position = UDim2.new(0, 10, 0, winH - 44)
-    barBg.BackgroundColor3 = Color3.fromRGB(30, 5, 10)
+    barBg.BackgroundColor3 = Color3.fromRGB(20, 30, 60)
     barBg.BorderSizePixel = 0
     barBg.ZIndex = 305
     barBg.Parent = loading
 
+    local barCorner = Instance.new("UICorner")
+    barCorner.CornerRadius = UDim.new(1, 0)
+    barCorner.Parent = barBg
+
     local barStroke = Instance.new("UIStroke")
-    barStroke.Color = Color3.fromRGB(255, 30, 60)
+    barStroke.Color = Color3.fromRGB(80, 200, 255)
     barStroke.Thickness = 1
     barStroke.Transparency = 0.3
     barStroke.Parent = barBg
 
     local barFill = Instance.new("Frame")
     barFill.Size = UDim2.new(0, 0, 1, 0)
-    barFill.BackgroundColor3 = Color3.fromRGB(255, 30, 60)
+    barFill.BackgroundColor3 = Color3.fromRGB(80, 200, 255)
     barFill.BorderSizePixel = 0
     barFill.ZIndex = 306
     barFill.Parent = barBg
 
+    local barFillCorner = Instance.new("UICorner")
+    barFillCorner.CornerRadius = UDim.new(1, 0)
+    barFillCorner.Parent = barFill
+
+    local barFillGlow = Instance.new("UIGradient")
+    barFillGlow.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 200, 255)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(150, 220, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 200, 255)),
+    })
+    barFillGlow.Parent = barFill
+
+    -- Percent
     local percentLbl = Instance.new("TextLabel")
     percentLbl.Size = UDim2.new(1, -20, 0, 14)
     percentLbl.Position = UDim2.new(0, 10, 0, winH - 26)
     percentLbl.BackgroundTransparency = 1
     percentLbl.Text = "0%"
-    percentLbl.TextColor3 = Color3.fromRGB(255, 30, 60)
+    percentLbl.TextColor3 = Color3.fromRGB(80, 200, 255)
     percentLbl.Font = Enum.Font.GothamBlack
     percentLbl.TextSize = 10
     percentLbl.TextXAlignment = Enum.TextXAlignment.Right
@@ -7271,80 +7527,14 @@ local function buildLoadingScreen(parent)
     brandLbl.Position = UDim2.new(0, 10, 0, winH - 26)
     brandLbl.BackgroundTransparency = 1
     brandLbl.Text = "V R I L Z H U B"
-    brandLbl.TextColor3 = Color3.fromRGB(150, 80, 100)
+    brandLbl.TextColor3 = Color3.fromRGB(100, 140, 180)
     brandLbl.Font = Enum.Font.GothamBold
     brandLbl.TextSize = 10
     brandLbl.TextXAlignment = Enum.TextXAlignment.Left
     brandLbl.ZIndex = 306
     brandLbl.Parent = loading
 
-    task.spawn(function()
-        while loading.Parent do
-            task.wait(math.random(8, 25) / 100)
-            for _, bar in ipairs(glitchBars) do
-                if math.random() < 0.4 then
-                    bar.Visible = true
-                    bar.Position = UDim2.fromScale(0, math.random())
-                    bar.Size = UDim2.new(1, 0, 0, math.random(2, 10))
-                    task.wait(0.03)
-                    bar.Visible = false
-                end
-            end
-        end
-    end)
-
-    task.spawn(function()
-        while loading.Parent do
-            task.wait(math.random(6, 15) / 100)
-            local offset = math.random(1, 6)
-            vRed.Position = UDim2.fromOffset(-offset, 0)
-            vBlue.Position = UDim2.fromOffset(offset, 0)
-            task.wait(0.05)
-            vRed.Position = UDim2.fromOffset(-1, 0)
-            vBlue.Position = UDim2.fromOffset(1, 0)
-        end
-    end)
-
-    task.spawn(function()
-        while loading.Parent do
-            task.wait(0.05)
-            noise.BackgroundTransparency = 0.88 + math.random() * 0.08
-        end
-    end)
-
-    task.spawn(function()
-        while loading.Parent do
-            task.wait(0.5)
-            TweenService:Create(vGlow, TweenInfo.new(0.5), {TextTransparency = 0.1}):Play()
-            task.wait(0.5)
-            TweenService:Create(vGlow, TweenInfo.new(0.5), {TextTransparency = 0.4}):Play()
-        end
-    end)
-
-    task.spawn(function()
-        local startSize = 1
-        local endSize = IS_MOBILE and 130 or 170
-        local duration = 1.2
-        local steps = 40
-        for i = 1, steps do
-            task.wait(duration / steps)
-            local t = i / steps
-            local eased = 1 - (1 - t) ^ 3
-            local size = startSize + (endSize - startSize) * eased
-            vLabel.TextSize = size
-            vGlow.TextSize = size
-            vRed.TextSize = size
-            vBlue.TextSize = size
-        end
-
-        task.wait(0.2)
-        for i = 1, 6 do
-            vLabel.Position = UDim2.fromOffset(math.random(-6, 6), math.random(-6, 6))
-            task.wait(0.04)
-            vLabel.Position = UDim2.fromOffset(0, 0)
-        end
-    end)
-
+    -- ═══ MAIN LOADING SEQUENCE ═══
     task.spawn(function()
         loading.Size = UDim2.fromOffset(0, 0)
         TweenService:Create(loading, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
@@ -7383,6 +7573,7 @@ local function buildLoadingScreen(parent)
         loadingText.Text = "READY!"
         percentLbl.Text = "100%"
 
+        -- Final shake
         for i = 1, 8 do
             loading.Position = UDim2.fromScale(0.5 + math.random(-15, 15)/1000, 0.5 + math.random(-15, 15)/1000)
             task.wait(0.03)
@@ -7391,17 +7582,19 @@ local function buildLoadingScreen(parent)
 
         task.wait(0.6)
 
+        -- Stop meteor spawn
+        meteorActive = false
+
         TweenService:Create(loading, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
             Size = UDim2.fromOffset(0, 0)
         }):Play()
         task.wait(0.5)
 
-                if loading then loading:Destroy() end
+        if loading then loading:Destroy() end
         buildMainWindow(parent)
         notify("Welcome, " .. LocalPlayer.DisplayName, "success")
 
-        -- ⭐ FIX: Features.Init() HANYA dipanggil di sini
-        -- Setelah key valid + loading selesai + main window muncul
+        -- Features.Init after UI ready
         task.spawn(function()
             task.wait(0.5)
             local timeout = 0
