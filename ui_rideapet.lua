@@ -4783,18 +4783,19 @@ do
     end)
 end
 
-    -- TAB EGG
+    -- TAB EGG (2 KOLOM)
 do
-    local eggPage = createPage("Egg")
+    local eggPage, eggLeft, eggRight = createTwoColumnPage("Egg")
     pages.Egg = eggPage
 
-    local eggEspCard, eggEspContent = makeCard(eggPage, "EGG ESP", 1)
+    -- ═══ KOLOM KIRI ═══
+    local eggEspCard, eggEspContent = makeCard(eggLeft, "EGG ESP", 1)
     makeToggle(eggEspContent, "Enable Egg ESP", false, function(v) Shared.ESP_Eggs_Enabled = v end)
     makeToggle(eggEspContent, "Show Name", false, function(v) Shared.ESP_EggName_Enabled = v end)
     makeToggle(eggEspContent, "Show Luck", false, function(v) Shared.ESP_EggLuck_Enabled = v end)
 
-     -- ===== EGG PLOT (HATCH + LUCK + PLANT) =====
-    local hatchLuckCard, hatchLuckContent = makeCard(eggPage, "🥚 EGG PLOT", 2)
+    -- ═══ KOLOM KANAN ═══
+    local hatchLuckCard, hatchLuckContent = makeCard(eggRight, "🥚 EGG PLOT", 1)
 
     -- Auto Hatch
     makeToggle(hatchLuckContent, "Auto Hatch", false, function(v)
@@ -4849,7 +4850,6 @@ do
     plantFilterLbl.ZIndex = 3
     plantFilterLbl.Parent = hatchLuckContent
 
-        -- Bikin list baru: "None" + semua egg
     local PlantFilterList = {"None"}
     for _, eggN in ipairs(EggNames) do
         table.insert(PlantFilterList, eggN)
@@ -4859,7 +4859,7 @@ do
         Shared.AutoPlantEgg_Filter = v
         local F = getFeatures()
         if F and F.setAutoPlantFilter then F.setAutoPlantFilter(v) end
-                if v == "None" then
+        if v == "None" then
             notify("Plant Filter: None (pick an egg first!)", "warning")
         else
             notify("Plant Filter: " .. v, "info")
@@ -4867,29 +4867,32 @@ do
     end)
 end
 
-    -- TAB VISUAL
+     -- TAB VISUAL (2 KOLOM)
 do
-    local visualPage = createPage("Visual")
+    local visualPage, visLeft, visRight = createTwoColumnPage("Visual")
     pages.Visual = visualPage
 
-    local pEspCard, pEspContent = makeCard(visualPage, "PLAYER ESP", 1)
+    -- ═══ KOLOM KIRI ═══
+    local pEspCard, pEspContent = makeCard(visLeft, "PLAYER ESP", 1)
     makeToggle(pEspContent, "Player ESP", false, function(v) Shared.ESP_Players_Enabled = v end)
     makeToggle(pEspContent, "Player Chams", false, function(v) Shared.ESP_PlayerChams_Enabled = v end)
     makeToggle(pEspContent, "Player Studs", false, function(v) Shared.ESP_PlayerStuds_Enabled = v end)
 
-    local petEspCard, petEspContent = makeCard(visualPage, "PET ESP", 2)
+    -- ═══ KOLOM KANAN ═══
+    local petEspCard, petEspContent = makeCard(visRight, "PET ESP", 1)
     makeToggle(petEspContent, "Pet ESP", false, function(v) Shared.ESP_Pets_Enabled = v end)
     makeToggle(petEspContent, "Show Name", false, function(v) Shared.ESP_PetName_Enabled = v end)
     makeToggle(petEspContent, "Show Cash", false, function(v) Shared.ESP_PetCash_Enabled = v end)
     makeToggle(petEspContent, "Show Speed", false, function(v) Shared.ESP_PetSpeed_Enabled = v end)
 end
 
-    -- TAB AUTO
+       -- TAB AUTO (2 KOLOM)
 do
-    local autoPage = createPage("Auto")
+    local autoPage, autoLeft, autoRight = createTwoColumnPage("Auto")
     pages.Auto = autoPage
 
-    local speedCard, speedContent = makeCard(autoPage, "SPEED", 1)
+    -- ═══ KOLOM KIRI: SPEED + FLY ═══
+    local speedCard, speedContent = makeCard(autoLeft, "SPEED", 1)
     makeToggle(speedContent, "Enable Speed", false, function(v) Shared.Speed_Enabled = v end)
 
     local speedLbl = Instance.new("TextLabel")
@@ -4916,7 +4919,7 @@ do
     sliderFill.BackgroundColor3 = C.Accent
     sliderFill.BorderSizePixel = 0
     sliderFill.Parent = sliderBg
-        local sfc = Instance.new("UICorner"); sfc.CornerRadius = UDim.new(1,0); sfc.Parent = sliderFill
+    local sfc = Instance.new("UICorner"); sfc.CornerRadius = UDim.new(1,0); sfc.Parent = sliderFill
 
     local sliderBtn = Instance.new("TextButton")
     sliderBtn.Size = UDim2.new(1, 0, 1, 20)
@@ -4936,7 +4939,7 @@ do
             draggingSlider = false
         end
     end)
-       UserInputService.InputChanged:Connect(function(i)
+    UserInputService.InputChanged:Connect(function(i)
         if draggingSlider and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
             local mouseX = UserInputService:GetMouseLocation().X
             local rel = math.clamp((mouseX - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
@@ -4944,35 +4947,24 @@ do
             sliderFill.Size = UDim2.new(rel, 0, 1, 0)
             speedLbl.Text = "Speed: " .. Shared.Speed_Value
             local F = getFeatures()
-            if F and F.setSpeed then
-                F.setSpeed(Shared.Speed_Value)
-            end
+            if F and F.setSpeed then F.setSpeed(Shared.Speed_Value) end
         end
     end)
 
-    -- Infinity Jump section (dipanggil dari fungsi terpisah)
+    -- Infinity Jump (masih di card SPEED)
     buildInfinityJumpSection(speedContent, makeToggle, C, CFG, notify, registerTheme)
-    -- ═══════════════════════════════════════════
-    -- 🛸 CHARACTER FLY CARD
-    -- ═══════════════════════════════════════════
-do
-    local flyCard, flyContent = makeCard(autoPage, "🛸 CHARACTER FLY", 2)
 
-    -- Toggle Enable Fly
+    -- CHARACTER FLY CARD (kiri bawah)
+    local flyCard, flyContent = makeCard(autoLeft, "🛸 CHARACTER FLY", 2)
+
     makeToggle(flyContent, "Enable Fly", false, function(v)
         Shared.Fly_Enabled = v
         local F = getFeatures()
-        if F and F.setFlyEnabled then
-            F.setFlyEnabled(v)
-        end
-        if v then
-            notify("🛸 Fly: ON", "success")
-        else
-            notify("🛸 Fly: OFF", "info")
-        end
+        if F and F.setFlyEnabled then F.setFlyEnabled(v) end
+        if v then notify("🛸 Fly: ON", "success")
+        else notify("🛸 Fly: OFF", "info") end
     end)
 
-    -- Height Dropdown
     local flyHeightLbl = Instance.new("TextLabel")
     flyHeightLbl.Size = UDim2.new(1, 0, 0, 16)
     flyHeightLbl.BackgroundTransparency = 1
@@ -4998,13 +4990,10 @@ do
         local h = tonumber(v) or 100
         Shared.Fly_Height = h
         local F = getFeatures()
-        if F and F.setFlyHeight then
-            F.setFlyHeight(h)
-        end
+        if F and F.setFlyHeight then F.setFlyHeight(h) end
         notify("🛸 Fly Height: " .. h .. " studs", "info")
     end)
 
-    -- Speed Dropdown
     local flySpeedLbl = Instance.new("TextLabel")
     flySpeedLbl.Size = UDim2.new(1, 0, 0, 16)
     flySpeedLbl.BackgroundTransparency = 1
@@ -5030,14 +5019,12 @@ do
         local s = tonumber(v) or 300
         Shared.Fly_Speed = s
         local F = getFeatures()
-        if F and F.setFlySpeed then
-            F.setFlySpeed(s)
-        end
+        if F and F.setFlySpeed then F.setFlySpeed(s) end
         notify("🛸 Fly Speed: " .. s .. " studs/s", "info")
     end)
-end
-    -- ═══════════════════════════════════════════
-    local ipCard, ipContent = makeCard(autoPage, "INSTANT PICKUP", 3)
+
+    -- ═══ KOLOM KANAN: INSTANT PICKUP + OTHER AUTO ═══
+    local ipCard, ipContent = makeCard(autoRight, "INSTANT PICKUP", 1)
     makeToggle(ipContent, "Enable Instant Pickup", false, function(v) Shared.InstantPickup_Enabled = v end)
 
     local ipNote = Instance.new("TextLabel")
@@ -5051,17 +5038,16 @@ end
     ipNote.LayoutOrder = 2
     ipNote.Parent = ipContent
 
-    local autoCard, autoContent = makeCard(autoPage, "OTHER AUTO", 4)
-    
-    -- Wrap semua variable dropdown di do...end biar gak numpuk local register
+    local autoCard, autoContent = makeCard(autoRight, "OTHER AUTO", 2)
+
     do
         makeToggle(autoContent, "Auto Ride Pet", true, function(v)
-    Shared.AutoRidePet_Enabled = v
-    local F = getFeatures()
-    if F and F.setAutoRideEnabled then F.setAutoRideEnabled(v) end
-    if v then notify("🐉 Auto Ride Pet: ON", "success")
-    else notify("🐉 Auto Ride Pet: OFF", "info") end
-end)
+            Shared.AutoRidePet_Enabled = v
+            local F = getFeatures()
+            if F and F.setAutoRideEnabled then F.setAutoRideEnabled(v) end
+            if v then notify("🐉 Auto Ride Pet: ON", "success")
+            else notify("🐉 Auto Ride Pet: OFF", "info") end
+        end)
 
         local ridePetLbl = Instance.new("TextLabel")
         ridePetLbl.Size = UDim2.new(1, 0, 0, 16)
@@ -5107,7 +5093,7 @@ end)
             if F and F.setAutoRidePet then F.setAutoRidePet(petName) end
             notify("🐉 Selected: " .. petName, "info")
         end)
-    end  -- ← PENUTUP do...end
+    end
 
     makeToggle(autoContent, "Auto Equip Best", false, function(v) Shared.AutoEquipBest_Enabled = v end)
 end
