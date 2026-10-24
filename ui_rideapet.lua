@@ -9047,6 +9047,7 @@ function UI.Init(sharedState)
     Shared.WebhookURL = loadWebhookURL() or ""
     Shared.WebhookEnabled = false
     Shared.WebhookLastSend = 0
+    Shared.WebhookMentionEveryone = false
 
     -- Live Chat state
     Shared.LiveChat_Messages = {}
