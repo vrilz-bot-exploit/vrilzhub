@@ -3546,6 +3546,7 @@ do
     local handleSize = IS_MOBILE and 32 or 22
     resizeHandle.Size = UDim2.fromOffset(handleSize, handleSize)
     resizeHandle.Position = UDim2.new(1, -(handleSize + 2), 1, -(handleSize + 2))
+    resizeHandle.AnchorPoint = Vector2.new(1, 1)  -- ⭐ FIX
     resizeHandle.BackgroundTransparency = 1
     resizeHandle.Text = "⌟"
     resizeHandle.TextColor3 = C.Accent
@@ -3558,12 +3559,59 @@ do
 
     -- Hit target lebih gede biar gampang di-tap di HP
     local hitPad = Instance.new("TextButton")
+    hitPad.AnchorPoint = Vector2.new(1, 1)  -- ⭐ FIX
     hitPad.Size = UDim2.fromOffset(handleSize + 14, handleSize + 14)
     hitPad.Position = UDim2.new(1, -(handleSize + 9), 1, -(handleSize + 9))
     hitPad.BackgroundTransparency = 1
     hitPad.Text = ""
     hitPad.ZIndex = 99
     hitPad.Parent = main
+
+    local resizing = false
+    local resizeStart, startSize
+    local resizeInput
+
+    local function isResizeInput(i)
+        return i.UserInputType == Enum.UserInputType.MouseButton1
+            or i.UserInputType == Enum.UserInputType.Touch
+    end
+
+    hitPad.InputBegan:Connect(function(i)
+        if isResizeInput(i) then
+            resizing = true
+            resizeStart = i.Position
+            startSize = main.Size
+            resizeInput = i
+
+            i.Changed:Connect(function()
+                if i.UserInputState == Enum.UserInputState.End then
+                    if resizeInput == i then
+                        resizing = false
+                        resizeInput = nil
+                    end
+                end
+            end)
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(i)
+        if resizing and resizeInput == i then
+            if i.UserInputType == Enum.UserInputType.MouseMovement
+                or i.UserInputType == Enum.UserInputType.Touch then
+                local delta = i.Position - resizeStart
+
+                local minW = IS_MOBILE and 260 or 600
+                local minH = IS_MOBILE and 300 or 400
+                local maxW = IS_MOBILE and (viewport.X - 8) or 1200
+                local maxH = IS_MOBILE and (viewport.Y - 20) or 800
+
+                local newX = math.clamp(startSize.X.Offset + delta.X, minW, maxW)
+                local newY = math.clamp(startSize.Y.Offset + delta.Y, minH, maxH)
+                main.Size = UDim2.fromOffset(newX, newY)
+            end
+        end
+    end)
+end
 
     local resizing = false
     local resizeStart, startSize
@@ -6603,55 +6651,52 @@ end)
         end
     end)
 
-    -- Drag handler (PC + Mobile)
+    -- Drag handler (PC + Mobile) — single source of truth
 do
-    local dragging, dragInput, dragStart, startPos
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
+    local dragInput = nil
 
-    local function isDragInput(input)
+    local function isPress(input)
         return input.UserInputType == Enum.UserInputType.MouseButton1
             or input.UserInputType == Enum.UserInputType.Touch
     end
 
-    local function isDragMove(input)
-        return input.UserInputType == Enum.UserInputType.MouseMovement
-            or input.UserInputType == Enum.UserInputType.Touch
-    end
-
     header.InputBegan:Connect(function(input)
-        if isDragInput(input) then
-            -- Jangan drag kalau klik tombol close/min (kanan header)
-            local posX = input.Position.X
-            if posX > (header.AbsolutePosition.X + header.AbsoluteSize.X - 90) then return end
+        if not isPress(input) then return end
 
-            dragging = true
-            dragStart = input.Position
-            startPos = main.Position
+        -- Jangan drag kalau klik tombol close/min (kanan header)
+        local posX = input.Position.X
+        if posX > (header.AbsolutePosition.X + header.AbsoluteSize.X - 90) then return end
 
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    if dragInput == input then
-                        dragging = false
-                        dragInput = nil
-                    end
-                end
-            end)
-        end
-    end)
+        dragging = true
+        dragStart = input.Position
+        startPos = main.Position
+        dragInput = input
 
-    header.InputChanged:Connect(function(input)
-        if isDragMove(input) then
-            dragInput = input
-        end
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End and dragInput == input then
+                dragging = false
+                dragInput = nil
+                dragStart = nil
+                startPos = nil
+            end
+        end)
     end)
 
     UserInputService.InputChanged:Connect(function(input)
-        if dragging and dragInput == input then
-            local delta = input.Position - dragStart
-            main.Position = UDim2.new(
-                startPos.X.Scale, startPos.X.Offset + delta.X,
-                startPos.Y.Scale, startPos.Y.Offset + delta.Y
-            )
+        if not dragging or dragInput ~= input then return end
+        if input.UserInputType ~= Enum.UserInputType.MouseMovement
+            and input.UserInputType ~= Enum.UserInputType.Touch then
+            return
         end
+
+        local delta = input.Position - dragStart
+        main.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        )
     end)
 end
 
