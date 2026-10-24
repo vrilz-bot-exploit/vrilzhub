@@ -3546,7 +3546,7 @@ do
     local handleSize = IS_MOBILE and 32 or 22
     resizeHandle.Size = UDim2.fromOffset(handleSize, handleSize)
     resizeHandle.Position = UDim2.new(1, -(handleSize + 2), 1, -(handleSize + 2))
-    resizeHandle.AnchorPoint = Vector2.new(1, 1)  -- ⭐ FIX
+    resizeHandle.AnchorPoint = Vector2.new(1, 1)
     resizeHandle.BackgroundTransparency = 1
     resizeHandle.Text = "⌟"
     resizeHandle.TextColor3 = C.Accent
@@ -3559,7 +3559,7 @@ do
 
     -- Hit target lebih gede biar gampang di-tap di HP
     local hitPad = Instance.new("TextButton")
-    hitPad.AnchorPoint = Vector2.new(1, 1)  -- ⭐ FIX
+    hitPad.AnchorPoint = Vector2.new(1, 1)
     hitPad.Size = UDim2.fromOffset(handleSize + 14, handleSize + 14)
     hitPad.Position = UDim2.new(1, -(handleSize + 9), 1, -(handleSize + 9))
     hitPad.BackgroundTransparency = 1
@@ -3600,53 +3600,6 @@ do
                 or i.UserInputType == Enum.UserInputType.Touch then
                 local delta = i.Position - resizeStart
 
-                local minW = IS_MOBILE and 260 or 600
-                local minH = IS_MOBILE and 300 or 400
-                local maxW = IS_MOBILE and (viewport.X - 8) or 1200
-                local maxH = IS_MOBILE and (viewport.Y - 20) or 800
-
-                local newX = math.clamp(startSize.X.Offset + delta.X, minW, maxW)
-                local newY = math.clamp(startSize.Y.Offset + delta.Y, minH, maxH)
-                main.Size = UDim2.fromOffset(newX, newY)
-            end
-        end
-    end)
-end
-
-    local resizing = false
-    local resizeStart, startSize
-    local resizeInput
-
-    local function isResizeInput(i)
-        return i.UserInputType == Enum.UserInputType.MouseButton1
-            or i.UserInputType == Enum.UserInputType.Touch
-    end
-
-    hitPad.InputBegan:Connect(function(i)
-        if isResizeInput(i) then
-            resizing = true
-            resizeStart = i.Position
-            startSize = main.Size
-            resizeInput = i
-
-            i.Changed:Connect(function()
-                if i.UserInputState == Enum.UserInputState.End then
-                    if resizeInput == i then
-                        resizing = false
-                        resizeInput = nil
-                    end
-                end
-            end)
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(i)
-        if resizing and resizeInput == i then
-            if i.UserInputType == Enum.UserInputType.MouseMovement
-                or i.UserInputType == Enum.UserInputType.Touch then
-                local delta = i.Position - resizeStart
-
-                -- Batas minimum / maksimum
                 local minW = IS_MOBILE and 260 or 600
                 local minH = IS_MOBILE and 300 or 400
                 local maxW = IS_MOBILE and (viewport.X - 8) or 1200
