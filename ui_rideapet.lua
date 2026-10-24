@@ -5094,7 +5094,7 @@ end
     -- 🏆 TAB WEBHOOK — PLATINUM EDITION
     -- ═══════════════════════════════════════════════════════════
     do
-        local webhookPage = createPage("Webhook")
+        local webhookPage, webhookLeft, webhookRight = createTwoColumnPage("Webhook")
         pages.Webhook = webhookPage
 
         -- ╔═══════════════════════════════════════════════════════╗
@@ -5107,7 +5107,7 @@ end
         heroFrame.LayoutOrder = 1
         heroFrame.ClipsDescendants = true
         heroFrame.ZIndex = 3
-        heroFrame.Parent = webhookPage
+        heroFrame.Parent = webhookLeft
 
         local heroCorner = Instance.new("UICorner")
         heroCorner.CornerRadius = UDim.new(0, 18)
@@ -5327,7 +5327,7 @@ end
         -- ╔═══════════════════════════════════════════════════════╗
         -- ║  TOGGLE ENABLE WEBHOOK                                 ║
         -- ╚═══════════════════════════════════════════════════════╝
-        local toggleCard, toggleContent = makeCard(webhookPage, "⚡ SYSTEM CONTROL", 2)
+        local toggleCard, toggleContent = makeCard(webhookLeft, "⚡ SYSTEM CONTROL", 2)
 
         makeToggle(toggleContent, "Enable Webhook System", Shared.WebhookEnabled or false, function(v)
             Shared.WebhookEnabled = v
@@ -5349,7 +5349,7 @@ end
         -- ╔═══════════════════════════════════════════════════════╗
         -- ║  URL INPUT — Platinum Style                            ║
         -- ╚═══════════════════════════════════════════════════════╝
-        local urlCard, urlContent = makeCard(webhookPage, "🔗 WEBHOOK ENDPOINT", 3)
+        local urlCard, urlContent = makeCard(webhookRight, "🔗 WEBHOOK ENDPOINT", 1)
 
         local urlHint = Instance.new("TextLabel")
         urlHint.Size = UDim2.new(1, 0, 0, 14)
@@ -5469,7 +5469,7 @@ end
         -- ╔═══════════════════════════════════════════════════════╗
         -- ║  TEST BUTTON — Platinum Shine                          ║
         -- ╚═══════════════════════════════════════════════════════╝
-        local testCard, testContent = makeCard(webhookPage, "🧪 TEST CONNECTION", 4)
+        local testCard, testContent = makeCard(webhookRight, "🧪 TEST CONNECTION", 2)
 
         local testDesc = Instance.new("TextLabel")
         testDesc.Size = UDim2.new(1, 0, 0, 30)
@@ -5652,7 +5652,7 @@ end
         -- ╔═══════════════════════════════════════════════════════╗
         -- ║  INFO PANEL — Platinum List                            ║
         -- ╚═══════════════════════════════════════════════════════╝
-        local infoCard, infoContent = makeCard(webhookPage, "💎 PLATINUM FEATURES", 5)
+        local infoCard, infoContent = makeCard(webhookRight, "💎 PLATINUM FEATURES", 3)
 
         local features = {
             { icon = "🎯", title = "Rare Egg Alerts",  desc = "Auto-notify saat rare egg spawn",     color = C.Accent },
@@ -5740,13 +5740,13 @@ end
         end
     end
 
-       -- TAB SETTINGS
+              -- TAB SETTINGS
     do
-        local setPage = createPage("Settings")
+        local setPage, setLeft, setRight = createTwoColumnPage("Settings")
         pages.Settings = setPage
 
         -- ===== ANTI-AFK CARD =====
-        local afkCard, afkContent = makeCard(setPage, "🛡 ANTI-AFK", 0)
+        local afkCard, afkContent = makeCard(setLeft, "🛡 ANTI-AFK", 1)
 
         local afkLbl = Instance.new("TextLabel")
         afkLbl.Size = UDim2.new(1, 0, 0, 16)
@@ -5767,7 +5767,7 @@ end
         end)
 
         -- ===== THEME CARD =====
-        local themeCard, themeContent = makeCard(setPage, "THEME", 1)
+        local themeCard, themeContent = makeCard(setLeft, "THEME", 2)
 
         local themeLbl = Instance.new("TextLabel")
         themeLbl.Size = UDim2.new(1, 0, 0, 16)
@@ -5787,7 +5787,7 @@ end
         end)
 
         -- ===== TITLE CARD =====
-        local titleCard, titleContent = makeCard(setPage, "👑 TITLE", 3)
+        local titleCard, titleContent = makeCard(setLeft, "👑 TITLE", 3)
 
         local titleLbl = Instance.new("TextLabel")
         titleLbl.Size = UDim2.new(1, 0, 0, 16)
@@ -5940,7 +5940,7 @@ end
         _G.VRILZ_RebuildCustomTitle = rebuildCustomTitleUI
 
         -- ===== STEAL MODE CARD =====
-        local stealModeCard, stealModeContent = makeCard(setPage, "STEAL MODE", 2)
+        local stealModeCard, stealModeContent = makeCard(setRight, "STEAL MODE", 1)
 
         local stealModeLbl = Instance.new("TextLabel")
         stealModeLbl.Size = UDim2.new(1, 0, 0, 16)
@@ -5959,7 +5959,7 @@ end
         end)
 
         -- ===== LIVE CHAT CARD =====
-        local chatToggleCard, chatToggleContent = makeCard(setPage, "💬 LIVE CHAT", 5)
+        local chatToggleCard, chatToggleContent = makeCard(setRight, "💬 LIVE CHAT", 2)
         local liveChatWin = buildLiveChatWindow(screenGui)
 
         makeToggle(chatToggleContent, "Show Live Chat Window", false, function(v)
@@ -5987,7 +5987,7 @@ end
         chatHint.Parent = chatToggleContent
 
         -- ===== GRAPHICS CARD =====
-        local fpsCard, fpsContent = makeCard(setPage, "⚡ GRAPHICS", 6)
+        local fpsCard, fpsContent = makeCard(setRight, "⚡ GRAPHICS", 3)
         local fpsWin = buildFPSWindow(screenGui)
         UI._fpsWindow = fpsWin
 
