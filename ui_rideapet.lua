@@ -3997,21 +3997,6 @@ do
     end)
 end
 
-       -- Keep the Info tab independently scrollable all the way to the Discord copy button.
-    do
-        local infoLayout = infoPage:FindFirstChildOfClass("UIListLayout")
-        if infoLayout then
-            infoPage.AutomaticCanvasSize = Enum.AutomaticSize.None
-            infoPage.ScrollingDirection = Enum.ScrollingDirection.Y
-            infoPage.ScrollingEnabled = true
-            local function syncInfoCanvas()
-                infoPage.CanvasSize = UDim2.new(0, 0, 0, infoLayout.AbsoluteContentSize.Y + 50)
-            end
-            infoLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(syncInfoCanvas)
-            task.defer(syncInfoCanvas)
-        end
-    end
-end
     -- Lightweight 3D egg preview used only by the prediction/info cards.
     -- It reads an existing rendered egg model when available and falls back to a simple 3D egg.
     local function makeEggPreview(parent, eggName)
