@@ -1886,7 +1886,9 @@ end
 
 local RARITY_ORDER = {
     Common = 1, Uncommon = 2, Rare = 3, Epic = 4,
-    Legendary = 5, Mythic = 6, Divine = 7, Ethereal = 8, Secret = 9,
+    Legendary = 5, Mythic = 6, Divine = 7,
+    Secret = 8,
+    Ethereal = 9,
 }
 
 local function getEggRarity(eggName)
@@ -2374,7 +2376,9 @@ end
 local function getNotifThreshold()
     local t = {
         Common = 1, Uncommon = 2, Rare = 3, Epic = 4,
-        Legendary = 5, Mythic = 6, Divine = 7, Ethereal = 8, Secret = 9,
+        Legendary = 5, Mythic = 6, Divine = 7,
+        Secret = 8,
+        Ethereal = 9,
     }
     return t[Shared.RarityNotifThreshold or "Legendary"] or 5
 end
