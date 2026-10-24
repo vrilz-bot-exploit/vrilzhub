@@ -2848,6 +2848,7 @@ end
 animeBg.ScaleType = Enum.ScaleType.Crop
 animeBg.ZIndex = 1
 animeBg.Parent = main
+registerTheme(animeBg, "Accent", "ImageColor3")
 
 local animeBgCorner = Instance.new("UICorner")
 animeBgCorner.CornerRadius = UDim.new(0, 18)
