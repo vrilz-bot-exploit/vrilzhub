@@ -3014,6 +3014,7 @@ vhFace.TextStrokeColor3 = C.Accent
 vhFace.TextStrokeTransparency = 0
 vhFace.ZIndex = 14
 vhFace.Parent = logoHolder
+registerTheme(vhFace, "Accent", "TextStrokeColor3")  -- ⭐ TAMBAH INI
 
 -- ⚡ EFEK PETIR MERAH ⚡
 local lightningHolder = Instance.new("Frame")
