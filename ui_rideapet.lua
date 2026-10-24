@@ -7004,7 +7004,7 @@ local function buildLoadingScreen(parent)
     local viewport = (workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize) or Vector2.new(1280, 720)
 
     local winW = IS_MOBILE and 340 or 460
-    local winH = IS_MOBILE and 230 or 270
+    local winH = IS_MOBILE and 280 or 320
 
     -- ═══ MAIN CONTAINER ═══
     local loading = Instance.new("Frame")
