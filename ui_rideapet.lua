@@ -3298,43 +3298,77 @@ end)
     pageHolderPad.PaddingRight = UDim.new(0, IS_MOBILE and 6 or 10)
     pageHolderPad.Parent = pageHolder
 
-    if not IS_MOBILE then
-        local resizeHandle = Instance.new("TextButton")
-        resizeHandle.Size = UDim2.fromOffset(22, 22)
-        resizeHandle.Position = UDim2.new(1, -24, 1, -24)
-        resizeHandle.BackgroundTransparency = 1
-        resizeHandle.Text = "⌟"
-        resizeHandle.TextColor3 = C.Accent
-        resizeHandle.TextSize = 17
-        resizeHandle.Font = Enum.Font.GothamBold
-        resizeHandle.AutoButtonColor = false
-        resizeHandle.ZIndex = 100
-        resizeHandle.Parent = main
-        registerTheme(resizeHandle, "Accent", "TextColor3")
+    -- Resize handle (PC + Mobile)
+do
+    local resizeHandle = Instance.new("TextButton")
+    local handleSize = IS_MOBILE and 32 or 22
+    resizeHandle.Size = UDim2.fromOffset(handleSize, handleSize)
+    resizeHandle.Position = UDim2.new(1, -(handleSize + 2), 1, -(handleSize + 2))
+    resizeHandle.BackgroundTransparency = 1
+    resizeHandle.Text = "⌟"
+    resizeHandle.TextColor3 = C.Accent
+    resizeHandle.TextSize = IS_MOBILE and 22 or 17
+    resizeHandle.Font = Enum.Font.GothamBold
+    resizeHandle.AutoButtonColor = false
+    resizeHandle.ZIndex = 100
+    resizeHandle.Parent = main
+    registerTheme(resizeHandle, "Accent", "TextColor3")
 
-        local resizing = false
-        local resizeStart, startSize
-        resizeHandle.InputBegan:Connect(function(i)
-            if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                resizing = true
-                resizeStart = i.Position
-                startSize = main.Size
-            end
-        end)
-        UserInputService.InputChanged:Connect(function(i)
-            if resizing and i.UserInputType == Enum.UserInputType.MouseMovement then
+    -- Hit target lebih gede biar gampang di-tap di HP
+    local hitPad = Instance.new("TextButton")
+    hitPad.Size = UDim2.fromOffset(handleSize + 14, handleSize + 14)
+    hitPad.Position = UDim2.new(1, -(handleSize + 9), 1, -(handleSize + 9))
+    hitPad.BackgroundTransparency = 1
+    hitPad.Text = ""
+    hitPad.ZIndex = 99
+    hitPad.Parent = main
+
+    local resizing = false
+    local resizeStart, startSize
+    local resizeInput
+
+    local function isResizeInput(i)
+        return i.UserInputType == Enum.UserInputType.MouseButton1
+            or i.UserInputType == Enum.UserInputType.Touch
+    end
+
+    hitPad.InputBegan:Connect(function(i)
+        if isResizeInput(i) then
+            resizing = true
+            resizeStart = i.Position
+            startSize = main.Size
+            resizeInput = i
+
+            i.Changed:Connect(function()
+                if i.UserInputState == Enum.UserInputState.End then
+                    if resizeInput == i then
+                        resizing = false
+                        resizeInput = nil
+                    end
+                end
+            end)
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(i)
+        if resizing and resizeInput == i then
+            if i.UserInputType == Enum.UserInputType.MouseMovement
+                or i.UserInputType == Enum.UserInputType.Touch then
                 local delta = i.Position - resizeStart
-                local newX = math.clamp(startSize.X.Offset + delta.X, 600, 1200)
-                local newY = math.clamp(startSize.Y.Offset + delta.Y, 400, 800)
+
+                -- Batas minimum / maksimum
+                local minW = IS_MOBILE and 260 or 600
+                local minH = IS_MOBILE and 300 or 400
+                local maxW = IS_MOBILE and (viewport.X - 8) or 1200
+                local maxH = IS_MOBILE and (viewport.Y - 20) or 800
+
+                local newX = math.clamp(startSize.X.Offset + delta.X, minW, maxW)
+                local newY = math.clamp(startSize.Y.Offset + delta.Y, minH, maxH)
                 main.Size = UDim2.fromOffset(newX, newY)
             end
-        end)
-        UserInputService.InputEnded:Connect(function(i)
-            if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                resizing = false
-            end
-        end)
-    end
+        end
+    end)
+end
 
     -- OPEN BUTTON
     local openBtn = Instance.new("TextButton")
@@ -6313,38 +6347,57 @@ end
         end
     end)
 
-    -- Drag handler
-    do
-        local dragging, dragInput, dragStart, startPos
-        header.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                local mouseX = UserInputService:GetMouseLocation().X
-                if mouseX > (header.AbsolutePosition.X + header.AbsoluteSize.X - 90) then return end
-                dragging = true
-                dragStart = input.Position
-                startPos = main.Position
-                input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then
-                        dragging = false
-                    end
-                end)
-            end
-        end)
-        header.InputChanged:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseMovement then
-                dragInput = input
-            end
-        end)
-        UserInputService.InputChanged:Connect(function(input)
-            if input == dragInput and dragging then
-                local delta = input.Position - dragStart
-                main.Position = UDim2.new(
-                    startPos.X.Scale, startPos.X.Offset + delta.X,
-                    startPos.Y.Scale, startPos.Y.Offset + delta.Y
-                )
-            end
-        end)
+    -- Drag handler (PC + Mobile)
+do
+    local dragging, dragInput, dragStart, startPos
+
+    local function isDragInput(input)
+        return input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch
     end
+
+    local function isDragMove(input)
+        return input.UserInputType == Enum.UserInputType.MouseMovement
+            or input.UserInputType == Enum.UserInputType.Touch
+    end
+
+    header.InputBegan:Connect(function(input)
+        if isDragInput(input) then
+            -- Jangan drag kalau klik tombol close/min (kanan header)
+            local posX = input.Position.X
+            if posX > (header.AbsolutePosition.X + header.AbsoluteSize.X - 90) then return end
+
+            dragging = true
+            dragStart = input.Position
+            startPos = main.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    if dragInput == input then
+                        dragging = false
+                        dragInput = nil
+                    end
+                end
+            end)
+        end
+    end)
+
+    header.InputChanged:Connect(function(input)
+        if isDragMove(input) then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and dragInput == input then
+            local delta = input.Position - dragStart
+            main.Position = UDim2.new(
+                startPos.X.Scale, startPos.X.Offset + delta.X,
+                startPos.Y.Scale, startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
 
 -- ⭐ PANGGIL EGG EXECUTOR DI SINI
     buildEggExecutorGUI(screenGui)
