@@ -95,7 +95,9 @@ local EggNames = {
     "Bloom Egg", "Aurora Egg", "White Egg", "Brown Egg",
     -- Tambahan dari GameData:
     "Flaming Egg", "Mushroom Egg", "Asteroid Egg", "Giant Egg",
-    "Diamond Egg", "Dragon Egg"
+    "Diamond Egg", "Dragon Egg",
+    -- ⭐ BARU:
+    "Seraph Egg", "Halloween Egg"
 }
 
 -- ====== RARITY ======
@@ -9512,7 +9514,6 @@ function UI.Init(sharedState)
     Shared.AutoMutation_Enabled = false
     Shared.MutationReturn_Enabled = false
     Shared.ReturnMode = "Step"
-    Shared.MutationStealMode = "Rarity"   -- "Rarity" atau "Name"
         Shared.MutationSelectedEggs = {
         ["Cherub Egg"] = false, ["Volcanic Egg"] = false, ["Blackhole Egg"] = false,
         ["Solaris Egg"] = false, ["Galaxy Egg"] = false, ["Crystal Egg"] = false,
@@ -9524,6 +9525,8 @@ function UI.Init(sharedState)
         ["Aurora Egg"] = false, ["White Egg"] = false, ["Brown Egg"] = false,
         ["Flaming Egg"] = false, ["Mushroom Egg"] = false, ["Asteroid Egg"] = false,
         ["Giant Egg"] = false, ["Diamond Egg"] = false, ["Dragon Egg"] = false,
+        -- ⭐ BARU:
+        ["Seraph Egg"] = false, ["Halloween Egg"] = false,
     }
     Shared.FPSBoost_Enabled = false
     Shared.HD4K_Enabled = false
