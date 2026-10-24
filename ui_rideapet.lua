@@ -23,8 +23,8 @@ local IS_MOBILE = UserInputService.TouchEnabled and not UserInputService.Keyboar
 -- ====== UI CONFIG ======
 local UI_CONFIG = {
     MOBILE = {
-    WIN_W = 520,   -- dari 340 → 420
-    WIN_H = 720,   -- dari 480 → 620
+    WIN_W = 620,
+    WIN_H = 720,
     -- Note: di HP viewport < 452px, ini otomatis di-clamp jadi viewport.X - 32
 
     SIDEBAR_W = 64,     -- dari 58 → 64 (biar icon tab gak kejepit)
