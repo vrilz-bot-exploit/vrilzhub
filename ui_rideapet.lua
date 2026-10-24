@@ -429,60 +429,63 @@ local function setupNotifHolder(parent)
 end
 
 -- ============================================================
--- 🌠 PREMIUM METEOR GLOW NOTIFICATION v2
--- Ganti fungsi notify() lama dengan ini
+-- 🌠 PREMIUM METEOR GLOW NOTIFICATION v3
+-- Meteor jatuh dari atas + text auto-fit (gak pernah keluar)
 -- ============================================================
-
 local function notify(text, type)
     if not NotifHolder then return end
     type = type or "info"
 
-    -- ═══ KONFIG WARNA PER TYPE ═══
+    -- ═══ WARNA PER TYPE ═══
     local color, glowColor, icon, gradientTop, gradientBot
     if type == "success" then
         color = Color3.fromRGB(70, 255, 160)
         glowColor = Color3.fromRGB(40, 255, 130)
         icon = "✓"
-        gradientTop = Color3.fromRGB(20, 55, 38)
+        gradientTop = Color3.fromRGB(22, 60, 42)
         gradientBot = Color3.fromRGB(8, 22, 16)
     elseif type == "error" then
         color = Color3.fromRGB(255, 90, 100)
         glowColor = Color3.fromRGB(255, 40, 70)
         icon = "✕"
-        gradientTop = Color3.fromRGB(58, 22, 26)
+        gradientTop = Color3.fromRGB(62, 24, 28)
         gradientBot = Color3.fromRGB(22, 8, 10)
     elseif type == "warning" then
         color = Color3.fromRGB(255, 210, 70)
         glowColor = Color3.fromRGB(255, 180, 30)
         icon = "!"
-        gradientTop = Color3.fromRGB(58, 45, 15)
+        gradientTop = Color3.fromRGB(62, 48, 18)
         gradientBot = Color3.fromRGB(22, 18, 8)
     else
         color = Color3.fromRGB(100, 200, 255)
         glowColor = Color3.fromRGB(60, 170, 255)
         icon = "✦"
-        gradientTop = Color3.fromRGB(18, 35, 55)
+        gradientTop = Color3.fromRGB(20, 38, 60)
         gradientBot = Color3.fromRGB(8, 15, 28)
     end
 
-    local notifW = CFG.NOTIF_W + 20
-    local notifH = CFG.NOTIF_H + 18
+    -- ═══ UKURAN ADAPTIF (mobile & PC beda) ═══
+    local isMob = IS_MOBILE
+    local vp = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
+    -- Lebar notif: mobile max 88% viewport, PC pake CFG
+    local maxW = isMob and math.min(vp.X - 30, 340) or (CFG.NOTIF_W + 30)
+    local notifW = math.clamp(maxW, 220, 380)
+    local notifH = isMob and 58 or 64
 
     -- ═══ MAIN CONTAINER ═══
     local notif = Instance.new("Frame")
     notif.Size = UDim2.fromOffset(notifW, notifH)
     notif.BackgroundColor3 = gradientBot
-    notif.BackgroundTransparency = 0
     notif.BorderSizePixel = 0
     notif.ZIndex = 501
     notif.ClipsDescendants = false
     notif.Parent = NotifHolder
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 16)
+    corner.CornerRadius = UDim.new(0, 14)
     corner.Parent = notif
 
-    -- ═══ GRADIENT BODY (glassmorphism) ═══
+    -- ═══ GRADIENT BODY ═══
     local bodyGradient = Instance.new("UIGradient")
     bodyGradient.Rotation = 115
     bodyGradient.Color = ColorSequence.new({
@@ -492,139 +495,311 @@ local function notify(text, type)
     })
     bodyGradient.Parent = notif
 
-    -- ═══ OUTER GLOW (meteor halo) ═══
+    -- ═══ OUTER GLOW (2 layer halo) ═══
     local glow1 = Instance.new("Frame")
-    glow1.Name = "GlowOuter"
     glow1.Size = UDim2.new(1, 24, 1, 24)
     glow1.Position = UDim2.new(0.5, 0, 0.5, 0)
     glow1.AnchorPoint = Vector2.new(0.5, 0.5)
     glow1.BackgroundColor3 = glowColor
-    glow1.BackgroundTransparency = 0.88
+    glow1.BackgroundTransparency = 0.85
     glow1.BorderSizePixel = 0
     glow1.ZIndex = 499
     glow1.Parent = notif
-
-    local glow1Corner = Instance.new("UICorner")
-    glow1Corner.CornerRadius = UDim.new(0, 24)
-    glow1Corner.Parent = glow1
+    local gc1 = Instance.new("UICorner")
+    gc1.CornerRadius = UDim.new(0, 22)
+    gc1.Parent = glow1
 
     local glow2 = Instance.new("Frame")
-    glow2.Name = "GlowInner"
     glow2.Size = UDim2.new(1, 12, 1, 12)
     glow2.Position = UDim2.new(0.5, 0, 0.5, 0)
     glow2.AnchorPoint = Vector2.new(0.5, 0.5)
     glow2.BackgroundColor3 = glowColor
-    glow2.BackgroundTransparency = 0.82
+    glow2.BackgroundTransparency = 0.78
     glow2.BorderSizePixel = 0
     glow2.ZIndex = 499
     glow2.Parent = notif
-
-    local glow2Corner = Instance.new("UICorner")
-    glow2Corner.CornerRadius = UDim.new(0, 20)
-    glow2Corner.Parent = glow2
+    local gc2 = Instance.new("UICorner")
+    gc2.CornerRadius = UDim.new(0, 18)
+    gc2.Parent = glow2
 
     -- ═══ NEON STROKE ═══
     local stroke = Instance.new("UIStroke")
     stroke.Color = color
-    stroke.Thickness = 1.8
-    stroke.Transparency = 0.15
+    stroke.Thickness = 1.6
+    stroke.Transparency = 0.12
     stroke.Parent = notif
 
-    -- ═══ INNER HIGHLIGHT (top gloss) ═══
+    -- ═══ TOP GLOSS ═══
     local gloss = Instance.new("Frame")
-    gloss.Size = UDim2.new(1, -20, 0, 1)
-    gloss.Position = UDim2.fromOffset(10, 1)
+    gloss.Size = UDim2.new(1, -18, 0, 1)
+    gloss.Position = UDim2.fromOffset(9, 1)
     gloss.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    gloss.BackgroundTransparency = 0.75
+    gloss.BackgroundTransparency = 0.72
     gloss.BorderSizePixel = 0
     gloss.ZIndex = 503
     gloss.Parent = notif
+    local glc = Instance.new("UICorner")
+    glc.CornerRadius = UDim.new(1, 0)
+    glc.Parent = gloss
 
-    local glossCorner = Instance.new("UICorner")
-    glossCorner.CornerRadius = UDim.new(1, 0)
-    glossCorner.Parent = gloss
+    -- ═══ METEOR FIRE TRAIL (di belakang card, memanjang ke atas) ═══
+    local trailBase = Instance.new("Frame")
+    trailBase.Name = "FireTrail"
+    trailBase.AnchorPoint = Vector2.new(0.5, 0)
+    trailBase.Position = UDim2.new(0.5, 0, 0, 0)  -- mulai dari bawah trail
+    trailBase.Size = UDim2.new(0, 8, 0, 0)
+    trailBase.BackgroundColor3 = color
+    trailBase.BackgroundTransparency = 0.6
+    trailBase.BorderSizePixel = 0
+    trailBase.ZIndex = 498
+    trailBase.Parent = notif
+    local tbc = Instance.new("UICorner")
+    tbc.CornerRadius = UDim.new(1, 0)
+    tbc.Parent = trailBase
+    local trailGrad = Instance.new("UIGradient")
+    trailGrad.Rotation = 90
+    trailGrad.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.9),
+        NumberSequenceKeypoint.new(1, 0.1),
+    })
+    trailGrad.Parent = trailBase
 
-    -- ═══ METEOR TRAIL (particle sparkles) ═══
-    local trailHolder = Instance.new("Frame")
-    trailHolder.Name = "MeteorTrail"
-    trailHolder.Size = UDim2.fromScale(1, 1)
-    trailHolder.BackgroundTransparency = 1
-    trailHolder.ZIndex = 504
-    trailHolder.ClipsDescendants = true
-    trailHolder.Parent = notif
+    -- ═══ METEOR SPARK PARTICLES (di belakang card) ═══
+    local sparkHolder = Instance.new("Frame")
+    sparkHolder.Name = "SparkHolder"
+    sparkHolder.AnchorPoint = Vector2.new(0.5, 0)
+    sparkHolder.Position = UDim2.new(0.5, 0, 0, 0)
+    sparkHolder.Size = UDim2.new(0, 60, 0, 100)
+    sparkHolder.BackgroundTransparency = 1
+    sparkHolder.ZIndex = 498
+    sparkHolder.ClipsDescendants = false
+    sparkHolder.Parent = notif
 
-    for i = 1, 14 do
-        local spark = Instance.new("Frame")
-        local sz = math.random(2, 5)
-        spark.Size = UDim2.fromOffset(sz, sz)
-        spark.Position = UDim2.fromScale(math.random(0, 100) / 100, math.random(0, 100) / 100)
-        spark.BackgroundColor3 = color
-        spark.BackgroundTransparency = math.random(0, 40) / 100
-        spark.BorderSizePixel = 0
-        spark.ZIndex = 504
-        spark.Parent = trailHolder
+    -- ═══ ICON ═══
+    local iconSize = isMob and 30 or 34
+    local iconBg = Instance.new("Frame")
+    iconBg.Size = UDim2.fromOffset(iconSize, iconSize)
+    iconBg.Position = UDim2.new(0, isMob and 10 or 12, 0.5, 0)
+    iconBg.AnchorPoint = Vector2.new(0, 0.5)
+    iconBg.BackgroundColor3 = color
+    iconBg.BorderSizePixel = 0
+    iconBg.ZIndex = 505
+    iconBg.Parent = notif
+    local ic = Instance.new("UICorner")
+    ic.CornerRadius = UDim.new(1, 0)
+    ic.Parent = iconBg
 
-        local sparkCorner = Instance.new("UICorner")
-        sparkCorner.CornerRadius = UDim.new(1, 0)
-        sparkCorner.Parent = spark
+    local iconGrad = Instance.new("UIGradient")
+    iconGrad.Rotation = 135
+    iconGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, color),
+        ColorSequenceKeypoint.new(1, glowColor),
+    })
+    iconGrad.Parent = iconBg
 
-        -- Spark animasi drift
-        task.spawn(function()
-            local startPos = spark.Position
-            local driftX = (math.random(-40, 40)) / 1000
-            local driftY = (math.random(-40, 40)) / 1000
-            local duration = math.random(80, 180) / 100
-            while spark.Parent and notif.Parent do
-                TweenService:Create(spark, TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-                    Position = UDim2.new(
-                        startPos.X.Scale + driftX,
-                        startPos.X.Offset,
-                        startPos.Y.Scale + driftY,
-                        startPos.Y.Offset
-                    ),
-                    BackgroundTransparency = 1
-                }):Play()
-                task.wait(duration)
-                if not spark.Parent then break end
-                spark.Position = startPos
-                spark.BackgroundTransparency = 0.15
-                task.wait(0.3)
-            end
-        end)
+    local iconGlow = Instance.new("Frame")
+    iconGlow.Size = UDim2.new(1, 8, 1, 8)
+    iconGlow.Position = UDim2.new(0.5, 0, 0.5, 0)
+    iconGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+    iconGlow.BackgroundColor3 = glowColor
+    iconGlow.BackgroundTransparency = 0.65
+    iconGlow.BorderSizePixel = 0
+    iconGlow.ZIndex = 504
+    iconGlow.Parent = iconBg
+    local igc = Instance.new("UICorner")
+    igc.CornerRadius = UDim.new(1, 0)
+    igc.Parent = iconGlow
+
+    local iconLbl = Instance.new("TextLabel")
+    iconLbl.Size = UDim2.fromScale(1, 1)
+    iconLbl.BackgroundTransparency = 1
+    iconLbl.Text = icon
+    iconLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    iconLbl.Font = Enum.Font.GothamBlack
+    iconLbl.TextSize = isMob and 15 or 17
+    iconLbl.ZIndex = 506
+    iconLbl.Parent = iconBg
+
+    -- ═══ TEXT LABEL (AUTO-FIT — gak akan pernah kepotong) ═══
+    local textX = (isMob and 10 or 12) + iconSize + (isMob and 8 or 10)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -(textX + (isMob and 8 or 12)), 1, -6)
+    label.Position = UDim2.fromOffset(textX, 3)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(248, 250, 255)
+    label.Font = Enum.Font.GothamBold
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.TextYAlignment = Enum.TextYAlignment.Center
+    label.TextWrapped = true                    -- ⭐ biar turun baris
+    label.TextTruncate = Enum.TextTruncate.None -- ⭐ jangan dipotong "..."
+    label.ZIndex = 505
+    label.Parent = notif
+
+    -- ⭐ AUTO-FIT: mulai dari besar, kalau kepanjangan dikecilin pelan-pelan
+    local baseSize = isMob and 12 or 13
+    local minSize = isMob and 8 or 9
+    local fitSize = baseSize
+
+    label.TextSize = fitSize
+
+    -- Loop fit: turunin TextSize sampai TextFits = true ATAU sampai batas min
+    local function autoFit()
+        fitSize = baseSize
+        label.TextSize = fitSize
+        -- Batas iterasi biar gak infinite loop
+        local safety = 20
+        while not label.TextFits and fitSize > minSize and safety > 0 do
+            fitSize = fitSize - 1
+            label.TextSize = fitSize
+            safety = safety - 1
+            task.wait()  -- kasih napas 1 frame
+        end
+        -- Kalau masih gak fit di minSize → kurangi text dengan "..." (fallback terakhir)
+        if not label.TextFits and fitSize <= minSize then
+            label.TextTruncate = Enum.TextTruncate.AtEnd
+        end
     end
 
-    -- ═══ METEOR STREAK LINE (diagonal) ═══
-    local streak = Instance.new("Frame")
-    streak.Name = "MeteorStreak"
-    streak.Size = UDim2.new(0, 80, 0, 2)
-    streak.Position = UDim2.new(-0.3, 0, 0.5, 0)
-    streak.BackgroundColor3 = color
-    streak.BackgroundTransparency = 0.4
-    streak.BorderSizePixel = 0
-    streak.Rotation = -12
-    streak.ZIndex = 502
-    streak.Parent = notif
+    task.defer(autoFit)
 
-    local streakGrad = Instance.new("UIGradient")
-    streakGrad.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 1),
-        NumberSequenceKeypoint.new(0.5, 0),
-        NumberSequenceKeypoint.new(1, 1),
-    })
-    streakGrad.Parent = streak
+    -- ═══ ANIMASI MASUK: METEOR JATUH BENERAN ═══
+    -- Start di atas layar, jatuh ke posisi notif
+    notif.Position = UDim2.fromOffset(0, -vp.Y * 0.6)   -- ⭐ jauh di atas layar
+    notif.Rotation = 25
+    notif.Size = UDim2.fromOffset(notifW * 0.35, notifH * 0.35)
+    notif.BackgroundTransparency = 0.4
 
-    -- Loop meteor streak
-    task.spawn(function()
-        while streak.Parent and notif.Parent do
-            task.wait(math.random(25, 45) / 10)
-            if not streak.Parent then break end
-            streak.Position = UDim2.new(-0.3, 0, 0.5, 0)
-            TweenService:Create(streak, TweenInfo.new(0.9, Enum.EasingStyle.Quad), {
-                Position = UDim2.new(1.3, 0, 0.5, 0)
-            }):Play()
-            task.wait(1)
-        end
+    -- Trail muncul duluan (kecil)
+    trailBase.Size = UDim2.new(0, 6, 0, 0)
+    trailBase.Position = UDim2.new(0.5, 0, 0, 0)
+
+    -- Phase 1: JATUH (0.7s) — dari atas layar ke posisi
+    TweenService:Create(notif, TweenInfo.new(0.7, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+        Position = UDim2.fromOffset(0, -notifH - 12),
+        Rotation = 12,
+        Size = UDim2.fromOffset(notifW * 0.75, notifH * 0.75),
+        BackgroundTransparency = 0.1,
+    }):Play()
+
+    -- Trail ditarik dari atas
+    TweenService:Create(trailBase, TweenInfo.new(0.7, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+        Size = UDim2.new(0, 8, 0, 200),
+    }):Play()
+
+    task.delay(0.7, function()
+        if not notif.Parent then return end
+
+        -- Phase 2: BOUNCE (0.35s) — spring ke posisi final
+        TweenService:Create(notif, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Position = UDim2.fromOffset(0, 0),
+            Rotation = 0,
+            Size = UDim2.fromOffset(notifW, notifH),
+            BackgroundTransparency = 0,
+        }):Play()
+
+        -- Trail meruncing hilang
+        TweenService:Create(trailBase, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 2, 0, 0),
+            BackgroundTransparency = 1,
+        }):Play()
+
+        -- Spawn sparks pas impact
+        task.spawn(function()
+            for i = 1, 12 do
+                local spark = Instance.new("Frame")
+                local sz = math.random(3, 6)
+                spark.Size = UDim2.fromOffset(sz, sz)
+                spark.AnchorPoint = Vector2.new(0.5, 0.5)
+                spark.Position = UDim2.new(0.5, 0, 0.5, 0)
+                spark.BackgroundColor3 = color
+                spark.BackgroundTransparency = 0.1
+                spark.BorderSizePixel = 0
+                spark.ZIndex = 507
+                spark.Parent = sparkHolder
+
+                local sc = Instance.new("UICorner")
+                sc.CornerRadius = UDim.new(1, 0)
+                sc.Parent = spark
+
+                -- Arah acak
+                local angle = math.random() * math.pi * 2
+                local dist = math.random(30, 80)
+                local dx = math.cos(angle) * dist
+                local dy = math.sin(angle) * dist
+
+                TweenService:Create(spark, TweenInfo.new(0.7, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                    Position = UDim2.new(0.5, dx, 0.5, dy),
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromOffset(1, 1),
+                }):Play()
+
+                task.delay(0.8, function()
+                    if spark then spark:Destroy() end
+                end)
+            end
+        end)
+
+        -- Icon pulse
+        task.spawn(function()
+            while iconGlow.Parent and notif.Parent do
+                iconGlow.BackgroundTransparency = 0.6
+                TweenService:Create(iconGlow, TweenInfo.new(1.2), {BackgroundTransparency = 0.9}):Play()
+                task.wait(1.2)
+            end
+        end)
+
+        -- Streak line melintas
+        task.spawn(function()
+            while notif.Parent do
+                local streak = Instance.new("Frame")
+                streak.Size = UDim2.new(0, notifW * 0.5, 0, 2)
+                streak.Position = UDim2.new(-0.5, 0, 0.5, 0)
+                streak.BackgroundColor3 = color
+                streak.BackgroundTransparency = 0.3
+                streak.BorderSizePixel = 0
+                streak.ZIndex = 502
+                streak.Parent = notif
+                local sg = Instance.new("UIGradient")
+                sg.Transparency = NumberSequence.new({
+                    NumberSequenceKeypoint.new(0, 1),
+                    NumberSequenceKeypoint.new(0.5, 0),
+                    NumberSequenceKeypoint.new(1, 1),
+                })
+                sg.Parent = streak
+                TweenService:Create(streak, TweenInfo.new(1.2, Enum.EasingStyle.Linear), {
+                    Position = UDim2.new(1.5, 0, 0.5, 0),
+                }):Play()
+                task.delay(1.3, function() if streak then streak:Destroy() end end)
+                task.wait(2.2)
+                if not notif.Parent then break end
+            end
+        end)
     end)
+
+    -- ═══ ANIMASI HILANG: METEOR TERBANG JAUH ═══
+    task.delay(3.5, function()
+        if not notif.Parent then return end
+
+        -- Terbang ke atas kiri keluar layar
+        TweenService:Create(notif, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+            Position = UDim2.fromOffset(-vp.X * 0.3, -vp.Y * 0.5),
+            Rotation = -35,
+            Size = UDim2.fromOffset(notifW * 0.2, notifH * 0.2),
+            BackgroundTransparency = 1,
+        }):Play()
+
+        TweenService:Create(stroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
+        TweenService:Create(glow1, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(glow2, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(label, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+        TweenService:Create(iconLbl, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+        TweenService:Create(iconBg, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+
+        task.wait(0.65)
+        if notif then notif:Destroy() end
+    end)
+end
 
     -- ═══ ICON CIRCLE (glowing) ═══
     local iconSize = 38
