@@ -2791,7 +2791,60 @@ animeBg.Name = "AnimeBackground"
 animeBg.Size = UDim2.fromScale(1, 1)
 animeBg.Position = UDim2.fromScale(0, 0)
 animeBg.BackgroundTransparency = 1
-animeBg.Image = "rbxassetid://GANTI_ID_FOTO_ANIME_LU"  -- ← GANTI DI SINI
+-- ⭐⭐⭐ GITHUB IMAGE LOADER ⭐⭐⭐
+local GITHUB_ANIME_URL = "https://raw.githubusercontent.com/vrilz-vd/anime/refs/heads/main/images%20(2).jpe"
+local GITHUB_ANIME_CACHE = "vrilz_anime_bg.jpe"
+
+local function loadGithubImage()
+    -- Cek apakah executor support getcustomasset
+    if not (writefile and isfile and getcustomasset) then
+        warn("[BG] Executor gak support getcustomasset")
+        return nil
+    end
+    
+    -- Cek cache dulu
+    if isfile(GITHUB_ANIME_CACHE) then
+        local ok, asset = pcall(getcustomasset, GITHUB_ANIME_CACHE)
+        if ok and asset then
+            print("[BG] ✅ Loaded dari cache")
+            return asset
+        end
+    end
+    
+    -- Download dari GitHub
+    print("[BG] Download dari GitHub...")
+    local ok, content = pcall(function()
+        return game:HttpGet(GITHUB_ANIME_URL)
+    end)
+    
+    if not ok or not content then
+        warn("[BG] ❌ Gagal download dari GitHub")
+        return nil
+    end
+    
+    -- Simpan ke file lokal
+    pcall(writefile, GITHUB_ANIME_CACHE, content)
+    
+    -- Convert ke asset
+    local ok2, asset = pcall(getcustomasset, GITHUB_ANIME_CACHE)
+    if ok2 and asset then
+        print("[BG] ✅ Loaded dari GitHub")
+        return asset
+    end
+    
+    warn("[BG] ❌ Gagal convert ke asset")
+    return nil
+end
+
+-- Pasang ke ImageLabel
+local bgAsset = loadGithubImage()
+if bgAsset then
+    animeBg.Image = bgAsset
+else
+    animeBg.Image = ""
+    animeBg.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+end
+-- ⭐⭐⭐ END GITHUB IMAGE LOADER ⭐⭐⭐
 animeBg.ScaleType = Enum.ScaleType.Crop
 animeBg.ZIndex = 1
 animeBg.Parent = main
