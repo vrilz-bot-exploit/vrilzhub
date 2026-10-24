@@ -2953,21 +2953,99 @@ animeOverlayCorner.Parent = animeOverlay
     headerFix.ZIndex = 10
     headerFix.Parent = header
 
-    local logo = Instance.new("TextLabel")
-    logo.Size = UDim2.fromOffset(IS_MOBILE and 30 or 36, IS_MOBILE and 30 or 36)
-    logo.Position = UDim2.fromOffset(IS_MOBILE and 10 or 12, (CFG.HEADER_H - (IS_MOBILE and 30 or 36)) / 2)
-    logo.BackgroundColor3 = C.Accent
-    logo.Text = "VH"
-    logo.TextColor3 = Color3.new(1, 1, 1)
-    logo.Font = Enum.Font.GothamBold
-    logo.TextSize = IS_MOBILE and 16 or 20
-    logo.ZIndex = 11
-    logo.Parent = header
-    registerTheme(logo, "Accent", "BackgroundColor3")
+   -- ⭐⭐⭐ VH LOGO 3D + PETIR MERAH ⭐⭐⭐
+local logoHolder = Instance.new("Frame")
+logoHolder.Name = "HeaderLogo"
+logoHolder.Size = UDim2.fromOffset(IS_MOBILE and 32 or 38, IS_MOBILE and 32 or 38)
+logoHolder.Position = UDim2.fromOffset(IS_MOBILE and 10 or 12, (CFG.HEADER_H - (IS_MOBILE and 32 or 38)) / 2)
+logoHolder.BackgroundColor3 = Color3.fromRGB(15, 5, 5) -- Latar gelap
+logoHolder.BackgroundTransparency = 0.1
+logoHolder.ZIndex = 11
+logoHolder.ClipsDescendants = true
+logoHolder.Parent = header
 
-    local logoCorner = Instance.new("UICorner")
-    logoCorner.CornerRadius = UDim.new(0, 8)
-    logoCorner.Parent = logo
+local lhCorner = Instance.new("UICorner")
+lhCorner.CornerRadius = UDim.new(0, 8)
+lhCorner.Parent = logoHolder
+
+-- Garis tepi menyala
+local lhStroke = Instance.new("UIStroke")
+lhStroke.Color = C.Accent
+lhStroke.Thickness = 1.5
+lhStroke.Transparency = 0.2
+lhStroke.Parent = logoHolder
+
+local textSizeVal = IS_MOBILE and 14 or 18
+
+-- Efek 3D Shadow
+local vhShadow = Instance.new("TextLabel")
+vhShadow.Size = UDim2.fromScale(1, 1)
+vhShadow.Position = UDim2.fromOffset(2, 2)
+vhShadow.BackgroundTransparency = 1
+vhShadow.Text = "VH"
+vhShadow.TextColor3 = Color3.fromRGB(0, 0, 0)
+vhShadow.TextTransparency = 0.2
+vhShadow.Font = Enum.Font.GothamBlack
+vhShadow.TextSize = textSizeVal
+vhShadow.ZIndex = 12
+vhShadow.Parent = logoHolder
+
+-- Efek 3D Depth (Warna Orange/Accent)
+local vhDepth = Instance.new("TextLabel")
+vhDepth.Size = UDim2.fromScale(1, 1)
+vhDepth.Position = UDim2.fromOffset(1, 1)
+vhDepth.BackgroundTransparency = 1
+vhDepth.Text = "VH"
+vhDepth.TextColor3 = C.Accent
+vhDepth.Font = Enum.Font.GothamBlack
+vhDepth.TextSize = textSizeVal
+vhDepth.ZIndex = 13
+vhDepth.Parent = logoHolder
+
+-- Teks Utama Putih
+local vhFace = Instance.new("TextLabel")
+vhFace.Size = UDim2.fromScale(1, 1)
+vhFace.BackgroundTransparency = 1
+vhFace.Text = "VH"
+vhFace.TextColor3 = Color3.fromRGB(255, 255, 255)
+vhFace.Font = Enum.Font.GothamBlack
+vhFace.TextSize = textSizeVal
+vhFace.TextStrokeColor3 = C.Accent
+vhFace.TextStrokeTransparency = 0
+vhFace.ZIndex = 14
+vhFace.Parent = logoHolder
+
+-- ⚡ EFEK PETIR MERAH ⚡
+local lightningHolder = Instance.new("Frame")
+lightningHolder.Size = UDim2.fromScale(1, 1)
+lightningHolder.BackgroundTransparency = 1
+lightningHolder.ClipsDescendants = true
+lightningHolder.ZIndex = 15
+lightningHolder.Parent = logoHolder
+
+task.spawn(function()
+    while logoHolder.Parent do
+        task.wait(math.random(10, 25) / 10) -- Jeda acak
+        if not logoHolder.Parent then break end
+        
+        -- Bikin garis petir
+        local bolt = Instance.new("Frame")
+        bolt.AnchorPoint = Vector2.new(0.5, 0.5)
+        bolt.Size = UDim2.fromOffset(1.5, math.random(8, 12))
+        bolt.Position = UDim2.fromScale(math.random(20, 80)/100, math.random(20, 80)/100)
+        bolt.Rotation = math.random(-45, 45)
+        bolt.BackgroundColor3 = Color3.fromRGB(255, 50, 50) -- MERAH NYALA
+        bolt.BorderSizePixel = 0
+        bolt.ZIndex = 16
+        bolt.Parent = lightningHolder
+        
+        -- Animasi kilat hilang
+        task.wait(0.05)
+        bolt.BackgroundTransparency = 1
+        task.wait(0.05)
+        if bolt then bolt:Destroy() end
+    end
+end)
 
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(0, 300, 0, 20)
