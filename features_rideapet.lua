@@ -304,12 +304,28 @@ local function sendPlatinumWebhook(eventType, data)
         timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
     })
 
-    local payload = HttpService:JSONEncode({
-        username = "🏆 VRILZHUB KING",
-                avatar_url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2018.56.22.jpeg",
-        embeds = embeds,
-    })
+    -- ⭐ @everyone ping kalau diaktifin
+local contentField = nil
+if Shared.WebhookMentionEveryone then
+    contentField = "@everyone"
+end
 
+local payloadTable = {
+    username = "🏆 VRILZHUB KING",
+    avatar_url = "https://raw.githubusercontent.com/vrilz-bot-exploit/vrilzhub/main/WhatsApp%20Image%202026-10-16%20at%2018.56.22.jpeg",
+    embeds = embeds,
+}
+
+if contentField then
+    payloadTable.content = contentField
+    -- ⭐ Biar embed tetap muncul (default allowed_mentions = semua)
+    payloadTable.allowed_mentions = {
+        parse = {"everyone"}
+    }
+end
+
+local payload = HttpService:JSONEncode(payloadTable)
+    
     pcall(function()
         local req = (syn and syn.request) or (http and http.request) or http_request or request
         if req then
