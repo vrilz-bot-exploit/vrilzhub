@@ -1863,6 +1863,354 @@ local function buildLightsEffectLayer(mainFrame)
     return layer
 end
 
+-- ============================================================
+-- ⚡ LIGHTNING EFFECT LAYER v2 — Red Lightning (nyambar ke bawah)
+-- ============================================================
+local function buildLightningEffectLayer(mainFrame)
+    local layer = Instance.new("Frame")
+    layer.Name = "LightningEffectLayer"
+    layer.Size = UDim2.fromScale(1, 1)
+    layer.BackgroundTransparency = 1
+    layer.ClipsDescendants = true
+    layer.ZIndex = 7
+    layer.Active = false
+    layer.Parent = mainFrame
+
+    local layerCorner = Instance.new("UICorner")
+    layerCorner.CornerRadius = UDim.new(0, 18)
+    layerCorner.Parent = layer
+
+    local lightningActive = true
+    layer.Destroying:Connect(function()
+        lightningActive = false
+    end)
+
+    -- ══════════════════════════════════════════
+    -- HELPER: bikin 1 segmen garis petir miring
+    -- ══════════════════════════════════════════
+    local function makeSegment(parent, p1, p2, thickness, color, transparency, zIndex)
+        local dx = (p2.x - p1.x) * 1000
+        local dy = (p2.y - p1.y) * 1000
+        local length = math.sqrt(dx * dx + dy * dy)
+        local angle = math.deg(math.atan2(dy, dx))
+        local midX = (p1.x + p2.x) / 2
+        local midY = (p1.y + p2.y) / 2
+
+        local seg = Instance.new("Frame")
+        seg.AnchorPoint = Vector2.new(0.5, 0.5)
+        seg.Position = UDim2.fromScale(midX, midY)
+        seg.Size = UDim2.fromOffset(length, thickness)
+        seg.Rotation = angle
+        seg.BackgroundColor3 = color
+        seg.BackgroundTransparency = transparency
+        seg.BorderSizePixel = 0
+        seg.ZIndex = zIndex
+        seg.Parent = parent
+
+        local c = Instance.new("UICorner")
+        c.CornerRadius = UDim.new(1, 0)
+        c.Parent = seg
+
+        return seg
+    end
+
+    -- ══════════════════════════════════════════
+    -- HELPER: generate zig-zag path dari atas ke bawah
+    -- ══════════════════════════════════════════
+    local function generateBoltPath(startX, startY, endY, segments, jitter)
+        local path = { {x = startX, y = startY} }
+        for i = 1, segments do
+            local t = i / segments
+            local py = startY + (endY - startY) * t
+            local px = startX + math.random(-jitter, jitter) / 100
+            px = math.clamp(px, 0.02, 0.98)
+            py = math.clamp(py, 0.02, 0.98)
+            table.insert(path, {x = px, y = py})
+        end
+        return path
+    end
+
+    -- ══════════════════════════════════════════
+    -- SPAWN 1 PETIR UTAMA (nyambar ke bawah)
+    -- ══════════════════════════════════════════
+    local function spawnLightningBolt()
+        if not lightningActive or not layer.Parent then return end
+
+        -- ═══ Titik awal (atas), titik akhir (bawah) ═══
+        local startX = math.random(15, 85) / 100
+        local startY = -0.05                              -- mulai dari ATAS window
+        local endY = math.random(55, 95) / 100            -- berakhir di BAWAH
+        local endX = math.clamp(startX + math.random(-12, 12) / 100, 0.05, 0.95)
+
+        -- ═══ Container utama ═══
+        local boltHolder = Instance.new("Frame")
+        boltHolder.Name = "LightningBolt"
+        boltHolder.Size = UDim2.fromScale(1, 1)
+        boltHolder.BackgroundTransparency = 1
+        boltHolder.ClipsDescendants = true
+        boltHolder.ZIndex = 8
+        boltHolder.Parent = layer
+
+        local allFrames = {}
+        local RED_CORE    = Color3.fromRGB(255, 30, 30)
+        local RED_GLOW    = Color3.fromRGB(255, 80, 80)
+        local WHITE_HOT   = Color3.fromRGB(255, 230, 230)
+        local DARK_RED    = Color3.fromRGB(180, 0, 0)
+
+        -- ═══ Bangun jalur utama (zig-zag vertikal) ═══
+        local mainSegments = math.random(6, 9)
+        local mainPath = generateBoltPath(startX, startY, endY, mainSegments, 6)
+
+        -- ═══ Render tiap segmen jalur utama (3 layer: glow + core + hot) ═══
+        for i = 1, #mainPath - 1 do
+            local p1 = mainPath[i]
+            local p2 = mainPath[i + 1]
+
+            -- Outer glow (tebal, transparan)
+            table.insert(allFrames, makeSegment(
+                boltHolder, p1, p2,
+                math.random(10, 14),      -- ketebalan glow
+                RED_GLOW, 0.55, 8
+            ))
+
+            -- Mid glow
+            table.insert(allFrames, makeSegment(
+                boltHolder, p1, p2,
+                math.random(5, 7),
+                RED_CORE, 0.15, 9
+            ))
+
+            -- Core merah
+            table.insert(allFrames, makeSegment(
+                boltHolder, p1, p2,
+                3,
+                RED_CORE, 0, 10
+            ))
+
+            -- Inner white hot
+            table.insert(allFrames, makeSegment(
+                boltHolder, p1, p2,
+                1.2,
+                WHITE_HOT, 0, 11
+            ))
+
+            -- ═══ CABANG (branch) — 60% chance per segmen ═══
+            if math.random() < 0.6 then
+                local branchCount = math.random(1, 3)
+                for b = 1, branchCount do
+                    local branchStart = p1
+                    local branchLenY = math.random(8, 25) / 100
+                    local branchLenX = math.random(-15, 15) / 100
+                    local branchEnd = {
+                        x = math.clamp(branchStart.x + branchLenX, 0.02, 0.98),
+                        y = math.clamp(branchStart.y + branchLenY, 0.02, 1.0)
+                    }
+
+                    -- Cabang pakai 2-3 sub-segmen biar zig-zag
+                    local subSegs = math.random(2, 3)
+                    local branchPath = { branchStart }
+                    for s = 1, subSegs do
+                        local st = s / subSegs
+                        local sx = branchStart.x + (branchEnd.x - branchStart.x) * st + math.random(-5, 5) / 100
+                        local sy = branchStart.y + (branchEnd.y - branchStart.y) * st + math.random(-2, 2) / 100
+                        sx = math.clamp(sx, 0.02, 0.98)
+                        sy = math.clamp(sy, 0.02, 1.0)
+                        table.insert(branchPath, {x = sx, y = sy})
+                    end
+
+                    for bs = 1, #branchPath - 1 do
+                        local bp1 = branchPath[bs]
+                        local bp2 = branchPath[bs + 1]
+
+                        -- Glow cabang
+                        table.insert(allFrames, makeSegment(
+                            boltHolder, bp1, bp2,
+                            math.random(4, 6),
+                            RED_GLOW, 0.65, 8
+                        ))
+
+                        -- Core cabang
+                        table.insert(allFrames, makeSegment(
+                            boltHolder, bp1, bp2,
+                            1.5,
+                            RED_CORE, 0.1, 9
+                        ))
+                    end
+
+                    -- Sub-cabang kecil (30% chance)
+                    if math.random() < 0.3 then
+                        local subBranchEnd = {
+                            x = math.clamp(branchEnd.x + math.random(-10, 10) / 100, 0.02, 0.98),
+                            y = math.clamp(branchEnd.y + math.random(5, 15) / 100, 0.02, 1.0)
+                        }
+                        table.insert(allFrames, makeSegment(
+                            boltHolder, branchEnd, subBranchEnd,
+                            1, DARK_RED, 0.2, 9
+                        ))
+                    end
+                end
+            end
+
+            -- ═══ Spark kecil di titik sambungan ═══
+            if math.random() < 0.5 then
+                local spark = Instance.new("Frame")
+                spark.AnchorPoint = Vector2.new(0.5, 0.5)
+                spark.Position = UDim2.fromScale(p1.x, p1.y)
+                spark.Size = UDim2.fromOffset(math.random(4, 8), math.random(4, 8))
+                spark.BackgroundColor3 = WHITE_HOT
+                spark.BackgroundTransparency = 0.2
+                spark.BorderSizePixel = 0
+                spark.ZIndex = 10
+                spark.Parent = boltHolder
+                local sc = Instance.new("UICorner")
+                sc.CornerRadius = UDim.new(1, 0)
+                sc.Parent = spark
+                table.insert(allFrames, spark)
+            end
+        end
+
+        -- ═══ TITIK TUMBUKAN DI BAWAH (impact glow) ═══
+        local impactX = mainPath[#mainPath].x
+        local impactY = mainPath[#mainPath].y
+
+        local impact = Instance.new("Frame")
+        impact.AnchorPoint = Vector2.new(0.5, 0.5)
+        impact.Position = UDim2.fromScale(impactX, impactY)
+        impact.Size = UDim2.fromOffset(30, 30)
+        impact.BackgroundColor3 = RED_GLOW
+        impact.BackgroundTransparency = 0.4
+        impact.BorderSizePixel = 0
+        impact.ZIndex = 9
+        impact.Parent = boltHolder
+        local ic = Instance.new("UICorner")
+        ic.CornerRadius = UDim.new(1, 0)
+        ic.Parent = impact
+        table.insert(allFrames, impact)
+
+        -- Impact core
+        local impactCore = Instance.new("Frame")
+        impactCore.AnchorPoint = Vector2.new(0.5, 0.5)
+        impactCore.Position = UDim2.fromScale(impactX, impactY)
+        impactCore.Size = UDim2.fromOffset(12, 12)
+        impactCore.BackgroundColor3 = WHITE_HOT
+        impactCore.BorderSizePixel = 0
+        impactCore.ZIndex = 11
+        impactCore.Parent = boltHolder
+        local icc = Instance.new("UICorner")
+        icc.CornerRadius = UDim.new(1, 0)
+        icc.Parent = impactCore
+        table.insert(allFrames, impactCore)
+
+        -- ═══ FLASH seluruh layer (warna merah) ═══
+        local flash = Instance.new("Frame")
+        flash.Size = UDim2.fromScale(1, 1)
+        flash.BackgroundColor3 = Color3.fromRGB(255, 40, 40)
+        flash.BackgroundTransparency = 0.9
+        flash.BorderSizePixel = 0
+        flash.ZIndex = 7
+        flash.Parent = layer
+        local flashCorner = Instance.new("UICorner")
+        flashCorner.CornerRadius = UDim.new(0, 18)
+        flashCorner.Parent = flash
+
+        -- ═══ ANIMASI: flicker realistis (4 tahap) ═══
+        -- Tahap 1: muncul terang instant
+        for _, f in ipairs(allFrames) do
+            local origTrans = f.BackgroundTransparency
+            f.BackgroundTransparency = 1
+            task.delay(0.01, function()
+                if f.Parent then
+                    TweenService:Create(f, TweenInfo.new(0.04, Enum.EasingStyle.Linear), {
+                        BackgroundTransparency = origTrans
+                    }):Play()
+                end
+            end)
+        end
+
+        TweenService:Create(flash, TweenInfo.new(0.08, Enum.EasingStyle.Linear), {
+            BackgroundTransparency = 0.85
+        }):Play()
+
+        -- Tahap 2: meredup sebentar (flicker 1)
+        task.delay(0.08, function()
+            if not boltHolder.Parent then return end
+            for _, f in ipairs(allFrames) do
+                if f.Parent then
+                    f.BackgroundTransparency = math.min(0.85, f.BackgroundTransparency + 0.5)
+                end
+            end
+        end)
+
+        -- Tahap 3: nyala lagi terang (flicker 2)
+        task.delay(0.16, function()
+            if not boltHolder.Parent then return end
+            for _, f in ipairs(allFrames) do
+                if f.Parent then
+                    local cur = f.BackgroundTransparency
+                    f.BackgroundTransparency = math.max(0, cur - 0.4)
+                end
+            end
+            TweenService:Create(flash, TweenInfo.new(0.06, Enum.EasingStyle.Linear), {
+                BackgroundTransparency = 0.95
+            }):Play()
+        end)
+
+        -- Tahap 4: fade out pelan (0.35s)
+        task.delay(0.28, function()
+            for _, f in ipairs(allFrames) do
+                if f.Parent then
+                    TweenService:Create(f, TweenInfo.new(0.35, Enum.EasingStyle.Quad), {
+                        BackgroundTransparency = 1
+                    }):Play()
+                end
+            end
+            if flash.Parent then
+                TweenService:Create(flash, TweenInfo.new(0.3), {
+                    BackgroundTransparency = 1
+                }):Play()
+            end
+        end)
+
+        -- ═══ Cleanup ═══
+        task.delay(0.85, function()
+            if boltHolder and boltHolder.Parent then
+                boltHolder:Destroy()
+            end
+            if flash and flash.Parent then
+                flash:Destroy()
+            end
+        end)
+    end
+
+    -- ══════════════════════════════════════════
+    -- LOOP SPAWN — banyak petir, natural
+    -- ══════════════════════════════════════════
+    task.spawn(function()
+        task.wait(0.5)
+        while lightningActive do
+            -- 1 petir utama
+            spawnLightningBolt()
+
+            -- 40% chance: petir kedua langsung nyusul
+            if math.random() < 0.4 then
+                task.wait(math.random(6, 12) / 100)
+                spawnLightningBolt()
+            end
+
+            -- 20% chance: petir ketiga
+            if math.random() < 0.2 then
+                task.wait(math.random(5, 10) / 100)
+                spawnLightningBolt()
+            end
+
+            -- Jeda sebelum petir berikutnya
+            task.wait(math.random(30, 80) / 100)
+        end
+    end)
+
+    return layer
+end
+
 -- ====== FPS WINDOW ======
 local function buildFPSWindow(parent)
     local fpsWin = Instance.new("Frame")
@@ -6639,6 +6987,10 @@ end)
         local lightsLayer = buildLightsEffectLayer(main)
         lightsLayer.Visible = false
 
+        -- ⚡ LIGHTNING EFFECT LAYER (terpisah)
+        local lightningLayer = buildLightningEffectLayer(main)
+        lightningLayer.Visible = false
+
         makeToggle(fpsContent, "FPS Boost", false, function(v)
             Shared.FPSBoost_Enabled = v
             if v then gfx_enableFPS() else gfx_disableFPS() end
@@ -6666,6 +7018,19 @@ end)
             end
         end)
 end
+
+        -- ⚡ TOGGLE LIGHTNING EFFECT (petir merah terpisah)
+        makeToggle(fpsContent, "Lightning Effect", false, function(v)
+            Shared.LightningEffect_Enabled = v
+            if lightningLayer then
+                lightningLayer.Visible = v
+            end
+            if v then
+                notify("⚡ Lightning Effect: ON (red lightning)", "success")
+            else
+                notify("⚡ Lightning Effect: OFF", "info")
+            end
+        end)
 
         -- ===== EVENT TAB =====
     do
