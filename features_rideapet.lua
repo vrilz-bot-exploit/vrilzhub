@@ -6,12 +6,6 @@
 local Features = {}
 local Shared = nil
 
--- ⭐ TAMBAH BARIS INI
-local StealExecState = {
-    Busy = false,
-    Status = "Idle",
-}
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -891,183 +885,6 @@ local function getDropRemoteLocal()
         or gameR:FindFirstChild("Drop")
 end
 
--- ============================================================
--- 👻 VISUAL DECOY v3 — Clone diem di base, karakter asli nge-steal
--- Camera di-lock ke clone, karakter asli INVISIBLE di layar lu
--- ============================================================
-local VisualDecoy = {
-    active = false,
-    clone = nil,
-    cameraSubject = nil,
-    originals = {},
-    conn = nil,
-    frozenCFrame = nil,
-}
-
-local function _getDecoyPosition()
-    local spawn = getMyPlotSpawn()
-    if spawn then
-        return CFrame.new(spawn.Position + Vector3.new(0, 5, 0))
-    end
-    local char = LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    return hrp and hrp.CFrame or CFrame.new(0, 100, 0)
-end
-
-local function spawnVisualDecoy()
-    if VisualDecoy.active then return end
-    local char = LocalPlayer.Character
-    if not char then
-        warn("[Decoy] ❌ No character")
-        return
-    end
-
-    -- ⭐ TAMBAH BLOK INI
-    local spawnPart = getMyPlotSpawn()
-    if not spawnPart then
-        warn("[Decoy] ❌ No plot spawn — decoy position undefined, abort")
-        return
-    end
-    
-    local oldArchivable = char.Archivable
-    char.Archivable = true
-    local ok, clone = pcall(function() return char:Clone() end)
-    char.Archivable = oldArchivable
-    if not ok or not clone then
-        warn("[Decoy] ❌ Clone failed: " .. tostring(clone))
-        return
-    end
-
-    clone.Name = "SenaVisualDecoy"
-    local hum = clone:FindFirstChildOfClass("Humanoid")
-    local root = clone:FindFirstChild("HumanoidRootPart")
-    if not hum or not root then
-        warn("[Decoy] ❌ Clone has no Humanoid/RootPart")
-        pcall(function() clone:Destroy() end)
-        return
-    end
-
-    -- Setup clone: anchored, gak interact
-    for _, d in ipairs(clone:GetDescendants()) do
-        if d:IsA("BasePart") then
-            d.Anchored = true
-            d.CanCollide = false
-            d.CanQuery = false
-            d.CanTouch = false
-            d.LocalTransparencyModifier = 0
-        elseif d:IsA("Script") or d:IsA("LocalScript") or d:IsA("ModuleScript") then
-            pcall(function() d:Destroy() end)
-        elseif d:IsA("Trail") or d:IsA("ParticleEmitter") or d:IsA("Sound") then
-            d.Enabled = false
-        end
-    end
-
-    pcall(function()
-        hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-        hum.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
-    end)
-
-    local decoyCF = _getDecoyPosition()
-    clone.Parent = workspace
-    clone:PivotTo(decoyCF)
-    VisualDecoy.clone = clone
-    VisualDecoy.frozenCFrame = decoyCF
-    VisualDecoy.active = true
-
-    -- Hide karakter asli (LOCAL ONLY — cuma di layar lu)
-    VisualDecoy.originals = {}
-    for _, d in ipairs(char:GetDescendants()) do
-        if d:IsA("BasePart") then
-            if VisualDecoy.originals[d] == nil then
-                VisualDecoy.originals[d] = d.LocalTransparencyModifier
-            end
-            d.LocalTransparencyModifier = 1
-        elseif d:IsA("Trail") then
-            d.Enabled = false
-        end
-    end
-
-    -- Camera pindah ke clone (ini yang bikin LU liat karakter diem)
-    local camera = workspace.CurrentCamera
-    if camera then
-        VisualDecoy.cameraSubject = camera.CameraSubject
-        camera.CameraSubject = hum
-    end
-
-    -- Loop paksa tiap frame (game sering reset LocalTransparencyModifier / CameraSubject)
-    if VisualDecoy.conn then
-        pcall(function() VisualDecoy.conn:Disconnect() end)
-    end
-    VisualDecoy.conn = RunService.RenderStepped:Connect(function()
-        if not VisualDecoy.active then return end
-
-        -- Paksa clone tetap di posisi awal
-        if VisualDecoy.clone and VisualDecoy.clone.Parent and VisualDecoy.frozenCFrame then
-            pcall(function()
-                VisualDecoy.clone:PivotTo(VisualDecoy.frozenCFrame)
-            end)
-        end
-
-        -- Paksa karakter asli tetap invisible
-        local liveChar = LocalPlayer.Character
-        if liveChar then
-            for d in pairs(VisualDecoy.originals) do
-                if d.Parent and d.LocalTransparencyModifier ~= 1 then
-                    d.LocalTransparencyModifier = 1
-                end
-            end
-        end
-
-        -- Paksa camera tetap di clone
-        local cam = workspace.CurrentCamera
-        if cam and VisualDecoy.clone and VisualDecoy.clone.Parent then
-            local decoyHum = VisualDecoy.clone:FindFirstChildOfClass("Humanoid")
-            if decoyHum and cam.CameraSubject ~= decoyHum then
-                cam.CameraSubject = decoyHum
-            end
-        end
-    end)
-
-    print("[Decoy] ✅ Spawned at " .. tostring(decoyCF.Position))
-end
-
-local function removeVisualDecoy()
-    if not VisualDecoy.active then return end
-
-    if VisualDecoy.conn then
-        pcall(function() VisualDecoy.conn:Disconnect() end)
-        VisualDecoy.conn = nil
-    end
-
-    if VisualDecoy.clone then
-        pcall(function() VisualDecoy.clone:Destroy() end)
-        VisualDecoy.clone = nil
-    end
-
-    local char = LocalPlayer.Character
-    if char then
-        for d, trans in pairs(VisualDecoy.originals) do
-            if typeof(d) == "Instance" and d.Parent then
-                pcall(function() d.LocalTransparencyModifier = trans end)
-            end
-        end
-    end
-    VisualDecoy.originals = {}
-
-    local camera = workspace.CurrentCamera
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if camera then
-        pcall(function()
-            camera.CameraSubject = hum or VisualDecoy.cameraSubject
-        end)
-        VisualDecoy.cameraSubject = nil
-    end
-
-    VisualDecoy.frozenCFrame = nil
-    VisualDecoy.active = false
-    print("[Decoy] ❌ Removed")
-end
-
 -- ⭐ HELPER BARU: Konfirmasi egg beneran udah di tangan (DisplayEgg stabil)
 local function confirmEggInHand(timeout)
     timeout = timeout or 4
@@ -1096,7 +913,6 @@ end
 
 -- ⭐ INSTANT RETURN — TP langsung ke plot (delay 6 detik khusus Instant)
 local function instantReturnToPlot()
-    removeVisualDecoy()
     if not Shared.MutationReturn_Enabled then return end
 
     local char = LocalPlayer.Character
@@ -1170,7 +986,6 @@ local function instantReturnToPlot()
 end
 
 local function returnToMyPlot()
-    removeVisualDecoy()
     if not Shared.AutoReturn_Enabled then return end
 
     local char = LocalPlayer.Character
@@ -2705,32 +2520,15 @@ end
 local function isHoldingEggMutation()
     local char = LocalPlayer.Character
     if not char then return false end
-
-    -- Cara 1: Wooden.DisplayEgg (paling umum)
     local wooden = char:FindFirstChild("Wooden")
-    if wooden then
-        local displayEgg = wooden:FindFirstChild("DisplayEgg")
-        if displayEgg then
-            for _, c in ipairs(displayEgg:GetChildren()) do
-                if c:IsA("MeshPart") and not c.Name:lower():find("circle") then
-                    return true, c.Name
-                end
-            end
-        end
-    end
-
-    -- Cara 2: Cek Tool di character (kadang egg jadi Tool)
-    for _, c in ipairs(char:GetChildren()) do
-        if c:IsA("Tool") and c.Name:lower():find("egg", 1, true) then
+    if not wooden then return false end
+    local displayEgg = wooden:FindFirstChild("DisplayEgg")
+    if not displayEgg then return false end
+    for _, c in ipairs(displayEgg:GetChildren()) do
+        if c:IsA("MeshPart") and not c.Name:lower():find("circle") then
             return true, c.Name
         end
     end
-
-    -- Cara 3: Cek attribute player
-    if LocalPlayer:GetAttribute("HoldingEgg") ~= nil then
-        return true, tostring(LocalPlayer:GetAttribute("HoldingEgg"))
-    end
-
     return false
 end
 
@@ -5310,6 +5108,119 @@ function Features.setYinRitualEnabled(v)
     end
 end
 
+-- ============================================================
+-- 👻 GHOST CLONE — Khusus Egg Mutation Steal
+-- Kamera nempel clone di base, karakter asli stealth
+-- ============================================================
+local GhostMode = {
+    Active = false,
+    Decoy = nil,
+    OriginalVisibility = {},
+}
+
+local function ghostSpawnDecoy()
+    local char = LocalPlayer.Character
+    if not char then return false end
+
+    local base = getMyPlotSpawn()
+    if not base then return false end
+
+    if GhostMode.Decoy and GhostMode.Decoy.Parent then
+        GhostMode.Decoy:Destroy()
+    end
+
+    local clone = char:Clone()
+    clone.Name = "VRILZ_Ghost_" .. LocalPlayer.Name
+    clone.Parent = workspace
+
+    pcall(function()
+        clone:PivotTo(base.CFrame + Vector3.new(0, 3, 0))
+    end)
+
+    for _, d in ipairs(clone:GetDescendants()) do
+        if d:IsA("BasePart") then
+            d.Anchored = true
+            d.CanCollide = false
+            d.CanQuery = false
+            d.CanTouch = false
+        elseif d:IsA("Script") or d:IsA("LocalScript") or d:IsA("ModuleScript") then
+            d:Destroy()
+        end
+    end
+
+    local cloneHum = clone:FindFirstChildOfClass("Humanoid")
+        or clone:FindFirstChild("HumanoidRootPart")
+
+    if not cloneHum then
+        clone:Destroy()
+        return false
+    end
+
+    GhostMode.Decoy = clone
+
+    local cam = workspace.CurrentCamera
+    if cam then
+        cam.CameraSubject = cloneHum
+    end
+
+    GhostMode.OriginalVisibility = {}
+    for _, d in ipairs(char:GetDescendants()) do
+        if d:IsA("BasePart") then
+            GhostMode.OriginalVisibility[d] = d.LocalTransparencyModifier
+            d.LocalTransparencyModifier = 1
+        end
+    end
+
+    GhostMode.Active = true
+    return true
+end
+
+local function ghostRemoveDecoy()
+    if GhostMode.Decoy and GhostMode.Decoy.Parent then
+        GhostMode.Decoy:Destroy()
+    end
+    GhostMode.Decoy = nil
+
+    local cam = workspace.CurrentCamera
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if cam and hum then
+        cam.CameraSubject = hum
+    end
+
+    for d, v in pairs(GhostMode.OriginalVisibility) do
+        if d and d.Parent and d:IsA("BasePart") then
+            d.LocalTransparencyModifier = v
+        end
+    end
+    GhostMode.OriginalVisibility = {}
+
+    GhostMode.Active = false
+end
+
+function Features.isGhostModeActive()
+    return GhostMode.Active
+end
+
+LocalPlayer.CharacterAdded:Connect(function()
+    if GhostMode.Active then
+        ghostRemoveDecoy()
+    end
+end)
+
+-- ============================================================
+-- STEAL EXECUTOR — LOGIC ONLY (dipanggil dari UI)
+-- Tanpa GUI, tanpa toggle. UI yang bikin tombol, ini yang jalanin.
+-- Guard: Auto Mutation / Mutation Steal / Auto Farm / Volcanic Hunt
+-- Volcanic egg → cave waypoint | Normal egg → direct TP
+-- Return: STEP mode | Wait egg back: 4 seconds
+-- ============================================================
+local StealExecState = {
+    Busy = false,
+    Status = "Idle",
+    CurrentEggName = nil,
+}
+
 -- ⭐ cek fitur steal/mutation yang ON
 local function isAnyStealFeatureOn()
     local reasons = {}
@@ -5380,87 +5291,28 @@ local function seStealNormalEgg(egg)
     myRoot.AssemblyLinearVelocity = Vector3.zero
     task.wait(0.1)
 
-        -- ═══ PICKUP LOOP — dengan FALLBACK + TIMEOUT LEBIH PANJANG ═══
+    -- Pickup loop
     local picked = false
-    local pickupStart = os.clock()
-
-    -- Set prompt properties biar gampang di-pickup
-    if prompt and prompt:IsA("ProximityPrompt") then
-        pcall(function()
-            prompt.HoldDuration = 0
-            prompt.MaxActivationDistance = math.huge
-            prompt.RequiresLineOfSight = false
-            prompt.Enabled = true
-        end)
-    end
-
-    print("[Pickup] Start pickup loop, fireproximityprompt:", typeof(fireproximityprompt))
-
-    for i = 1, 40 do  -- ⬅️ 15 → 40 loop (10 detik)
-        if isHoldingEggMutation() then
-            picked = true
-            print("[Pickup] ✅ Egg ke-tangan di loop:", i)
-            break
-        end
-
-        if not egg or not egg.Parent then
-            -- Egg udah hilang, cek lagi apakah ke-tangan
-            task.wait(0.5)
-            if isHoldingEggMutation() then
-                picked = true
-                print("[Pickup] ✅ Egg ke-tangan (egg hilang)")
-            else
-                print("[Pickup] ❌ Egg hilang tapi gak ke-tangan")
-            end
-            break
-        end
-
-        -- Re-TP ke egg
-        myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if myRoot and eggPart and eggPart.Parent then
-            myRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
-            myRoot.Velocity = Vector3.zero
-            myRoot.AssemblyLinearVelocity = Vector3.zero
-        end
-
-        -- Coba pickup — 3 CARA
-        local ok = false
-
-        -- Cara 1: fireproximityprompt
+    for i = 1, 15 do
+        if not egg.Parent then picked = true; break end
         if typeof(fireproximityprompt) == "function" then
-            local success, err = pcall(fireproximityprompt, prompt)
-            if not success then
-                print("[Pickup] fireproximityprompt error:", err)
+            pcall(fireproximityprompt, prompt)
+        end
+        task.wait(0.25)
+        if isHoldingEggMutation() then picked = true; break end
+        if eggPart and eggPart.Parent then
+            myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if myRoot then
+                myRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
+                myRoot.Velocity = Vector3.zero
+                myRoot.AssemblyLinearVelocity = Vector3.zero
             end
+            task.wait(0.1)
         end
-        task.wait(0.1)
-
-        -- Cara 2: InputHoldBegin/End (fallback)
-        if not isHoldingEggMutation() and prompt and prompt:IsA("ProximityPrompt") then
-            pcall(function()
-                prompt:InputHoldBegin()
-                task.wait(0.1)
-                prompt:InputHoldEnd()
-            end)
-        end
-        task.wait(0.15)
-
-        -- Cek hasil
-        if isHoldingEggMutation() then
-            picked = true
-            print("[Pickup] ✅ Egg ke-tangan di loop:", i)
-            break
-        end
-
-        task.wait(0.15)
     end
 
     if not picked or not isHoldingEggMutation() then
-        print("[Pickup] ❌ GAGAL pickup setelah", math.floor(os.clock() - pickupStart), "detik")
-        print("[Pickup] fireproximityprompt:", typeof(fireproximityprompt))
-        print("[Pickup] prompt:", prompt and prompt:GetFullName() or "nil")
-        print("[Pickup] egg masih ada:", egg and egg.Parent and "ya" or "tidak")
-        return false, "Failed pickup"
+        return false, "Failed to pickup egg"
     end
 
     StealExecState.Status = "🌋 TP to magma..."
@@ -5633,12 +5485,70 @@ local function seStealVolcanicEgg(egg)
     return true, nil
 end
 
+-- ⭐ MAIN ENTRY — dipanggil dari UI
+function Features.stealEgg(egg)
+    if StealExecState.Busy then
+        if Shared.Notify then Shared.Notify("⏳ Already stealing, wait...", "warning") end
+        return false, "busy"
+    end
+
+    local anyOn, reasons = isAnyStealFeatureOn()
+    if anyOn then
+        local reasonStr = table.concat(reasons, ", ")
+        if Shared.Notify then
+            Shared.Notify("⚠️ Please disable your steal/mutation first! (" .. reasonStr .. ")", "error")
+        end
+        StealExecState.Status = "❌ Blocked: " .. reasonStr
+        return false, "blocked"
+    end
+
+    if not egg or not egg.Parent then
+        if Shared.Notify then Shared.Notify("❌ Egg not found", "error") end
+        return false, "not_found"
+    end
+
+    StealExecState.Busy = true
+    StealExecState.CurrentEggName = egg.Name
+    local isVolcanic = egg.Name:lower():find("volcan") ~= nil
+    StealExecState.Status = isVolcanic and "🌋 Stealing volcanic..." or "🎯 Stealing..."
+
+    task.spawn(function()
+        -- 👻 SPAWN GHOST DI BASE
+        local ghostOk = ghostSpawnDecoy()
+        if ghostOk then
+            StealExecState.Status = "👻 Ghost di base — mulai steal..."
+            task.wait(0.3)
+        end
+
+        local ok, err
+        if isVolcanic then ok, err = seStealVolcanicEgg(egg)
+        else ok, err = seStealNormalEgg(egg) end
+
+        -- 👻 HAPUS GHOST + BALIKIN KAMERA
+        if ghostOk then
+            ghostRemoveDecoy()
+            task.wait(0.2)
+        end
+
+        if not ok then
+            if Shared.Notify then Shared.Notify("❌ Steal failed: " .. tostring(err), "error") end
+            StealExecState.Status = "❌ " .. tostring(err)
+        else
+            if Shared.Notify then Shared.Notify("✅ Steal complete!", "success") end
+        end
+
+        StealExecState.Busy = false
+        StealExecState.CurrentEggName = nil
+    end)
+
+    return true, nil
+end
 function Features.getStealExecState()
     return StealExecState
 end
 
 function Features.isAnyStealFeatureOn()
-    return _isAnyStealFeatureOn()   -- ✅ panggil yang dengan underscore
+    return isAnyStealFeatureOn()
 end
 
 -- ⭐ loop cuma buat update state (gak manggil GUI)
@@ -5740,343 +5650,6 @@ function Features.Init(sharedState)
         end
     end)
 end   -- ⭐⭐⭐ TUTUP Features.Init DI SINI ⭐⭐⭐
-
--- ⭐ CORE: STEAL EGG BIASA (non-volcanic)
--- ⭐ Return by STEP — persis kayak returnToMyPlot() di file lu
-local function _stealExecReturnStep()
-    local oldFlag = Shared.AutoReturn_Enabled
-    Shared.AutoReturn_Enabled = true
-    local ok = pcall(returnToMyPlot)
-    Shared.AutoReturn_Enabled = oldFlag
-    return ok
-end
-local function _stealExecNormal(egg)
-    StealExecState.Status = "🎯 TP to egg: " .. egg.Name
-
-    local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
-    if not eggPart then return false, "Egg no BasePart" end
-
-    local prompt = egg:FindFirstChild("Pickup", true) or egg:FindFirstChildWhichIsA("ProximityPrompt", true)
-    if not prompt then return false, "Egg no Pickup prompt" end
-
-    if prompt:IsA("ProximityPrompt") then
-        prompt.HoldDuration = 0
-        prompt.MaxActivationDistance = math.huge
-        prompt.RequiresLineOfSight = false
-    end
-
-    -- TP langsung ke egg
-    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not myRoot then return false, "No HRP" end
-    myRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
-    myRoot.Velocity = Vector3.zero
-    myRoot.AssemblyLinearVelocity = Vector3.zero
-    task.wait(0.1)
-
-       -- ═══ PICKUP — FORCE + FALLBACK + LOOP PANJANG ═══
-    if prompt and prompt:IsA("ProximityPrompt") then
-        pcall(function()
-            prompt.HoldDuration = 0
-            prompt.MaxActivationDistance = math.huge
-            prompt.RequiresLineOfSight = false
-            prompt.Enabled = true
-        end)
-    end
-
-    local picked = false
-    for i = 1, 60 do  -- 60 loop = ±15 detik
-        if isHoldingEggMutation() then picked = true; break end
-
-        -- Kalo egg hilang, tunggu bentar & cek
-        if not egg or not egg.Parent then
-            task.wait(1)
-            if isHoldingEggMutation() then picked = true end
-            break
-        end
-
-        -- Re-TP ke egg (deketin banget)
-        myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if myRoot and eggPart and eggPart.Parent then
-            myRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 2, 0), eggPart.Position)
-            myRoot.Velocity = Vector3.zero
-            myRoot.AssemblyLinearVelocity = Vector3.zero
-        end
-        task.wait(0.05)
-
-        -- CARA 1: fireproximityprompt
-        if typeof(fireproximityprompt) == "function" then
-            pcall(fireproximityprompt, prompt)
-        end
-        task.wait(0.1)
-
-        -- CARA 2: InputHoldBegin/End
-        if not isHoldingEggMutation() and prompt and prompt:IsA("ProximityPrompt") then
-            pcall(function()
-                prompt:InputHoldBegin()
-                task.wait(0.05)
-                prompt:InputHoldEnd()
-            end)
-        end
-        task.wait(0.15)
-    end
-
-    if not picked or not isHoldingEggMutation() then
-        return false, "Failed pickup"
-    end
-    
-    StealExecState.Status = "🌋 TP to magma..."
-    task.wait(0.5)
-    local safePos = findSafeVolcanoPos()
-    if safePos then
-        local rootLava = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if rootLava then
-            rootLava.CFrame = CFrame.new(safePos)
-            rootLava.Velocity = Vector3.zero
-            rootLava.AssemblyLinearVelocity = Vector3.zero
-        end
-    end
-    task.wait(1.5)
-
-    StealExecState.Status = "🔥 Dipping..."
-
-    -- Dip sampe egg released
-    local dropWaited = 0
-    local eggReleased = false
-    while dropWaited < 15 do
-        fireVolcanoDip()
-        task.wait(1.5)
-        dropWaited = dropWaited + 1.5
-        if not isHoldingEggMutation() then eggReleased = true; break end
-    end
-
-    if not eggReleased then return false, "Dip timeout" end
-
-    StealExecState.Status = "⏳ Waiting egg back (max 20s)..."
-
-    -- Tunggu egg balik
-    local waitStart = os.clock()
-    while os.clock() - waitStart < 20 do
-        task.wait(1)
-        if isHoldingEggMutation() then
-            StealExecState.Status = "✅ Mutation complete!"
-            if Shared.Notify then Shared.Notify("🔥 Wait 4 seconds!", "success") end
-            task.wait(4)   -- ⭐ 4 detik
-            break
-        end
-    end
-
-    if not isHoldingEggMutation() then
-        return false, "Egg not back (timeout)"
-    end
-
-    StealExecState.Status = "🏠 Returning (step)..."
-
-    local ok = _stealExecReturnStep()
-    if ok then StealExecState.Status = "✅ Done!"
-    else StealExecState.Status = "⚠️ Return failed" end
-
-    return true
-end
-
--- ⭐ Core: steal volcanic egg (cave waypoint)
-local function _stealExecVolcanic(egg)
-    StealExecState.Status = "🌋 Volcanic: " .. egg.Name
-
-    local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
-    if not eggPart then return false, "Egg no BasePart" end
-
-    -- TP ke volcanic spawn (kalo jauh)
-    local spawns = Workspace:FindFirstChild("EggSpawns")
-    local spawnPart = spawns and spawns:FindFirstChild("Volcanic")
-    if spawnPart and spawnPart:IsA("BasePart") then
-        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if curRoot then
-            local d = (spawnPart.Position - curRoot.Position).Magnitude
-            if d > 50 then
-                curRoot.CFrame = spawnPart.CFrame + Vector3.new(0, 5, 0)
-                curRoot.Velocity = Vector3.zero
-                curRoot.AssemblyLinearVelocity = Vector3.zero
-                task.wait(0.5)
-            end
-        end
-    end
-
-    -- Masuk cave pake waypoint
-    StealExecState.Status = "🚶 Entering cave..."
-    for i, wp in ipairs(VolcanicWaypoints) do
-        tpWaypoint(wp)
-        local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if curRoot and eggPart and eggPart.Parent then
-            local d = (eggPart.Position - curRoot.Position).Magnitude
-            if d <= 40 then break end
-        end
-    end
-
-    -- TP langsung ke egg
-    local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if curRoot and eggPart and eggPart.Parent then
-        curRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
-        curRoot.Velocity = Vector3.zero
-        curRoot.AssemblyLinearVelocity = Vector3.zero
-        task.wait(0.3)
-    end
-
-    -- Pickup
-    StealExecState.Status = "🖐 Picking up..."
-    local picked = false
-    if egg.Parent then picked = volcanicPickupVerified(egg)
-    else picked = isHoldingEggMutation() end
-
-    if not picked or not isHoldingEggMutation() then
-        return false, "Failed pickup volcanic"
-    end
-
-    -- Exit cave
-    StealExecState.Status = "🚶 Exiting cave..."
-    local exited = exitCave()
-    if not exited or not isHoldingEggMutation() then
-        return false, "Failed exit cave"
-    end
-
-    -- Ke magma
-    StealExecState.Status = "🌋 TP to magma..."
-    task.wait(0.5)
-    local safePos = findSafeVolcanoPos()
-    if safePos then
-        local rootLava = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if rootLava then
-            rootLava.CFrame = CFrame.new(safePos)
-            rootLava.Velocity = Vector3.zero
-            rootLava.AssemblyLinearVelocity = Vector3.zero
-        end
-    end
-    task.wait(1.5)
-
-    StealExecState.Status = "🔥 Dipping..."
-
-    local dropWaited = 0
-    local eggReleased = false
-    while dropWaited < 15 do
-        fireVolcanoDip()
-        task.wait(1.5)
-        dropWaited = dropWaited + 1.5
-        if not isHoldingEggMutation() then eggReleased = true; break end
-    end
-
-    if not eggReleased then return false, "Dip timeout" end
-
-    StealExecState.Status = "⏳ Waiting egg back (max 20s)..."
-
-    local waitStart = os.clock()
-    while os.clock() - waitStart < 20 do
-        task.wait(1)
-        if isHoldingEggMutation() then
-            StealExecState.Status = "✅ Mutation complete!"
-            if Shared.Notify then Shared.Notify("🔥 Wait 4 seconds!", "success") end
-            task.wait(4)   -- ⭐ 4 detik
-            break
-        end
-    end
-
-    if not isHoldingEggMutation() then
-        return false, "Egg not back (timeout)"
-    end
-
-    StealExecState.Status = "🏠 Returning (step)..."
-
-    local ok = _stealExecReturnStep()
-    if ok then StealExecState.Status = "✅ Done!"
-    else StealExecState.Status = "⚠️ Return failed" end
-
-    return true
-end
-
--- ⭐ Cek fitur steal/mutation yang ON
-local function _isAnyStealFeatureOn()
-    local reasons = {}
-    if Shared.AutoMutation_Enabled then table.insert(reasons, "Auto Mutation") end
-    if Shared.MutationSteal_Enabled then table.insert(reasons, "Mutation Steal") end
-    if Shared.AutoFarm_Enabled then table.insert(reasons, "Auto Farm") end
-    if Shared.AutoSteal_Enabled then table.insert(reasons, "Auto Steal") end
-    if Shared.VolcanicHunt_Enabled then table.insert(reasons, "Volcanic Hunt") end
-    if Shared.MutationSteal_Active then table.insert(reasons, "Mutation Steal (active)") end
-    local ms = Features.getMutationState and Features.getMutationState()
-    if ms and (ms.Running or ms.EggLocked or ms.StealPaused) then
-        table.insert(reasons, "Mutation (running)")
-    end
-    return #reasons > 0, reasons
-end
-
-function Features.stealEgg(egg, forceMode)
-    -- ⭐ DEFAULT forceMode = true — selalu force, gak peduli GUI panggil apa
-    if forceMode == nil then forceMode = true end
-
-    if StealExecState.Busy then
-        if Shared.Notify then Shared.Notify("⏳ Already stealing...", "warning") end
-        return false, "busy"
-    end
-
-    -- ═══ STEP 1: GUARD — SKIP KALO FORCE MODE ═══
-    if not forceMode then
-        local anyOn, reasons = _isAnyStealFeatureOn()
-        print("[Steal] 2. Guard:", anyOn, table.concat(reasons or {}, ", "))
-        if anyOn then
-            print("[Steal] ❌ BLOCKED by:", table.concat(reasons, ", "))
-            if Shared.Notify then
-                Shared.Notify("⚠️ Please disable your steal/mutation first! (" .. table.concat(reasons, ", ") .. ")", "error")
-            end
-            StealExecState.Status = "❌ Blocked: " .. table.concat(reasons, ", ")
-            return false, "blocked"
-        end
-    else
-        print("[Steal] 2. Guard SKIPPED (forceMode)")
-    end
-
-    if not egg or not egg.Parent then
-        print("[Steal] ❌ Egg not found / already gone")
-        if Shared.Notify then Shared.Notify("❌ Egg not found", "error") end
-        return false, "not_found"
-    end
-
-        -- ═══ STEP 2: SPAWN DECOY — SELALU SPAWN, GAK PEDULI forceMode ═══
-    StealExecState.Busy = true
-    local isVolcanic = egg.Name:lower():find("volcan") ~= nil
-    StealExecState.Status = isVolcanic and "🌋 Stealing volcanic..." or "🎯 Stealing..."
-
-    -- ⭐ SELALU SPAWN DECOY (kalo plot loaded)
-    local decoyOk = pcall(spawnVisualDecoy)
-    if not decoyOk or not VisualDecoy.active then
-        warn("[Steal] Decoy failed — lanjut tanpa decoy")
-    end
-
-    -- Jalanin steal
-    print("[Steal] 6. Mulai", isVolcanic and "_stealExecVolcanic" or "_stealExecNormal")
-    task.spawn(function()
-        local ok, err
-        if isVolcanic then
-            ok, err = _stealExecVolcanic(egg)
-        else
-            ok, err = _stealExecNormal(egg)
-        end
-
-        print("[Steal] 7. HASIL:", ok, "ERR:", err)
-        pcall(removeVisualDecoy)
-
-        if not ok then
-            print("[Steal] ❌ GAGAL:", err)
-            if Shared.Notify then Shared.Notify("❌ Steal failed: " .. tostring(err), "error") end
-            StealExecState.Status = "❌ " .. tostring(err)
-        else
-            print("[Steal] ✅ SUKSES")
-            if Shared.Notify then Shared.Notify("✅ Steal complete!", "success") end
-            StealExecState.Status = "✅ Done!"
-        end
-
-        StealExecState.Busy = false
-    end)
-
-    return true
-end
 
 -- ============================================================
 -- AUTO OBBY (TALK + FLY TO FINISH + 30 MIN COOLDOWN)
