@@ -5363,28 +5363,87 @@ local function seStealNormalEgg(egg)
     myRoot.AssemblyLinearVelocity = Vector3.zero
     task.wait(0.1)
 
-    -- Pickup loop
+        -- ═══ PICKUP LOOP — dengan FALLBACK + TIMEOUT LEBIH PANJANG ═══
     local picked = false
-    for i = 1, 15 do
-        if not egg.Parent then picked = true; break end
-        if typeof(fireproximityprompt) == "function" then
-            pcall(fireproximityprompt, prompt)
+    local pickupStart = os.clock()
+
+    -- Set prompt properties biar gampang di-pickup
+    if prompt and prompt:IsA("ProximityPrompt") then
+        pcall(function()
+            prompt.HoldDuration = 0
+            prompt.MaxActivationDistance = math.huge
+            prompt.RequiresLineOfSight = false
+            prompt.Enabled = true
+        end)
+    end
+
+    print("[Pickup] Start pickup loop, fireproximityprompt:", typeof(fireproximityprompt))
+
+    for i = 1, 40 do  -- ⬅️ 15 → 40 loop (10 detik)
+        if isHoldingEggMutation() then
+            picked = true
+            print("[Pickup] ✅ Egg ke-tangan di loop:", i)
+            break
         end
-        task.wait(0.25)
-        if isHoldingEggMutation() then picked = true; break end
-        if eggPart and eggPart.Parent then
-            myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if myRoot then
-                myRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
-                myRoot.Velocity = Vector3.zero
-                myRoot.AssemblyLinearVelocity = Vector3.zero
+
+        if not egg or not egg.Parent then
+            -- Egg udah hilang, cek lagi apakah ke-tangan
+            task.wait(0.5)
+            if isHoldingEggMutation() then
+                picked = true
+                print("[Pickup] ✅ Egg ke-tangan (egg hilang)")
+            else
+                print("[Pickup] ❌ Egg hilang tapi gak ke-tangan")
             end
-            task.wait(0.1)
+            break
         end
+
+        -- Re-TP ke egg
+        myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if myRoot and eggPart and eggPart.Parent then
+            myRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
+            myRoot.Velocity = Vector3.zero
+            myRoot.AssemblyLinearVelocity = Vector3.zero
+        end
+
+        -- Coba pickup — 3 CARA
+        local ok = false
+
+        -- Cara 1: fireproximityprompt
+        if typeof(fireproximityprompt) == "function" then
+            local success, err = pcall(fireproximityprompt, prompt)
+            if not success then
+                print("[Pickup] fireproximityprompt error:", err)
+            end
+        end
+        task.wait(0.1)
+
+        -- Cara 2: InputHoldBegin/End (fallback)
+        if not isHoldingEggMutation() and prompt and prompt:IsA("ProximityPrompt") then
+            pcall(function()
+                prompt:InputHoldBegin()
+                task.wait(0.1)
+                prompt:InputHoldEnd()
+            end)
+        end
+        task.wait(0.15)
+
+        -- Cek hasil
+        if isHoldingEggMutation() then
+            picked = true
+            print("[Pickup] ✅ Egg ke-tangan di loop:", i)
+            break
+        end
+
+        task.wait(0.15)
     end
 
     if not picked or not isHoldingEggMutation() then
-        return false, "Failed to pickup egg"
+        print("[Pickup] ❌ GAGAL pickup setelah", math.floor(os.clock() - pickupStart), "detik")
+        print("[Pickup] fireproximityprompt:", typeof(fireproximityprompt))
+        print("[Pickup] prompt:", prompt and prompt:GetFullName() or "nil")
+        print("[Pickup] egg masih ada:", egg and egg.Parent and "ya" or "tidak")
+        return false, "Failed pickup"
     end
 
     StealExecState.Status = "🌋 TP to magma..."
