@@ -5120,23 +5120,52 @@ local GhostMode = {
 
 local function ghostSpawnDecoy()
     local char = LocalPlayer.Character
-    if not char then return false end
+    if not char then
+        warn("[Ghost] No character")
+        return false
+    end
 
+    -- Coba dapet base dari plot
     local base = getMyPlotSpawn()
-    if not base then return false end
+    
+    -- ⭐ FALLBACK: kalau plot gak ketemu, pake posisi sekarang (clone nempel di tempat lu berdiri)
+    if not base then
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hrp then
+            warn("[Ghost] No HumanoidRootPart, no plot spawn")
+            return false
+        end
+        warn("[Ghost] Plot spawn not found — using current position as fallback")
+        base = hrp
+    end
 
+    -- Pastiin char Archivable
+    local oldArchivable = char.Archivable
+    char.Archivable = true
+
+    -- Bersihin clone lama
     if GhostMode.Decoy and GhostMode.Decoy.Parent then
         GhostMode.Decoy:Destroy()
     end
 
-    local clone = char:Clone()
+    -- Clone
+    local okClone, clone = pcall(char.Clone, char)
+    char.Archivable = oldArchivable
+
+    if not okClone or not clone then
+        warn("[Ghost] char:Clone() failed")
+        return false
+    end
+
     clone.Name = "VRILZ_Ghost_" .. LocalPlayer.Name
     clone.Parent = workspace
 
+    -- Pindah ke base
     pcall(function()
         clone:PivotTo(base.CFrame + Vector3.new(0, 3, 0))
     end)
 
+    -- Freeze part + hapus script
     for _, d in ipairs(clone:GetDescendants()) do
         if d:IsA("BasePart") then
             d.Anchored = true
@@ -5148,21 +5177,25 @@ local function ghostSpawnDecoy()
         end
     end
 
+    -- Cari subject buat kamera
     local cloneHum = clone:FindFirstChildOfClass("Humanoid")
         or clone:FindFirstChild("HumanoidRootPart")
 
     if not cloneHum then
+        warn("[Ghost] Clone no Humanoid / HRP")
         clone:Destroy()
         return false
     end
 
     GhostMode.Decoy = clone
 
+    -- Kamera ke clone
     local cam = workspace.CurrentCamera
     if cam then
         cam.CameraSubject = cloneHum
     end
 
+    -- Sembunyiin karakter asli
     GhostMode.OriginalVisibility = {}
     for _, d in ipairs(char:GetDescendants()) do
         if d:IsA("BasePart") then
@@ -5172,6 +5205,7 @@ local function ghostSpawnDecoy()
     end
 
     GhostMode.Active = true
+    print("[Ghost] ✅ Clone spawned at", base.Position, "| camera set to clone")
     return true
 end
 
@@ -5512,12 +5546,21 @@ function Features.stealEgg(egg)
     local isVolcanic = egg.Name:lower():find("volcan") ~= nil
     StealExecState.Status = isVolcanic and "🌋 Stealing volcanic..." or "🎯 Stealing..."
 
-    task.spawn(function()
+        task.spawn(function()
         -- 👻 SPAWN GHOST DI BASE
         local ghostOk = ghostSpawnDecoy()
         if ghostOk then
             StealExecState.Status = "👻 Ghost di base — mulai steal..."
             task.wait(0.3)
+        else
+            -- ⭐ CLONE GAGAL → ABORT, jangan steal
+            if Shared.Notify then
+                Shared.Notify("❌ Ghost clone gagal spawn (plot ga ketemu). Steal di-cancel.", "error")
+            end
+            StealExecState.Status = "❌ Ghost clone failed — steal aborted"
+            StealExecState.Busy = false
+            StealExecState.CurrentEggName = nil
+            return  -- ⭐ EXIT, jangan lanjut steal
         end
 
         local ok, err
