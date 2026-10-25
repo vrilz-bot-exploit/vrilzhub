@@ -2705,15 +2705,32 @@ end
 local function isHoldingEggMutation()
     local char = LocalPlayer.Character
     if not char then return false end
+
+    -- Cara 1: Wooden.DisplayEgg (paling umum)
     local wooden = char:FindFirstChild("Wooden")
-    if not wooden then return false end
-    local displayEgg = wooden:FindFirstChild("DisplayEgg")
-    if not displayEgg then return false end
-    for _, c in ipairs(displayEgg:GetChildren()) do
-        if c:IsA("MeshPart") and not c.Name:lower():find("circle") then
+    if wooden then
+        local displayEgg = wooden:FindFirstChild("DisplayEgg")
+        if displayEgg then
+            for _, c in ipairs(displayEgg:GetChildren()) do
+                if c:IsA("MeshPart") and not c.Name:lower():find("circle") then
+                    return true, c.Name
+                end
+            end
+        end
+    end
+
+    -- Cara 2: Cek Tool di character (kadang egg jadi Tool)
+    for _, c in ipairs(char:GetChildren()) do
+        if c:IsA("Tool") and c.Name:lower():find("egg", 1, true) then
             return true, c.Name
         end
     end
+
+    -- Cara 3: Cek attribute player
+    if LocalPlayer:GetAttribute("HoldingEgg") ~= nil then
+        return true, tostring(LocalPlayer:GetAttribute("HoldingEgg"))
+    end
+
     return false
 end
 
@@ -5756,30 +5773,57 @@ local function _stealExecNormal(egg)
     myRoot.AssemblyLinearVelocity = Vector3.zero
     task.wait(0.1)
 
-    -- Pickup loop
+       -- ═══ PICKUP — FORCE + FALLBACK + LOOP PANJANG ═══
+    if prompt and prompt:IsA("ProximityPrompt") then
+        pcall(function()
+            prompt.HoldDuration = 0
+            prompt.MaxActivationDistance = math.huge
+            prompt.RequiresLineOfSight = false
+            prompt.Enabled = true
+        end)
+    end
+
     local picked = false
-    for i = 1, 15 do
-        if not egg.Parent then picked = true; break end
+    for i = 1, 60 do  -- 60 loop = ±15 detik
+        if isHoldingEggMutation() then picked = true; break end
+
+        -- Kalo egg hilang, tunggu bentar & cek
+        if not egg or not egg.Parent then
+            task.wait(1)
+            if isHoldingEggMutation() then picked = true end
+            break
+        end
+
+        -- Re-TP ke egg (deketin banget)
+        myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if myRoot and eggPart and eggPart.Parent then
+            myRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 2, 0), eggPart.Position)
+            myRoot.Velocity = Vector3.zero
+            myRoot.AssemblyLinearVelocity = Vector3.zero
+        end
+        task.wait(0.05)
+
+        -- CARA 1: fireproximityprompt
         if typeof(fireproximityprompt) == "function" then
             pcall(fireproximityprompt, prompt)
         end
-        task.wait(0.25)
-        if isHoldingEggMutation() then picked = true; break end
-        if eggPart and eggPart.Parent then
-            myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if myRoot then
-                myRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
-                myRoot.Velocity = Vector3.zero
-                myRoot.AssemblyLinearVelocity = Vector3.zero
-            end
-            task.wait(0.1)
+        task.wait(0.1)
+
+        -- CARA 2: InputHoldBegin/End
+        if not isHoldingEggMutation() and prompt and prompt:IsA("ProximityPrompt") then
+            pcall(function()
+                prompt:InputHoldBegin()
+                task.wait(0.05)
+                prompt:InputHoldEnd()
+            end)
         end
+        task.wait(0.15)
     end
 
     if not picked or not isHoldingEggMutation() then
         return false, "Failed pickup"
     end
-
+    
     StealExecState.Status = "🌋 TP to magma..."
     task.wait(0.5)
     local safePos = findSafeVolcanoPos()
@@ -5963,17 +6007,16 @@ local function _isAnyStealFeatureOn()
     return #reasons > 0, reasons
 end
 
--- ⭐ MAIN ENTRY — dipanggil dari GUI
 function Features.stealEgg(egg, forceMode)
-    print("[Steal] 1. Masuk stealEgg, egg:", egg and egg.Name, "forceMode:", forceMode)
-    
+    -- ⭐ DEFAULT forceMode = true — selalu force, gak peduli GUI panggil apa
+    if forceMode == nil then forceMode = true end
+
     if StealExecState.Busy then
-        print("[Steal] ❌ Busy = true (steal sebelumnya masih jalan)")
         if Shared.Notify then Shared.Notify("⏳ Already stealing...", "warning") end
         return false, "busy"
     end
 
-    -- Guard
+    -- ═══ STEP 1: GUARD — SKIP KALO FORCE MODE ═══
     if not forceMode then
         local anyOn, reasons = _isAnyStealFeatureOn()
         print("[Steal] 2. Guard:", anyOn, table.concat(reasons or {}, ", "))
@@ -5995,17 +6038,15 @@ function Features.stealEgg(egg, forceMode)
         return false, "not_found"
     end
 
-    -- Decoy
+        -- ═══ STEP 2: SPAWN DECOY — SELALU SPAWN, GAK PEDULI forceMode ═══
     StealExecState.Busy = true
     local isVolcanic = egg.Name:lower():find("volcan") ~= nil
-    print("[Steal] 3. IsVolcanic:", isVolcanic)
     StealExecState.Status = isVolcanic and "🌋 Stealing volcanic..." or "🎯 Stealing..."
 
-    print("[Steal] 4. Spawn decoy...")
+    -- ⭐ SELALU SPAWN DECOY (kalo plot loaded)
     local decoyOk = pcall(spawnVisualDecoy)
-    print("[Steal] 5. Decoy OK:", decoyOk, "VisualDecoy.active:", VisualDecoy.active)
     if not decoyOk or not VisualDecoy.active then
-        print("[Steal] ⚠️ Decoy gagal — lanjut tanpa decoy (steal tetep jalan)")
+        warn("[Steal] Decoy failed — lanjut tanpa decoy")
     end
 
     -- Jalanin steal
