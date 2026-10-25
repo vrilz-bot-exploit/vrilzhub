@@ -4211,34 +4211,34 @@ end)
 
         -- Resize handle (PC + Mobile)
 do
-    local resizeHandle = Instance.new("TextButton")
+        local resizeHandle = Instance.new("TextButton")
     local handleSize = IS_MOBILE and 32 or 22
     resizeHandle.Size = UDim2.fromOffset(handleSize, handleSize)
-    resizeHandle.Position = UDim2.new(1, -(handleSize + 2), 1, -(handleSize + 2))
+    resizeHandle.Position = UDim2.new(1, -handleSize, 1, -handleSize) -- ⭐ Mentok di pojok
     resizeHandle.AnchorPoint = Vector2.new(1, 1)
     resizeHandle.BackgroundTransparency = 1
-    resizeHandle.Text = "⌟"
-    resizeHandle.TextColor3 = C.Accent
+    resizeHandle.Text = "" -- ⭐ Hapus teksnya
+    resizeHandle.TextColor3 = Color3.fromRGB(0, 0, 0) -- ⭐ Jadiin item (transparan)
     resizeHandle.TextSize = IS_MOBILE and 22 or 17
     resizeHandle.Font = Enum.Font.GothamBold
     resizeHandle.AutoButtonColor = false
     resizeHandle.Active = false
     resizeHandle.ZIndex = 100
     resizeHandle.Parent = main
-    registerTheme(resizeHandle, "Accent", "TextColor3")
+    -- (registerTheme dihapus biar gak ada warna orange)
 
     -- Hit target lebih gede biar gampang di-tap di HP
     local hitPad = Instance.new("TextButton")
     hitPad.AnchorPoint = Vector2.new(1, 1)
     hitPad.Size = UDim2.fromOffset(handleSize + 14, handleSize + 14)
-    hitPad.Position = UDim2.new(1, -(handleSize + 9), 1, -(handleSize + 9))
+    hitPad.Position = UDim2.new(1, 0, 1, 0) -- ⭐ Mentok 100% di pojok kanan bawah
     hitPad.BackgroundTransparency = 1
     hitPad.Text = ""
     hitPad.AutoButtonColor = false
     hitPad.Active = true
-    hitPad.ZIndex = 200  -- ⭐ FIX: naikin ZIndex biar gak ketutup
+    hitPad.ZIndex = 200
     hitPad.Parent = main
-
+    
     local resizing = false
     local resizeStart = nil
     local startSize = nil
