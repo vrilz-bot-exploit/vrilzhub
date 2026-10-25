@@ -1824,12 +1824,23 @@ local function buildLightsEffectLayer(mainFrame)
         meteor.AnchorPoint = Vector2.new(0.5, 0.5)
         meteor.Size = UDim2.fromOffset(headSize, headSize)
 
-        -- Start dari atas window (bisa kiri/tengah/kanan), end di bawah
-        local startX = math.random(5, 95) / 100
+                -- ⭐ FIX: Meteor jatuh miring/diagonal (bukan lurus vertikal)
+        -- Tentukan arah geser (kiri atau kanan)
+        local goRight = math.random() > 0.5
+        local startX, endX
+        
+        if goRight then
+            -- Mulai dari kiri, geser ke kanan bawah
+            startX = math.random(-10, 40) / 100
+            endX = startX + math.random(50, 80) / 100
+        else
+            -- Mulai dari kanan, geser ke kiri bawah
+            startX = math.random(60, 110) / 100
+            endX = startX - math.random(50, 80) / 100
+        end
+
         local startY = -0.15
-        local endX = startX + math.random(-20, 20) / 100
         local endY = 1.15
-        endX = math.clamp(endX, -0.1, 1.1)
 
         meteor.Position = UDim2.fromScale(startX, startY)
         meteor.BackgroundColor3 = pickColor
@@ -1855,7 +1866,7 @@ local function buildLightsEffectLayer(mainFrame)
         hgc.CornerRadius = UDim.new(1, 0)
         hgc.Parent = headGlow
 
-        -- Trail panjang ke ATAS (karena meteor jatuh ke bawah)
+                -- ⭐ FIX: Trail ikut miring sesuai arah jatuh
         local trailLen = math.random(120, 200)
         local trail = Instance.new("Frame")
         trail.AnchorPoint = Vector2.new(0.5, 1)
@@ -1866,7 +1877,11 @@ local function buildLightsEffectLayer(mainFrame)
         trail.BorderSizePixel = 0
         trail.ZIndex = 7
         trail.Parent = meteor
-
+        
+        -- Hitung sudut kemiringan meteor
+        local angleDeg = math.deg(math.atan2(endY - startY, endX - startX)) - 90
+        trail.Rotation = angleDeg -- ⭐ Miringin ekornya
+        
         local trailGrad = Instance.new("UIGradient")
         trailGrad.Rotation = 90
         trailGrad.Transparency = NumberSequence.new({
@@ -1876,7 +1891,7 @@ local function buildLightsEffectLayer(mainFrame)
         })
         trailGrad.Parent = trail
 
-        -- Trail glow (lebih lebar)
+                -- Trail glow (lebih lebar)
         local trailGlow = Instance.new("Frame")
         trailGlow.AnchorPoint = Vector2.new(0.5, 1)
         trailGlow.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -1886,6 +1901,7 @@ local function buildLightsEffectLayer(mainFrame)
         trailGlow.BorderSizePixel = 0
         trailGlow.ZIndex = 6
         trailGlow.Parent = meteor
+        trailGlow.Rotation = angleDeg -- ⭐ Miringin glow ekornya juga
 
         local trailGlowGrad = Instance.new("UIGradient")
         trailGlowGrad.Rotation = 90
