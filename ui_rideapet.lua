@@ -1581,7 +1581,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
 end
 
 -- ============================================================
--- 🌌 LIGHTS EFFECT LAYER v2 — Meteor + Bintang + Satelit (realistis)
+-- 🌌 LIGHTS EFFECT LAYER v3 — REALISTIC METEOR SHOWER
 -- ============================================================
 local function buildLightsEffectLayer(mainFrame)
     local layer = Instance.new("Frame")
@@ -1664,7 +1664,7 @@ local function buildLightsEffectLayer(mainFrame)
         sc.CornerRadius = UDim.new(1, 0)
         sc.Parent = star
 
-        -- ⭐ Glow halo tipis di sekitar bintang
+        -- Glow halo tipis di sekitar bintang
         local starGlow = Instance.new("Frame")
         starGlow.AnchorPoint = Vector2.new(0.5, 0.5)
         starGlow.Position = UDim2.fromScale(0.5, 0.5)
@@ -1678,7 +1678,7 @@ local function buildLightsEffectLayer(mainFrame)
         sgc.CornerRadius = UDim.new(1, 0)
         sgc.Parent = starGlow
 
-        -- ⭐ Twinkle animation (kedap-kedip), beda delay per bintang
+        -- Twinkle animation
         local baseTrans = star.BackgroundTransparency
         local baseGlowTrans = starGlow.BackgroundTransparency
         local minTrans = math.max(0, baseTrans - 0.55)
@@ -1781,16 +1781,16 @@ local function buildLightsEffectLayer(mainFrame)
                 angle = angle + speed
                 if angle > math.pi * 2 then angle = angle - math.pi * 2 end
 
-                -- Orbit ellipse (radius X & Y beda, biar keliatan 3D)
+                -- Orbit ellipse
                 local rx = radiusPct * 0.5
                 local ry = radiusPct * 0.25
                 local x = 0.5 + math.cos(angle) * rx
                 local y = 0.5 + math.sin(angle) * ry
                 sat.Position = UDim2.fromScale(x, y)
 
-                -- Skala satelit biar keliatan menjauh/mendekat
-                local depth = math.sin(angle)  -- -1..1
-                local scale = 0.7 + (depth + 1) * 0.25  -- 0.7..1.2
+                -- Skala satelit
+                local depth = math.sin(angle)
+                local scale = 0.7 + (depth + 1) * 0.25
                 local baseSize = IS_MOBILE and 6 or 8
                 sat.Size = UDim2.fromOffset(baseSize * scale, baseSize * scale)
                 sat.BackgroundTransparency = 0.3 - depth * 0.3
@@ -1803,7 +1803,7 @@ local function buildLightsEffectLayer(mainFrame)
     createSatellite(0.70, -0.018, math.pi, Color3.fromRGB(255, 180, 200))
 
     -- ══════════════════════════════════════════
-    -- METEOR JATUH KE BAWAH + trail panjang
+    -- METEOR JATUH (REALISTIS)
     -- ══════════════════════════════════════════
     local meteorColors = {
         Color3.fromRGB(255, 200, 120),  -- oranye api
@@ -1816,148 +1816,181 @@ local function buildLightsEffectLayer(mainFrame)
         if not active or not layer.Parent then return end
 
         local pickColor = meteorColors[math.random(1, #meteorColors)]
-        local headSize = math.random(3, 5)
-
-        -- Head meteor
-        local meteor = Instance.new("Frame")
-        meteor.Name = "Meteor"
-        meteor.AnchorPoint = Vector2.new(0.5, 0.5)
-        meteor.Size = UDim2.fromOffset(headSize, headSize)
-
-                -- ⭐ FIX: Meteor jatuh miring/diagonal (bukan lurus vertikal)
-        -- Tentukan arah geser (kiri atau kanan)
+        
+        -- Tentukan arah diagonal (Miring melintasi layar)
         local goRight = math.random() > 0.5
         local startX, endX
         
         if goRight then
-            -- Mulai dari kiri, geser ke kanan bawah
-            startX = math.random(-10, 40) / 100
-            endX = startX + math.random(50, 80) / 100
+            startX = math.random(-20, 10) / 100
+            endX = startX + math.random(80, 120) / 100
         else
-            -- Mulai dari kanan, geser ke kiri bawah
-            startX = math.random(60, 110) / 100
-            endX = startX - math.random(50, 80) / 100
+            startX = math.random(90, 120) / 100
+            endX = startX - math.random(80, 120) / 100
         end
 
-        local startY = -0.15
-        local endY = 1.15
+        local startY = -0.2
+        local endY = 1.2
 
+        -- Hitung sudut miring secara presisi buat ekornya
+        local angleDeg = math.deg(math.atan2(endY - startY, endX - startX)) - 90
+
+        -- ══════════════════════════════════════════
+        -- 1. KEPALA METEOR (BOLA SEMPURNA)
+        -- ══════════════════════════════════════════
+        local meteor = Instance.new("Frame")
+        meteor.Name = "MeteorHead"
+        meteor.AnchorPoint = Vector2.new(0.5, 0.5)
+        meteor.Size = UDim2.fromOffset(8, 8) -- Ukuran fix, dijamin bulat
         meteor.Position = UDim2.fromScale(startX, startY)
-        meteor.BackgroundColor3 = pickColor
+        meteor.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Inti putih panas
         meteor.BorderSizePixel = 0
-        meteor.ZIndex = 8
+        meteor.ZIndex = 15
         meteor.Parent = layer
 
         local mc = Instance.new("UICorner")
-        mc.CornerRadius = UDim.new(1, 0)
+        mc.CornerRadius = UDim.new(1, 0) -- 1,0 = Lingkaran sempurna
         mc.Parent = meteor
 
-        -- Head glow (halo besar)
+        -- Glow luar (halo cahaya)
         local headGlow = Instance.new("Frame")
         headGlow.AnchorPoint = Vector2.new(0.5, 0.5)
         headGlow.Position = UDim2.fromScale(0.5, 0.5)
-        headGlow.Size = UDim2.fromOffset(headSize * 4, headSize * 4)
+        headGlow.Size = UDim2.fromOffset(24, 24)
         headGlow.BackgroundColor3 = pickColor
-        headGlow.BackgroundTransparency = 0.4
+        headGlow.BackgroundTransparency = 0.3
         headGlow.BorderSizePixel = 0
-        headGlow.ZIndex = 7
+        headGlow.ZIndex = 14
         headGlow.Parent = meteor
         local hgc = Instance.new("UICorner")
         hgc.CornerRadius = UDim.new(1, 0)
         hgc.Parent = headGlow
 
-                -- ⭐ FIX: Trail ikut miring sesuai arah jatuh
-        local trailLen = math.random(120, 200)
-        local trail = Instance.new("Frame")
-        trail.AnchorPoint = Vector2.new(0.5, 1)
-        trail.Position = UDim2.new(0.5, 0, 0.5, 0)
-        trail.Size = UDim2.fromOffset(3, trailLen)
-        trail.BackgroundColor3 = pickColor
-        trail.BackgroundTransparency = 0.15
-        trail.BorderSizePixel = 0
-        trail.ZIndex = 7
-        trail.Parent = meteor
+        -- ══════════════════════════════════════════
+        -- 2. EKOR KOMET MULTI-LAYER (REALISTIS)
+        -- ══════════════════════════════════════════
+        local trailHolder = Instance.new("Frame")
+        trailHolder.AnchorPoint = Vector2.new(0.5, 0.5)
+        trailHolder.Position = UDim2.fromScale(0.5, 0.5)
+        trailHolder.Size = UDim2.fromOffset(1, 1)
+        trailHolder.BackgroundTransparency = 1
+        trailHolder.Rotation = angleDeg -- Ekor miring sesuai arah
+        trailHolder.ZIndex = 10
+        trailHolder.Parent = meteor
+
+        local trailLength = math.random(100, 150)
+
+        -- Layer 1: Ekor Luar (Besar & Transparan / Efek Gas)
+        local outerTrail = Instance.new("Frame")
+        outerTrail.AnchorPoint = Vector2.new(0.5, 1)
+        outerTrail.Position = UDim2.new(0.5, 0, 0.5, 0)
+        outerTrail.Size = UDim2.fromOffset(12, trailLength)
+        outerTrail.BackgroundColor3 = pickColor
+        outerTrail.BorderSizePixel = 0
+        outerTrail.ZIndex = 11
+        outerTrail.Parent = trailHolder
         
-        -- Hitung sudut kemiringan meteor
-        local angleDeg = math.deg(math.atan2(endY - startY, endX - startX)) - 90
-        trail.Rotation = angleDeg -- ⭐ Miringin ekornya
-        
-        local trailGrad = Instance.new("UIGradient")
-        trailGrad.Rotation = 90
-        trailGrad.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 1),      -- ujung atas fade out
-            NumberSequenceKeypoint.new(0.6, 0.4),
-            NumberSequenceKeypoint.new(1, 0),      -- dekat head terang
+        local outerGrad = Instance.new("UIGradient")
+        outerGrad.Rotation = 90
+        outerGrad.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 1),      -- Ujung ekor hilang total
+            NumberSequenceKeypoint.new(0.5, 0.85), -- Tengah samar
+            NumberSequenceKeypoint.new(1, 0.4),    -- Deket kepala terang
         })
-        trailGrad.Parent = trail
+        outerGrad.Parent = outerTrail
 
-                -- Trail glow (lebih lebar)
-        local trailGlow = Instance.new("Frame")
-        trailGlow.AnchorPoint = Vector2.new(0.5, 1)
-        trailGlow.Position = UDim2.new(0.5, 0, 0.5, 0)
-        trailGlow.Size = UDim2.fromOffset(8, trailLen * 0.9)
-        trailGlow.BackgroundColor3 = pickColor
-        trailGlow.BackgroundTransparency = 0.75
-        trailGlow.BorderSizePixel = 0
-        trailGlow.ZIndex = 6
-        trailGlow.Parent = meteor
-        trailGlow.Rotation = angleDeg -- ⭐ Miringin glow ekornya juga
-
-        local trailGlowGrad = Instance.new("UIGradient")
-        trailGlowGrad.Rotation = 90
-        trailGlowGrad.Transparency = NumberSequence.new({
+        -- Layer 2: Ekor Tengah (Warna Meteor / Inti Ekor)
+        local midTrail = Instance.new("Frame")
+        midTrail.AnchorPoint = Vector2.new(0.5, 1)
+        midTrail.Position = UDim2.new(0.5, 0, 0.5, 0)
+        midTrail.Size = UDim2.fromOffset(6, trailLength * 0.9)
+        midTrail.BackgroundColor3 = pickColor
+        midTrail.BorderSizePixel = 0
+        midTrail.ZIndex = 12
+        midTrail.Parent = trailHolder
+        
+        local midGrad = Instance.new("UIGradient")
+        midGrad.Rotation = 90
+        midGrad.Transparency = NumberSequence.new({
             NumberSequenceKeypoint.new(0, 1),
-            NumberSequenceKeypoint.new(0.7, 0.7),
-            NumberSequenceKeypoint.new(1, 0.3),
+            NumberSequenceKeypoint.new(0.4, 0.6),
+            NumberSequenceKeypoint.new(1, 0.1),
         })
-        trailGlowGrad.Parent = trailGlow
+        midGrad.Parent = midTrail
 
-        -- Spark kecil di trail
-        for s = 1, math.random(3, 5) do
+        -- Layer 3: Ekor Dalam (Putih Panas / Laser Core)
+        local coreTrail = Instance.new("Frame")
+        coreTrail.AnchorPoint = Vector2.new(0.5, 1)
+        coreTrail.Position = UDim2.new(0.5, 0, 0.5, 0)
+        coreTrail.Size = UDim2.fromOffset(2, trailLength * 0.7)
+        coreTrail.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        coreTrail.BorderSizePixel = 0
+        coreTrail.ZIndex = 13
+        coreTrail.Parent = trailHolder
+        
+        local coreGrad = Instance.new("UIGradient")
+        coreGrad.Rotation = 90
+        coreGrad.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 1),
+            NumberSequenceKeypoint.new(0.7, 0.3),
+            NumberSequenceKeypoint.new(1, 0),
+        })
+        coreGrad.Parent = coreTrail
+
+        -- Percikan Api (Sparks) yang berjatuhan
+        for s = 1, math.random(4, 7) do
             local spark = Instance.new("Frame")
             spark.AnchorPoint = Vector2.new(0.5, 0.5)
-            spark.Position = UDim2.new(0.5, math.random(-3, 3), 0.5, -math.random(10, trailLen - 10))
+            spark.Position = UDim2.new(0.5, math.random(-6, 6), 0.5, -math.random(10, trailLength - 10))
             spark.Size = UDim2.fromOffset(math.random(1, 3), math.random(1, 3))
             spark.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            spark.BackgroundTransparency = math.random(20, 60) / 100
+            spark.BackgroundTransparency = math.random(10, 50) / 100
             spark.BorderSizePixel = 0
-            spark.ZIndex = 7
-            spark.Parent = meteor
+            spark.ZIndex = 12
+            spark.Parent = trailHolder
             local spc = Instance.new("UICorner")
             spc.CornerRadius = UDim.new(1, 0)
             spc.Parent = spark
         end
 
-        -- Animasi jatuh ke bawah
-        local duration = math.random(180, 320) / 100  -- 1.8-3.2 detik
+        -- ══════════════════════════════════════════
+        -- 3. ANIMASI JATUH
+        -- ══════════════════════════════════════════
+        local duration = math.random(150, 250) / 100 -- 1.5 - 2.5 detik
+        
+        -- Gerak mulus ke titik ujung
         TweenService:Create(meteor, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
             Position = UDim2.fromScale(endX, endY),
         }):Play()
 
-        -- Fade out di ujung bawah
-        task.delay(duration * 0.85, function()
+        -- Fade Out pas mendekati ujung layar
+        task.delay(duration * 0.8, function()
             if meteor.Parent then
-                TweenService:Create(meteor, TweenInfo.new(duration * 0.15, Enum.EasingStyle.Quad), {
+                TweenService:Create(meteor, TweenInfo.new(duration * 0.2, Enum.EasingStyle.Quad), {
                     BackgroundTransparency = 1,
                 }):Play()
-                TweenService:Create(trail, TweenInfo.new(duration * 0.15), {
+                TweenService:Create(headGlow, TweenInfo.new(duration * 0.2, Enum.EasingStyle.Quad), {
                     BackgroundTransparency = 1,
                 }):Play()
-                TweenService:Create(trailGlow, TweenInfo.new(duration * 0.15), {
-                    BackgroundTransparency = 1,
-                }):Play()
-                TweenService:Create(headGlow, TweenInfo.new(duration * 0.15), {
-                    BackgroundTransparency = 1,
-                }):Play()
+                -- Fade out semua layer ekor secara barengan
+                for _, child in ipairs(trailHolder:GetChildren()) do
+                    if child:IsA("Frame") and child.Name ~= "Spark" then -- Spark udah transparan natural
+                        local targetTrans = child.BackgroundTransparency + 0.3
+                        TweenService:Create(child, TweenInfo.new(duration * 0.2), {
+                            BackgroundTransparency = targetTrans
+                        }):Play()
+                    end
+                end
             end
         end)
 
+        -- Hapus objek
         task.delay(duration + 0.2, function()
             if meteor then meteor:Destroy() end
         end)
     end
 
-    -- Loop spawn meteor (jeda natural)
+    -- Loop spawn meteor
     task.spawn(function()
         task.wait(1.5)
         while active do
