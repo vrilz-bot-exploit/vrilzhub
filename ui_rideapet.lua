@@ -6665,6 +6665,7 @@ end)
                 notify("✨ Lights Effect: OFF", "info")
             end
         end)
+end
 
         -- ===== EVENT TAB =====
     do
