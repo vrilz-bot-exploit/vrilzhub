@@ -1581,15 +1581,16 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
 end
 
 -- ============================================================
--- 🌠 LIGHTS EFFECT LAYER — Meteor + Bintang + Shadow (di dalam window)
+-- 🌌 LIGHTS EFFECT LAYER v2 — Meteor + Bintang + Satelit (realistis)
 -- ============================================================
 local function buildLightsEffectLayer(mainFrame)
     local layer = Instance.new("Frame")
     layer.Name = "LightsEffectLayer"
     layer.Size = UDim2.fromScale(1, 1)
+    layer.Position = UDim2.fromScale(0, 0)
     layer.BackgroundTransparency = 1
-    layer.ClipsDescendants = true          -- ⭐ kunci: semua efek kepotong di dalam window
-    layer.ZIndex = 4                        -- di belakang konten, di atas background
+    layer.ClipsDescendants = true
+    layer.ZIndex = 4
     layer.Active = false
     layer.Parent = mainFrame
 
@@ -1597,25 +1598,55 @@ local function buildLightsEffectLayer(mainFrame)
     layerCorner.CornerRadius = UDim.new(0, 18)
     layerCorner.Parent = layer
 
+    local active = true
+    layer.Destroying:Connect(function()
+        active = false
+    end)
+
     -- ══════════════════════════════════════════
-    -- STARFIELD (bintang-bintang twinkle + shadow)
+    -- BACKGROUND SPACE GRADIENT (deep space)
+    -- ══════════════════════════════════════════
+    local spaceBg = Instance.new("Frame")
+    spaceBg.Name = "SpaceBG"
+    spaceBg.Size = UDim2.fromScale(1, 1)
+    spaceBg.BackgroundColor3 = Color3.fromRGB(5, 8, 18)
+    spaceBg.BackgroundTransparency = 0.85
+    spaceBg.BorderSizePixel = 0
+    spaceBg.ZIndex = 4
+    spaceBg.Parent = layer
+
+    local spaceBgCorner = Instance.new("UICorner")
+    spaceBgCorner.CornerRadius = UDim.new(0, 18)
+    spaceBgCorner.Parent = spaceBg
+
+    local spaceGrad = Instance.new("UIGradient")
+    spaceGrad.Rotation = 135
+    spaceGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(8, 12, 30)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(3, 5, 15)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(1, 2, 8)),
+    })
+    spaceGrad.Parent = spaceBg
+
+    -- ══════════════════════════════════════════
+    -- STARFIELD — bintang kedap-kedip (twinkle)
     -- ══════════════════════════════════════════
     local starfield = Instance.new("Frame")
     starfield.Name = "Starfield"
     starfield.Size = UDim2.fromScale(1, 1)
     starfield.BackgroundTransparency = 1
     starfield.ClipsDescendants = true
-    starfield.ZIndex = 4
+    starfield.ZIndex = 5
     starfield.Parent = layer
 
     local starColors = {
-        Color3.fromRGB(255, 255, 255), -- putih
-        Color3.fromRGB(180, 220, 255), -- biru muda
-        Color3.fromRGB(255, 220, 180), -- kuning lembut
-        Color3.fromRGB(200, 180, 255), -- ungu
+        Color3.fromRGB(255, 255, 255),   -- putih
+        Color3.fromRGB(180, 220, 255),   -- biru muda
+        Color3.fromRGB(255, 220, 180),   -- kuning lembut
+        Color3.fromRGB(200, 180, 255),   -- ungu
+        Color3.fromRGB(255, 180, 220),   -- pink lembut
     }
-    local starCount = IS_MOBILE and 34 or 52
-    local stars = {}
+    local starCount = IS_MOBILE and 45 or 70
 
     for i = 1, starCount do
         local star = Instance.new("Frame")
@@ -1624,238 +1655,338 @@ local function buildLightsEffectLayer(mainFrame)
         star.Size = UDim2.fromOffset(sz, sz)
         star.Position = UDim2.fromScale(math.random(0, 1000) / 1000, math.random(0, 1000) / 1000)
         star.BackgroundColor3 = starColors[math.random(1, #starColors)]
-        star.BackgroundTransparency = math.random(25, 75) / 100
+        star.BackgroundTransparency = math.random(40, 85) / 100
         star.BorderSizePixel = 0
-        star.ZIndex = 5
+        star.ZIndex = 6
         star.Parent = starfield
 
         local sc = Instance.new("UICorner")
         sc.CornerRadius = UDim.new(1, 0)
         sc.Parent = star
 
-        -- ⭐ Shadow halus di belakang bintang
-        local starShadow = Instance.new("Frame")
-        starShadow.Size = UDim2.new(1, 4, 1, 4)
-        starShadow.Position = UDim2.new(0.5, 1, 0.5, 1)
-        starShadow.AnchorPoint = Vector2.new(0.5, 0.5)
-        starShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        starShadow.BackgroundTransparency = 0.65
-        starShadow.BorderSizePixel = 0
-        starShadow.ZIndex = 4
-        starShadow.Parent = star
+        -- ⭐ Glow halo tipis di sekitar bintang
+        local starGlow = Instance.new("Frame")
+        starGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+        starGlow.Position = UDim2.fromScale(0.5, 0.5)
+        starGlow.Size = UDim2.new(3, 0, 3, 0)
+        starGlow.BackgroundColor3 = star.BackgroundColor3
+        starGlow.BackgroundTransparency = 0.92
+        starGlow.BorderSizePixel = 0
+        starGlow.ZIndex = 5
+        starGlow.Parent = star
+        local sgc = Instance.new("UICorner")
+        sgc.CornerRadius = UDim.new(1, 0)
+        sgc.Parent = starGlow
 
-        local ssc = Instance.new("UICorner")
-        ssc.CornerRadius = UDim.new(1, 0)
-        ssc.Parent = starShadow
+        -- ⭐ Twinkle animation (kedap-kedip), beda delay per bintang
+        local baseTrans = star.BackgroundTransparency
+        local baseGlowTrans = starGlow.BackgroundTransparency
+        local minTrans = math.max(0, baseTrans - 0.55)
+        local minGlowTrans = math.max(0, baseGlowTrans - 0.10)
 
-        table.insert(stars, {obj = star, baseTrans = star.BackgroundTransparency})
-
-        -- Twinkle animation (beda delay tiap bintang)
         task.spawn(function()
-            task.wait(math.random(0, 300) / 100)
-            while star.Parent do
-                task.wait(math.random(18, 45) / 10)
-                if not star.Parent then break end
-                TweenService:Create(star, TweenInfo.new(0.7, Enum.EasingStyle.Sine), {
-                    BackgroundTransparency = math.max(0, star.BackgroundTransparency - 0.35)
+            task.wait(math.random(0, 400) / 100)  -- delay random awal
+            while star.Parent and active do
+                local upDur = math.random(50, 120) / 100
+                local downDur = math.random(60, 140) / 100
+
+                TweenService:Create(star, TweenInfo.new(upDur, Enum.EasingStyle.Sine), {
+                    BackgroundTransparency = minTrans
                 }):Play()
-                task.wait(0.7)
-                if not star.Parent then break end
-                TweenService:Create(star, TweenInfo.new(0.7, Enum.EasingStyle.Sine), {
-                    BackgroundTransparency = math.min(0.9, star.BackgroundTransparency + 0.3)
+                TweenService:Create(starGlow, TweenInfo.new(upDur, Enum.EasingStyle.Sine), {
+                    BackgroundTransparency = minGlowTrans
                 }):Play()
+
+                task.wait(upDur + math.random(0, 80) / 100)
+
+                TweenService:Create(star, TweenInfo.new(downDur, Enum.EasingStyle.Sine), {
+                    BackgroundTransparency = baseTrans
+                }):Play()
+                TweenService:Create(starGlow, TweenInfo.new(downDur, Enum.EasingStyle.Sine), {
+                    BackgroundTransparency = baseGlowTrans
+                }):Play()
+
+                task.wait(downDur + math.random(0, 200) / 100)
             end
         end)
     end
 
     -- ══════════════════════════════════════════
-    -- METEOR LAYER (jatuh horizontal, di dalam window)
+    -- SATELIT muter di orbit (2 satelit)
     -- ══════════════════════════════════════════
-    local meteorLayer = Instance.new("Frame")
-    meteorLayer.Name = "MeteorLayer"
-    meteorLayer.Size = UDim2.fromScale(1, 1)
-    meteorLayer.BackgroundTransparency = 1
-    meteorLayer.ClipsDescendants = true
-    meteorLayer.ZIndex = 6
-    meteorLayer.Parent = layer
+    local function createSatellite(radiusPct, speed, startAngle, color)
+        local orbitCenter = Instance.new("Frame")
+        orbitCenter.Name = "SatelliteOrbit"
+        orbitCenter.AnchorPoint = Vector2.new(0.5, 0.5)
+        orbitCenter.Position = UDim2.fromScale(0.5, 0.5)
+        orbitCenter.Size = UDim2.fromScale(1, 1)
+        orbitCenter.BackgroundTransparency = 1
+        orbitCenter.ZIndex = 6
+        orbitCenter.Parent = layer
 
-    local meteorsActive = true
-    layer.Destroying:Connect(function()
-        meteorsActive = false
-    end)
+        -- Satelit body
+        local sat = Instance.new("Frame")
+        sat.Name = "Satellite"
+        sat.AnchorPoint = Vector2.new(0.5, 0.5)
+        sat.Size = UDim2.fromOffset(IS_MOBILE and 6 or 8, IS_MOBILE and 6 or 8)
+        sat.BackgroundColor3 = color
+        sat.BorderSizePixel = 0
+        sat.ZIndex = 7
+        sat.Parent = orbitCenter
 
+        local satCorner = Instance.new("UICorner")
+        satCorner.CornerRadius = UDim.new(1, 0)
+        satCorner.Parent = sat
+
+        -- Glow
+        local satGlow = Instance.new("Frame")
+        satGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+        satGlow.Position = UDim2.fromScale(0.5, 0.5)
+        satGlow.Size = UDim2.new(2.5, 0, 2.5, 0)
+        satGlow.BackgroundColor3 = color
+        satGlow.BackgroundTransparency = 0.75
+        satGlow.BorderSizePixel = 0
+        satGlow.ZIndex = 6
+        satGlow.Parent = sat
+        local sgc2 = Instance.new("UICorner")
+        sgc2.CornerRadius = UDim.new(1, 0)
+        sgc2.Parent = satGlow
+
+        -- Panel satelit (2 strip tipis)
+        local panelL = Instance.new("Frame")
+        panelL.AnchorPoint = Vector2.new(1, 0.5)
+        panelL.Position = UDim2.new(0.5, -3, 0.5, 0)
+        panelL.Size = UDim2.fromOffset(6, 2)
+        panelL.BackgroundColor3 = Color3.fromRGB(200, 220, 255)
+        panelL.BackgroundTransparency = 0.3
+        panelL.BorderSizePixel = 0
+        panelL.ZIndex = 7
+        panelL.Parent = sat
+
+        local panelR = Instance.new("Frame")
+        panelR.AnchorPoint = Vector2.new(0, 0.5)
+        panelR.Position = UDim2.new(0.5, 3, 0.5, 0)
+        panelR.Size = UDim2.fromOffset(6, 2)
+        panelR.BackgroundColor3 = Color3.fromRGB(200, 220, 255)
+        panelR.BackgroundTransparency = 0.3
+        panelR.BorderSizePixel = 0
+        panelR.ZIndex = 7
+        panelR.Parent = sat
+
+        -- Animasi orbit
+        task.spawn(function()
+            local angle = startAngle or 0
+            while sat.Parent and active do
+                task.wait(0.03)
+                angle = angle + speed
+                if angle > math.pi * 2 then angle = angle - math.pi * 2 end
+
+                -- Orbit ellipse (radius X & Y beda, biar keliatan 3D)
+                local rx = radiusPct * 0.5
+                local ry = radiusPct * 0.25
+                local x = 0.5 + math.cos(angle) * rx
+                local y = 0.5 + math.sin(angle) * ry
+                sat.Position = UDim2.fromScale(x, y)
+
+                -- Skala satelit biar keliatan menjauh/mendekat
+                local depth = math.sin(angle)  -- -1..1
+                local scale = 0.7 + (depth + 1) * 0.25  -- 0.7..1.2
+                local baseSize = IS_MOBILE and 6 or 8
+                sat.Size = UDim2.fromOffset(baseSize * scale, baseSize * scale)
+                sat.BackgroundTransparency = 0.3 - depth * 0.3
+            end
+        end)
+    end
+
+    -- 2 satelit muter
+    createSatellite(0.85, 0.012, 0, Color3.fromRGB(180, 220, 255))
+    createSatellite(0.70, -0.018, math.pi, Color3.fromRGB(255, 180, 200))
+
+    -- ══════════════════════════════════════════
+    -- METEOR JATUH KE BAWAH + trail panjang
+    -- ══════════════════════════════════════════
     local meteorColors = {
-        Color3.fromRGB(255, 180, 100),  -- oranye (fire)
-        Color3.fromRGB(150, 220, 255),  -- biru (ice)
-        Color3.fromRGB(255, 140, 200),  -- pink
-        Color3.fromRGB(180, 160, 255),  -- ungu
+        Color3.fromRGB(255, 200, 120),  -- oranye api
+        Color3.fromRGB(150, 220, 255),  -- biru ice
+        Color3.fromRGB(255, 160, 200),  -- pink
+        Color3.fromRGB(200, 180, 255),  -- ungu
     }
 
     local function spawnMeteor()
-        if not meteorsActive or not meteorLayer.Parent then return end
+        if not active or not layer.Parent then return end
 
         local pickColor = meteorColors[math.random(1, #meteorColors)]
+        local headSize = math.random(3, 5)
 
         -- Head meteor
         local meteor = Instance.new("Frame")
         meteor.Name = "Meteor"
         meteor.AnchorPoint = Vector2.new(0.5, 0.5)
-        meteor.Size = UDim2.fromOffset(math.random(3, 5), math.random(3, 5))
-        local yPos = math.random(10, 90) / 100
-        meteor.Position = UDim2.fromScale(-0.15, yPos)
+        meteor.Size = UDim2.fromOffset(headSize, headSize)
+
+        -- Start dari atas window (bisa kiri/tengah/kanan), end di bawah
+        local startX = math.random(5, 95) / 100
+        local startY = -0.15
+        local endX = startX + math.random(-20, 20) / 100
+        local endY = 1.15
+        endX = math.clamp(endX, -0.1, 1.1)
+
+        meteor.Position = UDim2.fromScale(startX, startY)
         meteor.BackgroundColor3 = pickColor
         meteor.BorderSizePixel = 0
         meteor.ZIndex = 8
-        meteor.Parent = meteorLayer
+        meteor.Parent = layer
 
         local mc = Instance.new("UICorner")
         mc.CornerRadius = UDim.new(1, 0)
         mc.Parent = meteor
 
-        -- ⭐ Shadow meteor
-        local meteorShadow = Instance.new("Frame")
-        meteorShadow.Size = UDim2.new(1, 6, 1, 6)
-        meteorShadow.Position = UDim2.new(0.5, 3, 0.5, 3)
-        meteorShadow.AnchorPoint = Vector2.new(0.5, 0.5)
-        meteorShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        meteorShadow.BackgroundTransparency = 0.55
-        meteorShadow.BorderSizePixel = 0
-        meteorShadow.ZIndex = 7
-        meteorShadow.Parent = meteor
-
-        local msc = Instance.new("UICorner")
-        msc.CornerRadius = UDim.new(1, 0)
-        msc.Parent = meteorShadow
-
-        -- Head glow (halo)
+        -- Head glow (halo besar)
         local headGlow = Instance.new("Frame")
         headGlow.AnchorPoint = Vector2.new(0.5, 0.5)
         headGlow.Position = UDim2.fromScale(0.5, 0.5)
-        headGlow.Size = UDim2.fromOffset(14, 14)
+        headGlow.Size = UDim2.fromOffset(headSize * 4, headSize * 4)
         headGlow.BackgroundColor3 = pickColor
-        headGlow.BackgroundTransparency = 0.55
+        headGlow.BackgroundTransparency = 0.4
         headGlow.BorderSizePixel = 0
         headGlow.ZIndex = 7
         headGlow.Parent = meteor
-
         local hgc = Instance.new("UICorner")
         hgc.CornerRadius = UDim.new(1, 0)
         hgc.Parent = headGlow
 
-        -- Trail memanjang ke kiri (karena meteor gerak ke kanan)
-        local trailLen = math.random(40, 90)
+        -- Trail panjang ke ATAS (karena meteor jatuh ke bawah)
+        local trailLen = math.random(120, 200)
         local trail = Instance.new("Frame")
-        trail.AnchorPoint = Vector2.new(1, 0.5)
-        trail.Position = UDim2.fromScale(0.5, 0.5)
-        trail.Size = UDim2.fromOffset(trailLen, 2)
+        trail.AnchorPoint = Vector2.new(0.5, 1)
+        trail.Position = UDim2.new(0.5, 0, 0.5, 0)
+        trail.Size = UDim2.fromOffset(3, trailLen)
         trail.BackgroundColor3 = pickColor
-        trail.BackgroundTransparency = 0.25
+        trail.BackgroundTransparency = 0.15
         trail.BorderSizePixel = 0
         trail.ZIndex = 7
         trail.Parent = meteor
 
         local trailGrad = Instance.new("UIGradient")
+        trailGrad.Rotation = 90
         trailGrad.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 1),
-            NumberSequenceKeypoint.new(0.4, 0.15),
-            NumberSequenceKeypoint.new(1, 0),
+            NumberSequenceKeypoint.new(0, 1),      -- ujung atas fade out
+            NumberSequenceKeypoint.new(0.6, 0.4),
+            NumberSequenceKeypoint.new(1, 0),      -- dekat head terang
         })
         trailGrad.Parent = trail
 
+        -- Trail glow (lebih lebar)
+        local trailGlow = Instance.new("Frame")
+        trailGlow.AnchorPoint = Vector2.new(0.5, 1)
+        trailGlow.Position = UDim2.new(0.5, 0, 0.5, 0)
+        trailGlow.Size = UDim2.fromOffset(8, trailLen * 0.9)
+        trailGlow.BackgroundColor3 = pickColor
+        trailGlow.BackgroundTransparency = 0.75
+        trailGlow.BorderSizePixel = 0
+        trailGlow.ZIndex = 6
+        trailGlow.Parent = meteor
+
+        local trailGlowGrad = Instance.new("UIGradient")
+        trailGlowGrad.Rotation = 90
+        trailGlowGrad.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 1),
+            NumberSequenceKeypoint.new(0.7, 0.7),
+            NumberSequenceKeypoint.new(1, 0.3),
+        })
+        trailGlowGrad.Parent = trailGlow
+
         -- Spark kecil di trail
-        for i = 1, math.random(2, 4) do
+        for s = 1, math.random(3, 5) do
             local spark = Instance.new("Frame")
             spark.AnchorPoint = Vector2.new(0.5, 0.5)
-            spark.Position = UDim2.new(1, math.random(-trailLen, -10), 0.5, math.random(-3, 3))
-            spark.Size = UDim2.fromOffset(math.random(2, 3), math.random(2, 3))
+            spark.Position = UDim2.new(0.5, math.random(-3, 3), 0.5, -math.random(10, trailLen - 10))
+            spark.Size = UDim2.fromOffset(math.random(1, 3), math.random(1, 3))
             spark.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            spark.BackgroundTransparency = 0.35
+            spark.BackgroundTransparency = math.random(20, 60) / 100
             spark.BorderSizePixel = 0
             spark.ZIndex = 7
             spark.Parent = meteor
-            local sc = Instance.new("UICorner")
-            sc.CornerRadius = UDim.new(1, 0)
-            sc.Parent = spark
+            local spc = Instance.new("UICorner")
+            spc.CornerRadius = UDim.new(1, 0)
+            spc.Parent = spark
         end
 
-        -- Animate geser dari kiri ke kanan
-        local duration = math.random(180, 320) / 100
+        -- Animasi jatuh ke bawah
+        local duration = math.random(180, 320) / 100  -- 1.8-3.2 detik
         TweenService:Create(meteor, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
-            Position = UDim2.fromScale(1.15, yPos + math.random(-10, 10) / 100),
+            Position = UDim2.fromScale(endX, endY),
         }):Play()
 
-        -- Fade out di ujung kanan
-        task.delay(duration * 0.8, function()
+        -- Fade out di ujung bawah
+        task.delay(duration * 0.85, function()
             if meteor.Parent then
-                TweenService:Create(meteor, TweenInfo.new(duration * 0.2), {
+                TweenService:Create(meteor, TweenInfo.new(duration * 0.15, Enum.EasingStyle.Quad), {
                     BackgroundTransparency = 1,
                 }):Play()
-                TweenService:Create(trail, TweenInfo.new(duration * 0.2), {BackgroundTransparency = 1}):Play()
-                TweenService:Create(headGlow, TweenInfo.new(duration * 0.2), {BackgroundTransparency = 1}):Play()
-                TweenService:Create(meteorShadow, TweenInfo.new(duration * 0.2), {BackgroundTransparency = 1}):Play()
+                TweenService:Create(trail, TweenInfo.new(duration * 0.15), {
+                    BackgroundTransparency = 1,
+                }):Play()
+                TweenService:Create(trailGlow, TweenInfo.new(duration * 0.15), {
+                    BackgroundTransparency = 1,
+                }):Play()
+                TweenService:Create(headGlow, TweenInfo.new(duration * 0.15), {
+                    BackgroundTransparency = 1,
+                }):Play()
             end
         end)
 
-        task.delay(duration + 0.15, function()
+        task.delay(duration + 0.2, function()
             if meteor then meteor:Destroy() end
         end)
     end
 
-    -- Spawn meteor berkala
+    -- Loop spawn meteor (jeda natural)
     task.spawn(function()
-        task.wait(0.4)
-        while meteorsActive do
+        task.wait(1.5)
+        while active do
             spawnMeteor()
-            if math.random() < 0.25 then
-                task.wait(0.15)
+            if math.random() < 0.3 then
+                task.wait(math.random(10, 30) / 100)
                 spawnMeteor()
             end
-            task.wait(math.random(70, 160) / 100)
+            task.wait(math.random(150, 350) / 100)  -- 1.5-3.5 detik
         end
     end)
 
     -- ══════════════════════════════════════════
-    -- AMBIENT GLOW SHADOW (nuansa shadow lembut)
+    -- AMBIENT SHADOW (vignette atas & bawah)
     -- ══════════════════════════════════════════
-    local shadowGlow = Instance.new("Frame")
-    shadowGlow.Name = "ShadowGlow"
-    shadowGlow.Size = UDim2.fromScale(1, 1)
-    shadowGlow.BackgroundTransparency = 1
-    shadowGlow.ZIndex = 4
-    shadowGlow.Parent = layer
-
-    -- Shadow di tepi atas
     local topShadow = Instance.new("Frame")
     topShadow.Size = UDim2.new(1, 0, 0, 60)
     topShadow.Position = UDim2.fromScale(0, 0)
     topShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    topShadow.BackgroundTransparency = 0.75
+    topShadow.BackgroundTransparency = 0.7
     topShadow.BorderSizePixel = 0
     topShadow.ZIndex = 4
-    topShadow.Parent = shadowGlow
+    topShadow.Parent = layer
 
     local topShadowGrad = Instance.new("UIGradient")
     topShadowGrad.Rotation = 90
     topShadowGrad.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.55),
+        NumberSequenceKeypoint.new(0, 0.5),
         NumberSequenceKeypoint.new(1, 1),
     })
     topShadowGrad.Parent = topShadow
 
-    -- Shadow di tepi bawah
     local botShadow = Instance.new("Frame")
     botShadow.Size = UDim2.new(1, 0, 0, 60)
     botShadow.Position = UDim2.new(0, 0, 1, -60)
     botShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    botShadow.BackgroundTransparency = 0.75
+    botShadow.BackgroundTransparency = 0.7
     botShadow.BorderSizePixel = 0
     botShadow.ZIndex = 4
-    botShadow.Parent = shadowGlow
+    botShadow.Parent = layer
 
     local botShadowGrad = Instance.new("UIGradient")
     botShadowGrad.Rotation = -90
     botShadowGrad.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.55),
+        NumberSequenceKeypoint.new(0, 0.5),
         NumberSequenceKeypoint.new(1, 1),
     })
     botShadowGrad.Parent = botShadow
@@ -1864,20 +1995,19 @@ local function buildLightsEffectLayer(mainFrame)
 end
 
 -- ============================================================
--- ⚡ LIGHTNING EFFECT LAYER v3 — Red Lightning (di dalam window)
+-- ⚡ LIGHTNING EFFECT LAYER v4 — Rapi, gak numpuk, tetap bagus
 -- ============================================================
 local function buildLightningEffectLayer(mainFrame)
     local layer = Instance.new("Frame")
     layer.Name = "LightningEffectLayer"
-    layer.Size = UDim2.fromScale(1, 1)           -- full window
+    layer.Size = UDim2.fromScale(1, 1)
     layer.Position = UDim2.fromScale(0, 0)
     layer.BackgroundTransparency = 1
-    layer.ClipsDescendants = true                 -- ⭐ KUNCI: petir gak keluar window
+    layer.ClipsDescendants = true
     layer.ZIndex = 7
     layer.Active = false
     layer.Parent = mainFrame
 
-    -- Radius disamakan dengan window (18px) biar sudut petir ikut melengkung
     local layerCorner = Instance.new("UICorner")
     layerCorner.CornerRadius = UDim.new(0, 18)
     layerCorner.Parent = layer
@@ -1888,7 +2018,12 @@ local function buildLightningEffectLayer(mainFrame)
     end)
 
     -- ══════════════════════════════════════════
-    -- HELPER: bikin 1 segmen garis petir miring
+    -- LOCK: cegah petir numpuk. Cuma 1 sambaran pada satu waktu.
+    -- ══════════════════════════════════════════
+    local currentBoltHolder = nil
+
+    -- ══════════════════════════════════════════
+    -- HELPER: 1 segmen garis petir miring
     -- ══════════════════════════════════════════
     local function makeSegment(parent, p1, p2, thickness, color, transparency, zIndex)
         local dx = (p2.x - p1.x) * 1000
@@ -1917,7 +2052,7 @@ local function buildLightningEffectLayer(mainFrame)
     end
 
     -- ══════════════════════════════════════════
-    -- HELPER: generate zig-zag path dari atas ke bawah
+    -- HELPER: generate zig-zag path
     -- ══════════════════════════════════════════
     local function generateBoltPath(startX, startY, endY, segments, jitter)
         local path = { {x = startX, y = startY} }
@@ -1933,15 +2068,21 @@ local function buildLightningEffectLayer(mainFrame)
     end
 
     -- ══════════════════════════════════════════
-    -- SPAWN 1 PETIR UTAMA
+    -- SPAWN 1 PETIR (dijamin cuma 1 aktif)
     -- ══════════════════════════════════════════
     local function spawnLightningBolt()
         if not lightningActive or not layer.Parent then return end
 
-        -- ═══ Titik awal (atas) → titik akhir (bawah), semuanya di dalam layer
-        local startX = math.random(15, 85) / 100
-        local startY = 0.02                                  -- mulai sedikit di dalam atas
-        local endY = math.random(60, 92) / 100               -- berakhir di dalam bawah
+        -- ⭐ Kalau masih ada petir aktif → hapus dulu (anti numpuk)
+        if currentBoltHolder and currentBoltHolder.Parent then
+            currentBoltHolder:Destroy()
+            currentBoltHolder = nil
+        end
+
+        -- ═══ Posisi petir ═══
+        local startX = math.random(20, 80) / 100
+        local startY = 0.03
+        local endY = math.random(55, 85) / 100
         local endX = math.clamp(startX + math.random(-15, 15) / 100, 0.05, 0.95)
 
         local boltHolder = Instance.new("Frame")
@@ -1951,6 +2092,7 @@ local function buildLightningEffectLayer(mainFrame)
         boltHolder.ClipsDescendants = true
         boltHolder.ZIndex = 8
         boltHolder.Parent = layer
+        currentBoltHolder = boltHolder
 
         local allFrames = {}
         local RED_CORE  = Color3.fromRGB(255, 30, 30)
@@ -1958,76 +2100,46 @@ local function buildLightningEffectLayer(mainFrame)
         local WHITE_HOT = Color3.fromRGB(255, 230, 230)
         local DARK_RED  = Color3.fromRGB(180, 0, 0)
 
-        -- Jalur utama zig-zag
-        local mainSegments = math.random(6, 9)
-        local mainPath = generateBoltPath(startX, startY, endY, mainSegments, 6)
+        -- Jalur utama
+        local mainSegments = math.random(6, 8)
+        local mainPath = generateBoltPath(startX, startY, endY, mainSegments, 5)
 
         for i = 1, #mainPath - 1 do
             local p1 = mainPath[i]
             local p2 = mainPath[i + 1]
 
-            -- 4 layer: glow tebal, mid, core, hot
-            table.insert(allFrames, makeSegment(boltHolder, p1, p2, math.random(10, 14), RED_GLOW, 0.55, 8))
+            table.insert(allFrames, makeSegment(boltHolder, p1, p2, math.random(10, 13), RED_GLOW, 0.5, 8))
             table.insert(allFrames, makeSegment(boltHolder, p1, p2, math.random(5, 7), RED_CORE, 0.15, 9))
             table.insert(allFrames, makeSegment(boltHolder, p1, p2, 3, RED_CORE, 0, 10))
             table.insert(allFrames, makeSegment(boltHolder, p1, p2, 1.2, WHITE_HOT, 0, 11))
 
-            -- Cabang (60% chance per segmen)
-            if math.random() < 0.6 then
-                local branchCount = math.random(1, 3)
-                for b = 1, branchCount do
-                    local branchStart = p1
-                    local branchLenY = math.random(8, 25) / 100
-                    local branchLenX = math.random(-15, 15) / 100
-                    local branchEnd = {
-                        x = math.clamp(branchStart.x + branchLenX, 0.03, 0.97),
-                        y = math.clamp(branchStart.y + branchLenY, 0.03, 0.98)
-                    }
+            -- Cabang (cuma 40% chance, biar gak terlalu banyak)
+            if math.random() < 0.4 then
+                local branchStart = p1
+                local branchLenY = math.random(10, 20) / 100
+                local branchLenX = math.random(-15, 15) / 100
+                local branchEnd = {
+                    x = math.clamp(branchStart.x + branchLenX, 0.03, 0.97),
+                    y = math.clamp(branchStart.y + branchLenY, 0.03, 0.98)
+                }
 
-                    local subSegs = math.random(2, 3)
-                    local branchPath = { branchStart }
-                    for s = 1, subSegs do
-                        local st = s / subSegs
-                        local sx = branchStart.x + (branchEnd.x - branchStart.x) * st + math.random(-5, 5) / 100
-                        local sy = branchStart.y + (branchEnd.y - branchStart.y) * st + math.random(-2, 2) / 100
-                        sx = math.clamp(sx, 0.03, 0.97)
-                        sy = math.clamp(sy, 0.03, 0.98)
-                        table.insert(branchPath, {x = sx, y = sy})
-                    end
-
-                    for bs = 1, #branchPath - 1 do
-                        local bp1 = branchPath[bs]
-                        local bp2 = branchPath[bs + 1]
-                        table.insert(allFrames, makeSegment(boltHolder, bp1, bp2, math.random(4, 6), RED_GLOW, 0.65, 8))
-                        table.insert(allFrames, makeSegment(boltHolder, bp1, bp2, 1.5, RED_CORE, 0.1, 9))
-                    end
-
-                    -- Sub-cabang kecil
-                    if math.random() < 0.3 then
-                        local subBranchEnd = {
-                            x = math.clamp(branchEnd.x + math.random(-10, 10) / 100, 0.03, 0.97),
-                            y = math.clamp(branchEnd.y + math.random(5, 15) / 100, 0.03, 0.98)
-                        }
-                        table.insert(allFrames, makeSegment(boltHolder, branchEnd, subBranchEnd, 1, DARK_RED, 0.2, 9))
-                    end
+                local subSegs = math.random(2, 3)
+                local branchPath = { branchStart }
+                for s = 1, subSegs do
+                    local st = s / subSegs
+                    local sx = branchStart.x + (branchEnd.x - branchStart.x) * st + math.random(-4, 4) / 100
+                    local sy = branchStart.y + (branchEnd.y - branchStart.y) * st + math.random(-2, 2) / 100
+                    sx = math.clamp(sx, 0.03, 0.97)
+                    sy = math.clamp(sy, 0.03, 0.98)
+                    table.insert(branchPath, {x = sx, y = sy})
                 end
-            end
 
-            -- Spark kecil di titik sambungan
-            if math.random() < 0.5 then
-                local spark = Instance.new("Frame")
-                spark.AnchorPoint = Vector2.new(0.5, 0.5)
-                spark.Position = UDim2.fromScale(p1.x, p1.y)
-                spark.Size = UDim2.fromOffset(math.random(4, 8), math.random(4, 8))
-                spark.BackgroundColor3 = WHITE_HOT
-                spark.BackgroundTransparency = 0.2
-                spark.BorderSizePixel = 0
-                spark.ZIndex = 10
-                spark.Parent = boltHolder
-                local sc = Instance.new("UICorner")
-                sc.CornerRadius = UDim.new(1, 0)
-                sc.Parent = spark
-                table.insert(allFrames, spark)
+                for bs = 1, #branchPath - 1 do
+                    local bp1 = branchPath[bs]
+                    local bp2 = branchPath[bs + 1]
+                    table.insert(allFrames, makeSegment(boltHolder, bp1, bp2, math.random(4, 5), RED_GLOW, 0.65, 8))
+                    table.insert(allFrames, makeSegment(boltHolder, bp1, bp2, 1.5, RED_CORE, 0.1, 9))
+                end
             end
         end
 
@@ -2038,7 +2150,7 @@ local function buildLightningEffectLayer(mainFrame)
         local impact = Instance.new("Frame")
         impact.AnchorPoint = Vector2.new(0.5, 0.5)
         impact.Position = UDim2.fromScale(impactX, impactY)
-        impact.Size = UDim2.fromOffset(30, 30)
+        impact.Size = UDim2.fromOffset(28, 28)
         impact.BackgroundColor3 = RED_GLOW
         impact.BackgroundTransparency = 0.4
         impact.BorderSizePixel = 0
@@ -2052,18 +2164,17 @@ local function buildLightningEffectLayer(mainFrame)
         local impactCore = Instance.new("Frame")
         impactCore.AnchorPoint = Vector2.new(0.5, 0.5)
         impactCore.Position = UDim2.fromScale(impactX, impactY)
-        impactCore.Size = UDim2.fromOffset(12, 12)
+        impactCore.Size = UDim2.fromOffset(10, 10)
         impactCore.BackgroundColor3 = WHITE_HOT
         impactCore.BorderSizePixel = 0
         impactCore.ZIndex = 11
         impactCore.Parent = boltHolder
         local icc = Instance.new("UICorner")
         icc.CornerRadius = UDim.new(1, 0)
-        icc.Parent = boltHolder -- fixed
         icc.Parent = impactCore
         table.insert(allFrames, impactCore)
 
-        -- ═══ ANIMASI flicker realistis (4 tahap) ═══
+        -- ═══ Animasi flicker (4 tahap) ═══
         for _, f in ipairs(allFrames) do
             local origTrans = f.BackgroundTransparency
             f.BackgroundTransparency = 1
@@ -2076,7 +2187,6 @@ local function buildLightningEffectLayer(mainFrame)
             end)
         end
 
-        -- Tahap 2: meredup
         task.delay(0.08, function()
             if not boltHolder.Parent then return end
             for _, f in ipairs(allFrames) do
@@ -2086,7 +2196,6 @@ local function buildLightningEffectLayer(mainFrame)
             end
         end)
 
-        -- Tahap 3: nyala lagi terang
         task.delay(0.16, function()
             if not boltHolder.Parent then return end
             for _, f in ipairs(allFrames) do
@@ -2096,7 +2205,6 @@ local function buildLightningEffectLayer(mainFrame)
             end
         end)
 
-        -- Tahap 4: fade out pelan
         task.delay(0.28, function()
             for _, f in ipairs(allFrames) do
                 if f.Parent then
@@ -2107,31 +2215,30 @@ local function buildLightningEffectLayer(mainFrame)
             end
         end)
 
-        -- Cleanup
+        -- Cleanup (dan reset currentBoltHolder)
         task.delay(0.85, function()
             if boltHolder and boltHolder.Parent then
                 boltHolder:Destroy()
+            end
+            if currentBoltHolder == boltHolder then
+                currentBoltHolder = nil
             end
         end)
     end
 
     -- ══════════════════════════════════════════
-    -- LOOP SPAWN — JEDA 2-5 DETIK (tidak spam)
+    -- LOOP SPAWN — 1 sambaran, jeda 3-6 detik
     -- ══════════════════════════════════════════
     task.spawn(function()
-        task.wait(1.5) -- delay awal biar gak langsung nyambar
+        task.wait(2) -- delay awal
         while lightningActive do
-            -- Sambaran pertama
-            spawnLightningBolt()
-
-            -- ⭐ 30% chance: sambaran kedua langsung nyusul (double strike)
-            if math.random() < 0.3 then
-                task.wait(math.random(15, 30) / 100)  -- 0.15-0.3 detik jeda
+            -- ⭐ Cuma spawn kalau gak ada petir aktif (anti numpuk)
+            if not currentBoltHolder then
                 spawnLightningBolt()
             end
 
-            -- ⭐ Jeda 2-5 DETIK sebelum sambaran berikutnya
-            task.wait(math.random(200, 500) / 100)  -- 2.0-5.0 detik
+            -- ⭐ Jeda 3-6 detik sebelum cek lagi
+            task.wait(math.random(300, 600) / 100)
         end
     end)
 
