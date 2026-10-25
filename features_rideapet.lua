@@ -886,8 +886,8 @@ local function getDropRemoteLocal()
 end
 
 -- ============================================================
--- 👻 VISUAL DECOY — karakter keliatan diem di layar sendiri
--- WAJIB di atas instantReturnToPlot & returnToMyPlot
+-- 👻 VISUAL DECOY v3 — Clone diem di base, karakter asli nge-steal
+-- Camera di-lock ke clone, karakter asli INVISIBLE di layar lu
 -- ============================================================
 local VisualDecoy = {
     active = false,
@@ -895,6 +895,7 @@ local VisualDecoy = {
     cameraSubject = nil,
     originals = {},
     conn = nil,
+    frozenCFrame = nil,
 }
 
 local function _getDecoyPosition()
@@ -910,22 +911,30 @@ end
 local function spawnVisualDecoy()
     if VisualDecoy.active then return end
     local char = LocalPlayer.Character
-    if not char then return end
+    if not char then
+        warn("[Decoy] ❌ No character")
+        return
+    end
 
     local oldArchivable = char.Archivable
     char.Archivable = true
     local ok, clone = pcall(function() return char:Clone() end)
     char.Archivable = oldArchivable
-    if not ok or not clone then return end
+    if not ok or not clone then
+        warn("[Decoy] ❌ Clone failed: " .. tostring(clone))
+        return
+    end
 
     clone.Name = "SenaVisualDecoy"
     local hum = clone:FindFirstChildOfClass("Humanoid")
     local root = clone:FindFirstChild("HumanoidRootPart")
     if not hum or not root then
+        warn("[Decoy] ❌ Clone has no Humanoid/RootPart")
         pcall(function() clone:Destroy() end)
         return
     end
 
+    -- Setup clone: anchored, gak interact
     for _, d in ipairs(clone:GetDescendants()) do
         if d:IsA("BasePart") then
             d.Anchored = true
@@ -945,11 +954,14 @@ local function spawnVisualDecoy()
         hum.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
     end)
 
+    local decoyCF = _getDecoyPosition()
     clone.Parent = workspace
-    clone:PivotTo(_getDecoyPosition())
+    clone:PivotTo(decoyCF)
     VisualDecoy.clone = clone
+    VisualDecoy.frozenCFrame = decoyCF
     VisualDecoy.active = true
 
+    -- Hide karakter asli (LOCAL ONLY — cuma di layar lu)
     VisualDecoy.originals = {}
     for _, d in ipairs(char:GetDescendants()) do
         if d:IsA("BasePart") then
@@ -962,17 +974,28 @@ local function spawnVisualDecoy()
         end
     end
 
+    -- Camera pindah ke clone (ini yang bikin LU liat karakter diem)
     local camera = workspace.CurrentCamera
     if camera then
         VisualDecoy.cameraSubject = camera.CameraSubject
         camera.CameraSubject = hum
     end
 
+    -- Loop paksa tiap frame (game sering reset LocalTransparencyModifier / CameraSubject)
     if VisualDecoy.conn then
         pcall(function() VisualDecoy.conn:Disconnect() end)
     end
     VisualDecoy.conn = RunService.RenderStepped:Connect(function()
         if not VisualDecoy.active then return end
+
+        -- Paksa clone tetap di posisi awal
+        if VisualDecoy.clone and VisualDecoy.clone.Parent and VisualDecoy.frozenCFrame then
+            pcall(function()
+                VisualDecoy.clone:PivotTo(VisualDecoy.frozenCFrame)
+            end)
+        end
+
+        -- Paksa karakter asli tetap invisible
         local liveChar = LocalPlayer.Character
         if liveChar then
             for d in pairs(VisualDecoy.originals) do
@@ -981,6 +1004,8 @@ local function spawnVisualDecoy()
                 end
             end
         end
+
+        -- Paksa camera tetap di clone
         local cam = workspace.CurrentCamera
         if cam and VisualDecoy.clone and VisualDecoy.clone.Parent then
             local decoyHum = VisualDecoy.clone:FindFirstChildOfClass("Humanoid")
@@ -989,6 +1014,8 @@ local function spawnVisualDecoy()
             end
         end
     end)
+
+    print("[Decoy] ✅ Spawned at " .. tostring(decoyCF.Position))
 end
 
 local function removeVisualDecoy()
@@ -1023,7 +1050,9 @@ local function removeVisualDecoy()
         VisualDecoy.cameraSubject = nil
     end
 
+    VisualDecoy.frozenCFrame = nil
     VisualDecoy.active = false
+    print("[Decoy] ❌ Removed")
 end
 
 -- ⭐ HELPER BARU: Konfirmasi egg beneran udah di tangan (DisplayEgg stabil)
@@ -5548,9 +5577,11 @@ function Features.stealEgg(egg)
         if isVolcanic then ok, err = seStealVolcanicEgg(egg)
         else ok, err = seStealNormalEgg(egg) end
 
-        if not ok then
+                if not ok then
             if Shared.Notify then Shared.Notify("❌ Steal failed: " .. tostring(err), "error") end
             StealExecState.Status = "❌ " .. tostring(err)
+            -- ⭐ KALAU GAGAL, HAPUS CLONE — karakter balik keliatan
+            pcall(removeVisualDecoy)
         else
             if Shared.Notify then Shared.Notify("✅ Steal complete!", "success") end
         end
@@ -5757,9 +5788,6 @@ local function _stealExecNormal(egg)
         return false, "Failed pickup"
     end
 
-    -- ⭐ BARU spawn clone SETELAH egg beneran di tangan
-    spawnVisualDecoy()
-
     StealExecState.Status = "🌋 TP to magma..."
     task.wait(0.5)
     local safePos = findSafeVolcanoPos()
@@ -5867,8 +5895,6 @@ local function _stealExecVolcanic(egg)
         return false, "Failed pickup volcanic"
     end
 
-    spawnVisualDecoy()
-
     -- Exit cave
     StealExecState.Status = "🚶 Exiting cave..."
     local exited = exitCave()
@@ -5936,7 +5962,7 @@ function Features.stealEgg(egg)
         return false, "busy"
     end
 
-    -- ⭐ SPAWN CLONE DULUAN — biar karakter langsung diem di layar
+    -- ⭐ PAKSA SPAWN CLONE DI AWAL — karakter asli invisible, camera pindah ke clone
     spawnVisualDecoy()
 
     -- Guard
