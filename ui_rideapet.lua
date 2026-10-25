@@ -7017,7 +7017,6 @@ end)
                 notify("✨ Lights Effect: OFF", "info")
             end
         end)
-end
 
         -- ⚡ TOGGLE LIGHTNING EFFECT (petir merah terpisah)
         makeToggle(fpsContent, "Lightning Effect", false, function(v)
@@ -7031,6 +7030,7 @@ end
                 notify("⚡ Lightning Effect: OFF", "info")
             end
         end)
+end
 
         -- ===== EVENT TAB =====
     do
