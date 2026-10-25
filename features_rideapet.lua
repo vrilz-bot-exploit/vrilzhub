@@ -885,6 +885,147 @@ local function getDropRemoteLocal()
         or gameR:FindFirstChild("Drop")
 end
 
+-- ============================================================
+-- 👻 VISUAL DECOY — karakter keliatan diem di layar sendiri
+-- WAJIB di atas instantReturnToPlot & returnToMyPlot
+-- ============================================================
+local VisualDecoy = {
+    active = false,
+    clone = nil,
+    cameraSubject = nil,
+    originals = {},
+    conn = nil,
+}
+
+local function _getDecoyPosition()
+    local spawn = getMyPlotSpawn()
+    if spawn then
+        return CFrame.new(spawn.Position + Vector3.new(0, 5, 0))
+    end
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    return hrp and hrp.CFrame or CFrame.new(0, 100, 0)
+end
+
+local function spawnVisualDecoy()
+    if VisualDecoy.active then return end
+    local char = LocalPlayer.Character
+    if not char then return end
+
+    local oldArchivable = char.Archivable
+    char.Archivable = true
+    local ok, clone = pcall(function() return char:Clone() end)
+    char.Archivable = oldArchivable
+    if not ok or not clone then return end
+
+    clone.Name = "SenaVisualDecoy"
+    local hum = clone:FindFirstChildOfClass("Humanoid")
+    local root = clone:FindFirstChild("HumanoidRootPart")
+    if not hum or not root then
+        pcall(function() clone:Destroy() end)
+        return
+    end
+
+    for _, d in ipairs(clone:GetDescendants()) do
+        if d:IsA("BasePart") then
+            d.Anchored = true
+            d.CanCollide = false
+            d.CanQuery = false
+            d.CanTouch = false
+            d.LocalTransparencyModifier = 0
+        elseif d:IsA("Script") or d:IsA("LocalScript") or d:IsA("ModuleScript") then
+            pcall(function() d:Destroy() end)
+        elseif d:IsA("Trail") or d:IsA("ParticleEmitter") or d:IsA("Sound") then
+            d.Enabled = false
+        end
+    end
+
+    pcall(function()
+        hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+        hum.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
+    end)
+
+    clone.Parent = workspace
+    clone:PivotTo(_getDecoyPosition())
+    VisualDecoy.clone = clone
+    VisualDecoy.active = true
+
+    VisualDecoy.originals = {}
+    for _, d in ipairs(char:GetDescendants()) do
+        if d:IsA("BasePart") then
+            if VisualDecoy.originals[d] == nil then
+                VisualDecoy.originals[d] = d.LocalTransparencyModifier
+            end
+            d.LocalTransparencyModifier = 1
+        elseif d:IsA("Trail") then
+            d.Enabled = false
+        end
+    end
+
+    local camera = workspace.CurrentCamera
+    if camera then
+        VisualDecoy.cameraSubject = camera.CameraSubject
+        camera.CameraSubject = hum
+    end
+
+    if VisualDecoy.conn then
+        pcall(function() VisualDecoy.conn:Disconnect() end)
+    end
+    VisualDecoy.conn = RunService.RenderStepped:Connect(function()
+        if not VisualDecoy.active then return end
+        local liveChar = LocalPlayer.Character
+        if liveChar then
+            for d in pairs(VisualDecoy.originals) do
+                if d.Parent and d.LocalTransparencyModifier ~= 1 then
+                    d.LocalTransparencyModifier = 1
+                end
+            end
+        end
+        local cam = workspace.CurrentCamera
+        if cam and VisualDecoy.clone and VisualDecoy.clone.Parent then
+            local decoyHum = VisualDecoy.clone:FindFirstChildOfClass("Humanoid")
+            if decoyHum and cam.CameraSubject ~= decoyHum then
+                cam.CameraSubject = decoyHum
+            end
+        end
+    end)
+end
+
+local function removeVisualDecoy()
+    if not VisualDecoy.active then return end
+
+    if VisualDecoy.conn then
+        pcall(function() VisualDecoy.conn:Disconnect() end)
+        VisualDecoy.conn = nil
+    end
+
+    if VisualDecoy.clone then
+        pcall(function() VisualDecoy.clone:Destroy() end)
+        VisualDecoy.clone = nil
+    end
+
+    local char = LocalPlayer.Character
+    if char then
+        for d, trans in pairs(VisualDecoy.originals) do
+            if typeof(d) == "Instance" and d.Parent then
+                pcall(function() d.LocalTransparencyModifier = trans end)
+            end
+        end
+    end
+    VisualDecoy.originals = {}
+
+    local camera = workspace.CurrentCamera
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if camera then
+        pcall(function()
+            camera.CameraSubject = hum or VisualDecoy.cameraSubject
+        end)
+        VisualDecoy.cameraSubject = nil
+    end
+
+    VisualDecoy.active = false
+end
+
 -- ⭐ HELPER BARU: Konfirmasi egg beneran udah di tangan (DisplayEgg stabil)
 local function confirmEggInHand(timeout)
     timeout = timeout or 4
@@ -5110,19 +5251,6 @@ function Features.setYinRitualEnabled(v)
     end
 end
 
--- ============================================================
--- STEAL EXECUTOR — LOGIC ONLY (dipanggil dari UI)
--- Tanpa GUI, tanpa toggle. UI yang bikin tombol, ini yang jalanin.
--- Guard: Auto Mutation / Mutation Steal / Auto Farm / Volcanic Hunt
--- Volcanic egg → cave waypoint | Normal egg → direct TP
--- Return: STEP mode | Wait egg back: 4 seconds
--- ============================================================
-local StealExecState = {
-    Busy = false,
-    Status = "Idle",
-    CurrentEggName = nil,
-}
-
 -- ⭐ cek fitur steal/mutation yang ON
 local function isAnyStealFeatureOn()
     local reasons = {}
@@ -5581,150 +5709,8 @@ local function _stealExecReturnStep()
     return ok
 end
 
--- ============================================================
--- 👻 VISUAL DECOY — karakter keliatan diem di layar sendiri
--- Cuma visual. Gak ngubah logic steal. Gak ada UI/toggle baru.
--- ============================================================
-local VisualDecoy = {
-    active = false,
-    clone = nil,
-    cameraSubject = nil,
-    originals = {},
-    conn = nil,
-}
-
-local function _getDecoyPosition()
-    local spawn = getMyPlotSpawn()
-    if spawn then
-        return CFrame.new(spawn.Position + Vector3.new(0, 5, 0))
-    end
-    local char = LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    return hrp and hrp.CFrame or CFrame.new(0, 100, 0)
-end
-
-local function spawnVisualDecoy()
-    if VisualDecoy.active then return end
-    local char = LocalPlayer.Character
-    if not char then return end
-
-    local oldArchivable = char.Archivable
-    char.Archivable = true
-    local ok, clone = pcall(function() return char:Clone() end)
-    char.Archivable = oldArchivable
-    if not ok or not clone then return end
-
-    clone.Name = "SenaVisualDecoy"
-    local hum = clone:FindFirstChildOfClass("Humanoid")
-    local root = clone:FindFirstChild("HumanoidRootPart")
-    if not hum or not root then
-        pcall(function() clone:Destroy() end)
-        return
-    end
-
-    for _, d in ipairs(clone:GetDescendants()) do
-        if d:IsA("BasePart") then
-            d.Anchored = true
-            d.CanCollide = false
-            d.CanQuery = false
-            d.CanTouch = false
-            d.LocalTransparencyModifier = 0
-        elseif d:IsA("Script") or d:IsA("LocalScript") or d:IsA("ModuleScript") then
-            pcall(function() d:Destroy() end)
-        elseif d:IsA("Trail") or d:IsA("ParticleEmitter") or d:IsA("Sound") then
-            d.Enabled = false
-        end
-    end
-
-    pcall(function()
-        hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-        hum.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
-    end)
-
-    clone.Parent = workspace
-    clone:PivotTo(_getDecoyPosition())
-    VisualDecoy.clone = clone
-    VisualDecoy.active = true
-
-    VisualDecoy.originals = {}
-    for _, d in ipairs(char:GetDescendants()) do
-        if d:IsA("BasePart") then
-            if VisualDecoy.originals[d] == nil then
-                VisualDecoy.originals[d] = d.LocalTransparencyModifier
-            end
-            d.LocalTransparencyModifier = 1
-        elseif d:IsA("Trail") then
-            d.Enabled = false
-        end
-    end
-
-    local camera = workspace.CurrentCamera
-    if camera then
-        VisualDecoy.cameraSubject = camera.CameraSubject
-        camera.CameraSubject = hum
-    end
-
-    if VisualDecoy.conn then
-        pcall(function() VisualDecoy.conn:Disconnect() end)
-    end
-    VisualDecoy.conn = RunService.RenderStepped:Connect(function()
-        if not VisualDecoy.active then return end
-        local liveChar = LocalPlayer.Character
-        if liveChar then
-            for d in pairs(VisualDecoy.originals) do
-                if d.Parent and d.LocalTransparencyModifier ~= 1 then
-                    d.LocalTransparencyModifier = 1
-                end
-            end
-        end
-        local cam = workspace.CurrentCamera
-        if cam and VisualDecoy.clone and VisualDecoy.clone.Parent then
-            local decoyHum = VisualDecoy.clone:FindFirstChildOfClass("Humanoid")
-            if decoyHum and cam.CameraSubject ~= decoyHum then
-                cam.CameraSubject = decoyHum
-            end
-        end
-    end)
-end
-
-local function removeVisualDecoy()
-    if not VisualDecoy.active then return end
-
-    if VisualDecoy.conn then
-        pcall(function() VisualDecoy.conn:Disconnect() end)
-        VisualDecoy.conn = nil
-    end
-
-    if VisualDecoy.clone then
-        pcall(function() VisualDecoy.clone:Destroy() end)
-        VisualDecoy.clone = nil
-    end
-
-    local char = LocalPlayer.Character
-    if char then
-        for d, trans in pairs(VisualDecoy.originals) do
-            if typeof(d) == "Instance" and d.Parent then
-                pcall(function() d.LocalTransparencyModifier = trans end)
-            end
-        end
-    end
-    VisualDecoy.originals = {}
-
-    local camera = workspace.CurrentCamera
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if camera then
-        pcall(function()
-            camera.CameraSubject = hum or VisualDecoy.cameraSubject
-        end)
-        VisualDecoy.cameraSubject = nil
-    end
-
-    VisualDecoy.active = false
-end
-
 -- ⭐ CORE: STEAL EGG BIASA (non-volcanic)
 local function _stealExecNormal(egg)
-    spawnVisualDecoy()
     StealExecState.Status = "🎯 TP to egg: " .. egg.Name
 
     local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
@@ -5770,6 +5756,9 @@ local function _stealExecNormal(egg)
     if not picked or not isHoldingEggMutation() then
         return false, "Failed pickup"
     end
+
+    -- ⭐ BARU spawn clone SETELAH egg beneran di tangan
+    spawnVisualDecoy()
 
     StealExecState.Status = "🌋 TP to magma..."
     task.wait(0.5)
@@ -5827,7 +5816,6 @@ end
 
 -- ⭐ Core: steal volcanic egg (cave waypoint)
 local function _stealExecVolcanic(egg)
-    spawnVisualDecoy()
     StealExecState.Status = "🌋 Volcanic: " .. egg.Name
 
     local eggPart = egg:FindFirstChildWhichIsA("BasePart", true)
@@ -5878,6 +5866,8 @@ local function _stealExecVolcanic(egg)
     if not picked or not isHoldingEggMutation() then
         return false, "Failed pickup volcanic"
     end
+
+    spawnVisualDecoy()
 
     -- Exit cave
     StealExecState.Status = "🚶 Exiting cave..."
