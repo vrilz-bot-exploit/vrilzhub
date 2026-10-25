@@ -6,6 +6,12 @@
 local Features = {}
 local Shared = nil
 
+-- ⭐ TAMBAH BARIS INI
+local StealExecState = {
+    Busy = false,
+    Status = "Idle",
+}
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -916,6 +922,13 @@ local function spawnVisualDecoy()
         return
     end
 
+    -- ⭐ TAMBAH BLOK INI
+    local spawnPart = getMyPlotSpawn()
+    if not spawnPart then
+        warn("[Decoy] ❌ No plot spawn — decoy position undefined, abort")
+        return
+    end
+    
     local oldArchivable = char.Archivable
     char.Archivable = true
     local ok, clone = pcall(function() return char:Clone() end)
@@ -5544,61 +5557,12 @@ local function seStealVolcanicEgg(egg)
     return true, nil
 end
 
--- ⭐ MAIN ENTRY — dipanggil dari UI
-function Features.stealEgg(egg)
-    if StealExecState.Busy then
-        if Shared.Notify then Shared.Notify("⏳ Already stealing, wait...", "warning") end
-        return false, "busy"
-    end
-
-    -- ⭐ GUARD: cek fitur steal/mutation yang ON
-    local anyOn, reasons = isAnyStealFeatureOn()
-    if anyOn then
-        local reasonStr = table.concat(reasons, ", ")
-        if Shared.Notify then
-            Shared.Notify("⚠️ Please disable your steal/mutation first! (" .. reasonStr .. ")", "error")
-        end
-        StealExecState.Status = "❌ Blocked: " .. reasonStr
-        return false, "blocked"
-    end
-
-    if not egg or not egg.Parent then
-        if Shared.Notify then Shared.Notify("❌ Egg not found", "error") end
-        return false, "not_found"
-    end
-
-    StealExecState.Busy = true
-    StealExecState.CurrentEggName = egg.Name
-    local isVolcanic = egg.Name:lower():find("volcan") ~= nil
-    StealExecState.Status = isVolcanic and "🌋 Stealing volcanic..." or "🎯 Stealing..."
-
-    task.spawn(function()
-        local ok, err
-        if isVolcanic then ok, err = seStealVolcanicEgg(egg)
-        else ok, err = seStealNormalEgg(egg) end
-
-                if not ok then
-            if Shared.Notify then Shared.Notify("❌ Steal failed: " .. tostring(err), "error") end
-            StealExecState.Status = "❌ " .. tostring(err)
-            -- ⭐ KALAU GAGAL, HAPUS CLONE — karakter balik keliatan
-            pcall(removeVisualDecoy)
-        else
-            if Shared.Notify then Shared.Notify("✅ Steal complete!", "success") end
-        end
-
-        StealExecState.Busy = false
-        StealExecState.CurrentEggName = nil
-    end)
-
-    return true, nil
-end
-
 function Features.getStealExecState()
     return StealExecState
 end
 
 function Features.isAnyStealFeatureOn()
-    return isAnyStealFeatureOn()
+    return _isAnyStealFeatureOn()   -- ✅ panggil yang dengan underscore
 end
 
 -- ⭐ loop cuma buat update state (gak manggil GUI)
@@ -5701,36 +5665,7 @@ function Features.Init(sharedState)
     end)
 end   -- ⭐⭐⭐ TUTUP Features.Init DI SINI ⭐⭐⭐
 
--- ============================================================
--- 🥚 EGG STEAL EXECUTOR — FUNGSI BARU (TANPA UBAH YANG LAMA)
--- Dipanggil dari GUI egg executor
--- Flow: TP ke egg → pickup → TP lava → drop → tunggu balik → wait 4s → return step
--- ============================================================
-local StealExecState = {
-    Busy = false,
-    Status = "Idle",
-}
-
-function Features.getStealExecState()
-    return StealExecState
-end
-
--- ⭐ Cek fitur steal/mutation yang ON
-local function _isAnyStealFeatureOn()
-    local reasons = {}
-    if Shared.AutoMutation_Enabled then table.insert(reasons, "Auto Mutation") end
-    if Shared.MutationSteal_Enabled then table.insert(reasons, "Mutation Steal") end
-    if Shared.AutoFarm_Enabled then table.insert(reasons, "Auto Farm") end
-    if Shared.AutoSteal_Enabled then table.insert(reasons, "Auto Steal") end
-    if Shared.VolcanicHunt_Enabled then table.insert(reasons, "Volcanic Hunt") end
-    if Shared.MutationSteal_Active then table.insert(reasons, "Mutation Steal (active)") end
-    local ms = Features.getMutationState and Features.getMutationState()
-    if ms and (ms.Running or ms.EggLocked or ms.StealPaused) then
-        table.insert(reasons, "Mutation (running)")
-    end
-    return #reasons > 0, reasons
-end
-
+-- ⭐ CORE: STEAL EGG BIASA (non-volcanic)
 -- ⭐ Return by STEP — persis kayak returnToMyPlot() di file lu
 local function _stealExecReturnStep()
     local oldFlag = Shared.AutoReturn_Enabled
@@ -5739,8 +5674,6 @@ local function _stealExecReturnStep()
     Shared.AutoReturn_Enabled = oldFlag
     return ok
 end
-
--- ⭐ CORE: STEAL EGG BIASA (non-volcanic)
 local function _stealExecNormal(egg)
     StealExecState.Status = "🎯 TP to egg: " .. egg.Name
 
@@ -5955,6 +5888,22 @@ local function _stealExecVolcanic(egg)
     return true
 end
 
+-- ⭐ Cek fitur steal/mutation yang ON
+local function _isAnyStealFeatureOn()
+    local reasons = {}
+    if Shared.AutoMutation_Enabled then table.insert(reasons, "Auto Mutation") end
+    if Shared.MutationSteal_Enabled then table.insert(reasons, "Mutation Steal") end
+    if Shared.AutoFarm_Enabled then table.insert(reasons, "Auto Farm") end
+    if Shared.AutoSteal_Enabled then table.insert(reasons, "Auto Steal") end
+    if Shared.VolcanicHunt_Enabled then table.insert(reasons, "Volcanic Hunt") end
+    if Shared.MutationSteal_Active then table.insert(reasons, "Mutation Steal (active)") end
+    local ms = Features.getMutationState and Features.getMutationState()
+    if ms and (ms.Running or ms.EggLocked or ms.StealPaused) then
+        table.insert(reasons, "Mutation (running)")
+    end
+    return #reasons > 0, reasons
+end
+
 -- ⭐ MAIN ENTRY — dipanggil dari GUI
 function Features.stealEgg(egg)
     if StealExecState.Busy then
@@ -5962,10 +5911,7 @@ function Features.stealEgg(egg)
         return false, "busy"
     end
 
-    -- ⭐ PAKSA SPAWN CLONE DI AWAL — karakter asli invisible, camera pindah ke clone
-    spawnVisualDecoy()
-
-    -- Guard
+    -- ═══ STEP 1: GUARD DULU — SEBELUM SPAWN DECOY ═══
     local anyOn, reasons = _isAnyStealFeatureOn()
     if anyOn then
         local reasonStr = table.concat(reasons, ", ")
@@ -5981,20 +5927,37 @@ function Features.stealEgg(egg)
         return false, "not_found"
     end
 
+    -- ═══ STEP 2: BARU SPAWN DECOY SETELAH LOLOS GUARD ═══
     StealExecState.Busy = true
     local isVolcanic = egg.Name:lower():find("volcan") ~= nil
     StealExecState.Status = isVolcanic and "🌋 Stealing volcanic..." or "🎯 Stealing..."
 
+    local decoyOk = pcall(spawnVisualDecoy)
+    if not decoyOk or not VisualDecoy.active then
+        StealExecState.Busy = false
+        StealExecState.Status = "❌ Decoy spawn failed"
+        if Shared.Notify then Shared.Notify("❌ Decoy spawn failed — steal aborted", "error") end
+        return false, "decoy_failed"
+    end
+
+    -- ═══ STEP 3: JALANIN STEAL + GUARANTEED CLEANUP ═══
     task.spawn(function()
         local ok, err
-        if isVolcanic then ok, err = _stealExecVolcanic(egg)
-        else ok, err = _stealExecNormal(egg) end
+        if isVolcanic then
+            ok, err = _stealExecVolcanic(egg)
+        else
+            ok, err = _stealExecNormal(egg)
+        end
+
+        -- ⭐ GUARANTEED CLEANUP — selalu hapus decoy apapun hasilnya
+        pcall(removeVisualDecoy)
 
         if not ok then
             if Shared.Notify then Shared.Notify("❌ Steal failed: " .. tostring(err), "error") end
             StealExecState.Status = "❌ " .. tostring(err)
         else
             if Shared.Notify then Shared.Notify("✅ Steal complete!", "success") end
+            StealExecState.Status = "✅ Done!"
         end
 
         StealExecState.Busy = false
