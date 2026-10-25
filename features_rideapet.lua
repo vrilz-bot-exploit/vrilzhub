@@ -5906,44 +5906,51 @@ end
 
 -- ⭐ MAIN ENTRY — dipanggil dari GUI
 function Features.stealEgg(egg, forceMode)
+    print("[Steal] 1. Masuk stealEgg, egg:", egg and egg.Name, "forceMode:", forceMode)
+    
     if StealExecState.Busy then
+        print("[Steal] ❌ Busy = true (steal sebelumnya masih jalan)")
         if Shared.Notify then Shared.Notify("⏳ Already stealing...", "warning") end
         return false, "busy"
     end
 
-    -- ═══ STEP 1: GUARD — SKIP KALO FORCE MODE ═══
+    -- Guard
     if not forceMode then
         local anyOn, reasons = _isAnyStealFeatureOn()
+        print("[Steal] 2. Guard:", anyOn, table.concat(reasons or {}, ", "))
         if anyOn then
-            local reasonStr = table.concat(reasons, ", ")
+            print("[Steal] ❌ BLOCKED by:", table.concat(reasons, ", "))
             if Shared.Notify then
-                Shared.Notify("⚠️ Please disable your steal/mutation first! (" .. reasonStr .. ")", "error")
+                Shared.Notify("⚠️ Please disable your steal/mutation first! (" .. table.concat(reasons, ", ") .. ")", "error")
             end
-            StealExecState.Status = "❌ Blocked: " .. reasonStr
+            StealExecState.Status = "❌ Blocked: " .. table.concat(reasons, ", ")
             return false, "blocked"
         end
+    else
+        print("[Steal] 2. Guard SKIPPED (forceMode)")
     end
 
     if not egg or not egg.Parent then
+        print("[Steal] ❌ Egg not found / already gone")
         if Shared.Notify then Shared.Notify("❌ Egg not found", "error") end
         return false, "not_found"
     end
 
-    -- ═══ STEP 2: SPAWN DECOY (SKIP KALO FORCE MODE) ═══
+    -- Decoy
     StealExecState.Busy = true
     local isVolcanic = egg.Name:lower():find("volcan") ~= nil
+    print("[Steal] 3. IsVolcanic:", isVolcanic)
     StealExecState.Status = isVolcanic and "🌋 Stealing volcanic..." or "🎯 Stealing..."
 
-    if not forceMode then
-        local decoyOk = pcall(spawnVisualDecoy)
-        if not decoyOk or not VisualDecoy.active then
-            -- Fallback: coba tanpa decoy
-            warn("[Steal] Decoy failed — lanjut tanpa decoy")
-            -- JANGAN abort, tetep lanjut
-        end
+    print("[Steal] 4. Spawn decoy...")
+    local decoyOk = pcall(spawnVisualDecoy)
+    print("[Steal] 5. Decoy OK:", decoyOk, "VisualDecoy.active:", VisualDecoy.active)
+    if not decoyOk or not VisualDecoy.active then
+        print("[Steal] ⚠️ Decoy gagal — lanjut tanpa decoy (steal tetep jalan)")
     end
 
-    -- ═══ STEP 3: JALANIN STEAL + GUARANTEED CLEANUP ═══
+    -- Jalanin steal
+    print("[Steal] 6. Mulai", isVolcanic and "_stealExecVolcanic" or "_stealExecNormal")
     task.spawn(function()
         local ok, err
         if isVolcanic then
@@ -5952,13 +5959,15 @@ function Features.stealEgg(egg, forceMode)
             ok, err = _stealExecNormal(egg)
         end
 
-        -- ⭐ GUARANTEED CLEANUP
+        print("[Steal] 7. HASIL:", ok, "ERR:", err)
         pcall(removeVisualDecoy)
 
         if not ok then
+            print("[Steal] ❌ GAGAL:", err)
             if Shared.Notify then Shared.Notify("❌ Steal failed: " .. tostring(err), "error") end
             StealExecState.Status = "❌ " .. tostring(err)
         else
+            print("[Steal] ✅ SUKSES")
             if Shared.Notify then Shared.Notify("✅ Steal complete!", "success") end
             StealExecState.Status = "✅ Done!"
         end
@@ -5968,6 +5977,7 @@ function Features.stealEgg(egg, forceMode)
 
     return true
 end
+
 -- ============================================================
 -- AUTO OBBY (TALK + FLY TO FINISH + 30 MIN COOLDOWN)
 -- ============================================================
