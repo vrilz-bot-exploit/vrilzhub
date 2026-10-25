@@ -1580,6 +1580,289 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     return container
 end
 
+-- ============================================================
+-- 🌠 LIGHTS EFFECT LAYER — Meteor + Bintang + Shadow (di dalam window)
+-- ============================================================
+local function buildLightsEffectLayer(mainFrame)
+    local layer = Instance.new("Frame")
+    layer.Name = "LightsEffectLayer"
+    layer.Size = UDim2.fromScale(1, 1)
+    layer.BackgroundTransparency = 1
+    layer.ClipsDescendants = true          -- ⭐ kunci: semua efek kepotong di dalam window
+    layer.ZIndex = 4                        -- di belakang konten, di atas background
+    layer.Active = false
+    layer.Parent = mainFrame
+
+    local layerCorner = Instance.new("UICorner")
+    layerCorner.CornerRadius = UDim.new(0, 18)
+    layerCorner.Parent = layer
+
+    -- ══════════════════════════════════════════
+    -- STARFIELD (bintang-bintang twinkle + shadow)
+    -- ══════════════════════════════════════════
+    local starfield = Instance.new("Frame")
+    starfield.Name = "Starfield"
+    starfield.Size = UDim2.fromScale(1, 1)
+    starfield.BackgroundTransparency = 1
+    starfield.ClipsDescendants = true
+    starfield.ZIndex = 4
+    starfield.Parent = layer
+
+    local starColors = {
+        Color3.fromRGB(255, 255, 255), -- putih
+        Color3.fromRGB(180, 220, 255), -- biru muda
+        Color3.fromRGB(255, 220, 180), -- kuning lembut
+        Color3.fromRGB(200, 180, 255), -- ungu
+    }
+    local starCount = IS_MOBILE and 34 or 52
+    local stars = {}
+
+    for i = 1, starCount do
+        local star = Instance.new("Frame")
+        local sz = math.random(1, 3)
+        star.Name = "Star_" .. i
+        star.Size = UDim2.fromOffset(sz, sz)
+        star.Position = UDim2.fromScale(math.random(0, 1000) / 1000, math.random(0, 1000) / 1000)
+        star.BackgroundColor3 = starColors[math.random(1, #starColors)]
+        star.BackgroundTransparency = math.random(25, 75) / 100
+        star.BorderSizePixel = 0
+        star.ZIndex = 5
+        star.Parent = starfield
+
+        local sc = Instance.new("UICorner")
+        sc.CornerRadius = UDim.new(1, 0)
+        sc.Parent = star
+
+        -- ⭐ Shadow halus di belakang bintang
+        local starShadow = Instance.new("Frame")
+        starShadow.Size = UDim2.new(1, 4, 1, 4)
+        starShadow.Position = UDim2.new(0.5, 1, 0.5, 1)
+        starShadow.AnchorPoint = Vector2.new(0.5, 0.5)
+        starShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        starShadow.BackgroundTransparency = 0.65
+        starShadow.BorderSizePixel = 0
+        starShadow.ZIndex = 4
+        starShadow.Parent = star
+
+        local ssc = Instance.new("UICorner")
+        ssc.CornerRadius = UDim.new(1, 0)
+        ssc.Parent = starShadow
+
+        table.insert(stars, {obj = star, baseTrans = star.BackgroundTransparency})
+
+        -- Twinkle animation (beda delay tiap bintang)
+        task.spawn(function()
+            task.wait(math.random(0, 300) / 100)
+            while star.Parent do
+                task.wait(math.random(18, 45) / 10)
+                if not star.Parent then break end
+                TweenService:Create(star, TweenInfo.new(0.7, Enum.EasingStyle.Sine), {
+                    BackgroundTransparency = math.max(0, star.BackgroundTransparency - 0.35)
+                }):Play()
+                task.wait(0.7)
+                if not star.Parent then break end
+                TweenService:Create(star, TweenInfo.new(0.7, Enum.EasingStyle.Sine), {
+                    BackgroundTransparency = math.min(0.9, star.BackgroundTransparency + 0.3)
+                }):Play()
+            end
+        end)
+    end
+
+    -- ══════════════════════════════════════════
+    -- METEOR LAYER (jatuh horizontal, di dalam window)
+    -- ══════════════════════════════════════════
+    local meteorLayer = Instance.new("Frame")
+    meteorLayer.Name = "MeteorLayer"
+    meteorLayer.Size = UDim2.fromScale(1, 1)
+    meteorLayer.BackgroundTransparency = 1
+    meteorLayer.ClipsDescendants = true
+    meteorLayer.ZIndex = 6
+    meteorLayer.Parent = layer
+
+    local meteorsActive = true
+    layer.Destroying:Connect(function()
+        meteorsActive = false
+    end)
+
+    local meteorColors = {
+        Color3.fromRGB(255, 180, 100),  -- oranye (fire)
+        Color3.fromRGB(150, 220, 255),  -- biru (ice)
+        Color3.fromRGB(255, 140, 200),  -- pink
+        Color3.fromRGB(180, 160, 255),  -- ungu
+    }
+
+    local function spawnMeteor()
+        if not meteorsActive or not meteorLayer.Parent then return end
+
+        local pickColor = meteorColors[math.random(1, #meteorColors)]
+
+        -- Head meteor
+        local meteor = Instance.new("Frame")
+        meteor.Name = "Meteor"
+        meteor.AnchorPoint = Vector2.new(0.5, 0.5)
+        meteor.Size = UDim2.fromOffset(math.random(3, 5), math.random(3, 5))
+        local yPos = math.random(10, 90) / 100
+        meteor.Position = UDim2.fromScale(-0.15, yPos)
+        meteor.BackgroundColor3 = pickColor
+        meteor.BorderSizePixel = 0
+        meteor.ZIndex = 8
+        meteor.Parent = meteorLayer
+
+        local mc = Instance.new("UICorner")
+        mc.CornerRadius = UDim.new(1, 0)
+        mc.Parent = meteor
+
+        -- ⭐ Shadow meteor
+        local meteorShadow = Instance.new("Frame")
+        meteorShadow.Size = UDim2.new(1, 6, 1, 6)
+        meteorShadow.Position = UDim2.new(0.5, 3, 0.5, 3)
+        meteorShadow.AnchorPoint = Vector2.new(0.5, 0.5)
+        meteorShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        meteorShadow.BackgroundTransparency = 0.55
+        meteorShadow.BorderSizePixel = 0
+        meteorShadow.ZIndex = 7
+        meteorShadow.Parent = meteor
+
+        local msc = Instance.new("UICorner")
+        msc.CornerRadius = UDim.new(1, 0)
+        msc.Parent = meteorShadow
+
+        -- Head glow (halo)
+        local headGlow = Instance.new("Frame")
+        headGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+        headGlow.Position = UDim2.fromScale(0.5, 0.5)
+        headGlow.Size = UDim2.fromOffset(14, 14)
+        headGlow.BackgroundColor3 = pickColor
+        headGlow.BackgroundTransparency = 0.55
+        headGlow.BorderSizePixel = 0
+        headGlow.ZIndex = 7
+        headGlow.Parent = meteor
+
+        local hgc = Instance.new("UICorner")
+        hgc.CornerRadius = UDim.new(1, 0)
+        hgc.Parent = headGlow
+
+        -- Trail memanjang ke kiri (karena meteor gerak ke kanan)
+        local trailLen = math.random(40, 90)
+        local trail = Instance.new("Frame")
+        trail.AnchorPoint = Vector2.new(1, 0.5)
+        trail.Position = UDim2.fromScale(0.5, 0.5)
+        trail.Size = UDim2.fromOffset(trailLen, 2)
+        trail.BackgroundColor3 = pickColor
+        trail.BackgroundTransparency = 0.25
+        trail.BorderSizePixel = 0
+        trail.ZIndex = 7
+        trail.Parent = meteor
+
+        local trailGrad = Instance.new("UIGradient")
+        trailGrad.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 1),
+            NumberSequenceKeypoint.new(0.4, 0.15),
+            NumberSequenceKeypoint.new(1, 0),
+        })
+        trailGrad.Parent = trail
+
+        -- Spark kecil di trail
+        for i = 1, math.random(2, 4) do
+            local spark = Instance.new("Frame")
+            spark.AnchorPoint = Vector2.new(0.5, 0.5)
+            spark.Position = UDim2.new(1, math.random(-trailLen, -10), 0.5, math.random(-3, 3))
+            spark.Size = UDim2.fromOffset(math.random(2, 3), math.random(2, 3))
+            spark.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            spark.BackgroundTransparency = 0.35
+            spark.BorderSizePixel = 0
+            spark.ZIndex = 7
+            spark.Parent = meteor
+            local sc = Instance.new("UICorner")
+            sc.CornerRadius = UDim.new(1, 0)
+            sc.Parent = spark
+        end
+
+        -- Animate geser dari kiri ke kanan
+        local duration = math.random(180, 320) / 100
+        TweenService:Create(meteor, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
+            Position = UDim2.fromScale(1.15, yPos + math.random(-10, 10) / 100),
+        }):Play()
+
+        -- Fade out di ujung kanan
+        task.delay(duration * 0.8, function()
+            if meteor.Parent then
+                TweenService:Create(meteor, TweenInfo.new(duration * 0.2), {
+                    BackgroundTransparency = 1,
+                }):Play()
+                TweenService:Create(trail, TweenInfo.new(duration * 0.2), {BackgroundTransparency = 1}):Play()
+                TweenService:Create(headGlow, TweenInfo.new(duration * 0.2), {BackgroundTransparency = 1}):Play()
+                TweenService:Create(meteorShadow, TweenInfo.new(duration * 0.2), {BackgroundTransparency = 1}):Play()
+            end
+        end)
+
+        task.delay(duration + 0.15, function()
+            if meteor then meteor:Destroy() end
+        end)
+    end
+
+    -- Spawn meteor berkala
+    task.spawn(function()
+        task.wait(0.4)
+        while meteorsActive do
+            spawnMeteor()
+            if math.random() < 0.25 then
+                task.wait(0.15)
+                spawnMeteor()
+            end
+            task.wait(math.random(70, 160) / 100)
+        end
+    end)
+
+    -- ══════════════════════════════════════════
+    -- AMBIENT GLOW SHADOW (nuansa shadow lembut)
+    -- ══════════════════════════════════════════
+    local shadowGlow = Instance.new("Frame")
+    shadowGlow.Name = "ShadowGlow"
+    shadowGlow.Size = UDim2.fromScale(1, 1)
+    shadowGlow.BackgroundTransparency = 1
+    shadowGlow.ZIndex = 4
+    shadowGlow.Parent = layer
+
+    -- Shadow di tepi atas
+    local topShadow = Instance.new("Frame")
+    topShadow.Size = UDim2.new(1, 0, 0, 60)
+    topShadow.Position = UDim2.fromScale(0, 0)
+    topShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    topShadow.BackgroundTransparency = 0.75
+    topShadow.BorderSizePixel = 0
+    topShadow.ZIndex = 4
+    topShadow.Parent = shadowGlow
+
+    local topShadowGrad = Instance.new("UIGradient")
+    topShadowGrad.Rotation = 90
+    topShadowGrad.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.55),
+        NumberSequenceKeypoint.new(1, 1),
+    })
+    topShadowGrad.Parent = topShadow
+
+    -- Shadow di tepi bawah
+    local botShadow = Instance.new("Frame")
+    botShadow.Size = UDim2.new(1, 0, 0, 60)
+    botShadow.Position = UDim2.new(0, 0, 1, -60)
+    botShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    botShadow.BackgroundTransparency = 0.75
+    botShadow.BorderSizePixel = 0
+    botShadow.ZIndex = 4
+    botShadow.Parent = shadowGlow
+
+    local botShadowGrad = Instance.new("UIGradient")
+    botShadowGrad.Rotation = -90
+    botShadowGrad.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.55),
+        NumberSequenceKeypoint.new(1, 1),
+    })
+    botShadowGrad.Parent = botShadow
+
+    return layer
+end
+
 -- ====== FPS WINDOW ======
 local function buildFPSWindow(parent)
     local fpsWin = Instance.new("Frame")
@@ -6352,6 +6635,10 @@ end)
         local fpsWin = buildFPSWindow(screenGui)
         UI._fpsWindow = fpsWin
 
+        -- ⭐ LIGHTS EFFECT LAYER
+        local lightsLayer = buildLightsEffectLayer(main)
+        lightsLayer.Visible = false
+
         makeToggle(fpsContent, "FPS Boost", false, function(v)
             Shared.FPSBoost_Enabled = v
             if v then gfx_enableFPS() else gfx_disableFPS() end
@@ -6365,7 +6652,19 @@ end)
         makeToggle(fpsContent, "FPS Window", false, function(v)
             if fpsWin then fpsWin.Visible = v end
         end)
-    end
+
+        -- ⭐ TOGGLE LIGHTS EFFECT (meteor + bintang + shadow)
+        makeToggle(fpsContent, "Lights Effect", false, function(v)
+            Shared.LightsEffect_Enabled = v
+            if lightsLayer then
+                lightsLayer.Visible = v
+            end
+            if v then
+                notify("✨ Lights Effect: ON (meteor + stars)", "success")
+            else
+                notify("✨ Lights Effect: OFF", "info")
+            end
+        end)
 
         -- ===== EVENT TAB =====
     do
@@ -9529,6 +9828,7 @@ function UI.Init(sharedState)
         ["Seraph Egg"] = false, ["Halloween Egg"] = false,
     }
     Shared.FPSBoost_Enabled = false
+    Shared.LightsEffect_Enabled = false
     Shared.HD4K_Enabled = false
     Shared.YinRitual_Enabled = false
     Shared.InfinityJump_Enabled = false
