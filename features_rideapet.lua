@@ -5936,6 +5936,9 @@ function Features.stealEgg(egg)
         return false, "busy"
     end
 
+    -- ⭐ SPAWN CLONE DULUAN — biar karakter langsung diem di layar
+    spawnVisualDecoy()
+
     -- Guard
     local anyOn, reasons = _isAnyStealFeatureOn()
     if anyOn then
