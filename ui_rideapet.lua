@@ -956,6 +956,99 @@ _G.VRILZ_DropdownLayer = nil
 _G.VRILZ_DropdownCloseOverlay = nil
 _G.VRILZ_DropdownActive = nil
 
+-- ============================================================
+-- ⭐ DROPDOWN STARFIELD — bintang kelap-kelip di background
+-- ⚠️ TIDAK menyentuh nama item / teks option sama sekali
+-- ============================================================
+local function addDropdownStarfield(listFrame)
+    local starLayer = Instance.new("Frame")
+    starLayer.Name = "StarfieldLayer"
+    starLayer.Size = UDim2.fromScale(1, 1)
+    starLayer.BackgroundTransparency = 1
+    starLayer.ClipsDescendants = true
+    starLayer.ZIndex = 2001
+    starLayer.Parent = listFrame
+
+    local starColors = {
+        Color3.fromRGB(255, 255, 255),
+        Color3.fromRGB(180, 220, 255),
+        Color3.fromRGB(255, 220, 180),
+        Color3.fromRGB(200, 180, 255),
+    }
+
+    local starCount = IS_MOBILE and 10 or 16
+    local stars = {}
+
+    for i = 1, starCount do
+        local star = Instance.new("Frame")
+        local sz = math.random(1, 2)
+        star.Name = "Star_" .. i
+        star.Size = UDim2.fromOffset(sz, sz)
+        star.Position = UDim2.fromScale(math.random(0, 1000) / 1000, math.random(0, 1000) / 1000)
+        star.BackgroundColor3 = starColors[math.random(1, #starColors)]
+        star.BackgroundTransparency = math.random(40, 80) / 100
+        star.BorderSizePixel = 0
+        star.ZIndex = 2001
+        star.Parent = starLayer
+
+        local sc = Instance.new("UICorner")
+        sc.CornerRadius = UDim.new(1, 0)
+        sc.Parent = star
+
+        local glow = Instance.new("Frame")
+        glow.AnchorPoint = Vector2.new(0.5, 0.5)
+        glow.Position = UDim2.fromScale(0.5, 0.5)
+        glow.Size = UDim2.new(3, 0, 3, 0)
+        glow.BackgroundColor3 = star.BackgroundColor3
+        glow.BackgroundTransparency = 0.92
+        glow.BorderSizePixel = 0
+        glow.ZIndex = 2000
+        glow.Parent = star
+        local gc = Instance.new("UICorner")
+        gc.CornerRadius = UDim.new(1, 0)
+        gc.Parent = glow
+
+        table.insert(stars, {star = star, glow = glow})
+    end
+
+    for _, s in ipairs(stars) do
+        task.spawn(function()
+            task.wait(math.random(0, 300) / 100)
+            local star = s.star
+            local glow = s.glow
+            local baseTrans = star.BackgroundTransparency
+            local baseGlowTrans = glow.BackgroundTransparency
+            local minTrans = math.max(0, baseTrans - 0.5)
+            local minGlowTrans = math.max(0, baseGlowTrans - 0.08)
+
+            while star.Parent and starLayer.Parent do
+                local upDur = math.random(50, 120) / 100
+                local downDur = math.random(60, 140) / 100
+
+                TweenService:Create(star, TweenInfo.new(upDur, Enum.EasingStyle.Sine), {
+                    BackgroundTransparency = minTrans
+                }):Play()
+                TweenService:Create(glow, TweenInfo.new(upDur, Enum.EasingStyle.Sine), {
+                    BackgroundTransparency = minGlowTrans
+                }):Play()
+
+                task.wait(upDur + math.random(0, 80) / 100)
+
+                TweenService:Create(star, TweenInfo.new(downDur, Enum.EasingStyle.Sine), {
+                    BackgroundTransparency = baseTrans
+                }):Play()
+                TweenService:Create(glow, TweenInfo.new(downDur, Enum.EasingStyle.Sine), {
+                    BackgroundTransparency = baseGlowTrans
+                }):Play()
+
+                task.wait(downDur + math.random(0, 200) / 100)
+            end
+        end)
+    end
+
+    return starLayer
+end
+
 local function setupDropdownLayer(parent)
     _G.VRILZ_DropdownLayer = Instance.new("Frame")
     _G.VRILZ_DropdownLayer.Name = "DropdownLayer"
@@ -1018,6 +1111,8 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     selectedLbl.Parent = container
     registerTheme(selectedLbl, "Text", "TextColor3")
 
+    -- Real chevron: draw the two strokes instead of using a glyph.
+    -- This guarantees the icon can never render as a square/tofu character.
     local arrow = Instance.new("Frame")
     arrow.Name = "DropdownChevron"
     arrow.Size = UDim2.fromOffset(IS_MOBILE and 20 or 22, IS_MOBILE and 16 or 18)
@@ -1028,6 +1123,7 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     arrow.Parent = container
 
     local chevronL = Instance.new("Frame")
+    chevronL.Name = "Left"
     chevronL.Size = UDim2.fromOffset(IS_MOBILE and 8 or 9, 2)
     chevronL.Position = UDim2.new(0.5, -(IS_MOBILE and 7 or 8), 0.5, -1)
     chevronL.BackgroundColor3 = C.Accent2
@@ -1038,6 +1134,7 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     registerTheme(chevronL, "Accent2", "BackgroundColor3")
 
     local chevronR = Instance.new("Frame")
+    chevronR.Name = "Right"
     chevronR.Size = UDim2.fromOffset(IS_MOBILE and 8 or 9, 2)
     chevronR.Position = UDim2.new(0.5, 1, 0.5, -1)
     chevronR.BackgroundColor3 = C.Accent2
@@ -1095,15 +1192,6 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     listStroke.Parent = listFrame
     registerTheme(listStroke, "Accent", "Color")
 
-    -- ⭐ LAYER EFEK (bintang + jurus) — di belakang item, tidak ganggu layout
-    local fxLayer = Instance.new("Frame")
-    fxLayer.Name = "FXLayer"
-    fxLayer.Size = UDim2.fromScale(1, 1)
-    fxLayer.BackgroundTransparency = 1
-    fxLayer.ClipsDescendants = true
-    fxLayer.ZIndex = 2001
-    fxLayer.Parent = listFrame
-
     local listTopGlow = Instance.new("Frame")
     listTopGlow.Size = UDim2.new(1, -18, 0, 2)
     listTopGlow.Position = UDim2.fromOffset(9, 1)
@@ -1130,6 +1218,7 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     listLayout.Padding = UDim.new(0, 2)
     listLayout.SortOrder = Enum.SortOrder.LayoutOrder
     listLayout.Parent = listFrame
+    addDropdownStarfield(listFrame)
 
     local listPad = Instance.new("UIPadding")
     listPad.PaddingTop = UDim.new(0, 4)
@@ -1141,174 +1230,6 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     local itemHeight = CFG.DROPDOWN_ITEM
     local maxH = math.min(#items * (itemHeight + 2) + 10, IS_MOBILE and 126 or 148)
 
-    -- ═══════════════════════════════════════════════════════════
-    -- ⭐ BINTANG KELAP-KELIP DI DALAM POPUP (background)
-    -- ═══════════════════════════════════════════════════════════
-    local twinkleStars = {}
-    for i = 1, 14 do
-        local star = Instance.new("TextLabel")
-        star.Size = UDim2.fromOffset(14, 14)
-        star.Position = UDim2.fromScale(math.random(0, 100) / 100, math.random(0, 100) / 100)
-        star.BackgroundTransparency = 1
-        star.Text = (math.random() > 0.5) and "✦" or "✧"
-        star.TextColor3 = (math.random() > 0.5) and C.Accent2 or Color3.fromRGB(255, 240, 200)
-        star.TextSize = math.random(8, 14)
-        star.Font = Enum.Font.GothamBold
-        star.TextTransparency = 1
-        star.ZIndex = 2001
-        star.Parent = fxLayer
-        table.insert(twinkleStars, star)
-
-        -- Animasi twinkle async
-        task.spawn(function()
-            task.wait(math.random(0, 150) / 100)
-            while star.Parent do
-                local dur = math.random(60, 140) / 100
-                TweenService:Create(star, TweenInfo.new(dur, Enum.EasingStyle.Sine), {
-                    TextTransparency = math.random(0, 30) / 100,
-                    TextSize = math.random(11, 16),
-                }):Play()
-                task.wait(dur + math.random(30, 100) / 100)
-                if not star.Parent then break end
-                TweenService:Create(star, TweenInfo.new(dur, Enum.EasingStyle.Sine), {
-                    TextTransparency = 1,
-                    TextSize = math.random(8, 11),
-                }):Play()
-                task.wait(dur + math.random(30, 120) / 100)
-            end
-        end)
-    end
-
-    -- ═══════════════════════════════════════════════════════════
-    -- ⚡ EFEK "SALING JURUS" — 2 garis bentrok di tengah popup
-    -- ═══════════════════════════════════════════════════════════
-    local function spawnClash()
-        if not listFrame.Visible or not fxLayer.Parent then return end
-
-        local clashHolder = Instance.new("Frame")
-        clashHolder.Size = UDim2.fromScale(1, 1)
-        clashHolder.BackgroundTransparency = 1
-        clashHolder.ClipsDescendants = true
-        clashHolder.ZIndex = 2002
-        clashHolder.Parent = fxLayer
-
-        -- Titik bentrok di tengah popup (random sedikit)
-        local cx = math.random(30, 70) / 100
-        local cy = math.random(30, 70) / 100
-
-        -- Warna efek (accent2 & putih hot)
-        local colA = C.Accent2
-        local colB = Color3.fromRGB(255, 255, 255)
-
-        -- Posisi awal: dari 2 sudut random
-        local angA = math.rad(math.random(0, 360))
-        local angB = angA + math.rad(180 + math.random(-40, 40))
-        local len = math.random(60, 120)
-
-        local function makeTrail(angle, color, startOffset)
-            local trail = Instance.new("Frame")
-            trail.AnchorPoint = Vector2.new(0.5, 0.5)
-            trail.Size = UDim2.fromOffset(2, len)
-            trail.Position = UDim2.fromScale(cx, cy)
-            trail.Rotation = math.deg(angle) + startOffset
-            trail.BackgroundColor3 = color
-            trail.BorderSizePixel = 0
-            trail.ZIndex = 2003
-            trail.Parent = clashHolder
-
-            local tc = Instance.new("UICorner")
-            tc.CornerRadius = UDim.new(1, 0)
-            tc.Parent = trail
-
-            local grad = Instance.new("UIGradient")
-            grad.Rotation = 90
-            grad.Transparency = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, 1),
-                NumberSequenceKeypoint.new(0.5, 0.1),
-                NumberSequenceKeypoint.new(1, 1),
-            })
-            grad.Parent = trail
-            return trail
-        end
-
-        local tA = makeTrail(angA, colA, 0)
-        local tB = makeTrail(angB, colB, 0)
-
-        -- Spark bentrokan di tengah
-        local spark = Instance.new("Frame")
-        spark.AnchorPoint = Vector2.new(0.5, 0.5)
-        spark.Position = UDim2.fromScale(cx, cy)
-        spark.Size = UDim2.fromOffset(4, 4)
-        spark.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        spark.BorderSizePixel = 0
-        spark.ZIndex = 2004
-        spark.Parent = clashHolder
-        local sc = Instance.new("UICorner")
-        sc.CornerRadius = UDim.new(1, 0)
-        sc.Parent = spark
-
-        -- Glow halo bentrokan
-        local halo = Instance.new("Frame")
-        halo.AnchorPoint = Vector2.new(0.5, 0.5)
-        halo.Position = UDim2.fromScale(cx, cy)
-        halo.Size = UDim2.fromOffset(10, 10)
-        halo.BackgroundColor3 = C.Accent2
-        halo.BackgroundTransparency = 0.5
-        halo.BorderSizePixel = 0
-        halo.ZIndex = 2002
-        halo.Parent = clashHolder
-        local hc = Instance.new("UICorner")
-        hc.CornerRadius = UDim.new(1, 0)
-        hc.Parent = halo
-
-        -- Animasi bentrok: kedua trail menembak ke tengah
-        TweenService:Create(tA, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.fromOffset(3, len * 0.15),
-            BackgroundTransparency = 0.2,
-        }):Play()
-        TweenService:Create(tB, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.fromOffset(3, len * 0.15),
-            BackgroundTransparency = 0.2,
-        }):Play()
-
-        TweenService:Create(spark, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.fromOffset(20, 20),
-            BackgroundTransparency = 0,
-        }):Play()
-        TweenService:Create(halo, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.fromOffset(60, 60),
-            BackgroundTransparency = 1,
-        }):Play()
-
-        -- Fade out + cleanup
-        task.delay(0.2, function()
-            if tA and tA.Parent then
-                TweenService:Create(tA, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-            end
-            if tB and tB.Parent then
-                TweenService:Create(tB, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-            end
-            if spark and spark.Parent then
-                TweenService:Create(spark, TweenInfo.new(0.25), {BackgroundTransparency = 1, Size = UDim2.fromOffset(4, 4)}):Play()
-            end
-        end)
-
-        task.delay(0.55, function()
-            if clashHolder then clashHolder:Destroy() end
-        end)
-    end
-
-    -- Loop clash efek (hanya saat popup kebuka)
-    task.spawn(function()
-        task.wait(0.3)
-        while listFrame.Parent do
-            task.wait(math.random(60, 130) / 100)
-            if listFrame.Visible then
-                spawnClash()
-            end
-        end
-    end)
-
     local function closeList()
         isOpen = false
         chevronL.Rotation = 45
@@ -1316,7 +1237,7 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
         local w = listFrame.Size.X.Offset
         TweenService:Create(listFrame, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.fromOffset(w, 0)}):Play()
         task.delay(0.2, function()
-            if not isOpen then listFrame.Visible = false listShadow.Visible = false end
+            if not isOpen then listFrame.Visible = false end
         end)
         if _G.VRILZ_DropdownCloseOverlay then
             _G.VRILZ_DropdownCloseOverlay.Visible = false
@@ -1331,10 +1252,10 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
 
         isOpen = true
         listFrame.Visible = true
-        listShadow.Visible = true
         chevronL.Rotation = -45
         chevronR.Rotation = 45
 
+        -- Compact popover: jangan selebar field/window.
         local width = math.min(CFG.DROPDOWN_POPUP_W, math.max(140, container.AbsoluteSize.X - 12))
         listFrame.Size = UDim2.fromOffset(width, 0)
 
@@ -1348,6 +1269,7 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
         local spaceBelow = screenH - (containerAbsY + containerAbsH + 8)
         local realMaxH = math.min(maxH, math.max(spaceBelow, 90))
 
+        -- Tetap tepat di bawah dropdown, rata kanan dengan tombol <>.
         local popupRight = math.min(screenW - 8, containerAbsX + containerAbsW)
         local popupLeft = math.max(8, popupRight - width)
         listFrame.Position = UDim2.fromOffset(popupLeft, containerAbsY + containerAbsH + 6)
@@ -1464,6 +1386,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     selectedLbl.Parent = container
     registerTheme(selectedLbl, "Text", "TextColor3")
 
+    -- Draw the rarity chevron from two small strokes so it never becomes a square/tofu glyph.
     local arrow = Instance.new("Frame")
     arrow.Name = "RarityChevron"
     arrow.Size = UDim2.fromOffset(IS_MOBILE and 20 or 22, IS_MOBILE and 16 or 18)
@@ -1554,7 +1477,10 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     listLayout.Padding = UDim.new(0, 2)
     listLayout.SortOrder = Enum.SortOrder.LayoutOrder
     listLayout.Parent = listFrame
+    addDropdownStarfield(listFrame)
 
+    addDropdownStarfield(listFrame)
+    
     local listPad = Instance.new("UIPadding")
     listPad.PaddingTop = UDim.new(0, 4)
     listPad.PaddingBottom = UDim.new(0, 4)
@@ -1566,166 +1492,6 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     local maxH = math.min(#items * (itemHeight + 2) + 10, IS_MOBILE and 126 or 148)
 
     local optionButtons = {}
-
-    -- ⭐ LAYER EFEK (bintang + jurus)
-    local fxLayer = Instance.new("Frame")
-    fxLayer.Name = "FXLayer"
-    fxLayer.Size = UDim2.fromScale(1, 1)
-    fxLayer.BackgroundTransparency = 1
-    fxLayer.ClipsDescendants = true
-    fxLayer.ZIndex = 2001
-    fxLayer.Parent = listFrame
-
-    -- ⭐ Bintang kelap-kelip
-    for i = 1, 14 do
-        local star = Instance.new("TextLabel")
-        star.Size = UDim2.fromOffset(14, 14)
-        star.Position = UDim2.fromScale(math.random(0, 100) / 100, math.random(0, 100) / 100)
-        star.BackgroundTransparency = 1
-        star.Text = (math.random() > 0.5) and "✦" or "✧"
-        star.TextColor3 = (math.random() > 0.5) and C.Accent2 or Color3.fromRGB(255, 240, 200)
-        star.TextSize = math.random(8, 14)
-        star.Font = Enum.Font.GothamBold
-        star.TextTransparency = 1
-        star.ZIndex = 2001
-        star.Parent = fxLayer
-
-        task.spawn(function()
-            task.wait(math.random(0, 150) / 100)
-            while star.Parent do
-                local dur = math.random(60, 140) / 100
-                TweenService:Create(star, TweenInfo.new(dur, Enum.EasingStyle.Sine), {
-                    TextTransparency = math.random(0, 30) / 100,
-                    TextSize = math.random(11, 16),
-                }):Play()
-                task.wait(dur + math.random(30, 100) / 100)
-                if not star.Parent then break end
-                TweenService:Create(star, TweenInfo.new(dur, Enum.EasingStyle.Sine), {
-                    TextTransparency = 1,
-                    TextSize = math.random(8, 11),
-                }):Play()
-                task.wait(dur + math.random(30, 120) / 100)
-            end
-        end)
-    end
-
-    -- ⚡ Efek saling jurus
-    local function spawnClash()
-        if not listFrame.Visible or not fxLayer.Parent then return end
-
-        local clashHolder = Instance.new("Frame")
-        clashHolder.Size = UDim2.fromScale(1, 1)
-        clashHolder.BackgroundTransparency = 1
-        clashHolder.ClipsDescendants = true
-        clashHolder.ZIndex = 2002
-        clashHolder.Parent = fxLayer
-
-        local cx = math.random(30, 70) / 100
-        local cy = math.random(30, 70) / 100
-
-        local colA = C.Accent2
-        local colB = Color3.fromRGB(255, 255, 255)
-
-        local angA = math.rad(math.random(0, 360))
-        local angB = angA + math.rad(180 + math.random(-40, 40))
-        local len = math.random(60, 120)
-
-        local function makeTrail(angle, color)
-            local trail = Instance.new("Frame")
-            trail.AnchorPoint = Vector2.new(0.5, 0.5)
-            trail.Size = UDim2.fromOffset(2, len)
-            trail.Position = UDim2.fromScale(cx, cy)
-            trail.Rotation = math.deg(angle)
-            trail.BackgroundColor3 = color
-            trail.BorderSizePixel = 0
-            trail.ZIndex = 2003
-            trail.Parent = clashHolder
-
-            local tc = Instance.new("UICorner")
-            tc.CornerRadius = UDim.new(1, 0)
-            tc.Parent = trail
-
-            local grad = Instance.new("UIGradient")
-            grad.Rotation = 90
-            grad.Transparency = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, 1),
-                NumberSequenceKeypoint.new(0.5, 0.1),
-                NumberSequenceKeypoint.new(1, 1),
-            })
-            grad.Parent = trail
-            return trail
-        end
-
-        local tA = makeTrail(angA, colA)
-        local tB = makeTrail(angB, colB)
-
-        local spark = Instance.new("Frame")
-        spark.AnchorPoint = Vector2.new(0.5, 0.5)
-        spark.Position = UDim2.fromScale(cx, cy)
-        spark.Size = UDim2.fromOffset(4, 4)
-        spark.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        spark.BorderSizePixel = 0
-        spark.ZIndex = 2004
-        spark.Parent = clashHolder
-        local sc = Instance.new("UICorner")
-        sc.CornerRadius = UDim.new(1, 0)
-        sc.Parent = spark
-
-        local halo = Instance.new("Frame")
-        halo.AnchorPoint = Vector2.new(0.5, 0.5)
-        halo.Position = UDim2.fromScale(cx, cy)
-        halo.Size = UDim2.fromOffset(10, 10)
-        halo.BackgroundColor3 = C.Accent2
-        halo.BackgroundTransparency = 0.5
-        halo.BorderSizePixel = 0
-        halo.ZIndex = 2002
-        halo.Parent = clashHolder
-        local hc = Instance.new("UICorner")
-        hc.CornerRadius = UDim.new(1, 0)
-        hc.Parent = halo
-
-        TweenService:Create(tA, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.fromOffset(3, len * 0.15),
-            BackgroundTransparency = 0.2,
-        }):Play()
-        TweenService:Create(tB, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.fromOffset(3, len * 0.15),
-            BackgroundTransparency = 0.2,
-        }):Play()
-        TweenService:Create(spark, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.fromOffset(20, 20),
-            BackgroundTransparency = 0,
-        }):Play()
-        TweenService:Create(halo, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.fromOffset(60, 60),
-            BackgroundTransparency = 1,
-        }):Play()
-
-        task.delay(0.2, function()
-            if tA and tA.Parent then
-                TweenService:Create(tA, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-            end
-            if tB and tB.Parent then
-                TweenService:Create(tB, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-            end
-            if spark and spark.Parent then
-                TweenService:Create(spark, TweenInfo.new(0.25), {BackgroundTransparency = 1, Size = UDim2.fromOffset(4, 4)}):Play()
-            end
-        end)
-        task.delay(0.55, function()
-            if clashHolder then clashHolder:Destroy() end
-        end)
-    end
-
-    task.spawn(function()
-        task.wait(0.3)
-        while listFrame.Parent do
-            task.wait(math.random(60, 130) / 100)
-            if listFrame.Visible then
-                spawnClash()
-            end
-        end
-    end)
 
     local function updateLabel()
         local selected = {}
@@ -1759,7 +1525,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         local w = listFrame.Size.X.Offset
         TweenService:Create(listFrame, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.fromOffset(w, 0)}):Play()
         task.delay(0.2, function()
-            if not isOpen then listFrame.Visible = false listShadow.Visible = false end
+            if not isOpen then listFrame.Visible = false end
         end)
         if _G.VRILZ_DropdownCloseOverlay then
             _G.VRILZ_DropdownCloseOverlay.Visible = false
@@ -1774,10 +1540,10 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
 
         isOpen = true
         listFrame.Visible = true
-        listShadow.Visible = true
         arrowL.Rotation = -45
         arrowR.Rotation = 45
 
+        -- Compact popover: jangan selebar field/window.
         local width = math.min(CFG.DROPDOWN_POPUP_W, math.max(140, container.AbsoluteSize.X - 12))
         listFrame.Size = UDim2.fromOffset(width, 0)
 
@@ -1791,6 +1557,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         local spaceBelow = screenH - (containerAbsY + containerAbsH + 8)
         local realMaxH = math.min(maxH, math.max(spaceBelow, 90))
 
+        -- Tetap tepat di bawah dropdown, rata kanan dengan tombol <>.
         local popupRight = math.min(screenW - 8, containerAbsX + containerAbsW)
         local popupLeft = math.max(8, popupRight - width)
         listFrame.Position = UDim2.fromOffset(popupLeft, containerAbsY + containerAbsH + 6)
@@ -2618,6 +2385,305 @@ local function buildLightningEffectLayer(mainFrame)
 
             -- ⭐ Jeda 3-6 detik sebelum cek lagi
             task.wait(math.random(300, 600) / 100)
+        end
+    end)
+
+    return layer
+end
+
+-- ============================================================
+-- ⚔️ DUEL EFFECT LAYER — 2 siluet saling ngejurus
+-- ============================================================
+local function buildDuelEffectLayer(mainFrame)
+    local layer = Instance.new("Frame")
+    layer.Name = "DuelEffectLayer"
+    layer.Size = UDim2.fromScale(1, 1)
+    layer.Position = UDim2.fromScale(0, 0)
+    layer.BackgroundTransparency = 1
+    layer.ClipsDescendants = true
+    layer.ZIndex = 6
+    layer.Active = false
+    layer.Parent = mainFrame
+
+    local layerCorner = Instance.new("UICorner")
+    layerCorner.CornerRadius = UDim.new(0, 18)
+    layerCorner.Parent = layer
+
+    local active = true
+    layer.Destroying:Connect(function() active = false end)
+
+    -- ═══ Helper: siluet karakter (kepala + badan + kaki) ═══
+    local function makeFighter(parent, facingRight, color)
+        local holder = Instance.new("Frame")
+        holder.Size = UDim2.fromOffset(IS_MOBILE and 26 or 34, IS_MOBILE and 48 or 62)
+        holder.BackgroundTransparency = 1
+        holder.ZIndex = 7
+        holder.Parent = parent
+
+        local scale = IS_MOBILE and 1 or 1.3
+
+        -- Kepala
+        local head = Instance.new("Frame")
+        head.Size = UDim2.fromOffset(10 * scale, 10 * scale)
+        head.Position = UDim2.new(0.5, -(5 * scale), 0, 0)
+        head.BackgroundColor3 = color
+        head.BackgroundTransparency = 0.25
+        head.BorderSizePixel = 0
+        head.ZIndex = 8
+        head.Parent = holder
+        local hc = Instance.new("UICorner")
+        hc.CornerRadius = UDim.new(1, 0)
+        hc.Parent = head
+
+        -- Badan
+        local body = Instance.new("Frame")
+        body.Size = UDim2.fromOffset(14 * scale, 20 * scale)
+        body.Position = UDim2.new(0.5, -(7 * scale), 0, 11 * scale)
+        body.BackgroundColor3 = color
+        body.BackgroundTransparency = 0.25
+        body.BorderSizePixel = 0
+        body.ZIndex = 8
+        body.Parent = holder
+        local bc = Instance.new("UICorner")
+        bc.CornerRadius = UDim.new(0, 3)
+        bc.Parent = body
+
+        -- Kaki kiri
+        local legL = Instance.new("Frame")
+        legL.Size = UDim2.fromOffset(5 * scale, 16 * scale)
+        legL.Position = UDim2.new(0.5, -(7 * scale), 0, 32 * scale)
+        legL.BackgroundColor3 = color
+        legL.BackgroundTransparency = 0.25
+        legL.BorderSizePixel = 0
+        legL.ZIndex = 8
+        legL.Parent = holder
+        local llc = Instance.new("UICorner")
+        llc.CornerRadius = UDim.new(0, 2)
+        llc.Parent = legL
+
+        -- Kaki kanan
+        local legR = Instance.new("Frame")
+        legR.Size = UDim2.fromOffset(5 * scale, 16 * scale)
+        legR.Position = UDim2.new(0.5, 2 * scale, 0, 32 * scale)
+        legR.BackgroundColor3 = color
+        legR.BackgroundTransparency = 0.25
+        legR.BorderSizePixel = 0
+        legR.ZIndex = 8
+        legR.Parent = holder
+        local lrc = Instance.new("UICorner")
+        lrc.CornerRadius = UDim.new(0, 2)
+        lrc.Parent = legR
+
+        -- Lengan menembak (mengarah ke lawan)
+        local arm = Instance.new("Frame")
+        arm.Size = UDim2.fromOffset(12 * scale, 4 * scale)
+        arm.AnchorPoint = Vector2.new(facingRight and 0 or 1, 0.5)
+        arm.Position = UDim2.new(0.5, facingRight and (5 * scale) or -(5 * scale), 0, 18 * scale)
+        arm.BackgroundColor3 = color
+        arm.BackgroundTransparency = 0.25
+        arm.BorderSizePixel = 0
+        arm.ZIndex = 8
+        arm.Parent = holder
+        local ac = Instance.new("UICorner")
+        ac.CornerRadius = UDim.new(1, 0)
+        ac.Parent = arm
+
+        return holder, arm
+    end
+
+    -- ═══ Posisi fighter ═══
+    local leftFighterHolder = Instance.new("Frame")
+    leftFighterHolder.Name = "LeftFighterHolder"
+    leftFighterHolder.Size = UDim2.fromOffset(IS_MOBILE and 26 or 34, IS_MOBILE and 48 or 62)
+    leftFighterHolder.AnchorPoint = Vector2.new(0, 1)
+    leftFighterHolder.Position = UDim2.new(0, IS_MOBILE and 14 or 24, 1, -(IS_MOBILE and 30 or 50))
+    leftFighterHolder.BackgroundTransparency = 1
+    leftFighterHolder.ZIndex = 7
+    leftFighterHolder.Parent = layer
+
+    local rightFighterHolder = Instance.new("Frame")
+    rightFighterHolder.Name = "RightFighterHolder"
+    rightFighterHolder.Size = UDim2.fromOffset(IS_MOBILE and 26 or 34, IS_MOBILE and 48 or 62)
+    rightFighterHolder.AnchorPoint = Vector2.new(1, 1)
+    rightFighterHolder.Position = UDim2.new(1, -(IS_MOBILE and 14 or 24), 1, -(IS_MOBILE and 30 or 50))
+    rightFighterHolder.BackgroundTransparency = 1
+    rightFighterHolder.ZIndex = 7
+    rightFighterHolder.Parent = layer
+
+    local leftColor = Color3.fromRGB(80, 180, 255)   -- biru
+    local rightColor = Color3.fromRGB(255, 90, 100)  -- merah
+
+    local leftFighter, leftArm = makeFighter(leftFighterHolder, true, leftColor)
+    local rightFighter, rightArm = makeFighter(rightFighterHolder, false, rightColor)
+
+    -- Idle animation: nafas naik-turun
+    task.spawn(function()
+        while active and leftFighter.Parent do
+            TweenService:Create(leftFighter, TweenInfo.new(1.2, Enum.EasingStyle.Sine), {
+                Position = UDim2.fromOffset(0, -3)
+            }):Play()
+            TweenService:Create(rightFighter, TweenInfo.new(1.2, Enum.EasingStyle.Sine), {
+                Position = UDim2.fromOffset(0, -3)
+            }):Play()
+            task.wait(1.2)
+            TweenService:Create(leftFighter, TweenInfo.new(1.2, Enum.EasingStyle.Sine), {
+                Position = UDim2.fromOffset(0, 0)
+            }):Play()
+            TweenService:Create(rightFighter, TweenInfo.new(1.2, Enum.EasingStyle.Sine), {
+                Position = UDim2.fromOffset(0, 0)
+            }):Play()
+            task.wait(1.2)
+        end
+    end)
+
+    -- ═══ Beam / jurus ═══
+    local function spawnBeam(fromRight)
+        if not active or not layer.Parent then return end
+
+        local startHolder = fromRight and rightFighterHolder or leftFighterHolder
+        local endHolder   = fromRight and leftFighterHolder or rightFighterHolder
+        local beamColor   = fromRight and rightColor or leftColor
+
+        -- Hitung posisi absolut
+        local startAbs = startHolder.AbsolutePosition
+        local startSize = startHolder.AbsoluteSize
+        local endAbs = endHolder.AbsolutePosition
+        local endSize = endHolder.AbsoluteSize
+
+        -- Titik awal: ujung lengan (tengah vertikal body)
+        local startX = fromRight
+            and (startAbs.X)                                    -- kiri fighter kanan
+            or  (startAbs.X + startSize.X)                      -- kanan fighter kiri
+        local startY = startAbs.Y + startSize.Y * 0.42
+
+        local endX = fromRight
+            and (endAbs.X + endSize.X)
+            or  (endAbs.X)
+        local endY = endAbs.Y + endSize.Y * 0.42
+
+        -- Konversi ke posisi relatif layer
+        local layerAbs = layer.AbsolutePosition
+        local layerSize = layer.AbsoluteSize
+
+        local relStartX = (startX - layerAbs.X) / layerSize.X
+        local relStartY = (startY - layerAbs.Y) / layerSize.Y
+        local relEndX   = (endX - layerAbs.X) / layerSize.X
+        local relEndY   = (endY - layerAbs.Y) / layerSize.Y
+
+        local dx = relEndX - relStartX
+        local dy = relEndY - relStartY
+        local dist = math.sqrt(dx * dx + dy * dy)
+        local angleDeg = math.deg(math.atan2(dy, dx))
+
+        -- Beam utama (panjang penuh)
+        local beam = Instance.new("Frame")
+        beam.Name = "JurusBeam"
+        beam.AnchorPoint = Vector2.new(0, 0.5)
+        beam.Position = UDim2.fromScale(relStartX, relStartY)
+        beam.Size = UDim2.fromOffset(0, 0)
+        beam.Rotation = angleDeg
+        beam.BackgroundColor3 = beamColor
+        beam.BackgroundTransparency = 0.15
+        beam.BorderSizePixel = 0
+        beam.ZIndex = 9
+        beam.Parent = layer
+
+        local beamCorner = Instance.new("UICorner")
+        beamCorner.CornerRadius = UDim.new(1, 0)
+        beamCorner.Parent = beam
+
+        -- Inti putih panas
+        local beamCore = Instance.new("Frame")
+        beamCore.AnchorPoint = Vector2.new(0, 0.5)
+        beamCore.Position = UDim2.new(0, 0, 0.5, 0)
+        beamCore.Size = UDim2.new(1, 0, 0.4, 0)
+        beamCore.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        beamCore.BackgroundTransparency = 0
+        beamCore.BorderSizePixel = 0
+        beamCore.ZIndex = 10
+        beamCore.Parent = beam
+        local bcc = Instance.new("UICorner")
+        bcc.CornerRadius = UDim.new(1, 0)
+        bcc.Parent = beamCore
+
+        -- Glow di ujung beam (impact)
+        local impact = Instance.new("Frame")
+        impact.AnchorPoint = Vector2.new(0.5, 0.5)
+        impact.Position = UDim2.new(1, 0, 0.5, 0)
+        impact.Size = UDim2.fromOffset(14, 14)
+        impact.BackgroundColor3 = beamColor
+        impact.BackgroundTransparency = 0.3
+        impact.BorderSizePixel = 0
+        impact.ZIndex = 9
+        impact.Parent = beam
+        local ic = Instance.new("UICorner")
+        ic.CornerRadius = UDim.new(1, 0)
+        ic.Parent = impact
+
+        -- Animasi: beam memanjang dari start ke end
+        local targetLen = dist * layerSize.X
+        local tweenDur = 0.25
+        TweenService:Create(beam, TweenInfo.new(tweenDur, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Size = UDim2.fromOffset(targetLen, 6)
+        }):Play()
+        TweenService:Create(impact, TweenInfo.new(tweenDur, Enum.EasingStyle.Quad), {
+            Size = UDim2.fromOffset(20, 20)
+        }):Play()
+
+        -- Fade out
+        task.delay(tweenDur + 0.15, function()
+            if beam.Parent then
+                TweenService:Create(beam, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
+                    BackgroundTransparency = 1
+                }):Play()
+                TweenService:Create(beamCore, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+                TweenService:Create(impact, TweenInfo.new(0.3), {
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromOffset(30, 30)
+                }):Play()
+            end
+        end)
+
+        task.delay(tweenDur + 0.5, function()
+            if beam then beam:Destroy() end
+        end)
+
+        -- Efek "recoil" di fighter yang nembak
+        local shooter = fromRight and rightFighter or leftFighter
+        local originalPos = shooter.Position
+        local recoilX = fromRight and 4 or -4
+        TweenService:Create(shooter, TweenInfo.new(0.1), {
+            Position = originalPos + UDim2.fromOffset(recoilX, 0)
+        }):Play()
+        task.delay(0.12, function()
+            if shooter.Parent then
+                TweenService:Create(shooter, TweenInfo.new(0.2, Enum.EasingStyle.Back), {
+                    Position = originalPos
+                }):Play()
+            end
+        end)
+    end
+
+    -- ═══ Loop duel ═══
+    task.spawn(function()
+        task.wait(2)
+        while active do
+            -- Fighter kiri nembak
+            spawnBeam(false)
+            task.wait(math.random(80, 150) / 100)
+
+            -- Fighter kanan nembak balik
+            spawnBeam(true)
+            task.wait(math.random(80, 150) / 100)
+
+            -- Kadang saling tembak barengan (clash)
+            if math.random() < 0.4 then
+                spawnBeam(false)
+                spawnBeam(true)
+                task.wait(0.3)
+            end
+
+            task.wait(math.random(20, 50) / 10)  -- jeda 2-5 detik
         end
     end)
 
@@ -7406,6 +7472,10 @@ end)
         local lightningLayer = buildLightningEffectLayer(main)
         lightningLayer.Visible = false
 
+        -- ⚔️ DUEL EFFECT LAYER (2 siluet saling ngejurus)
+        local duelLayer = buildDuelEffectLayer(main)
+        duelLayer.Visible = true
+
         makeToggle(fpsContent, "FPS Boost", false, function(v)
             Shared.FPSBoost_Enabled = v
             if v then gfx_enableFPS() else gfx_disableFPS() end
@@ -7443,6 +7513,18 @@ end)
                 notify("⚡ Lightning Effect: ON (red lightning)", "success")
             else
                 notify("⚡ Lightning Effect: OFF", "info")
+            end
+        end)
+        -- ⚔️ TOGGLE DUEL EFFECT (2 siluet saling ngejurus)
+        makeToggle(fpsContent, "Duel Effect", true, function(v)
+            Shared.DuelEffect_Enabled = v
+            if duelLayer then
+                duelLayer.Visible = v
+            end
+            if v then
+                notify("⚔️ Duel Effect: ON (2 siluet saling ngejurus)", "success")
+            else
+                notify("⚔️ Duel Effect: OFF", "info")
             end
         end)
 end
@@ -10610,6 +10692,7 @@ function UI.Init(sharedState)
     }
     Shared.FPSBoost_Enabled = false
     Shared.LightsEffect_Enabled = true
+    Shared.DuelEffect_Enabled = true
     Shared.HD4K_Enabled = false
     Shared.YinRitual_Enabled = false
     Shared.InfinityJump_Enabled = false
