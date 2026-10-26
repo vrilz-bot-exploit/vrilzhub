@@ -3822,7 +3822,7 @@ eggBg.Size = UDim2.fromScale(1, 1)
 eggBg.Position = UDim2.fromScale(0, 0)
 eggBg.BackgroundTransparency = 1
 eggBg.ScaleType = Enum.ScaleType.Crop
-eggBg.ZIndex = -1
+eggBg.ZIndex = 0
 eggBg.Parent = win
 
 if eggBgAsset then
@@ -3844,13 +3844,13 @@ else
 end
 
     -- ═══ STAR FIELD (bintang 3D berputar) ═══
-    local starLayer = Instance.new("Frame")
-    starLayer.Name = "StarField"
-    starLayer.Size = UDim2.fromScale(1, 1)
-    starLayer.BackgroundTransparency = 1
-    starLayer.ClipsDescendants = true
-    starLayer.ZIndex = 0
-    starLayer.Parent = win
+local starLayer = Instance.new("Frame")
+starLayer.Name = "StarField"
+starLayer.Size = UDim2.fromScale(1, 1)
+starLayer.BackgroundTransparency = 1
+starLayer.ClipsDescendants = true
+starLayer.ZIndex = 1  -- ← FIX: naikin ke 1, di atas background
+starLayer.Parent = win
 
     local stars = {}
     for i = 1, 50 do
@@ -4392,6 +4392,10 @@ end
     avatarSub.ZIndex = 12
     avatarSub.Parent = avatarInfo
 
+       -- ═══ FORWARD DECLARE (biar switchTab bisa akses) ═══
+    local updateEggList
+    local updateStatsDisplay
+
     -- ═══ TAB SWITCH ═══
     local function switchTab(key)
         EggState.ActiveTab = key
@@ -4407,15 +4411,21 @@ end
                 b.TextColor3 = COLOR_TEXT_DIM
             end
         end
-        if key == "eggs" then updateEggList() end
+        -- ⭐ Guard: cuma call kalau udah di-assign
+        if key == "eggs" and type(updateEggList) == "function" then
+            updateEggList()
+        end
     end
 
     for key, btn in pairs(tabButtons) do
-        btn.MouseButton1Click:Connect(function() switchTab(key) end)
+        btn.MouseButton1Click:Connect(function()
+            local ok, err = pcall(switchTab, key)
+            if not ok then warn("[EGG TAB] switchTab error: " .. tostring(err)) end
+        end)
     end
 
     -- ═══ UPDATE STATS ═══
-    local function updateStatsDisplay()
+    updateStatsDisplay = function()
         if not win.Parent then return end
         local activeTime = os.time() - StealStats.SessionStart
         local total = StealStats.TotalSteals
@@ -4442,7 +4452,7 @@ end
     end
 
     -- ═══ UPDATE EGG LIST ═══
-    local function updateEggList()
+    updateEggList = function()
         for _, child in ipairs(eggScroll:GetChildren()) do
             if child:IsA("Frame") or child:IsA("TextLabel") then
                 child:Destroy()
