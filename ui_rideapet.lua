@@ -4112,29 +4112,31 @@ task.spawn(function()
     while zodiacLayer.Parent do
         task.wait(math.random(40, 90) / 10)
         if not win.Visible then continue end
-        
+
+        -- ⭐ FIX: pakai warna lokal, jangan meteorColor (belum ada di scope ini)
+        local shootColor = Color3.fromRGB(255, 255, 255)
+
         local shoot = Instance.new("Frame")
         shoot.AnchorPoint = Vector2.new(0.5, 0.5)
         local startX = math.random(10, 90)
         shoot.Position = UDim2.fromScale(startX/100, -0.05)
         shoot.Size = UDim2.fromOffset(3, 3)
-        shoot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        shoot.BackgroundColor3 = shootColor
         shoot.BorderSizePixel = 0
         shoot.ZIndex = 20
         shoot.Parent = zodiacLayer
         local sc = Instance.new("UICorner"); sc.CornerRadius = UDim.new(1, 0); sc.Parent = shoot
-        
-        -- 🌟 PREMIUM TRAIL (3 layer: outer glow + mid + core)
-        -- Outer glow
+
+        -- 🌟 PREMIUM TRAIL (3 layer)
         local outerTrail = Instance.new("Frame")
         outerTrail.AnchorPoint = Vector2.new(0.5, 1)
         outerTrail.Position = UDim2.new(0.5, 0, 0.5, 0)
         outerTrail.Size = UDim2.fromOffset(12, 55)
-        outerTrail.BackgroundColor3 = meteorColor
+        outerTrail.BackgroundColor3 = shootColor
         outerTrail.BackgroundTransparency = 0.7
         outerTrail.BorderSizePixel = 0
         outerTrail.ZIndex = 22
-        outerTrail.Parent = meteor
+        outerTrail.Parent = shoot
         local otc = Instance.new("UICorner"); otc.CornerRadius = UDim.new(1, 0); otc.Parent = outerTrail
         local otg = Instance.new("UIGradient")
         otg.Rotation = 90
@@ -4145,16 +4147,15 @@ task.spawn(function()
         })
         otg.Parent = outerTrail
 
-        -- Mid trail
         local trail = Instance.new("Frame")
         trail.AnchorPoint = Vector2.new(0.5, 1)
         trail.Position = UDim2.new(0.5, 0, 0.5, 0)
         trail.Size = UDim2.fromOffset(5, 45)
-        trail.BackgroundColor3 = meteorColor
+        trail.BackgroundColor3 = shootColor
         trail.BackgroundTransparency = 0.2
         trail.BorderSizePixel = 0
         trail.ZIndex = 23
-        trail.Parent = meteor
+        trail.Parent = shoot
         local tc = Instance.new("UICorner"); tc.CornerRadius = UDim.new(1, 0); tc.Parent = trail
         local tGrad = Instance.new("UIGradient")
         tGrad.Rotation = 90
@@ -4165,7 +4166,6 @@ task.spawn(function()
         })
         tGrad.Parent = trail
 
-        -- Core (putih panas)
         local coreTrail = Instance.new("Frame")
         coreTrail.AnchorPoint = Vector2.new(0.5, 1)
         coreTrail.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -4173,7 +4173,7 @@ task.spawn(function()
         coreTrail.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         coreTrail.BorderSizePixel = 0
         coreTrail.ZIndex = 24
-        coreTrail.Parent = meteor
+        coreTrail.Parent = shoot
         local ctc = Instance.new("UICorner"); ctc.CornerRadius = UDim.new(1, 0); ctc.Parent = coreTrail
         local ctg = Instance.new("UIGradient")
         ctg.Rotation = 90
@@ -4183,7 +4183,7 @@ task.spawn(function()
             NumberSequenceKeypoint.new(1, 0),
         })
         ctg.Parent = coreTrail
-        
+
         local endX = startX + math.random(-40, 40)
         local duration = math.random(8, 14) / 10
         TweenService:Create(shoot, TweenInfo.new(duration, Enum.EasingStyle.Quad), {
@@ -4200,7 +4200,7 @@ task.spawn(function()
         end)
     end
 end)
-
+    
     -- ═══════════════════════════════════════════════════════════
     -- ☄️ METEOR SYSTEM (3 METEOR, TABRAKAN, MELEDAK)
     -- ═══════════════════════════════════════════════════════════
