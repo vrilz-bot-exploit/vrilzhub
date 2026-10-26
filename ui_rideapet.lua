@@ -981,6 +981,58 @@ local function setupDropdownLayer(parent)
     end)
 end
 
+-- ============================================================
+-- ⭐ STARFIELD HELPER — Bintang kelap-kelip untuk background opsi
+-- ============================================================
+local function attachStarfield(parentFrame, starCount, color)
+    starCount = starCount or 5
+    color = color or Color3.fromRGB(255, 255, 255)
+
+    local starLayer = Instance.new("Frame")
+    starLayer.Name = "StarfieldLayer"
+    starLayer.Size = UDim2.fromScale(1, 1)
+    starLayer.BackgroundTransparency = 1
+    starLayer.ClipsDescendants = true
+    starLayer.ZIndex = parentFrame.ZIndex - 1
+    starLayer.Parent = parentFrame
+
+    for i = 1, starCount do
+        local star = Instance.new("Frame")
+        local sz = math.random(1, 2)
+        star.Name = "Star_" .. i
+        star.Size = UDim2.fromOffset(sz, sz)
+        star.Position = UDim2.fromScale(math.random(5, 95) / 100, math.random(5, 95) / 100)
+        star.BackgroundColor3 = color
+        star.BackgroundTransparency = math.random(40, 80) / 100
+        star.BorderSizePixel = 0
+        star.ZIndex = parentFrame.ZIndex - 1
+        star.Parent = starLayer
+
+        local sc = Instance.new("UICorner")
+        sc.CornerRadius = UDim.new(1, 0)
+        sc.Parent = star
+
+        -- Animasi kelap-kelip (twinkle)
+        task.spawn(function()
+            local baseTrans = star.BackgroundTransparency
+            task.wait(math.random(0, 200) / 100)
+            while star.Parent and starLayer.Parent do
+                TweenService:Create(star, TweenInfo.new(math.random(30, 80) / 100, Enum.EasingStyle.Sine), {
+                    BackgroundTransparency = math.max(0, baseTrans - 0.6)
+                }):Play()
+                task.wait(math.random(40, 100) / 100)
+                if not star.Parent then break end
+                TweenService:Create(star, TweenInfo.new(math.random(50, 120) / 100, Enum.EasingStyle.Sine), {
+                    BackgroundTransparency = baseTrans
+                }):Play()
+                task.wait(math.random(60, 180) / 100)
+            end
+        end)
+    end
+
+    return starLayer
+end
+
 local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     local isOpen = false
     local selectedValue = default or items[1] or "Choose..."
@@ -1201,25 +1253,35 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
         end
     end)
 
-    for i, item in ipairs(items) do
+        for i, item in ipairs(items) do
         local opt = Instance.new("TextButton")
         opt.Size = UDim2.new(1, -8, 0, itemHeight)
         opt.Position = UDim2.fromOffset(4, 0)
         opt.BackgroundColor3 = C.Surface3
-        opt.Text = item
-        opt.TextColor3 = C.Text
-        opt.Font = Enum.Font.GothamSemibold
-        opt.TextSize = CFG.FONT_LABEL
+        opt.Text = ""
         opt.AutoButtonColor = false
         opt.ZIndex = 2002
         opt.LayoutOrder = i
+        opt.ClipsDescendants = true
         opt.Parent = listFrame
         registerTheme(opt, "Surface3", "BackgroundColor3")
-        registerTheme(opt, "Text", "TextColor3")
 
         local optCorner = Instance.new("UICorner")
         optCorner.CornerRadius = UDim.new(0, 8)
         optCorner.Parent = opt
+
+        -- ⭐ BACKGROUND GRADIENT
+        local optGradient = Instance.new("UIGradient")
+        optGradient.Rotation = 90
+        optGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, C.Surface3),
+            ColorSequenceKeypoint.new(0.5, C.Surface2),
+            ColorSequenceKeypoint.new(1, C.Surface3),
+        })
+        optGradient.Parent = opt
+
+        -- ⭐ BINTANG KELAP-KELIP DI BACKGROUND
+        attachStarfield(opt, 5, C.Accent2)
 
         local optStroke = Instance.new("UIStroke")
         optStroke.Color = C.Accent
@@ -1227,22 +1289,68 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
         optStroke.Transparency = 1
         optStroke.Parent = opt
 
+        -- ⭐ LABEL NAMA dengan gradient shimmer
+        local nameLbl = Instance.new("TextLabel")
+        nameLbl.Name = "OptionName"
+        nameLbl.Size = UDim2.new(1, -12, 1, 0)
+        nameLbl.Position = UDim2.fromOffset(8, 0)
+        nameLbl.BackgroundTransparency = 1
+        nameLbl.Text = item
+        nameLbl.TextColor3 = C.Text
+        nameLbl.Font = Enum.Font.GothamBold
+        nameLbl.TextSize = CFG.FONT_LABEL
+        nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+        nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
+        nameLbl.ZIndex = 2003
+        nameLbl.Parent = opt
+        registerTheme(nameLbl, "Text", "TextColor3")
+
+        -- ⭐ EFEK GRADIENT DI NAMA
+        local nameGradient = Instance.new("UIGradient")
+        nameGradient.Rotation = 0
+        nameGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, C.Text),
+            ColorSequenceKeypoint.new(0.5, C.Accent2),
+            ColorSequenceKeypoint.new(1, C.Text),
+        })
+        nameGradient.Parent = nameLbl
+
+        -- ⭐ SHIMMER (cahaya bergerak di nama)
+        task.spawn(function()
+            local offset = 0
+            while nameLbl.Parent and opt.Parent do
+                offset = offset + 0.04
+                if offset > 1 then offset = 0 end
+                nameGradient.Offset = Vector2.new(offset, 0)
+                task.wait(0.05)
+            end
+        end)
+
         if item == selectedValue then
             opt.BackgroundColor3 = C.Accent
+            nameLbl.TextColor3 = Color3.new(1, 1, 1)
+            nameLbl.TextStrokeColor3 = C.Accent2
+            nameLbl.TextStrokeTransparency = 0.3
             optStroke.Transparency = 0.15
+            nameGradient.Enabled = false
         end
 
         opt.MouseEnter:Connect(function()
             if item ~= selectedValue then
-                TweenService:Create(opt, TweenInfo.new(0.12), {BackgroundColor3 = C.Surface2}):Play()
+                TweenService:Create(opt, TweenInfo.new(0.15), {BackgroundColor3 = C.Surface2}):Play()
+                nameLbl.TextColor3 = C.Accent2
+                nameLbl.TextStrokeColor3 = C.Accent
+                nameLbl.TextStrokeTransparency = 0.4
             end
-            TweenService:Create(optStroke, TweenInfo.new(0.12), {Transparency = item == selectedValue and 0.15 or 0.45}):Play()
+            TweenService:Create(optStroke, TweenInfo.new(0.15), {Transparency = item == selectedValue and 0.15 or 0.45}):Play()
         end)
         opt.MouseLeave:Connect(function()
             if item ~= selectedValue then
-                TweenService:Create(opt, TweenInfo.new(0.12), {BackgroundColor3 = C.Surface3}):Play()
+                TweenService:Create(opt, TweenInfo.new(0.15), {BackgroundColor3 = C.Surface3}):Play()
+                nameLbl.TextColor3 = C.Text
+                nameLbl.TextStrokeTransparency = 1
             end
-            TweenService:Create(optStroke, TweenInfo.new(0.12), {Transparency = item == selectedValue and 0.15 or 1}):Play()
+            TweenService:Create(optStroke, TweenInfo.new(0.15), {Transparency = item == selectedValue and 0.15 or 1}):Play()
         end)
 
         opt.MouseButton1Click:Connect(function()
@@ -1252,7 +1360,7 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
             if onSelect then onSelect(item) end
         end)
     end
-
+    
     return container
 end
 
@@ -1418,7 +1526,15 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         local on = sharedTable[item] == true
         opt.chk.Text = on and "✓" or "○"
         opt.bg.BackgroundColor3 = on and C.Surface2 or C.Surface3
-        opt.txt.TextColor3 = C.Text
+
+        -- ⭐ JANGAN override TextColor3 — biarkan gradient shimmer yang urus
+        -- Cuma update stroke buat highlight selected
+        if on then
+            opt.txt.TextStrokeColor3 = C.Accent
+            opt.txt.TextStrokeTransparency = 0.4
+        else
+            opt.txt.TextStrokeTransparency = 1
+        end
     end
 
     local function closeList()
@@ -1486,7 +1602,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         end
     end)
 
-    for i, item in ipairs(items) do
+        for i, item in ipairs(items) do
         local opt = Instance.new("TextButton")
         opt.Size = UDim2.new(1, -8, 0, itemHeight)
         opt.Position = UDim2.fromOffset(4, 0)
@@ -1495,12 +1611,26 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         opt.AutoButtonColor = false
         opt.ZIndex = 2002
         opt.LayoutOrder = i
+        opt.ClipsDescendants = true
         opt.Parent = listFrame
         registerTheme(opt, "Surface3", "BackgroundColor3")
 
         local optCorner = Instance.new("UICorner")
         optCorner.CornerRadius = UDim.new(0, 5)
         optCorner.Parent = opt
+
+        -- ⭐ BACKGROUND GRADIENT
+        local optGradient = Instance.new("UIGradient")
+        optGradient.Rotation = 90
+        optGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, C.Surface3),
+            ColorSequenceKeypoint.new(0.5, C.Surface2),
+            ColorSequenceKeypoint.new(1, C.Surface3),
+        })
+        optGradient.Parent = opt
+
+        -- ⭐ BINTANG KELAP-KELIP
+        attachStarfield(opt, 5, C.Accent2)
 
         local chk = Instance.new("TextLabel")
         chk.Size = UDim2.fromOffset(24, itemHeight)
@@ -1522,15 +1652,55 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         txt.Font = Enum.Font.GothamBold
         txt.TextSize = CFG.FONT_LABEL
         txt.TextXAlignment = Enum.TextXAlignment.Left
+        txt.TextTruncate = Enum.TextTruncate.AtEnd
         txt.ZIndex = 2003
         txt.Parent = opt
 
+        -- ⭐ EFEK GRADIENT DI NAMA
+        local txtGradient = Instance.new("UIGradient")
+        txtGradient.Rotation = 0
+        txtGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, C.Text),
+            ColorSequenceKeypoint.new(0.5, C.Accent2),
+            ColorSequenceKeypoint.new(1, C.Text),
+        })
+        txtGradient.Parent = txt
+
+        -- ⭐ SHIMMER
+        task.spawn(function()
+            local offset = 0
+            while txt.Parent and opt.Parent do
+                offset = offset + 0.04
+                if offset > 1 then offset = 0 end
+                txtGradient.Offset = Vector2.new(offset, 0)
+                task.wait(0.05)
+            end
+        end)
+
         if sharedTable[item] then
             opt.BackgroundColor3 = C.Surface2
-            txt.TextColor3 = C.Text
+            txt.TextColor3 = C.Accent2
+            txt.TextStrokeColor3 = C.Accent
+            txt.TextStrokeTransparency = 0.4
         end
 
         optionButtons[item] = {bg = opt, chk = chk, txt = txt}
+
+        -- ⭐ HOVER EFFECT (glow + nama nyala) — TAMBAH INI
+        opt.MouseEnter:Connect(function()
+            if not sharedTable[item] then
+                TweenService:Create(opt, TweenInfo.new(0.15), {BackgroundColor3 = C.Surface2}):Play()
+                txt.TextStrokeColor3 = C.Accent
+                txt.TextStrokeTransparency = 0.4
+            end
+        end)
+
+        opt.MouseLeave:Connect(function()
+            if not sharedTable[item] then
+                TweenService:Create(opt, TweenInfo.new(0.15), {BackgroundColor3 = C.Surface3}):Play()
+                txt.TextStrokeTransparency = 1
+            end
+        end)
 
         opt.MouseButton1Click:Connect(function()
             local isNone = (item == "None")
