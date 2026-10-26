@@ -2800,18 +2800,18 @@ local function gfx_enableFPS()
             end
             
             -- ═══════════════════════════════════════
-            -- ✅ CEK BENTUK (bush/daun biasanya Sphere/Cylinder kecil)
-            -- ═══════════════════════════════════════
-            if obj.Shape == Enum.PartType.Ball and obj.Size.Magnitude < 30 then
-                -- Ball kecil = kemungkinan bush/daun
-                -- Cek warna hijau (daun)
-                local r = obj.Color.R
-                local g = obj.Color.G
-                local b = obj.Color.B
-                if g > r and g > b and g > 0.3 then
-                    return true  -- hijau = daun
-                end
-            end
+-- ✅ CEK BENTUK (bush/daun biasanya Sphere/Cylinder kecil)
+-- ═══════════════════════════════════════
+if obj:IsA("Part") and obj.Shape == Enum.PartType.Ball and obj.Size.Magnitude < 30 then
+    -- Ball kecil = kemungkinan bush/daun
+    -- Cek warna hijau (daun)
+    local r = obj.Color.R
+    local g = obj.Color.G
+    local b = obj.Color.B
+    if g > r and g > b and g > 0.3 then
+        return true  -- hijau = daun
+    end
+end
             
             -- Part transparan tinggi = dekorasi (bukan part penting)
             if obj.Transparency >= 0.5 then
