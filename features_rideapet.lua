@@ -3615,7 +3615,7 @@ local HalloweenCfg = {
     TP_WAIT = 0.08,
     LOOP_WAIT = 0.3,
     CLAIM_WAIT = 0.5,
-    RETURN_WAIT = 0.4,
+  RETURN_WAIT = 0.1,
 }
 
 local function getHalloweenBase()
@@ -3795,8 +3795,8 @@ local function halloweenReturnToBase()
     local dz = base.Position.Z - root.Position.Z
     local flatDist = math.sqrt(dx * dx + dz * dz)
 
-    if flatDist <= 400 then
-        -- ⭐ INSTANT TP — langsung ke base, no fly, no step, no delay
+       if flatDist <= 400 then
+        -- ⭐ INSTANT TP — langsung ke base, no fly, no step, NO WAIT
         local finalCF = base.CFrame + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
 
         -- Kalo naik pet → pet ikut ke-TP bareng
@@ -3818,11 +3818,16 @@ local function halloweenReturnToBase()
                 local targetPivot = newSeatCF * pivotToSeat:Inverse()
                 pcall(function() pet:PivotTo(targetPivot) end)
 
-                task.wait(HalloweenCfg.RETURN_WAIT)
-                return true
+                return true   -- ⬅️ HAPUS task.wait(0.4)
             end
         end
 
+        -- Gak naik pet → TP langsung, NO WAIT
+        root.CFrame = finalCF
+        root.Velocity = Vector3.zero
+        root.AssemblyLinearVelocity = Vector3.zero
+        return true   -- ⬅️ HAPUS task.wait(0.4)
+    end
         -- Gak naik pet → TP langsung, NO WAIT
         root.CFrame = finalCF
         root.Velocity = Vector3.zero
@@ -4298,9 +4303,9 @@ end
                 continue
             end
 
-                        HalloweenState.Status = "🏠 Returning to Halloween base..."
+                                                HalloweenState.Status = "🏠 Returning to Halloween base..."
 halloweenReturnToBase()
-task.wait(HalloweenCfg.RETURN_WAIT)
+-- ⬅️ HAPUS task.wait(HalloweenCfg.RETURN_WAIT)
 
 _G.VRILZ_HalloweenBusy = false   -- ⭐ RESET FLAG
         end
