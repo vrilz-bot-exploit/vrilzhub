@@ -3767,8 +3767,8 @@ local function buildEggExecutorGUI(screenGui)
     wStroke.Parent = win
 
   -- ═══ DI DALAM buildEggExecutorGUI — GANTI BAGIAN INI ═══
-local EGG_BG_URL = "https://raw.githubusercontent.com/vrilz-vd/anime/refs/heads/main/animeegg.jpe"
-local EGG_BG_CACHE = "vrilz_egg_bg.png"   -- ← FIX: png, bukan .jpe
+local EGG_BG_URL = "https://raw.githubusercontent.com/vrilz-vd/anime/refs/heads/main/images%20(5).jpe"
+local EGG_BG_CACHE = "vrilz_egg_bg_v5.png"
 
 local function loadEggBgImage()
     if not (writefile and isfile and getcustomasset) then
@@ -4716,8 +4716,8 @@ animeBg.Size = UDim2.fromScale(1, 1)
 animeBg.Position = UDim2.fromScale(0, 0)
 animeBg.BackgroundTransparency = 1
 -- ⭐⭐⭐ GITHUB IMAGE LOADER ⭐⭐⭐
-local GITHUB_ANIME_URL = "https://raw.githubusercontent.com/vrilz-vd/anime/refs/heads/main/images%20(2).jpe"
-local GITHUB_ANIME_CACHE = "vrilz_anime_bg.png"
+local GITHUB_ANIME_URL = "https://raw.githubusercontent.com/vrilz-vd/anime/refs/heads/main/images%20(4).jpe"
+local GITHUB_ANIME_CACHE = "vrilz_anime_bg_v4.png"
 
 local function loadGithubImage()
     -- Cek apakah executor support getcustomasset
