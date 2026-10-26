@@ -3788,12 +3788,13 @@ local function halloweenReturnToBase()
     local FLY_STEP = 75
     local FLY_WAIT = 0.08
 
-    -- ⭐ Hitung jarak HORIZONTAL (X/Z) — ≤ 400 studs = INSTANT TP
+    -- ⭐ Hitung jarak FULL 3D (X/Y/Z) — ≤ 400 studs = INSTANT TP
     local dx = base.Position.X - root.Position.X
+    local dy = base.Position.Y - root.Position.Y
     local dz = base.Position.Z - root.Position.Z
-    local flatDist = math.sqrt(dx * dx + dz * dz)
+    local fullDist = math.sqrt(dx * dx + dy * dy + dz * dz)
 
-    if flatDist <= 400 then
+    if fullDist <= 400 then
         -- ⭐ INSTANT TP — no fly, no step, NO WAIT
         local finalCF = base.CFrame + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
 
