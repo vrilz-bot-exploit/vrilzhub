@@ -10496,6 +10496,130 @@ end
 _G.VRILZ_ArqelUI = ArqelUI
 
 -- ============================================================
+-- ⭐ KEY/PREMIUM HELPERS — DIPISAH DARI UI.INIT (FIX COMPILE)
+-- ============================================================
+local function isRealPremiumKey(keyType)
+    if not keyType then return false end
+    local kt = tostring(keyType):upper()
+    return kt == "PREMIUM" or kt == "OWNER" or kt == "VIP"
+end
+
+local function isPremiumTimeNow()
+    if LocalPlayer.UserId == OWNER_USERID then
+        return true
+    end
+    local ok, result = pcall(function()
+        local wibTime = os.time() + 7 * 3600
+        local wibDate = os.date("!*t", wibTime)
+        if wibDate.wday ~= 7 then return false end
+        local totalMin = wibDate.hour * 60 + wibDate.min
+        return totalMin >= 1190 and totalMin <= 1439
+    end)
+    return ok and result
+end
+
+local function restoreSavedKeySync()
+    local savedKey = loadSavedKey()
+
+    if not savedKey then
+        Shared.KeyType = Shared.KeyType or "FREE"
+        Shared.KeyExpiresAt = Shared.KeyExpiresAt or 0
+        Shared.KeyValue = nil
+        Shared._RealKeyType = Shared.KeyType
+        Shared._RealKeyExpiresAt = Shared.KeyExpiresAt
+        print("[KEY] No saved key found.")
+        return
+    end
+
+    Shared.KeyValue = savedKey
+    local valid, message, data, isNetworkError = verifySavedKeyWithServer(savedKey)
+
+    if valid and data then
+        applyKeyInfo(data, savedKey)
+        print("[KEY] ✅ Restored saved key:", Shared.KeyType)
+        Shared._RealKeyType = Shared.KeyType
+        Shared._RealKeyExpiresAt = Shared.KeyExpiresAt or 0
+        return
+    end
+
+    if data and type(data) == "table" then
+        local expiresAt = tonumber(data.expires_at or data.expiry or 0) or 0
+        if expiresAt > 0 then
+            local nowMs = os.time() * 1000
+            if expiresAt <= nowMs then
+                clearSavedKey()
+                Shared.KeyType = "FREE"
+                Shared.KeyExpiresAt = 0
+                print("[KEY] ❌ Saved key EXPIRED (local check).")
+                Shared._RealKeyType = "FREE"
+                Shared._RealKeyExpiresAt = 0
+                return
+            end
+        end
+    end
+
+    if isNetworkError then
+        print("[KEY] ⚠️ Verify failed (network). Keeping saved key:", message)
+        Shared.KeyType = Shared.KeyType or "PREMIUM"
+        Shared.KeyExpiresAt = Shared.KeyExpiresAt or 0
+        Shared._RealKeyType = Shared.KeyType
+        Shared._RealKeyExpiresAt = Shared.KeyExpiresAt or 0
+        return
+    end
+
+    clearSavedKey()
+    Shared.KeyType = "FREE"
+    Shared.KeyExpiresAt = 0
+    print("[KEY] ❌ Saved key INVALID:", message)
+    Shared._RealKeyType = "FREE"
+    Shared._RealKeyExpiresAt = 0
+end
+
+-- ============================================================
+-- ⭐ PREMIUM AUTO-UNLOCK TRANSITION LOOP (dipisah)
+-- ============================================================
+local function startPremiumTransitionLoop()
+    task.spawn(function()
+        while true do
+            task.wait(30)
+            local nowPrem = isPremiumTimeNow()
+            if nowPrem == Shared._PremiumAutoUnlock then
+                continue
+            end
+            Shared._PremiumAutoUnlock = nowPrem
+
+            if nowPrem then
+                Shared.KeyType = "PREMIUM"
+                Shared.KeyExpiresAt = 0
+                if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
+                if _G.VRILZ_RebuildCustomTitle then pcall(_G.VRILZ_RebuildCustomTitle) end
+                if _G.VRILZ_RebuildReturnMode then pcall(_G.VRILZ_RebuildReturnMode) end
+                if Shared.Notify and not isRealPremiumKey(Shared._RealKeyType) then
+                    Shared.Notify("👑 PREMIUM AUTO-UNLOCK AKTIF!", "success")
+                end
+            else
+                if isRealPremiumKey(Shared._RealKeyType) then
+                    Shared.KeyType = Shared._RealKeyType
+                    Shared.KeyExpiresAt = Shared._RealKeyExpiresAt or 0
+                    if Shared.Notify then
+                        Shared.Notify("👑 Key premium tetap aktif — auto-unlock selesai", "info")
+                    end
+                else
+                    Shared.KeyType = "FREE"
+                    Shared.KeyExpiresAt = 0
+                    if Shared.Notify then
+                        Shared.Notify("🔒 Premium auto-unlock selesai — fitur premium ditutup", "warning")
+                    end
+                end
+                if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
+                if _G.VRILZ_RebuildCustomTitle then pcall(_G.VRILZ_RebuildCustomTitle) end
+                if _G.VRILZ_RebuildReturnMode then pcall(_G.VRILZ_RebuildReturnMode) end
+            end
+        end
+    end)
+end
+
+-- ============================================================
 -- UI.INIT
 -- ============================================================
 function UI.Init(sharedState)
@@ -10626,189 +10750,47 @@ function UI.Init(sharedState)
         end
     end)
 
-       -- ============================================================
-    -- ⭐ PREMIUM AUTO-UNLOCK — SABTU 19:50–23:59 WIB
     -- ============================================================
-    -- Aturan:
-    --  • Sabtu 19:50–23:59 WIB → bypass key window, buka semua fitur premium
-    --  • Di luar jam itu → restore key tersimpan (PREMIUM/FREE)
-    --  • User PREMIUM asli → selalu premium (gak pernah turun jadi FREE)
-    --  • User FREE → fitur premium tertutup di luar jam auto-unlock
-
-    local function isRealPremiumKey(keyType)
-        if not keyType then return false end
-        local kt = tostring(keyType):upper()
-        return kt == "PREMIUM" or kt == "OWNER" or kt == "VIP"
-    end
-
-        local function isPremiumTimeNow()
-        if LocalPlayer.UserId == OWNER_USERID then
-            return true
-        end
-
-        local ok, result = pcall(function()
-            local wibTime = os.time() + 7 * 3600
-            local wibDate = os.date("!*t", wibTime)
-            if wibDate.wday ~= 7 then return false end
-
-            local totalMin = wibDate.hour * 60 + wibDate.min
-            -- 19:50 = 1190, 23:59 = 1439
-            return totalMin >= 1190 and totalMin <= 1439
-        end)
-
-        return ok and result
-    end
-       -- Sinkron: restore saved key DULU, baru evaluasi premium.
-    local function restoreSavedKeySync()
-    local savedKey = loadSavedKey()
-
-    -- ═══ CASE 1: gak ada key tersimpan ═══
-    if not savedKey then
-        Shared.KeyType = Shared.KeyType or "FREE"
-        Shared.KeyExpiresAt = Shared.KeyExpiresAt or 0
-        Shared.KeyValue = nil
-        Shared._RealKeyType = Shared.KeyType
-        Shared._RealKeyExpiresAt = Shared.KeyExpiresAt
-        print("[KEY] No saved key found.")
-        return
-    end
-
-    -- ═══ CASE 2: ada key tersimpan ═══
-    Shared.KeyValue = savedKey
-    local valid, message, data, isNetworkError = verifySavedKeyWithServer(savedKey)
-
-    -- ⭐ Jika VALID → langsung set key info, JANGAN hapus file
-    if valid and data then
-        applyKeyInfo(data, savedKey)
-        print("[KEY] ✅ Restored saved key:", Shared.KeyType)
-        Shared._RealKeyType = Shared.KeyType
-        Shared._RealKeyExpiresAt = Shared.KeyExpiresAt or 0
-        return
-    end
-
-    -- ⭐ Cek expiry lokal dulu kalau server kasih data
-    if data and type(data) == "table" then
-        local expiresAt = tonumber(data.expires_at or data.expiry or 0) or 0
-        if expiresAt > 0 then
-            local nowMs = os.time() * 1000
-            if expiresAt <= nowMs then
-                -- Key BENERAN expired → clear
-                clearSavedKey()
-                Shared.KeyType = "FREE"
-                Shared.KeyExpiresAt = 0
-                print("[KEY] ❌ Saved key EXPIRED (local check).")
-                Shared._RealKeyType = "FREE"
-                Shared._RealKeyExpiresAt = 0
-                return
-            end
-        end
-    end
-
-    -- ⭐ NETWORK ERROR → JANGAN clear, anggap masih valid
-    if isNetworkError then
-        print("[KEY] ⚠️ Verify failed (network). Keeping saved key:", message)
-        -- Optimistic: anggap key masih valid dengan type default PREMIUM
-        Shared.KeyType = Shared.KeyType or "PREMIUM"
-        Shared.KeyExpiresAt = Shared.KeyExpiresAt or 0
-        Shared._RealKeyType = Shared.KeyType
-        Shared._RealKeyExpiresAt = Shared.KeyExpiresAt or 0
-        return
-    end
-
-    -- ⭐ INVALID KEY (bukan network) → clear
-    clearSavedKey()
-    Shared.KeyType = "FREE"
-    Shared.KeyExpiresAt = 0
-    print("[KEY] ❌ Saved key INVALID:", message)
-    Shared._RealKeyType = "FREE"
-    Shared._RealKeyExpiresAt = 0
-end
-
+    -- ⭐ STARTUP (RINGKAS — panggil helper di luar)
     -- ============================================================
-    -- ⭐ STARTUP
-    -- ============================================================
-   restoreSavedKeySync()                       -- 1. Restore key dulu (sinkron)
-local premiumNow = isPremiumTimeNow()       -- 2. Baru cek jam
-Shared._PremiumAutoUnlock = premiumNow
+    restoreSavedKeySync()
+    local premiumNow = isPremiumTimeNow()
+    Shared._PremiumAutoUnlock = premiumNow
 
-local hasRealPremium = isRealPremiumKey(Shared._RealKeyType)
-local hasAnySavedKey = loadSavedKey() ~= nil
+    local hasRealPremium = isRealPremiumKey(Shared._RealKeyType)
+    local savedKeyNow = loadSavedKey()
+    local hasValidSavedKey = savedKeyNow ~= nil
+        and (Shared.KeyType == "FREE"
+            or Shared.KeyType == "PREMIUM"
+            or Shared.KeyType == "VIP"
+            or Shared.KeyType == "OWNER")
 
--- ⭐ FIX: user yang punya key tersimpan (FREE/PREMIUM) & gak expired
--- harus langsung loading, gak perlu masukin key lagi
-local hasValidSavedKey = hasAnySavedKey and (Shared.KeyType == "FREE" or Shared.KeyType == "PREMIUM" or Shared.KeyType == "VIP" or Shared.KeyType == "OWNER")
+    if hasRealPremium or hasValidSavedKey then
+        Shared.KeyType = Shared._RealKeyType
+        Shared.KeyExpiresAt = Shared._RealKeyExpiresAt or 0
+        print("[KEY] ✅ Auto-login with saved key:", Shared.KeyType)
+        startLoading()
 
-if hasRealPremium or hasValidSavedKey then
-    -- ═══ User punya key valid ═══
-    Shared.KeyType = Shared._RealKeyType
-    Shared.KeyExpiresAt = Shared._RealKeyExpiresAt or 0
-    print("[KEY] ✅ Auto-login with saved key:", Shared.KeyType)
-    startLoading()
-
-elseif premiumNow then
-    -- ═══ User FREE + jam auto-unlock → bypass key, buka premium ═══
-    Shared.KeyType = "PREMIUM"
-    Shared.KeyExpiresAt = 0
-    task.spawn(function()
-        task.wait(1.5)
-        if Shared.Notify then
-            Shared.Notify("👑 PREMIUM AUTO-UNLOCK (Sabtu 19:50–23:59 WIB)", "success")
-        end
-    end)
-    startLoading()
-
-else
-    -- ═══ User FREE + bukan jam auto-unlock + gak ada key tersimpan → key window ═══
-    Shared.KeyType = "FREE"
-    Shared.KeyExpiresAt = 0
-    showKeyWindow()
-end
-
-               -- ⭐ LOOP TRANSISI (tiap 30 detik, tanpa network call)
-        -- ============================================================
+    elseif premiumNow then
+        Shared.KeyType = "PREMIUM"
+        Shared.KeyExpiresAt = 0
         task.spawn(function()
-            while true do
-                task.wait(30)
-                local nowPrem = isPremiumTimeNow()
-                if nowPrem == Shared._PremiumAutoUnlock then
-                    continue
-                end
-                Shared._PremiumAutoUnlock = nowPrem
-
-                if nowPrem then
-                    -- ═══ AUTO-UNLOCK ON ═══
-                    Shared.KeyType = "PREMIUM"
-                    Shared.KeyExpiresAt = 0
-                    if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
-                    -- ⭐ AUTO-REFRESH UI
-                    if _G.VRILZ_RebuildCustomTitle then pcall(_G.VRILZ_RebuildCustomTitle) end
-                    if _G.VRILZ_RebuildReturnMode then pcall(_G.VRILZ_RebuildReturnMode) end
-                    -- ⭐ Notif cuma buat user FREE, bukan premium asli
-                    if Shared.Notify and not isRealPremiumKey(Shared._RealKeyType) then
-                        Shared.Notify("👑 PREMIUM AUTO-UNLOCK AKTIF!", "success")
-                    end
-                else
-                    -- ═══ AUTO-UNLOCK OFF ═══
-                    if isRealPremiumKey(Shared._RealKeyType) then
-                        Shared.KeyType = Shared._RealKeyType
-                        Shared.KeyExpiresAt = Shared._RealKeyExpiresAt or 0
-                        if Shared.Notify then
-                            Shared.Notify("👑 Key premium tetap aktif — auto-unlock selesai", "info")
-                        end
-                    else
-                        Shared.KeyType = "FREE"
-                        Shared.KeyExpiresAt = 0
-                        if Shared.Notify then
-                            Shared.Notify("🔒 Premium auto-unlock selesai — fitur premium ditutup", "warning")
-                        end
-                    end
-                    if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
-                    -- ⭐ AUTO-REFRESH UI
-                    if _G.VRILZ_RebuildCustomTitle then pcall(_G.VRILZ_RebuildCustomTitle) end
-                    if _G.VRILZ_RebuildReturnMode then pcall(_G.VRILZ_RebuildReturnMode) end
-                end
+            task.wait(1.5)
+            if Shared.Notify then
+                Shared.Notify("👑 PREMIUM AUTO-UNLOCK (Sabtu 19:50–23:59 WIB)", "success")
             end
         end)
+        startLoading()
+
+    else
+        Shared.KeyType = "FREE"
+        Shared.KeyExpiresAt = 0
+        showKeyWindow()
+    end
+
+    task.spawn(function()
+        startPremiumTransitionLoop()
+    end)
 end
 
 return UI
