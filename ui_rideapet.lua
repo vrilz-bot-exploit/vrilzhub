@@ -3816,32 +3816,38 @@ end
 
 local eggBgAsset = loadEggBgImage()
 
-local eggBg = Instance.new("ImageLabel")
-eggBg.Name = "EggExecutorBackground"
-eggBg.Size = UDim2.fromScale(1, 1)
-eggBg.Position = UDim2.fromScale(0, 0)
-eggBg.BackgroundTransparency = 1
-eggBg.ScaleType = Enum.ScaleType.Crop
-eggBg.ZIndex = 0
-eggBg.Parent = win
-
-if eggBgAsset then
-    eggBg.Image = eggBgAsset
-else
-    -- ⭐ FALLBACK: gradient cosmic biar gak polos
-    eggBg.Image = ""
+    -- ═══ BACKGROUND EGG EXECUTOR (FULL COVER) ═══
+    local eggBg = Instance.new("ImageLabel")
+    eggBg.Name = "EggExecutorBackground"
+    eggBg.Size = UDim2.fromScale(1, 1)
+    eggBg.Position = UDim2.fromScale(0, 0)
     eggBg.BackgroundColor3 = Color3.fromRGB(12, 12, 25)
     eggBg.BackgroundTransparency = 0
+    eggBg.BorderSizePixel = 0
+    eggBg.ScaleType = Enum.ScaleType.Crop -- ⭐ INI KUNCINYA BIAR FULL NUTUPIN
+    eggBg.ZIndex = 0
+    eggBg.Parent = win
 
-    local fallbackGrad = Instance.new("UIGradient")
-    fallbackGrad.Rotation = 135
-    fallbackGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 10, 40)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(5, 8, 20)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 5, 25)),
-    })
-    fallbackGrad.Parent = eggBg
-end
+    -- ⭐ Kasih UICorner di gambar biar sudutnya rapi ngikutin window
+    local eggBgCorner = Instance.new("UICorner")
+    eggBgCorner.CornerRadius = UDim.new(0, 16)
+    eggBgCorner.Parent = eggBg
+
+    if eggBgAsset then
+        eggBg.Image = eggBgAsset
+        -- Gambar nutupin seluruh area
+    else
+        -- Fallback kalau gambar gagal load (biar gak item polos)
+        eggBg.Image = ""
+        local fallbackGrad = Instance.new("UIGradient")
+        fallbackGrad.Rotation = 135
+        fallbackGrad.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 10, 40)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(5, 8, 20)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 5, 25)),
+        })
+        fallbackGrad.Parent = eggBg
+    end
 
     -- ═══ STAR FIELD (bintang 3D berputar) ═══
 local starLayer = Instance.new("Frame")
