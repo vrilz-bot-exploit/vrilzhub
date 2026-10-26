@@ -3795,7 +3795,7 @@ local function halloweenReturnToBase()
     local dz = base.Position.Z - root.Position.Z
     local flatDist = math.sqrt(dx * dx + dz * dz)
 
-    if flatDist <= 350 then
+    if flatDist <= 400 then
         -- ⭐ INSTANT TP — langsung ke base, no fly, no step, no delay
         local finalCF = base.CFrame + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
 
