@@ -928,7 +928,7 @@ local function instantReturnToPlot()
 
     -- ⭐ STEP 1: Delay 6 detik total sejak egg di tangan (KHUSUS INSTANT)
     local delayStart = os.clock()
-    local DELAY_TOTAL = 6.0                          -- ⬅️ 4.0 → 6.0
+    local DELAY_TOTAL = 8.0                          -- ⬅️ 4.0 → 6.0
     local missStart = nil
     while os.clock() - delayStart < DELAY_TOTAL do
         if isHoldingEggLocal() then
@@ -1027,10 +1027,10 @@ local function returnToMyPlot()
         holding = true
     end
 
-    -- ⭐ DELAY 4 DETIK — toleransi flicker 1.5s (egg sering flicker di server)
+    -- ⭐ DELAY 6 DETIK — toleransi flicker 1.5s (egg sering flicker di server)
     local delayStart = os.clock()
     local missStart = nil
-    while os.clock() - delayStart < 4.0 do
+    while os.clock() - delayStart < 6.0 do
         if isHoldingEggLocal() then
             missStart = nil
         else
@@ -2949,9 +2949,9 @@ end
 -- ⭐ Notif dinamis: Instant → "Wait 6 seconds!", Step → "Wait 4 seconds!"
 local function getWaitNotifText()
     if (Shared.ReturnMode or "Step") == "Instant" then
-        return "🔥 Wait 6 seconds!"
+        return "🔥 Wait 8 seconds!"
     end
-    return "🔥 Wait 4 seconds!"
+    return "🔥 Wait 6 seconds!"
 end
 
 local function tpToSafe(pos)
