@@ -4956,7 +4956,87 @@ end)
         end
     end)
 
-    _G.VRILZ_EggExecutorRecordSteal = recordSteal
+        _G.VRILZ_EggExecutorRecordSteal = recordSteal
+
+    -- ============================================================
+    -- ⭐ AUTO-HIDE PANEL — FIX TAB EGG & PET
+    -- Hide pas GUI game kebuka, show lagi pas ditutup
+    -- ============================================================
+    local function isAnyMenuOpenLocal()
+        local PG = LocalPlayer:FindFirstChild("PlayerGui")
+        if not PG then return false end
+
+        -- ── 1. Cek ScreenGui "Main" (GUI utama game Ride a Pet) ──
+        local mainGui = PG:FindFirstChild("Main")
+        if mainGui then
+            for _, gui in ipairs(mainGui:GetChildren()) do
+                if gui:IsA("Frame") or gui:IsA("ImageLabel") then
+                    local name = gui.Name:lower()
+                    if name:find("shop") or name:find("egg") or name:find("pet")
+                       or name:find("index") or name:find("rebirth") or name:find("fusion")
+                       or name:find("store") or name:find("settings") or name:find("sell")
+                       or name:find("trade") or name:find("inventory")
+                       or name:find("edit") or name:find("craft") or name:find("code")
+                       or name:find("reward") or name:find("season") then
+                        if gui.Visible and gui.AbsoluteSize.X > 150 and gui.AbsoluteSize.Y > 150 then
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+
+        -- ── 2. Cek semua ScreenGui lain di PlayerGui ──
+        for _, sg in ipairs(PG:GetChildren()) do
+            if sg:IsA("ScreenGui")
+                and sg.Name ~= "VRILZ_EggExecutor_New"
+                and sg.Name ~= "VRILZHUB_RideAPet"
+                and sg.Name ~= "VRILZ_LiveChat"
+                and sg.Name ~= "VH_KeySystem"
+                and sg.Enabled then
+                local sgLower = sg.Name:lower()
+                if sgLower:find("egg") or sgLower:find("pet") or sgLower:find("shop")
+                   or sgLower:find("index") or sgLower:find("store") or sgLower:find("sell") then
+                    for _, c in ipairs(sg:GetDescendants()) do
+                        if (c:IsA("Frame") or c:IsA("ImageLabel")) and c.Visible then
+                            if c.AbsoluteSize.X > 200 and c.AbsoluteSize.Y > 200
+                                and c.AbsolutePosition.X >= 0 and c.AbsolutePosition.Y >= 0 then
+                                return true
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        return false
+    end
+
+    -- ⭐ Watcher loop — anti-flicker (cuma ubah kalau state berubah)
+    task.spawn(function()
+        local lastState = false
+        while eggScreen.Parent do
+            task.wait(0.15)
+            local success, isOpen = pcall(isAnyMenuOpenLocal)
+            if not success then isOpen = false end
+
+            if isOpen ~= lastState then
+                lastState = isOpen
+                if isOpen then
+                    -- ── GUI GAME KEBUKA → Hide semua ──
+                    if EggState.WindowVisible then
+                        EggState.WindowVisible = false
+                        win.Visible = false
+                        win.Position = UDim2.new(WIN_X, 0, WIN_Y, 150)
+                    end
+                    mini.Visible = false
+                else
+                    -- ── GUI GAME DITUTUP → Show mini lagi ──
+                    mini.Visible = true
+                end
+            end
+        end
+    end)
 end
 
 -- ============================================================
