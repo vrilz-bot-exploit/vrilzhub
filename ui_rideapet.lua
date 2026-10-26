@@ -4488,15 +4488,17 @@ end)
     winSub.TextColor3 = COLOR_TEXT_DIM; winSub.Font = Enum.Font.GothamBold; winSub.TextSize = 10
     winSub.TextXAlignment = Enum.TextXAlignment.Left; winSub.ZIndex = 12; winSub.Parent = winHeader
 
+       -- ⛔ Tombol close (✕) dihapus — window ditutup via mini panel
+    -- (winClose sengaja tetap dibuat tapi invisible biar connect di bawah gak error)
     local winClose = Instance.new("TextButton")
-    winClose.Size = UDim2.fromOffset(32, 32); winClose.Position = UDim2.new(1, -48, 0.5, -16)
-    winClose.BackgroundColor3 = Color3.fromRGB(180, 50, 50); winClose.BackgroundTransparency = 0.3
-    winClose.Text = "✕"; winClose.TextColor3 = Color3.new(1, 1, 1); winClose.Font = Enum.Font.GothamBold
-    winClose.TextSize = 18; winClose.BorderSizePixel = 0; winClose.ZIndex = 12; winClose.Parent = winHeader
-    local wcCorner = Instance.new("UICorner"); wcCorner.CornerRadius = UDim.new(1, 0); wcCorner.Parent = winClose
-    
-    winClose.MouseEnter:Connect(function() TweenService:Create(winClose, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 80, 80), BackgroundTransparency = 0}):Play() end)
-    winClose.MouseLeave:Connect(function() TweenService:Create(winClose, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(180, 50, 50), BackgroundTransparency = 0.3}):Play() end)
+    winClose.Size = UDim2.fromOffset(32, 32)
+    winClose.Position = UDim2.new(1, -48, 0.5, -16)
+    winClose.BackgroundTransparency = 1
+    winClose.Text = ""
+    winClose.BorderSizePixel = 0
+    winClose.Visible = false
+    winClose.ZIndex = 12
+    winClose.Parent = winHeader
 
     -- ═══ TAB BAR ═══
     local tabBar = Instance.new("Frame")
@@ -4827,13 +4829,6 @@ end)
         if key == "eggs" then updateEggList() end
     end
 
-    -- ═══ TAB SWITCH & ANIMATION ═══
-    local function switchTab(key)
-        EggState.ActiveTab = key
-        -- ... (kode existing)
-    end
-
-    for key, data in pairs(tabButtons) do
         data.btn.MouseButton1Click:Connect(function()
             -- ⭐ PRESS EFFECT
             TweenService:Create(data.btn, TweenInfo.new(0.08, Enum.EasingStyle.Quad), {
@@ -4975,7 +4970,6 @@ end)
         task.delay(0.3, function() if not EggState.WindowVisible then win.Visible = false end end)
     end
 
-    winClose.MouseButton1Click:Connect(closeWindow)
     mini.MouseButton1Click:Connect(function() if EggState.WindowVisible then closeWindow() else openWindow() end end)
 
     local dragging = false
