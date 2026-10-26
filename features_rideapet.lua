@@ -3793,11 +3793,15 @@ local function halloweenReturnToBase()
     -- ≤ 100 studs → INSTANT TP ke base Halloween
     -- > 100 studs → jalur normal (naik 40 → step 75)
     -- ═══════════════════════════════════════════════════════════
-    local baseTarget = base.Position + Vector3.new(0, FLY_HEIGHT, 0)
-    local flatDist = (Vector3.new(baseTarget.X, 0, baseTarget.Z)
-                    - Vector3.new(root.Position.X, 0, root.Position.Z)).Magnitude
+        -- ⭐ Hitung jarak HORIZONTAL (X/Z doang) dari posisi sekarang ke base
+    local dx = base.Position.X - root.Position.X
+    local dz = base.Position.Z - root.Position.Z
+    local flatDist = math.sqrt(dx * dx + dz * dz)
+
+    print(string.format("[HALLOWEEN RETURN] flatDist = %.1f studs (threshold 100)", flatDist))
 
     if flatDist <= 100 then
+        print("[HALLOWEEN RETURN] ✅ INSTANT TP ke base")
         local finalCF = base.CFrame + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
 
         -- Kalo naik pet → pet ikut ke-TP
@@ -4270,11 +4274,22 @@ end
                     task.wait(0.5)
                 end
 
-                if ok then
+                                if ok then
                     HalloweenState.Claimed = HalloweenState.Claimed + 1
                     collectedThisRound = collectedThisRound + 1
                     if highestRarity >= 3 then
                         HalloweenState.RareClaimed = HalloweenState.RareClaimed + 1
+                    end
+
+                    -- ⭐ FIX: snap ke posisi candy terakhir (biar return cek jarak dari titik ini)
+                    if candy and candy.Parent then
+                        local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                        if r then
+                            r.CFrame = CFrame.new(candy.Position + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0))
+                            r.Velocity = Vector3.zero
+                            r.AssemblyLinearVelocity = Vector3.zero
+                            task.wait(0.1)
+                        end
                     end
 
                     if isCarryingCandy() then break end
