@@ -2709,8 +2709,7 @@ local function gfx_cleanup()
     GFX.Created = {}
 end
 
--- ===== FPS BOOST =====
--- ===== FPS BOOST (v2 — lebih agresif) =====
+-- ===== FPS BOOST (v3 — KILL ALL TREES + LEAVES) =====
 local function gfx_enableFPS()
     if GFX.FPSEnabled then return end
     GFX.FPSEnabled = true
@@ -2721,17 +2720,36 @@ local function gfx_enableFPS()
     task.spawn(function()
         local hidden = {}
         
-        -- ⭐ KEYWORD FILTER (diperluas)
+        -- ⭐ KEYWORD FILTER — ekspansi besar buat pohon & daun
         local decoKeywords = {
-            "tree", "palm", "oak", "birch", "pine", "leaf", "leaves", "branch",
+            -- Pohon
+            "tree", "palm", "oak", "birch", "pine", "willow", "maple", "cherry",
+            "tree_", "trees", "pinetree", "palmtree", "bigtree", "smalltree",
+            
+            -- Daun & ranting
+            "leaf", "leaves", "foliage", "canopy", "branch", "branches",
+            "twig", "vine", "ivy", "moss", "fern",
+            
+            -- Batang
+            "trunk", "wood", "log", "stump", "bark",
+            
+            -- Semak & tumbuhan
             "bush", "shrub", "plant", "grass", "flower", "mushroom", "fungus",
+            "cactus", "succulent", "hedge",
+            
+            -- Alam & dekorasi
             "rock", "stone", "boulder", "pebble", "crystal",
-            "cloud", "fog", "mist", "wind",
-            "fence", "wall", "border", "gate", "sign", "post", "lamp", "light",
+            "cloud", "fog", "mist", "wind", "particle",
+            
+            -- Pagar & struktur ringan
+            "fence", "gate", "sign", "post", "lamp", "light", "torch",
+            
+            -- Dekorasi umum
             "deco", "decoration", "prop", "scenery", "scenery_",
+            "vegetation", "foliage", "natural", "nature", "environment",
         }
         
-        -- ⭐ CEK 1 PART — apa dia dekorasi?
+        -- ⭐ CEK 1 PART — apa dia pohon/daun/dekorasi?
         local function isDecoPart(obj)
             if not obj:IsA("BasePart") then return false end
             
@@ -2741,52 +2759,107 @@ local function gfx_enableFPS()
                 parentName = string.lower(obj.Parent.Name)
             end
             
-            -- JANGAN sentuh part penting
+            -- ═══════════════════════════════════════
+            -- ⚠️ SAFETY: JANGAN SENTUH PART PENTING
+            -- ═══════════════════════════════════════
             if obj:FindFirstChildWhichIsA("Humanoid") then return false end
             if obj:FindFirstChildWhichIsA("ProximityPrompt") then return false end
             if obj:FindFirstChildWhichIsA("ClickDetector") then return false end
             
-            -- Skip egg / nest / plot / char
+            -- Skip egg / nest / plot / char / pet / spawn
             if name:find("egg") or name:find("nest") then return false end
-            if parentName:find("plot") or parentName:find("char") or parentName:find("pet") then return false end
+            if parentName:find("plot") or parentName:find("char") 
+                or parentName:find("pet") or parentName:find("player")
+                or parentName:find("spawn") or parentName:find("egg")
+                or parentName:find("nest") then return false end
             
-            -- Cek keyword di nama part ATAU parent
+            -- Skip part dari karakter (pakai HumanoidRootPart parent check)
+            local ancestor = obj.Parent
+            for i = 1, 3 do
+                if not ancestor then break end
+                if ancestor:FindFirstChildWhichIsA("Humanoid") then return false end
+                ancestor = ancestor.Parent
+            end
+            
+            -- ═══════════════════════════════════════
+            -- ✅ CEK KEYWORD DI NAMA PART ATAU PARENT
+            -- ═══════════════════════════════════════
             for _, kw in ipairs(decoKeywords) do
                 if name:find(kw) or parentName:find(kw) then
                     return true
                 end
             end
             
-            -- Part transparan tinggi = dekorasi
+            -- ═══════════════════════════════════════
+            -- ✅ CEK MATERIAL (daun biasanya Grass/LeafyGrass/Fabric)
+            -- ═══════════════════════════════════════
+            if obj.Material == Enum.Material.Grass 
+                or obj.Material == Enum.Material.LeafyGrass 
+                or obj.Material == Enum.Material.Fabric then
+                return true
+            end
+            
+            -- ═══════════════════════════════════════
+            -- ✅ CEK BENTUK (bush/daun biasanya Sphere/Cylinder kecil)
+            -- ═══════════════════════════════════════
+            if obj.Shape == Enum.PartType.Ball and obj.Size.Magnitude < 30 then
+                -- Ball kecil = kemungkinan bush/daun
+                -- Cek warna hijau (daun)
+                local r = obj.Color.R
+                local g = obj.Color.G
+                local b = obj.Color.B
+                if g > r and g > b and g > 0.3 then
+                    return true  -- hijau = daun
+                end
+            end
+            
+            -- Part transparan tinggi = dekorasi (bukan part penting)
             if obj.Transparency >= 0.5 then
-                -- KECUALI yang punya script/prompt/detector
                 return true
             end
             
             return false
         end
         
-        -- ⭐ SCAN WORKSPACE
+        -- ═══════════════════════════════════════
+        -- ⭐ SCAN SEMUA WORKSPACE
+        -- ═══════════════════════════════════════
         for _, obj in ipairs(Workspace:GetDescendants()) do
             if obj:IsA("BasePart") and isDecoPart(obj) then
-                -- Skip kalau terlalu besar (bisa jadi building)
-                if obj.Size.Magnitude < 200 then
-                    obj.LocalTransparencyModifier = 1     -- invisible
-                    obj.Transparency = 1                  -- invisible juga (server sync)
-                    obj.CanCollide = false                -- tembus
-                    obj.CanTouch = false                  -- gak bisa di-touch
-                    obj.CanQuery = false                  -- gak kena raycast
-                    obj.CastShadow = false                -- ⭐ gak ada shadow (FPS gain)
+                -- Skip kalau terlalu besar (kemungkinan baseplate/building)
+                if obj.Size.Magnitude < 300 then
+                    pcall(function()
+                        obj.LocalTransparencyModifier = 1     -- invisible (local)
+                        obj.Transparency = 1                  -- invisible (sync)
+                        obj.CanCollide = false                -- tembus
+                        obj.CanTouch = false                  -- gak bisa di-touch
+                        obj.CanQuery = false                  -- gak kena raycast
+                        obj.CastShadow = false                -- ⭐ no shadow (FPS gain)
+                    end)
+                    table.insert(hidden, obj)
+                end
+            end
+            -- ⭐ Handle MeshPart juga (banyak pohon pakai MeshPart)
+            elseif obj:IsA("MeshPart") and isDecoPart(obj) then
+                if obj.Size.Magnitude < 300 then
+                    pcall(function()
+                        obj.LocalTransparencyModifier = 1
+                        obj.Transparency = 1
+                        obj.CanCollide = false
+                        obj.CanTouch = false
+                        obj.CanQuery = false
+                        obj.CastShadow = false
+                    end)
                     table.insert(hidden, obj)
                 end
             end
         end
         
         GFX.HiddenParts = hidden
-        notify("FPS Boost: " .. #hidden .. " Parts hidden", "info")
+        notify("FPS Boost: " .. #hidden .. " parts hidden 🌳", "info")
     end)
 
-    notify("FPS Boost enabled", "success")
+    notify("FPS Boost enabled ✅", "success")
 end
 
 local function gfx_disableFPS()
