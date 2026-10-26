@@ -3590,29 +3590,99 @@ end
 -- EGG EXECUTOR GUI — FUNCTION TERPISAH
 -- Dipanggil dari buildMainWindow biar gak exceed local register
 -- ============================================================
+-- ============================================================
+-- 🎨 EGG EXECUTOR — 3D COSMIC EDITION (STATS + AVATAR PREVIEW)
+-- Ganti total buildEggExecutorGUI lama
+-- ============================================================
 local function buildEggExecutorGUI(screenGui)
     local EGG_X, EGG_Y = 1348, 256
     local MINI_W, MINI_H = 72, 72
     local MINI_X, MINI_Y = EGG_X, EGG_Y - MINI_H - 6
-    local WIN_W, WIN_H = 540, 460
+    local WIN_W, WIN_H = 580, 520
     local WIN_X, WIN_Y = 0.5, 0.5
 
-    local COLOR_BG_MAIN    = Color3.fromRGB(10, 10, 14)
-    local COLOR_BG_CARD    = Color3.fromRGB(22, 22, 30)
-    local COLOR_GLASS      = Color3.fromRGB(35, 35, 45)
+    local COLOR_BG_MAIN    = Color3.fromRGB(8, 8, 16)
+    local COLOR_BG_CARD    = Color3.fromRGB(18, 18, 30)
+    local COLOR_GLASS      = Color3.fromRGB(30, 30, 45)
     local COLOR_CYAN       = Color3.fromRGB(0, 240, 255)
     local COLOR_CYAN_DIM   = Color3.fromRGB(0, 120, 140)
     local COLOR_TEXT       = Color3.fromRGB(255, 255, 255)
     local COLOR_TEXT_DIM   = Color3.fromRGB(160, 160, 180)
     local COLOR_RED        = Color3.fromRGB(255, 70, 70)
     local COLOR_GREEN      = Color3.fromRGB(0, 255, 150)
+    local COLOR_GOLD       = Color3.fromRGB(255, 215, 0)
 
-    local EggState = { WindowVisible = false }
+    local EggState = { WindowVisible = false, ActiveTab = "stats" }
     local EggCache = {}
     local TrackedCards = {}
 
+    -- ═══ STATS TRACKER ═══
+    local StealStats = {
+        TotalSteals = 0,
+        SessionStart = os.time(),
+        StolenEggs = {},
+    }
+
+    local function recordSteal(eggName, rarity, weight)
+        StealStats.TotalSteals = StealStats.TotalSteals + 1
+        table.insert(StealStats.StolenEggs, {
+            name = eggName or "?",
+            rarity = rarity or "?",
+            weight = weight or "?",
+            time = os.time(),
+        })
+        if #StealStats.StolenEggs > 50 then
+            table.remove(StealStats.StolenEggs, 1)
+        end
+    end
+    _G.VRILZ_EggExecutorRecordSteal = recordSteal
+
+    -- Auto detect dari DisplayEgg
+    task.spawn(function()
+        local lastHolding = nil
+        while task.wait(0.5) do
+            local holding, eggName = pcall(function()
+                local char = LocalPlayer.Character
+                if not char then return false, nil end
+                local wooden = char:FindFirstChild("Wooden")
+                if not wooden then return false, nil end
+                local displayEgg = wooden:FindFirstChild("DisplayEgg")
+                if not displayEgg then return false, nil end
+                for _, c in ipairs(displayEgg:GetChildren()) do
+                    if c:IsA("MeshPart") and not c.Name:lower():find("circle") then
+                        return true, c.Name
+                    end
+                end
+                return false, nil
+            end)
+            if holding and eggName and eggName ~= lastHolding then
+                lastHolding = eggName
+                local clean = eggName:gsub("_Model$", ""):gsub("_", " ")
+                clean = clean:gsub("%s*Egg%s*$", "")
+                clean = clean:gsub("^%l", string.upper) .. " Egg"
+                local already = false
+                for i = #StealStats.StolenEggs, math.max(1, #StealStats.StolenEggs - 3), -1 do
+                    if StealStats.StolenEggs[i].name == clean and (os.time() - StealStats.StolenEggs[i].time) < 5 then
+                        already = true
+                        break
+                    end
+                end
+                if not already then recordSteal(clean, "?", "?") end
+            elseif not holding then
+                lastHolding = nil
+            end
+        end
+    end)
+
+    local function formatTime(s)
+        local h = math.floor(s / 3600)
+        local m = math.floor((s % 3600) / 60)
+        local sec = s % 60
+        if h > 0 then return string.format("%02d:%02d:%02d", h, m, sec) end
+        return string.format("%02d:%02d", m, sec)
+    end
+
     local function getRoot() local c = LocalPlayer.Character; return c and c:FindFirstChild("HumanoidRootPart") end
-    local function getEggPart(egg) return egg and (egg:FindFirstChild("Handle") or egg:FindFirstChild("EggBase") or egg:FindFirstChildWhichIsA("BasePart", true)) end
 
     local old = screenGui:FindFirstChild("VRILZ_EggExecutor_New")
     if old then old:Destroy() end
@@ -3624,11 +3694,12 @@ local function buildEggExecutorGUI(screenGui)
     eggScreen.DisplayOrder = 600
     eggScreen.Parent = screenGui
 
+    -- ═══ MINI PANEL ═══
     local mini = Instance.new("TextButton")
     mini.Name = "MiniPanel"
     mini.Position = UDim2.fromOffset(MINI_X, MINI_Y)
     mini.Size = UDim2.fromOffset(MINI_W, MINI_H)
-    mini.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+    mini.BackgroundColor3 = Color3.fromRGB(0, 180, 200)
     mini.Text = ""
     mini.BorderSizePixel = 0
     mini.AutoButtonColor = false
@@ -3643,23 +3714,23 @@ local function buildEggExecutorGUI(screenGui)
     local mGrad = Instance.new("UIGradient")
     mGrad.Rotation = 90
     mGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 90, 90)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(170, 30, 30)),
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 240, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 100, 140)),
     })
     mGrad.Parent = mini
 
     local mStroke = Instance.new("UIStroke")
-    mStroke.Color = Color3.fromRGB(130, 20, 20)
+    mStroke.Color = Color3.fromRGB(0, 80, 100)
     mStroke.Thickness = 3
     mStroke.Parent = mini
 
+    -- Chart icon
     local chartFrame = Instance.new("Frame")
     chartFrame.Size = UDim2.fromOffset(40, 36)
     chartFrame.Position = UDim2.new(0.5, -20, 0.5, -18)
     chartFrame.BackgroundTransparency = 1
     chartFrame.Parent = mini
-
-    local bars = { {w = 8, h = 16}, {w = 8, h = 26}, {w = 8, h = 36} }
+    local bars = { {w=8,h=16}, {w=8,h=26}, {w=8,h=36} }
     for i, b in ipairs(bars) do
         local bar = Instance.new("Frame")
         bar.Size = UDim2.fromOffset(b.w, b.h)
@@ -3672,6 +3743,7 @@ local function buildEggExecutorGUI(screenGui)
         bc.Parent = bar
     end
 
+    -- ═══ BIG WINDOW ═══
     local win = Instance.new("Frame")
     win.Name = "BigWindow"
     win.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -3681,6 +3753,7 @@ local function buildEggExecutorGUI(screenGui)
     win.BorderSizePixel = 0
     win.Visible = false
     win.Active = true
+    win.ClipsDescendants = true
     win.Parent = eggScreen
 
     local wCorner = Instance.new("UICorner")
@@ -3693,24 +3766,146 @@ local function buildEggExecutorGUI(screenGui)
     wStroke.Transparency = 0.3
     wStroke.Parent = win
 
-    local winGlow = Instance.new("Frame")
-    winGlow.Size = UDim2.new(1, 12, 1, 12)
-    winGlow.Position = UDim2.fromOffset(-6, -6)
-    winGlow.BackgroundColor3 = COLOR_CYAN
-    winGlow.BackgroundTransparency = 0.9
-    winGlow.BorderSizePixel = 0
-    winGlow.ZIndex = 0
-    winGlow.Parent = win
+    -- ═══ STAR FIELD (bintang 3D berputar) ═══
+    local starLayer = Instance.new("Frame")
+    starLayer.Name = "StarField"
+    starLayer.Size = UDim2.fromScale(1, 1)
+    starLayer.BackgroundTransparency = 1
+    starLayer.ClipsDescendants = true
+    starLayer.ZIndex = 0
+    starLayer.Parent = win
 
-    local wgCorner = Instance.new("UICorner")
-    wgCorner.CornerRadius = UDim.new(0, 20)
-    wgCorner.Parent = winGlow
+    local stars = {}
+    for i = 1, 50 do
+        local sz = math.random(1, 3)
+        local star = Instance.new("Frame")
+        star.Size = UDim2.fromOffset(sz, sz)
+        star.Position = UDim2.fromScale(math.random(), math.random())
+        star.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        star.BackgroundTransparency = math.random(30, 80) / 100
+        star.BorderSizePixel = 0
+        star.ZIndex = 1
+        star.Parent = starLayer
+        local sc = Instance.new("UICorner")
+        sc.CornerRadius = UDim.new(1, 0)
+        sc.Parent = star
+        table.insert(stars, {
+            frame = star,
+            baseX = star.Position.X.Scale,
+            baseY = star.Position.Y.Scale,
+            speed = math.random(1, 10) / 1500,
+            offset = math.random() * math.pi * 2,
+            baseTrans = star.BackgroundTransparency,
+        })
+    end
 
+    task.spawn(function()
+        while win.Parent do
+            task.wait(0.03)
+            if not win.Visible then continue end
+            local t = tick()
+            for _, s in ipairs(stars) do
+                if not s.frame or not s.frame.Parent then continue end
+                local angle = t * s.speed + s.offset
+                local radius = 0.015
+                local nx = s.baseX + math.cos(angle) * radius
+                local ny = s.baseY + math.sin(angle) * radius
+                if nx < 0 then nx = 1 end
+                if nx > 1 then nx = 0 end
+                if ny < 0 then ny = 1 end
+                if ny > 1 then ny = 0 end
+                s.frame.Position = UDim2.fromScale(nx, ny)
+                s.frame.BackgroundTransparency = s.baseTrans - math.sin(t * 2 + s.offset) * 0.2
+            end
+        end
+    end)
+
+    -- ═══ UFO MUTER (3 buah orbit) ═══
+    local ufos = {}
+    for i = 1, 3 do
+        local ufo = Instance.new("Frame")
+        ufo.Name = "UFO_" .. i
+        ufo.Size = UDim2.fromOffset(32, 32)
+        ufo.BackgroundTransparency = 1
+        ufo.ZIndex = 2
+        ufo.Parent = win
+
+        local body = Instance.new("Frame")
+        body.Name = "Body"
+        body.Size = UDim2.fromScale(1, 0.5)
+        body.Position = UDim2.fromScale(0, 0.25)
+        body.BackgroundColor3 = Color3.fromRGB(0, 255, 200)
+        body.BackgroundTransparency = 0.15
+        body.BorderSizePixel = 0
+        body.ZIndex = 3
+        local bc = Instance.new("UICorner")
+        bc.CornerRadius = UDim.new(0.5, 0)
+        bc.Parent = body
+        body.Parent = ufo
+
+        local dome = Instance.new("Frame")
+        dome.Size = UDim2.fromScale(0.5, 0.5)
+        dome.Position = UDim2.fromScale(0.25, 0)
+        dome.BackgroundColor3 = Color3.fromRGB(200, 255, 255)
+        dome.BackgroundTransparency = 0.3
+        dome.BorderSizePixel = 0
+        dome.ZIndex = 4
+        local dc = Instance.new("UICorner")
+        dc.CornerRadius = UDim.new(0.5, 0)
+        dc.Parent = dome
+        dome.Parent = ufo
+
+        for j = 1, 5 do
+            local light = Instance.new("Frame")
+            light.Name = "Light_" .. j
+            light.Size = UDim2.fromOffset(3, 3)
+            light.Position = UDim2.new(0.1 + (j-1)*0.18, 0, 0.55, 0)
+            light.BackgroundColor3 = Color3.fromRGB(255, 255, 0)
+            light.BorderSizePixel = 0
+            light.ZIndex = 5
+            local lc = Instance.new("UICorner")
+            lc.CornerRadius = UDim.new(0.5, 0)
+            lc.Parent = light
+            light.Parent = ufo
+        end
+
+        table.insert(ufos, {
+            frame = ufo,
+            radius = 0.35 + (i-1) * 0.06,
+            speed = 0.4 + (i-1) * 0.25,
+            phase = (i-1) * (math.pi * 2 / 3),
+        })
+    end
+
+    task.spawn(function()
+        while win.Parent do
+            task.wait(0.03)
+            if not win.Visible then continue end
+            local t = tick()
+            for _, u in ipairs(ufos) do
+                if not u.frame or not u.frame.Parent then continue end
+                local x = 0.5 + math.cos(t * u.speed + u.phase) * u.radius
+                local y = 0.5 + math.sin(t * u.speed + u.phase) * u.radius * 0.55
+                u.frame.Position = UDim2.fromScale(x, y)
+                u.frame.Rotation = t * 50
+                for j = 1, 5 do
+                    local light = u.frame:FindFirstChild("Light_" .. j)
+                    if light then
+                        local blink = math.sin(t * 5 + j) > 0
+                        light.BackgroundColor3 = blink and Color3.fromRGB(255, 255, 0) or Color3.fromRGB(255, 100, 0)
+                    end
+                end
+            end
+        end
+    end)
+
+    -- ═══ HEADER ═══
     local winHeader = Instance.new("Frame")
     winHeader.Size = UDim2.new(1, 0, 0, 60)
     winHeader.BackgroundColor3 = COLOR_GLASS
-    winHeader.BackgroundTransparency = 0.1
+    winHeader.BackgroundTransparency = 0.25
     winHeader.BorderSizePixel = 0
+    winHeader.ZIndex = 10
     winHeader.Parent = win
 
     local whCorner = Instance.new("UICorner")
@@ -3722,101 +3917,569 @@ local function buildEggExecutorGUI(screenGui)
     accentLine.Position = UDim2.fromOffset(12, 8)
     accentLine.BackgroundColor3 = COLOR_CYAN
     accentLine.BorderSizePixel = 0
+    accentLine.ZIndex = 11
     accentLine.Parent = winHeader
-
     local alCorner = Instance.new("UICorner")
     alCorner.CornerRadius = UDim.new(1, 0)
     alCorner.Parent = accentLine
-
-    task.spawn(function()
-        while winHeader.Parent do
-            TweenService:Create(accentLine, TweenInfo.new(1.5), { BackgroundTransparency = 0.5 }):Play()
-            task.wait(1.5)
-            TweenService:Create(accentLine, TweenInfo.new(1.5), { BackgroundTransparency = 0 }):Play()
-            task.wait(1.5)
-        end
-    end)
 
     local winTitle = Instance.new("TextLabel")
     winTitle.Size = UDim2.new(1, -40, 0, 24)
     winTitle.Position = UDim2.fromOffset(28, 8)
     winTitle.BackgroundTransparency = 1
-    winTitle.Text = "EGG EXECUTOR"
+    winTitle.Text = "🎨 EGG EXECUTOR"
     winTitle.TextColor3 = COLOR_CYAN
     winTitle.Font = Enum.Font.GothamBold
     winTitle.TextSize = 18
     winTitle.TextXAlignment = Enum.TextXAlignment.Left
+    winTitle.ZIndex = 11
     winTitle.Parent = winHeader
 
     local winSub = Instance.new("TextLabel")
     winSub.Size = UDim2.new(1, -40, 0, 16)
     winSub.Position = UDim2.fromOffset(28, 32)
     winSub.BackgroundTransparency = 1
-    winSub.Text = "EXECUTE STEAL FROM HERE"
+    winSub.Text = "3D COSMIC DASHBOARD  ·  LIVE STATS"
     winSub.TextColor3 = COLOR_TEXT_DIM
     winSub.Font = Enum.Font.GothamMedium
     winSub.TextSize = 10
     winSub.TextXAlignment = Enum.TextXAlignment.Left
+    winSub.ZIndex = 11
     winSub.Parent = winHeader
 
-    local body = Instance.new("ScrollingFrame")
-    body.Size = UDim2.new(1, -32, 1, -80)
-    body.Position = UDim2.fromOffset(16, 70)
-    body.BackgroundTransparency = 1
-    body.BorderSizePixel = 0
-    body.ScrollBarThickness = 4
-    body.ScrollBarImageColor3 = COLOR_CYAN
-    body.CanvasSize = UDim2.new(0, 0, 0, 0)
-    body.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    body.Parent = win
+    -- Close button
+    local winClose = Instance.new("TextButton")
+    winClose.Size = UDim2.fromOffset(30, 30)
+    winClose.Position = UDim2.new(1, -40, 0, 15)
+    winClose.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+    winClose.BackgroundTransparency = 0.3
+    winClose.Text = "✕"
+    winClose.TextColor3 = Color3.new(1, 1, 1)
+    winClose.Font = Enum.Font.GothamBold
+    winClose.TextSize = 16
+    winClose.BorderSizePixel = 0
+    winClose.ZIndex = 12
+    winClose.Parent = winHeader
+    local wcCorner = Instance.new("UICorner")
+    wcCorner.CornerRadius = UDim.new(0.5, 0)
+    wcCorner.Parent = winClose
 
-    local grid = Instance.new("UIGridLayout")
-    grid.CellSize = UDim2.fromOffset(145, 190)
-    grid.CellPadding = UDim2.fromOffset(12, 12)
-    grid.SortOrder = Enum.SortOrder.LayoutOrder
-    grid.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    grid.Parent = body
+    -- ═══ TAB BAR ═══
+    local tabBar = Instance.new("Frame")
+    tabBar.Size = UDim2.new(1, -32, 0, 36)
+    tabBar.Position = UDim2.fromOffset(16, 70)
+    tabBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    tabBar.BackgroundTransparency = 0.6
+    tabBar.BorderSizePixel = 0
+    tabBar.ZIndex = 9
+    tabBar.Parent = win
+    local tbCorner = Instance.new("UICorner")
+    tbCorner.CornerRadius = UDim.new(0, 10)
+    tbCorner.Parent = tabBar
 
-    local function createEggPreview(parent, eggModel)
-        local vpf = Instance.new("ViewportFrame")
-        vpf.Size = UDim2.new(1, -12, 0, 95)
-        vpf.Position = UDim2.fromOffset(6, 6)
-        vpf.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
-        vpf.BackgroundTransparency = 0.3
-        vpf.Parent = parent
+    local tabs = {
+        {name = "Stats", icon = "📊", key = "stats"},
+        {name = "Eggs", icon = "🥚", key = "eggs"},
+        {name = "Avatar", icon = "👤", key = "avatar"},
+    }
+    local tabButtons = {}
 
-        local vCorner = Instance.new("UICorner")
-        vCorner.CornerRadius = UDim.new(0, 8)
-        vCorner.Parent = vpf
-
-        local vStroke = Instance.new("UIStroke")
-        vStroke.Color = COLOR_CYAN_DIM
-        vStroke.Thickness = 1
-        vStroke.Transparency = 0.4
-        vStroke.Parent = vpf
-
-        local cam = Instance.new("Camera")
-        cam.Parent = vpf
-        vpf.CurrentCamera = cam
-
-        local clonedEgg = EggCache[eggModel]
-        if not clonedEgg then
-            clonedEgg = eggModel:Clone()
-            for _, d in ipairs(clonedEgg:GetDescendants()) do
-                if d:IsA("ProximityPrompt") or d:IsA("Script") or d:IsA("LocalScript") then d:Destroy() end
-                if d:IsA("BasePart") then d.Anchored = true; d.CanCollide = false end
-            end
-            EggCache[eggModel] = clonedEgg
-        end
-        local clone = clonedEgg:Clone()
-        clone.Parent = vpf
-
-        local bboxCF, bboxSize = clone:GetBoundingBox()
-        local center = bboxCF.Position
-        local radius = math.max(bboxSize.X, bboxSize.Y, bboxSize.Z) / 2
-        cam.CFrame = CFrame.new(center + Vector3.new(radius*2.5, radius*1.5, radius*2.5), center)
+    for i, tab in ipairs(tabs) do
+        local btn = Instance.new("TextButton")
+        btn.Name = "Tab_" .. tab.key
+        btn.Size = UDim2.new(1/3 - 0.02, 0, 1, -8)
+        btn.Position = UDim2.new((i-1)/3 + 0.01, 0, 0, 4)
+        btn.BackgroundColor3 = i == 1 and COLOR_CYAN or Color3.fromRGB(40, 40, 60)
+        btn.BackgroundTransparency = 0.3
+        btn.Text = tab.icon .. "  " .. tab.name
+        btn.TextColor3 = i == 1 and Color3.new(0, 0, 0) or COLOR_TEXT_DIM
+        btn.Font = Enum.Font.GothamBold
+        btn.TextSize = 12
+        btn.BorderSizePixel = 0
+        btn.ZIndex = 10
+        btn.Parent = tabBar
+        local btnCorner = Instance.new("UICorner")
+        btnCorner.CornerRadius = UDim.new(0, 8)
+        btnCorner.Parent = btn
+        tabButtons[tab.key] = btn
     end
 
+    -- ═══ CONTENT AREA ═══
+    local content = Instance.new("Frame")
+    content.Size = UDim2.new(1, -32, 1, -130)
+    content.Position = UDim2.fromOffset(16, 115)
+    content.BackgroundTransparency = 1
+    content.ZIndex = 8
+    content.Parent = win
+
+    -- ═══ TAB: STATS ═══
+    local statsTab = Instance.new("Frame")
+    statsTab.Name = "StatsTab"
+    statsTab.Size = UDim2.fromScale(1, 1)
+    statsTab.BackgroundTransparency = 1
+    statsTab.ZIndex = 9
+    statsTab.Parent = content
+
+    local counterBg = Instance.new("Frame")
+    counterBg.Size = UDim2.new(1, 0, 0, 110)
+    counterBg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    counterBg.BackgroundTransparency = 0.4
+    counterBg.BorderSizePixel = 0
+    counterBg.ZIndex = 10
+    counterBg.Parent = statsTab
+    local cbCorner = Instance.new("UICorner")
+    cbCorner.CornerRadius = UDim.new(0, 12)
+    cbCorner.Parent = counterBg
+    local cbStroke = Instance.new("UIStroke")
+    cbStroke.Color = COLOR_CYAN
+    cbStroke.Thickness = 1.5
+    cbStroke.Transparency = 0.4
+    cbStroke.Parent = counterBg
+
+    local totalLabel = Instance.new("TextLabel")
+    totalLabel.Size = UDim2.fromScale(1, 0.5)
+    totalLabel.Position = UDim2.fromScale(0, 0.1)
+    totalLabel.BackgroundTransparency = 1
+    totalLabel.Text = "0"
+    totalLabel.TextColor3 = COLOR_CYAN
+    totalLabel.TextStrokeColor3 = Color3.fromRGB(0, 100, 80)
+    totalLabel.TextStrokeTransparency = 0.3
+    totalLabel.Font = Enum.Font.GothamBlack
+    totalLabel.TextSize = 52
+    totalLabel.ZIndex = 11
+    totalLabel.Parent = counterBg
+
+    local totalDesc = Instance.new("TextLabel")
+    totalDesc.Size = UDim2.fromScale(1, 0.3)
+    totalDesc.Position = UDim2.fromScale(0, 0.65)
+    totalDesc.BackgroundTransparency = 1
+    totalDesc.Text = "TOTAL STEAL"
+    totalDesc.TextColor3 = COLOR_TEXT_DIM
+    totalDesc.Font = Enum.Font.GothamBold
+    totalDesc.TextSize = 14
+    totalDesc.ZIndex = 11
+    totalDesc.Parent = counterBg
+
+    -- Stats grid
+    local grid = Instance.new("Frame")
+    grid.Size = UDim2.new(1, 0, 1, -120)
+    grid.Position = UDim2.fromOffset(0, 120)
+    grid.BackgroundTransparency = 1
+    grid.ZIndex = 10
+    grid.Parent = statsTab
+    local gridLayout = Instance.new("UIGridLayout")
+    gridLayout.CellSize = UDim2.new(0.5, -5, 0, 55)
+    gridLayout.CellPadding = UDim2.fromOffset(10, 10)
+    gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    gridLayout.Parent = grid
+
+    local function makeStatCard(icon, label, color)
+        local card = Instance.new("Frame")
+        card.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        card.BackgroundTransparency = 0.5
+        card.BorderSizePixel = 0
+        card.ZIndex = 11
+        local cc = Instance.new("UICorner")
+        cc.CornerRadius = UDim.new(0, 8)
+        cc.Parent = card
+        local cs = Instance.new("UIStroke")
+        cs.Color = color
+        cs.Thickness = 1
+        cs.Transparency = 0.6
+        cs.Parent = card
+
+        local iconLbl = Instance.new("TextLabel")
+        iconLbl.Size = UDim2.fromOffset(30, 30)
+        iconLbl.Position = UDim2.fromOffset(8, 12)
+        iconLbl.BackgroundTransparency = 1
+        iconLbl.Text = icon
+        iconLbl.TextSize = 20
+        iconLbl.ZIndex = 12
+        iconLbl.Parent = card
+
+        local valLbl = Instance.new("TextLabel")
+        valLbl.Name = "Value"
+        valLbl.Size = UDim2.new(1, -50, 0, 20)
+        valLbl.Position = UDim2.fromOffset(45, 8)
+        valLbl.BackgroundTransparency = 1
+        valLbl.Text = "0"
+        valLbl.TextColor3 = color
+        valLbl.Font = Enum.Font.GothamBold
+        valLbl.TextSize = 16
+        valLbl.TextXAlignment = Enum.TextXAlignment.Left
+        valLbl.ZIndex = 12
+        valLbl.Parent = card
+
+        local lblLbl = Instance.new("TextLabel")
+        lblLbl.Size = UDim2.new(1, -50, 0, 14)
+        lblLbl.Position = UDim2.fromOffset(45, 30)
+        lblLbl.BackgroundTransparency = 1
+        lblLbl.Text = label
+        lblLbl.TextColor3 = COLOR_TEXT_DIM
+        lblLbl.Font = Enum.Font.GothamMedium
+        lblLbl.TextSize = 10
+        lblLbl.TextXAlignment = Enum.TextXAlignment.Left
+        lblLbl.ZIndex = 12
+        lblLbl.Parent = card
+
+        return card, valLbl
+    end
+
+    local rateCard, rateVal = makeStatCard("⚡", "STEAL / MENIT", COLOR_GOLD)
+    rateCard.Parent = grid
+
+    local sessionCard, sessionVal = makeStatCard("⏱", "MASA AKTIF", COLOR_CYAN)
+    sessionCard.Parent = grid
+
+    local rareCard, rareVal = makeStatCard("💎", "RARE EGGS", Color3.fromRGB(255, 100, 255))
+    rareCard.Parent = grid
+
+    local avgCard, avgVal = makeStatCard("📈", "AVG / JAM", Color3.fromRGB(100, 200, 255))
+    avgCard.Parent = grid
+
+    -- ═══ TAB: EGGS ═══
+    local eggsTab = Instance.new("Frame")
+    eggsTab.Name = "EggsTab"
+    eggsTab.Size = UDim2.fromScale(1, 1)
+    eggsTab.BackgroundTransparency = 1
+    eggsTab.Visible = false
+    eggsTab.ZIndex = 9
+    eggsTab.Parent = content
+
+    local eggHeader = Instance.new("Frame")
+    eggHeader.Size = UDim2.new(1, 0, 0, 32)
+    eggHeader.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    eggHeader.BackgroundTransparency = 0.5
+    eggHeader.BorderSizePixel = 0
+    eggHeader.ZIndex = 10
+    eggHeader.Parent = eggsTab
+    local ehCorner = Instance.new("UICorner")
+    ehCorner.CornerRadius = UDim.new(0, 8)
+    ehCorner.Parent = eggHeader
+
+    local eggHeaderLabel = Instance.new("TextLabel")
+    eggHeaderLabel.Size = UDim2.new(1, -20, 1, 0)
+    eggHeaderLabel.Position = UDim2.fromOffset(15, 0)
+    eggHeaderLabel.BackgroundTransparency = 1
+    eggHeaderLabel.Text = "🥚 EGGS YANG SUDAH DI-STEAL"
+    eggHeaderLabel.TextColor3 = COLOR_CYAN
+    eggHeaderLabel.Font = Enum.Font.GothamBold
+    eggHeaderLabel.TextSize = 13
+    eggHeaderLabel.TextXAlignment = Enum.TextXAlignment.Left
+    eggHeaderLabel.ZIndex = 11
+    eggHeaderLabel.Parent = eggHeader
+
+    local eggScroll = Instance.new("ScrollingFrame")
+    eggScroll.Size = UDim2.new(1, 0, 1, -42)
+    eggScroll.Position = UDim2.fromOffset(0, 42)
+    eggScroll.BackgroundTransparency = 1
+    eggScroll.BorderSizePixel = 0
+    eggScroll.ScrollBarThickness = 4
+    eggScroll.ScrollBarImageColor3 = COLOR_CYAN
+    eggScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    eggScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    eggScroll.ZIndex = 10
+    eggScroll.Parent = eggsTab
+
+    local eggListLayout = Instance.new("UIListLayout")
+    eggListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    eggListLayout.Padding = UDim.new(0, 6)
+    eggListLayout.Parent = eggScroll
+
+    -- ═══ TAB: AVATAR ═══
+    local avatarTab = Instance.new("Frame")
+    avatarTab.Name = "AvatarTab"
+    avatarTab.Size = UDim2.fromScale(1, 1)
+    avatarTab.BackgroundTransparency = 1
+    avatarTab.Visible = false
+    avatarTab.ZIndex = 9
+    avatarTab.Parent = content
+
+    local viewportFrame = Instance.new("ViewportFrame")
+    viewportFrame.Name = "AvatarPreview"
+    viewportFrame.Size = UDim2.fromScale(1, 1)
+    viewportFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 20)
+    viewportFrame.BackgroundTransparency = 0.2
+    viewportFrame.BorderSizePixel = 0
+    viewportFrame.Ambient = Color3.fromRGB(150, 150, 200)
+    viewportFrame.LightColor = Color3.fromRGB(255, 255, 255)
+    viewportFrame.ZIndex = 10
+    viewportFrame.Parent = avatarTab
+
+    local vpCorner = Instance.new("UICorner")
+    vpCorner.CornerRadius = UDim.new(0, 12)
+    vpCorner.Parent = viewportFrame
+
+    local vpStroke = Instance.new("UIStroke")
+    vpStroke.Color = COLOR_CYAN
+    vpStroke.Thickness = 2
+    vpStroke.Transparency = 0.3
+    vpStroke.Parent = viewportFrame
+
+    local worldModel = Instance.new("WorldModel")
+    worldModel.Parent = viewportFrame
+
+    local camera = Instance.new("Camera")
+    camera.FieldOfView = 35
+    camera.Parent = viewportFrame
+    viewportFrame.CurrentCamera = camera
+
+    local avPlaceholder = Instance.new("TextLabel")
+    avPlaceholder.Size = UDim2.fromScale(1, 1)
+    avPlaceholder.BackgroundTransparency = 1
+    avPlaceholder.Text = "👤 Loading avatar..."
+    avPlaceholder.TextColor3 = COLOR_CYAN
+    avPlaceholder.Font = Enum.Font.GothamBold
+    avPlaceholder.TextSize = 16
+    avPlaceholder.ZIndex = 11
+    avPlaceholder.Parent = viewportFrame
+
+    -- Load avatar
+    task.spawn(function()
+        local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        local oldArch = char.Archivable
+        char.Archivable = true
+        local ok, clone = pcall(char.Clone, char)
+        char.Archivable = oldArch
+
+        if not ok or not clone then
+            avPlaceholder.Text = "❌ Gagal clone avatar"
+            return
+        end
+
+        clone.Name = "AvatarPreview_" .. LocalPlayer.Name
+        for _, d in ipairs(clone:GetDescendants()) do
+            if d:IsA("Script") or d:IsA("LocalScript") or d:IsA("ModuleScript") then
+                d:Destroy()
+            end
+            if d:IsA("BasePart") then
+                d.Anchored = true
+                d.CanCollide = false
+            end
+        end
+        clone.Parent = worldModel
+        avPlaceholder:Destroy()
+
+        local hrp = clone:FindFirstChild("HumanoidRootPart") or clone:FindFirstChild("Torso") or clone:FindFirstChild("UpperTorso")
+        if not hrp then
+            avPlaceholder.Text = "❌ No body part"
+            return
+        end
+
+        clone:PivotTo(CFrame.new(0, 0, 0))
+        local targetPos = hrp.Position
+        camera.CFrame = CFrame.lookAt(targetPos + Vector3.new(0, 0.5, -3.5), targetPos + Vector3.new(0, 0.5, 0))
+
+        task.spawn(function()
+            while viewportFrame.Parent and clone.Parent do
+                task.wait(0.03)
+                if not avatarTab.Visible then continue end
+                local t = tick() * 0.5
+                clone:PivotTo(CFrame.new(0, 0, 0) * CFrame.Angles(0, t, 0))
+            end
+        end)
+    end)
+
+    -- Avatar overlay
+    local avatarInfo = Instance.new("Frame")
+    avatarInfo.Size = UDim2.new(1, 0, 0, 50)
+    avatarInfo.Position = UDim2.new(0, 0, 1, -50)
+    avatarInfo.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    avatarInfo.BackgroundTransparency = 0.4
+    avatarInfo.BorderSizePixel = 0
+    avatarInfo.ZIndex = 11
+    avatarInfo.Parent = avatarTab
+    local aiCorner = Instance.new("UICorner")
+    aiCorner.CornerRadius = UDim.new(0, 12)
+    aiCorner.Parent = avatarInfo
+
+    local avatarName = Instance.new("TextLabel")
+    avatarName.Size = UDim2.new(1, -20, 0, 20)
+    avatarName.Position = UDim2.fromOffset(10, 6)
+    avatarName.BackgroundTransparency = 1
+    avatarName.Text = "👤 " .. LocalPlayer.DisplayName
+    avatarName.TextColor3 = COLOR_CYAN
+    avatarName.Font = Enum.Font.GothamBold
+    avatarName.TextSize = 14
+    avatarName.ZIndex = 12
+    avatarName.Parent = avatarInfo
+
+    local avatarSub = Instance.new("TextLabel")
+    avatarSub.Size = UDim2.new(1, -20, 0, 16)
+    avatarSub.Position = UDim2.fromOffset(10, 28)
+    avatarSub.BackgroundTransparency = 1
+    avatarSub.Text = "User ID: " .. LocalPlayer.UserId
+    avatarSub.TextColor3 = COLOR_TEXT_DIM
+    avatarSub.Font = Enum.Font.GothamMedium
+    avatarSub.TextSize = 11
+    avatarSub.ZIndex = 12
+    avatarSub.Parent = avatarInfo
+
+    -- ═══ TAB SWITCH ═══
+    local function switchTab(key)
+        EggState.ActiveTab = key
+        statsTab.Visible = (key == "stats")
+        eggsTab.Visible = (key == "eggs")
+        avatarTab.Visible = (key == "avatar")
+        for k, b in pairs(tabButtons) do
+            if k == key then
+                b.BackgroundColor3 = COLOR_CYAN
+                b.TextColor3 = Color3.new(0, 0, 0)
+            else
+                b.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+                b.TextColor3 = COLOR_TEXT_DIM
+            end
+        end
+        if key == "eggs" then updateEggList() end
+    end
+
+    for key, btn in pairs(tabButtons) do
+        btn.MouseButton1Click:Connect(function() switchTab(key) end)
+    end
+
+    -- ═══ UPDATE STATS ═══
+    local function updateStatsDisplay()
+        if not win.Parent then return end
+        local activeTime = os.time() - StealStats.SessionStart
+        local total = StealStats.TotalSteals
+
+        totalLabel.Text = tostring(total)
+        sessionVal.Text = formatTime(activeTime)
+
+        local minutes = math.max(activeTime / 60, 1)
+        rateVal.Text = string.format("%.1f", total / minutes)
+
+        local rareCount = 0
+        for _, e in ipairs(StealStats.StolenEggs) do
+            local r = tostring(e.rarity):lower()
+            if r:find("legendary") or r:find("mythic") or r:find("divine") or r:find("secret") or r:find("ethereal") then
+                rareCount = rareCount + 1
+            end
+        end
+        rareVal.Text = tostring(rareCount)
+
+        local perHour = total / math.max(activeTime / 3600, 0.01)
+        avgVal.Text = string.format("%.0f", perHour)
+
+        avatarSub.Text = "User ID: " .. LocalPlayer.UserId .. "  ·  " .. total .. " eggs stolen"
+    end
+
+    -- ═══ UPDATE EGG LIST ═══
+    local function updateEggList()
+        for _, child in ipairs(eggScroll:GetChildren()) do
+            if child:IsA("Frame") or child:IsA("TextLabel") then
+                child:Destroy()
+            end
+        end
+
+        local eggs = StealStats.StolenEggs
+        local count = #eggs
+
+        for i = count, 1, -1 do
+            local e = eggs[i]
+            local idx = count - i + 1
+
+            local row = Instance.new("Frame")
+            row.Size = UDim2.new(1, -8, 0, 36)
+            row.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            row.BackgroundTransparency = 0.5
+            row.BorderSizePixel = 0
+            row.LayoutOrder = idx
+            row.ZIndex = 11
+
+            local rc = Instance.new("UICorner")
+            rc.CornerRadius = UDim.new(0, 6)
+            rc.Parent = row
+
+            local rarityColor = COLOR_TEXT_DIM
+            local rl = tostring(e.rarity):lower()
+            if rl:find("common") then rarityColor = Color3.fromRGB(180, 180, 180)
+            elseif rl:find("uncommon") then rarityColor = Color3.fromRGB(100, 255, 100)
+            elseif rl:find("rare") then rarityColor = Color3.fromRGB(100, 150, 255)
+            elseif rl:find("epic") then rarityColor = Color3.fromRGB(200, 100, 255)
+            elseif rl:find("legendary") then rarityColor = COLOR_GOLD
+            elseif rl:find("mythic") then rarityColor = Color3.fromRGB(255, 100, 100)
+            elseif rl:find("divine") then rarityColor = Color3.fromRGB(255, 200, 255)
+            elseif rl:find("secret") then rarityColor = COLOR_CYAN
+            elseif rl:find("ethereal") then rarityColor = Color3.fromRGB(200, 255, 255)
+            end
+
+            local stroke = Instance.new("UIStroke")
+            stroke.Color = rarityColor
+            stroke.Thickness = 1
+            stroke.Transparency = 0.5
+            stroke.Parent = row
+
+            local numLbl = Instance.new("TextLabel")
+            numLbl.Size = UDim2.fromOffset(30, 36)
+            numLbl.BackgroundTransparency = 1
+            numLbl.Text = "#" .. idx
+            numLbl.TextColor3 = Color3.fromRGB(100, 100, 150)
+            numLbl.Font = Enum.Font.GothamBold
+            numLbl.TextSize = 11
+            numLbl.ZIndex = 12
+            numLbl.Parent = row
+
+            local nameLbl = Instance.new("TextLabel")
+            nameLbl.Size = UDim2.new(0.6, -40, 0, 18)
+            nameLbl.Position = UDim2.fromOffset(35, 2)
+            nameLbl.BackgroundTransparency = 1
+            nameLbl.Text = "🥚 " .. e.name
+            nameLbl.TextColor3 = rarityColor
+            nameLbl.Font = Enum.Font.GothamBold
+            nameLbl.TextSize = 13
+            nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+            nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
+            nameLbl.ZIndex = 12
+            nameLbl.Parent = row
+
+            local infoLbl = Instance.new("TextLabel")
+            infoLbl.Size = UDim2.new(0.6, -40, 0, 14)
+            infoLbl.Position = UDim2.fromOffset(35, 19)
+            infoLbl.BackgroundTransparency = 1
+            infoLbl.Text = e.rarity .. "  ·  " .. e.weight
+            infoLbl.TextColor3 = Color3.fromRGB(120, 120, 160)
+            infoLbl.Font = Enum.Font.GothamMedium
+            infoLbl.TextSize = 10
+            infoLbl.TextXAlignment = Enum.TextXAlignment.Left
+            infoLbl.ZIndex = 12
+            infoLbl.Parent = row
+
+            local timeLbl = Instance.new("TextLabel")
+            timeLbl.Size = UDim2.fromOffset(100, 36)
+            timeLbl.Position = UDim2.new(1, -110, 0, 0)
+            timeLbl.BackgroundTransparency = 1
+            timeLbl.Text = os.date("%H:%M:%S", e.time)
+            timeLbl.TextColor3 = Color3.fromRGB(100, 100, 150)
+            timeLbl.Font = Enum.Font.GothamMedium
+            timeLbl.TextSize = 11
+            timeLbl.TextXAlignment = Enum.TextXAlignment.Right
+            timeLbl.ZIndex = 12
+            timeLbl.Parent = row
+
+            row.Parent = eggScroll
+        end
+
+        task.defer(function()
+            if eggScroll then
+                eggScroll.CanvasSize = UDim2.new(0, 0, 0, eggListLayout.AbsoluteContentSize.Y + 10)
+            end
+        end)
+
+        if count == 0 then
+            local emptyLbl = Instance.new("TextLabel")
+            emptyLbl.Size = UDim2.new(1, 0, 0, 40)
+            emptyLbl.BackgroundTransparency = 1
+            emptyLbl.Text = "📭 Belum ada egg yang di-steal\nAktifkan fitur steal untuk mulai!"
+            emptyLbl.TextColor3 = Color3.fromRGB(100, 100, 150)
+            emptyLbl.Font = Enum.Font.GothamMedium
+            emptyLbl.TextSize = 13
+            emptyLbl.ZIndex = 11
+            emptyLbl.Parent = eggScroll
+        end
+    end
+
+    -- ═══ OPEN / CLOSE ═══
     local function openWindow()
         EggState.WindowVisible = true
         win.Visible = true
@@ -3836,6 +4499,8 @@ local function buildEggExecutorGUI(screenGui)
         end)
     end
 
+    winClose.MouseButton1Click:Connect(closeWindow)
+
     mini.MouseButton1Down:Connect(function()
         TweenService:Create(mini, TweenInfo.new(0.1), { Size = UDim2.fromOffset(MINI_W - 6, MINI_H - 6) }):Play()
     end)
@@ -3846,226 +4511,54 @@ local function buildEggExecutorGUI(screenGui)
         if EggState.WindowVisible then closeWindow() else openWindow() end
     end)
 
-    local function updateTracker()
-        local myRoot = getRoot()
-        local currentModels = {}
-
-        local rendered = workspace:FindFirstChild("RenderedEggs")
-        if rendered then
-            for _, egg in ipairs(rendered:GetChildren()) do
-                if egg:IsA("Model") then
-                    local part = getEggPart(egg)
-                    if part then
-                        currentModels[egg] = {
-                            name = egg.Name,
-                            dist = myRoot and (part.Position - myRoot.Position).Magnitude or 0,
-                            isVolcanic = egg.Name:lower():find("volcan") ~= nil,
-                            eggModel = egg
-                        }
-                    end
-                end
-            end
+    -- ═══ DRAG WINDOW ═══
+    local dragging = false
+    local dragStart, startPos
+    winHeader.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = win.Position
         end
-
-        local plots = workspace:FindFirstChild("Plots")
-        if plots then
-            for _, plot in ipairs(plots:GetChildren()) do
-                local owner = plot:GetAttribute("OwnerUserId") or plot:GetAttribute("Owner")
-                if owner == LocalPlayer.UserId or owner == LocalPlayer.Name then
-                    local eggsFolder = plot:FindFirstChild("Eggs") or plot:FindFirstChild("Nests")
-                    if eggsFolder then
-                        for _, egg in ipairs(eggsFolder:GetDescendants()) do
-                            if egg:IsA("Model") and not currentModels[egg] then
-                                local part = getEggPart(egg)
-                                if part then
-                                    currentModels[egg] = {
-                                        name = egg.Name,
-                                        dist = myRoot and (part.Position - myRoot.Position).Magnitude or 0,
-                                        isVolcanic = false,
-                                        eggModel = egg
-                                    }
-                                end
-                            end
-                        end
-                    end
-                end
-            end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            win.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
-
-        for eggModel, data in pairs(TrackedCards) do
-            if not currentModels[eggModel] then
-                if data.card and data.card.Parent then data.card:Destroy() end
-                TrackedCards[eggModel] = nil
-            end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
         end
+    end)
 
-        for eggModel, info in pairs(currentModels) do
-            if not TrackedCards[eggModel] then
-                local card = Instance.new("Frame")
-                card.Size = UDim2.fromOffset(145, 190)
-                card.BackgroundColor3 = COLOR_BG_CARD
-                card.BorderSizePixel = 0
-                card.LayoutOrder = #TrackedCards + 1
-                card.Parent = body
-
-                card.Size = UDim2.fromOffset(0, 0)
-                card.BackgroundTransparency = 1
-                TweenService:Create(card, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                    Size = UDim2.fromOffset(145, 190)
-                }):Play()
-                TweenService:Create(card, TweenInfo.new(0.3), { BackgroundTransparency = 0 }):Play()
-
-                local cc = Instance.new("UICorner")
-                cc.CornerRadius = UDim.new(0, 12)
-                cc.Parent = card
-
-                local cs = Instance.new("UIStroke")
-                cs.Color = info.isVolcanic and COLOR_RED or COLOR_CYAN_DIM
-                cs.Thickness = 1.5
-                cs.Transparency = 0.2
-                cs.Parent = card
-
-                createEggPreview(card, eggModel)
-
-                local nl = Instance.new("TextLabel")
-                nl.Size = UDim2.new(1, -12, 0, 22)
-                nl.Position = UDim2.fromOffset(6, 105)
-                nl.BackgroundTransparency = 1
-                nl.Text = info.name
-                nl.TextColor3 = COLOR_TEXT
-                nl.Font = Enum.Font.GothamBold
-                nl.TextSize = 13
-                nl.TextTruncate = Enum.TextTruncate.AtEnd
-                nl.Parent = card
-
-                local dl = Instance.new("TextLabel")
-                dl.Name = "DistLabel"
-                dl.Size = UDim2.new(1, -12, 0, 14)
-                dl.Position = UDim2.fromOffset(6, 128)
-                dl.BackgroundTransparency = 1
-                dl.Text = string.format("%d STUDS AWAY", math.floor(info.dist))
-                dl.TextColor3 = COLOR_TEXT_DIM
-                dl.Font = Enum.Font.GothamMedium
-                dl.TextSize = 10
-                dl.TextXAlignment = Enum.TextXAlignment.Left
-                dl.Parent = card
-
-                local stealBtn = Instance.new("TextButton")
-                stealBtn.Size = UDim2.new(1, -20, 0, 28)
-                stealBtn.Position = UDim2.new(0, 10, 1, -36)
-                stealBtn.BackgroundColor3 = COLOR_CYAN_DIM
-                stealBtn.Text = "STEAL"
-                stealBtn.TextColor3 = Color3.new(1, 1, 1)
-                stealBtn.Font = Enum.Font.GothamBold
-                stealBtn.TextSize = 12
-                stealBtn.BorderSizePixel = 0
-                stealBtn.AutoButtonColor = false
-                stealBtn.Parent = card
-
-                local sbc = Instance.new("UICorner")
-                sbc.CornerRadius = UDim.new(0, 8)
-                sbc.Parent = stealBtn
-
-                stealBtn.MouseEnter:Connect(function()
-                    TweenService:Create(stealBtn, TweenInfo.new(0.2), { BackgroundColor3 = COLOR_GREEN }):Play()
-                end)
-                stealBtn.MouseLeave:Connect(function()
-                    TweenService:Create(stealBtn, TweenInfo.new(0.2), { BackgroundColor3 = COLOR_CYAN_DIM }):Play()
-                end)
-
-                stealBtn.MouseButton1Click:Connect(function()
-                    local F = getFeatures()
-                    if not F or not F.stealEgg then
-                        notify("⚠️ Features not loaded yet", "error")
-                        return
-                    end
-
-                    local currentEgg = eggModel
-                    if not currentEgg or not currentEgg.Parent then
-                        local rendered2 = workspace:FindFirstChild("RenderedEggs")
-                        if rendered2 then
-                            for _, e in ipairs(rendered2:GetChildren()) do
-                                if e:IsA("Model") and e.Name == info.name then currentEgg = e; break end
-                            end
-                        end
-                    end
-                    if not currentEgg or not currentEgg.Parent then
-                        notify("❌ Egg not found anymore", "error")
-                        return
-                    end
-
-                    stealBtn.Text = "STEALING..."
-                    stealBtn.BackgroundColor3 = COLOR_GREEN
-
-                    local ok = F.stealEgg(currentEgg)
-                    if not ok then
-                        task.delay(0.5, function()
-                            if stealBtn and stealBtn.Parent then
-                                stealBtn.Text = "STEAL"
-                                stealBtn.BackgroundColor3 = COLOR_CYAN_DIM
-                            end
-                        end)
-                    end
-                end)
-
-                TrackedCards[eggModel] = { card = card, distLbl = dl, stealBtn = stealBtn }
-            else
-                local data = TrackedCards[eggModel]
-                if data.distLbl and data.distLbl.Parent then
-                    data.distLbl.Text = string.format("%d STUDS AWAY", math.floor(info.dist))
-                end
-            end
-        end
-
-        local sorted = {}
-        for eggModel, info in pairs(currentModels) do
-            table.insert(sorted, { model = eggModel, dist = info.dist })
-        end
-        table.sort(sorted, function(a, b) return a.dist < b.dist end)
-        for i, entry in ipairs(sorted) do
-            local data = TrackedCards[entry.model]
-            if data and data.card then data.card.LayoutOrder = i end
-        end
-    end
-
+    -- ═══ UPDATE LOOP ═══
     task.spawn(function()
-        while body.Parent do
+        while win.Parent do
             task.wait(1)
-            if EggState.WindowVisible then updateTracker() end
+            if EggState.WindowVisible then
+                pcall(updateStatsDisplay)
+            end
             for m in pairs(EggCache) do if not m.Parent then EggCache[m] = nil end end
         end
     end)
 
     task.spawn(function()
-        while win.Parent do
-            task.wait(0.3)
-            local F = getFeatures()
-            if F and F.getStealExecState then
-                local st = F.getStealExecState()
-                if not st.Busy then
-                    for _, data in pairs(TrackedCards) do
-                        if data.stealBtn and data.stealBtn.Parent and data.stealBtn.Text == "STEALING..." then
-                            data.stealBtn.Text = "STEAL"
-                            data.stealBtn.BackgroundColor3 = COLOR_CYAN_DIM
-                        end
-                    end
-                end
+        while eggScroll.Parent do
+            task.wait(1.5)
+            if EggState.ActiveTab == "eggs" and EggState.WindowVisible then
+                pcall(updateEggList)
             end
         end
     end)
 
-    -- ============================================================
-    -- ⭐ AUTO-HIDE MINI PANEL (FIX ANTI-CRASH)
-    -- ============================================================
-        local function isAnyMenuOpenLocal()
-        -- ⭐ Scan ScreenGui "Main" — ScreenGui utama game Ride a Pet
+    -- ═══ AUTO-HIDE MINI PANEL ═══
+    local function isAnyMenuOpenLocal()
         local PG = LocalPlayer:FindFirstChild("PlayerGui")
         if not PG then return false end
-
         local mainGui = PG:FindFirstChild("Main")
         if not mainGui then return false end
-
-        -- Iterasi children dari Main (Frame/ImageLabel)
         for _, gui in ipairs(mainGui:GetChildren()) do
             if gui:IsA("Frame") or gui:IsA("ImageLabel") then
                 local name = gui.Name:lower()
@@ -4080,24 +4573,24 @@ local function buildEggExecutorGUI(screenGui)
         end
         return false
     end
-    
+
     task.spawn(function()
         while eggScreen.Parent do
             task.wait(0.1)
             local success, isOpen = pcall(isAnyMenuOpenLocal)
-            
             if success and isOpen then
                 if mini.Visible then
                     mini.Visible = false
                     if EggState.WindowVisible then closeWindow() end
                 end
             else
-                if not mini.Visible then
-                    mini.Visible = true
-                end
+                if not mini.Visible then mini.Visible = true end
             end
         end
     end)
+
+    -- ═══ EXPOSE UNTUK STEAL ═══
+    _G.VRILZ_EggExecutorRecordSteal = recordSteal
 end
 
 -- ============================================================
