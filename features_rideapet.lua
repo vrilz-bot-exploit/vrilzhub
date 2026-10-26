@@ -3863,10 +3863,33 @@ local function halloweenReturnToBase()
         end
     end
 
-    -- ⭐ STEP 3: Gak naik pet — FLY STEP-BY-STEP
+        -- ⭐ STEP 3: Gak naik pet — cek jarak dulu
     local targetPos = base.Position + Vector3.new(0, FLY_HEIGHT, 0)
     local startPos = root.Position
     local totalDist = (targetPos - startPos).Magnitude
+
+    -- ⭐ INSTANT kalau jarak ≤ 100 studs, step kalau > 100
+    if totalDist <= 100 then
+        local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if r then
+            r.CFrame = CFrame.new(targetPos)
+            r.Velocity = Vector3.zero
+            r.AssemblyLinearVelocity = Vector3.zero
+        end
+        task.wait(0.1)
+
+        -- Turun ke base
+        local rFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if rFinal then
+            rFinal.CFrame = base.CFrame + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
+            rFinal.Velocity = Vector3.zero
+            rFinal.AssemblyLinearVelocity = Vector3.zero
+        end
+        task.wait(HalloweenCfg.RETURN_WAIT)
+        return true
+    end
+
+    -- Step normal kalau jarak > 100 studs
     local steps = math.ceil(totalDist / FLY_STEP)
 
     local dir = (targetPos - startPos)
