@@ -7068,7 +7068,7 @@ end)
 
         -- ⭐ LIGHTS EFFECT LAYER
         local lightsLayer = buildLightsEffectLayer(main)
-        lightsLayer.Visible = false
+        lightsLayer.Visible = true
 
         -- ⚡ LIGHTNING EFFECT LAYER (terpisah)
         local lightningLayer = buildLightningEffectLayer(main)
@@ -7089,7 +7089,7 @@ end)
         end)
 
         -- ⭐ TOGGLE LIGHTS EFFECT (meteor + bintang + shadow)
-        makeToggle(fpsContent, "Lights Effect", false, function(v)
+            makeToggle(fpsContent, "Lights Effect", true, function(v)
             Shared.LightsEffect_Enabled = v
             if lightsLayer then
                 lightsLayer.Visible = v
@@ -10277,7 +10277,7 @@ function UI.Init(sharedState)
         ["Seraph Egg"] = false, ["Halloween Egg"] = false,
     }
     Shared.FPSBoost_Enabled = false
-    Shared.LightsEffect_Enabled = false
+    Shared.LightsEffect_Enabled = true
     Shared.HD4K_Enabled = false
     Shared.YinRitual_Enabled = false
     Shared.InfinityJump_Enabled = false
