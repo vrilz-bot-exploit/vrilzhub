@@ -4801,7 +4801,7 @@ end)
         end
     end)
 
-    -- ═══ TAB SWITCH & ANIMATION ═══
+       -- ═══ TAB SWITCH & ANIMATION ═══
     local function switchTab(key)
         EggState.ActiveTab = key
         statsTab.Visible = (key == "stats")
@@ -4829,8 +4829,9 @@ end)
         if key == "eggs" then updateEggList() end
     end
 
+    -- ⭐ FIX: loop ini yang tadi HILANG, wajib ada
+    for key, data in pairs(tabButtons) do
         data.btn.MouseButton1Click:Connect(function()
-            -- ⭐ PRESS EFFECT
             TweenService:Create(data.btn, TweenInfo.new(0.08, Enum.EasingStyle.Quad), {
                 Size = UDim2.new(1/3 - 0.02, 0, 1, -12)
             }):Play()
