@@ -3590,10 +3590,6 @@ end
 -- EGG EXECUTOR GUI — FUNCTION TERPISAH
 -- Dipanggil dari buildMainWindow biar gak exceed local register
 -- ============================================================
--- ============================================================
--- 🎨 EGG EXECUTOR — 3D COSMIC EDITION (STATS + AVATAR PREVIEW)
--- Ganti total buildEggExecutorGUI lama
--- ============================================================
 local function buildEggExecutorGUI(screenGui)
     local EGG_X, EGG_Y = 1348, 256
     local MINI_W, MINI_H = 72, 72
@@ -3602,19 +3598,14 @@ local function buildEggExecutorGUI(screenGui)
     local WIN_X, WIN_Y = 0.5, 0.5
 
     local COLOR_BG_MAIN    = Color3.fromRGB(8, 8, 16)
-    local COLOR_BG_CARD    = Color3.fromRGB(18, 18, 30)
     local COLOR_GLASS      = Color3.fromRGB(30, 30, 45)
     local COLOR_CYAN       = Color3.fromRGB(0, 240, 255)
-    local COLOR_CYAN_DIM   = Color3.fromRGB(0, 120, 140)
     local COLOR_TEXT       = Color3.fromRGB(255, 255, 255)
     local COLOR_TEXT_DIM   = Color3.fromRGB(160, 160, 180)
-    local COLOR_RED        = Color3.fromRGB(255, 70, 70)
-    local COLOR_GREEN      = Color3.fromRGB(0, 255, 150)
     local COLOR_GOLD       = Color3.fromRGB(255, 215, 0)
 
     local EggState = { WindowVisible = false, ActiveTab = "stats" }
     local EggCache = {}
-    local TrackedCards = {}
 
     -- ═══ STATS TRACKER ═══
     local StealStats = {
@@ -3681,8 +3672,6 @@ local function buildEggExecutorGUI(screenGui)
         if h > 0 then return string.format("%02d:%02d:%02d", h, m, sec) end
         return string.format("%02d:%02d", m, sec)
     end
-
-    local function getRoot() local c = LocalPlayer.Character; return c and c:FindFirstChild("HumanoidRootPart") end
 
     local old = screenGui:FindFirstChild("VRILZ_EggExecutor_New")
     if old then old:Destroy() end
@@ -3766,218 +3755,156 @@ local function buildEggExecutorGUI(screenGui)
     wStroke.Transparency = 0.3
     wStroke.Parent = win
 
-  -- ═══ DI DALAM buildEggExecutorGUI — GANTI BAGIAN INI ═══
-local EGG_BG_URL = "https://raw.githubusercontent.com/vrilz-vd/anime/refs/heads/main/images%20(5).jpe"
-local EGG_BG_CACHE = "vrilz_egg_bg_v5.png"
+    -- ═══ BACKGROUND COSMIC 3D (ANTI GAGAL / ANTI HITAM) ═══
+    local bgFrame = Instance.new("Frame")
+    bgFrame.Name = "CosmicBackground"
+    bgFrame.Size = UDim2.fromScale(1, 1)
+    bgFrame.Position = UDim2.fromScale(0, 0)
+    bgFrame.BackgroundColor3 = Color3.fromRGB(10, 12, 28)
+    bgFrame.BorderSizePixel = 0
+    bgFrame.ZIndex = 0
+    bgFrame.Parent = win
 
-local function loadEggBgImage()
-    if not (writefile and isfile and getcustomasset) then
-        warn("[EGG BG] Executor gak support getcustomasset")
-        return nil
-    end
+    local bgCorner = Instance.new("UICorner")
+    bgCorner.CornerRadius = UDim.new(0, 16)
+    bgCorner.Parent = bgFrame
 
-    -- ⭐ Cek cache dulu
-    if isfile(EGG_BG_CACHE) then
-        local ok, asset = pcall(getcustomasset, EGG_BG_CACHE)
-        if ok and asset and asset ~= "" then
-            print("[EGG BG] ✅ Loaded dari cache")
-            return asset
-        end
-    end
+    -- Gradient Nebula (Gak butuh internet)
+    local bgGrad = Instance.new("UIGradient")
+    bgGrad.Rotation = 135
+    bgGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 10, 50)),   -- Ungu gelap
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(5, 8, 25)),   -- Deep Space
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 30, 40)),    -- Cyan Teal
+    })
+    bgGrad.Parent = bgFrame
 
-    -- ⭐ Download dari GitHub
-    print("[EGG BG] Download dari GitHub...")
-    local ok, content = pcall(function()
-        return game:HttpGet(EGG_BG_URL)
-    end)
+    -- Efek Glow Nebula
+    local nebulaGlow = Instance.new("Frame")
+    nebulaGlow.Size = UDim2.fromScale(1.2, 1.2)
+    nebulaGlow.Position = UDim2.fromScale(-0.1, -0.1)
+    nebulaGlow.BackgroundColor3 = Color3.fromRGB(80, 20, 120)
+    nebulaGlow.BackgroundTransparency = 0.85
+    nebulaGlow.BorderSizePixel = 0
+    nebulaGlow.ZIndex = 1
+    nebulaGlow.Parent = bgFrame
+    local glowCorner = Instance.new("UICorner"); glowCorner.CornerRadius = UDim.new(1, 0); glowCorner.Parent = nebulaGlow
+    local ng = Instance.new("UIGradient"); ng.Rotation = 45
+    ng.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0,0.6), NumberSequenceKeypoint.new(1,1)})
+    ng.Parent = nebulaGlow
 
-    if not ok or not content or #content < 100 then
-        warn("[EGG BG] ❌ Gagal download dari GitHub")
-        return nil
-    end
-
-    -- ⭐ Simpan ke file lokal
-    local writeOk = pcall(writefile, EGG_BG_CACHE, content)
-    if not writeOk then
-        warn("[EGG BG] ❌ Gagal writefile")
-        return nil
-    end
-
-    -- ⭐ Convert ke asset
-    local ok2, asset = pcall(getcustomasset, EGG_BG_CACHE)
-    if ok2 and asset and asset ~= "" then
-        print("[EGG BG] ✅ Loaded dari GitHub")
-        return asset
-    end
-
-    warn("[EGG BG] ❌ Gagal convert ke asset")
-    return nil
-end
-
-local eggBgAsset = loadEggBgImage()
-
-    -- ═══ BACKGROUND EGG EXECUTOR (FULL COVER) ═══
-    local eggBg = Instance.new("ImageLabel")
-    eggBg.Name = "EggExecutorBackground"
-    eggBg.Size = UDim2.fromScale(1, 1)
-    eggBg.Position = UDim2.fromScale(0, 0)
-    eggBg.BackgroundColor3 = Color3.fromRGB(12, 12, 25)
-    eggBg.BackgroundTransparency = 0
-    eggBg.BorderSizePixel = 0
-    eggBg.ScaleType = Enum.ScaleType.Crop -- ⭐ INI KUNCINYA BIAR FULL NUTUPIN
-    eggBg.ZIndex = 0
-    eggBg.Parent = win
-
-    -- ⭐ Kasih UICorner di gambar biar sudutnya rapi ngikutin window
-    local eggBgCorner = Instance.new("UICorner")
-    eggBgCorner.CornerRadius = UDim.new(0, 16)
-    eggBgCorner.Parent = eggBg
-
-    if eggBgAsset then
-        eggBg.Image = eggBgAsset
-        -- Gambar nutupin seluruh area
-    else
-        -- Fallback kalau gambar gagal load (biar gak item polos)
-        eggBg.Image = ""
-        local fallbackGrad = Instance.new("UIGradient")
-        fallbackGrad.Rotation = 135
-        fallbackGrad.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 10, 40)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(5, 8, 20)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 5, 25)),
-        })
-        fallbackGrad.Parent = eggBg
-    end
-
-    -- ═══ STAR FIELD (bintang 3D berputar) ═══
-local starLayer = Instance.new("Frame")
-starLayer.Name = "StarField"
-starLayer.Size = UDim2.fromScale(1, 1)
-starLayer.BackgroundTransparency = 1
-starLayer.ClipsDescendants = true
-starLayer.ZIndex = 1  -- ← FIX: naikin ke 1, di atas background
-starLayer.Parent = win
+    -- ═══ BINTANG KELAP-KELIP (STARFIELD) ═══
+    local starLayer = Instance.new("Frame")
+    starLayer.Name = "StarField"
+    starLayer.Size = UDim2.fromScale(1, 1)
+    starLayer.BackgroundTransparency = 1
+    starLayer.ClipsDescendants = true
+    starLayer.ZIndex = 2
+    starLayer.Parent = win
 
     local stars = {}
-    for i = 1, 50 do
+    for i = 1, 60 do
         local sz = math.random(1, 3)
         local star = Instance.new("Frame")
         star.Size = UDim2.fromOffset(sz, sz)
-        star.Position = UDim2.fromScale(math.random(), math.random())
-        star.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        star.Position = UDim2.fromScale(math.random(0, 100)/100, math.random(0, 100)/100)
+        star.BackgroundColor3 = i % 3 == 0 and Color3.fromRGB(0, 255, 255) or Color3.fromRGB(255, 255, 255)
         star.BackgroundTransparency = math.random(30, 80) / 100
         star.BorderSizePixel = 0
-        star.ZIndex = 1
+        star.ZIndex = 3
         star.Parent = starLayer
-        local sc = Instance.new("UICorner")
-        sc.CornerRadius = UDim.new(1, 0)
-        sc.Parent = star
+        local sc = Instance.new("UICorner"); sc.CornerRadius = UDim.new(1, 0); sc.Parent = star
+        
         table.insert(stars, {
             frame = star,
-            baseX = star.Position.X.Scale,
-            baseY = star.Position.Y.Scale,
-            speed = math.random(1, 10) / 1500,
-            offset = math.random() * math.pi * 2,
             baseTrans = star.BackgroundTransparency,
+            speed = math.random(5, 20) / 100,
+            offset = math.random() * math.pi * 2
         })
     end
 
     task.spawn(function()
         while win.Parent do
-            task.wait(0.03)
+            task.wait(0.05)
             if not win.Visible then continue end
             local t = tick()
             for _, s in ipairs(stars) do
-                if not s.frame or not s.frame.Parent then continue end
-                local angle = t * s.speed + s.offset
-                local radius = 0.015
-                local nx = s.baseX + math.cos(angle) * radius
-                local ny = s.baseY + math.sin(angle) * radius
-                if nx < 0 then nx = 1 end
-                if nx > 1 then nx = 0 end
-                if ny < 0 then ny = 1 end
-                if ny > 1 then ny = 0 end
-                s.frame.Position = UDim2.fromScale(nx, ny)
-                s.frame.BackgroundTransparency = s.baseTrans - math.sin(t * 2 + s.offset) * 0.2
+                if s.frame and s.frame.Parent then
+                    -- Efek kelap-kelip
+                    s.frame.BackgroundTransparency = math.clamp(s.baseTrans + math.sin(t * s.speed + s.offset) * 0.3, 0, 1)
+                end
             end
         end
     end)
 
-    -- ═══ UFO MUTER (3 buah orbit) ═══
-    local ufos = {}
-    for i = 1, 3 do
-        local ufo = Instance.new("Frame")
-        ufo.Name = "UFO_" .. i
-        ufo.Size = UDim2.fromOffset(32, 32)
-        ufo.BackgroundTransparency = 1
-        ufo.ZIndex = 2
-        ufo.Parent = win
+    -- ═══ 1 UFO REALISTIS 3D (MUTER) ═══
+    local ufoHolder = Instance.new("Frame")
+    ufoHolder.Size = UDim2.fromOffset(60, 60)
+    ufoHolder.BackgroundTransparency = 1
+    ufoHolder.ZIndex = 4
+    ufoHolder.Parent = win
 
-        local body = Instance.new("Frame")
-        body.Name = "Body"
-        body.Size = UDim2.fromScale(1, 0.5)
-        body.Position = UDim2.fromScale(0, 0.25)
-        body.BackgroundColor3 = Color3.fromRGB(0, 255, 200)
-        body.BackgroundTransparency = 0.15
-        body.BorderSizePixel = 0
-        body.ZIndex = 3
-        local bc = Instance.new("UICorner")
-        bc.CornerRadius = UDim.new(0.5, 0)
-        bc.Parent = body
-        body.Parent = ufo
+    -- Body UFO (Bawah)
+    local ufoBase = Instance.new("Frame")
+    ufoBase.Size = UDim2.fromScale(1, 0.3)
+    ufoBase.Position = UDim2.fromScale(0, 0.6)
+    ufoBase.BackgroundColor3 = Color3.fromRGB(50, 60, 80)
+    ufoBase.BorderSizePixel = 0
+    ufoBase.ZIndex = 5
+    ufoBase.Parent = ufoHolder
+    local ufc = Instance.new("UICorner"); ufc.CornerRadius = UDim.new(0.5, 0); ufc.Parent = ufoBase
+    local ufg = Instance.new("UIGradient"); ufg.Rotation = 90
+    ufg.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 120, 150)), ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 30, 50))})
+    ufg.Parent = ufoBase
 
-        local dome = Instance.new("Frame")
-        dome.Size = UDim2.fromScale(0.5, 0.5)
-        dome.Position = UDim2.fromScale(0.25, 0)
-        dome.BackgroundColor3 = Color3.fromRGB(200, 255, 255)
-        dome.BackgroundTransparency = 0.3
-        dome.BorderSizePixel = 0
-        dome.ZIndex = 4
-        local dc = Instance.new("UICorner")
-        dc.CornerRadius = UDim.new(0.5, 0)
-        dc.Parent = dome
-        dome.Parent = ufo
+    -- Dome UFO (Atas)
+    local ufoDome = Instance.new("Frame")
+    ufoDome.Size = UDim2.fromScale(0.6, 0.6)
+    ufoDome.Position = UDim2.fromScale(0.2, 0.1)
+    ufoDome.BackgroundColor3 = Color3.fromRGB(0, 255, 200)
+    ufoDome.BackgroundTransparency = 0.5
+    ufoDome.BorderSizePixel = 0
+    ufoDome.ZIndex = 6
+    ufoDome.Parent = ufoHolder
+    local udc = Instance.new("UICorner"); udc.CornerRadius = UDim.new(0.5, 0); udc.Parent = ufoDome
+    local uds = Instance.new("UIStroke"); uds.Color = Color3.fromRGB(0, 255, 200); uds.Thickness = 1.5; uds.Transparency = 0.3; uds.Parent = ufoDome
 
-        for j = 1, 5 do
-            local light = Instance.new("Frame")
-            light.Name = "Light_" .. j
-            light.Size = UDim2.fromOffset(3, 3)
-            light.Position = UDim2.new(0.1 + (j-1)*0.18, 0, 0.55, 0)
-            light.BackgroundColor3 = Color3.fromRGB(255, 255, 0)
-            light.BorderSizePixel = 0
-            light.ZIndex = 5
-            local lc = Instance.new("UICorner")
-            lc.CornerRadius = UDim.new(0.5, 0)
-            lc.Parent = light
-            light.Parent = ufo
-        end
-
-        table.insert(ufos, {
-            frame = ufo,
-            radius = 0.35 + (i-1) * 0.06,
-            speed = 0.4 + (i-1) * 0.25,
-            phase = (i-1) * (math.pi * 2 / 3),
-        })
+    -- Lampu UFO (Neon)
+    local ufoLights = {}
+    for i = 1, 4 do
+        local light = Instance.new("Frame")
+        light.Size = UDim2.fromOffset(6, 6)
+        light.Position = UDim2.new(0.15 + (i-1)*0.22, 0.6, 0.7, 0)
+        light.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+        light.BorderSizePixel = 0
+        light.ZIndex = 7
+        light.Parent = ufoHolder
+        local lc = Instance.new("UICorner"); lc.CornerRadius = UDim.new(1, 0); lc.Parent = light
+        table.insert(ufoLights, light)
     end
 
+    -- Animasi UFO muter & lampu kedap-kedip
     task.spawn(function()
         while win.Parent do
             task.wait(0.03)
             if not win.Visible then continue end
             local t = tick()
-            for _, u in ipairs(ufos) do
-                if not u.frame or not u.frame.Parent then continue end
-                local x = 0.5 + math.cos(t * u.speed + u.phase) * u.radius
-                local y = 0.5 + math.sin(t * u.speed + u.phase) * u.radius * 0.55
-                u.frame.Position = UDim2.fromScale(x, y)
-                u.frame.Rotation = t * 50
-                for j = 1, 5 do
-                    local light = u.frame:FindFirstChild("Light_" .. j)
-                    if light then
-                        local blink = math.sin(t * 5 + j) > 0
-                        light.BackgroundColor3 = blink and Color3.fromRGB(255, 255, 0) or Color3.fromRGB(255, 100, 0)
-                    end
-                end
+            
+            -- UFO muter bentuk angka 8
+            local x = 0.5 + math.sin(t * 0.8) * 0.35
+            local y = 0.2 + math.cos(t * 1.6) * 0.15
+            ufoHolder.Position = UDim2.fromScale(x, y)
+            
+            -- Miringin UFO biar 3D
+            local tilt = math.sin(t * 0.8) * 15
+            ufoBase.Rotation = tilt
+            ufoDome.Rotation = tilt
+
+            -- Lampu kedap-kedip
+            for i, light in ipairs(ufoLights) do
+                local blink = math.sin(t * 10 + i * 2) > 0
+                light.BackgroundColor3 = blink and Color3.fromRGB(255, 255, 0) or Color3.fromRGB(255, 50, 0)
+                light.BackgroundTransparency = blink and 0 or 0.5
             end
         end
     end)
@@ -4002,9 +3929,7 @@ starLayer.Parent = win
     accentLine.BorderSizePixel = 0
     accentLine.ZIndex = 11
     accentLine.Parent = winHeader
-    local alCorner = Instance.new("UICorner")
-    alCorner.CornerRadius = UDim.new(1, 0)
-    alCorner.Parent = accentLine
+    local alCorner = Instance.new("UICorner"); alCorner.CornerRadius = UDim.new(1, 0); alCorner.Parent = accentLine
 
     local winTitle = Instance.new("TextLabel")
     winTitle.Size = UDim2.new(1, -40, 0, 24)
@@ -4043,9 +3968,7 @@ starLayer.Parent = win
     winClose.BorderSizePixel = 0
     winClose.ZIndex = 12
     winClose.Parent = winHeader
-    local wcCorner = Instance.new("UICorner")
-    wcCorner.CornerRadius = UDim.new(0.5, 0)
-    wcCorner.Parent = winClose
+    local wcCorner = Instance.new("UICorner"); wcCorner.CornerRadius = UDim.new(0.5, 0); wcCorner.Parent = winClose
 
     -- ═══ TAB BAR ═══
     local tabBar = Instance.new("Frame")
@@ -4056,9 +3979,7 @@ starLayer.Parent = win
     tabBar.BorderSizePixel = 0
     tabBar.ZIndex = 9
     tabBar.Parent = win
-    local tbCorner = Instance.new("UICorner")
-    tbCorner.CornerRadius = UDim.new(0, 10)
-    tbCorner.Parent = tabBar
+    local tbCorner = Instance.new("UICorner"); tbCorner.CornerRadius = UDim.new(0, 10); tbCorner.Parent = tabBar
 
     local tabs = {
         {name = "Stats", icon = "📊", key = "stats"},
@@ -4081,9 +4002,7 @@ starLayer.Parent = win
         btn.BorderSizePixel = 0
         btn.ZIndex = 10
         btn.Parent = tabBar
-        local btnCorner = Instance.new("UICorner")
-        btnCorner.CornerRadius = UDim.new(0, 8)
-        btnCorner.Parent = btn
+        local btnCorner = Instance.new("UICorner"); btnCorner.CornerRadius = UDim.new(0, 8); btnCorner.Parent = btn
         tabButtons[tab.key] = btn
     end
 
@@ -4110,14 +4029,8 @@ starLayer.Parent = win
     counterBg.BorderSizePixel = 0
     counterBg.ZIndex = 10
     counterBg.Parent = statsTab
-    local cbCorner = Instance.new("UICorner")
-    cbCorner.CornerRadius = UDim.new(0, 12)
-    cbCorner.Parent = counterBg
-    local cbStroke = Instance.new("UIStroke")
-    cbStroke.Color = COLOR_CYAN
-    cbStroke.Thickness = 1.5
-    cbStroke.Transparency = 0.4
-    cbStroke.Parent = counterBg
+    local cbCorner = Instance.new("UICorner"); cbCorner.CornerRadius = UDim.new(0, 12); cbCorner.Parent = counterBg
+    local cbStroke = Instance.new("UIStroke"); cbStroke.Color = COLOR_CYAN; cbStroke.Thickness = 1.5; cbStroke.Transparency = 0.4; cbStroke.Parent = counterBg
 
     local totalLabel = Instance.new("TextLabel")
     totalLabel.Size = UDim2.fromScale(1, 0.5)
@@ -4162,14 +4075,8 @@ starLayer.Parent = win
         card.BackgroundTransparency = 0.5
         card.BorderSizePixel = 0
         card.ZIndex = 11
-        local cc = Instance.new("UICorner")
-        cc.CornerRadius = UDim.new(0, 8)
-        cc.Parent = card
-        local cs = Instance.new("UIStroke")
-        cs.Color = color
-        cs.Thickness = 1
-        cs.Transparency = 0.6
-        cs.Parent = card
+        local cc = Instance.new("UICorner"); cc.CornerRadius = UDim.new(0, 8); cc.Parent = card
+        local cs = Instance.new("UIStroke"); cs.Color = color; cs.Thickness = 1; cs.Transparency = 0.6; cs.Parent = card
 
         local iconLbl = Instance.new("TextLabel")
         iconLbl.Size = UDim2.fromOffset(30, 30)
@@ -4236,9 +4143,7 @@ starLayer.Parent = win
     eggHeader.BorderSizePixel = 0
     eggHeader.ZIndex = 10
     eggHeader.Parent = eggsTab
-    local ehCorner = Instance.new("UICorner")
-    ehCorner.CornerRadius = UDim.new(0, 8)
-    ehCorner.Parent = eggHeader
+    local ehCorner = Instance.new("UICorner"); ehCorner.CornerRadius = UDim.new(0, 8); ehCorner.Parent = eggHeader
 
     local eggHeaderLabel = Instance.new("TextLabel")
     eggHeaderLabel.Size = UDim2.new(1, -20, 1, 0)
@@ -4289,18 +4194,10 @@ starLayer.Parent = win
     viewportFrame.ZIndex = 10
     viewportFrame.Parent = avatarTab
 
-    local vpCorner = Instance.new("UICorner")
-    vpCorner.CornerRadius = UDim.new(0, 12)
-    vpCorner.Parent = viewportFrame
+    local vpCorner = Instance.new("UICorner"); vpCorner.CornerRadius = UDim.new(0, 12); vpCorner.Parent = viewportFrame
+    local vpStroke = Instance.new("UIStroke"); vpStroke.Color = COLOR_CYAN; vpStroke.Thickness = 2; vpStroke.Transparency = 0.3; vpStroke.Parent = viewportFrame
 
-    local vpStroke = Instance.new("UIStroke")
-    vpStroke.Color = COLOR_CYAN
-    vpStroke.Thickness = 2
-    vpStroke.Transparency = 0.3
-    vpStroke.Parent = viewportFrame
-
-    local worldModel = Instance.new("WorldModel")
-    worldModel.Parent = viewportFrame
+    local worldModel = Instance.new("WorldModel"); worldModel.Parent = viewportFrame
 
     local camera = Instance.new("Camera")
     camera.FieldOfView = 35
@@ -4317,7 +4214,7 @@ starLayer.Parent = win
     avPlaceholder.ZIndex = 11
     avPlaceholder.Parent = viewportFrame
 
-    -- Load avatar
+    -- ⭐ FIX: LOAD AVATAR (FULL BODY + GA ZOOM)
     task.spawn(function()
         local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
         local oldArch = char.Archivable
@@ -4332,9 +4229,7 @@ starLayer.Parent = win
 
         clone.Name = "AvatarPreview_" .. LocalPlayer.Name
         for _, d in ipairs(clone:GetDescendants()) do
-            if d:IsA("Script") or d:IsA("LocalScript") or d:IsA("ModuleScript") then
-                d:Destroy()
-            end
+            if d:IsA("Script") or d:IsA("LocalScript") or d:IsA("ModuleScript") then d:Destroy() end
             if d:IsA("BasePart") then
                 d.Anchored = true
                 d.CanCollide = false
@@ -4349,15 +4244,17 @@ starLayer.Parent = win
             return
         end
 
+        -- ⭐ KAMERA MUNDUR BIAR FULL BODY KELIATAN
         clone:PivotTo(CFrame.new(0, 0, 0))
         local targetPos = hrp.Position
-        camera.CFrame = CFrame.lookAt(targetPos + Vector3.new(0, 0.5, -3.5), targetPos + Vector3.new(0, 0.5, 0))
+        camera.CFrame = CFrame.lookAt(targetPos + Vector3.new(0, 1.5, -6.5), targetPos + Vector3.new(0, 1, 0))
 
         task.spawn(function()
             while viewportFrame.Parent and clone.Parent do
                 task.wait(0.03)
                 if not avatarTab.Visible then continue end
                 local t = tick() * 0.5
+                -- Rotasi 360 derajat halus
                 clone:PivotTo(CFrame.new(0, 0, 0) * CFrame.Angles(0, t, 0))
             end
         end)
@@ -4372,9 +4269,7 @@ starLayer.Parent = win
     avatarInfo.BorderSizePixel = 0
     avatarInfo.ZIndex = 11
     avatarInfo.Parent = avatarTab
-    local aiCorner = Instance.new("UICorner")
-    aiCorner.CornerRadius = UDim.new(0, 12)
-    aiCorner.Parent = avatarInfo
+    local aiCorner = Instance.new("UICorner"); aiCorner.CornerRadius = UDim.new(0, 12); aiCorner.Parent = avatarInfo
 
     local avatarName = Instance.new("TextLabel")
     avatarName.Size = UDim2.new(1, -20, 0, 20)
@@ -4398,7 +4293,7 @@ starLayer.Parent = win
     avatarSub.ZIndex = 12
     avatarSub.Parent = avatarInfo
 
-       -- ═══ FORWARD DECLARE (biar switchTab bisa akses) ═══
+    -- ═══ FORWARD DECLARE ═══
     local updateEggList
     local updateStatsDisplay
 
@@ -4417,10 +4312,7 @@ starLayer.Parent = win
                 b.TextColor3 = COLOR_TEXT_DIM
             end
         end
-        -- ⭐ Guard: cuma call kalau udah di-assign
-        if key == "eggs" and type(updateEggList) == "function" then
-            updateEggList()
-        end
+        if key == "eggs" and type(updateEggList) == "function" then updateEggList() end
     end
 
     for key, btn in pairs(tabButtons) do
@@ -4460,9 +4352,7 @@ starLayer.Parent = win
     -- ═══ UPDATE EGG LIST ═══
     updateEggList = function()
         for _, child in ipairs(eggScroll:GetChildren()) do
-            if child:IsA("Frame") or child:IsA("TextLabel") then
-                child:Destroy()
-            end
+            if child:IsA("Frame") or child:IsA("TextLabel") then child:Destroy() end
         end
 
         local eggs = StealStats.StolenEggs
@@ -4480,9 +4370,7 @@ starLayer.Parent = win
             row.LayoutOrder = idx
             row.ZIndex = 11
 
-            local rc = Instance.new("UICorner")
-            rc.CornerRadius = UDim.new(0, 6)
-            rc.Parent = row
+            local rc = Instance.new("UICorner"); rc.CornerRadius = UDim.new(0, 6); rc.Parent = row
 
             local rarityColor = COLOR_TEXT_DIM
             local rl = tostring(e.rarity):lower()
@@ -4497,11 +4385,7 @@ starLayer.Parent = win
             elseif rl:find("ethereal") then rarityColor = Color3.fromRGB(200, 255, 255)
             end
 
-            local stroke = Instance.new("UIStroke")
-            stroke.Color = rarityColor
-            stroke.Thickness = 1
-            stroke.Transparency = 0.5
-            stroke.Parent = row
+            local stroke = Instance.new("UIStroke"); stroke.Color = rarityColor; stroke.Thickness = 1; stroke.Transparency = 0.5; stroke.Parent = row
 
             local numLbl = Instance.new("TextLabel")
             numLbl.Size = UDim2.fromOffset(30, 36)
@@ -4554,9 +4438,7 @@ starLayer.Parent = win
         end
 
         task.defer(function()
-            if eggScroll then
-                eggScroll.CanvasSize = UDim2.new(0, 0, 0, eggListLayout.AbsoluteContentSize.Y + 10)
-            end
+            if eggScroll then eggScroll.CanvasSize = UDim2.new(0, 0, 0, eggListLayout.AbsoluteContentSize.Y + 10) end
         end)
 
         if count == 0 then
@@ -4604,11 +4486,15 @@ starLayer.Parent = win
         if EggState.WindowVisible then closeWindow() else openWindow() end
     end)
 
-    -- ═══ DRAG WINDOW ═══
+    -- ═══ ⭐ FIX: DRAG WINDOW (Benerin error gak bisa geser) ═══
     local dragging = false
     local dragStart, startPos
     winHeader.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            -- Jangan drag kalau klik tombol close (pojok kanan atas)
+            local mouseX = input.Position.X
+            if mouseX > (winHeader.AbsolutePosition.X + winHeader.AbsoluteSize.X - 50) then return end
+            
             dragging = true
             dragStart = input.Position
             startPos = win.Position
@@ -4617,6 +4503,7 @@ starLayer.Parent = win
     UserInputService.InputChanged:Connect(function(input)
         if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - dragStart
+            -- Pake AnchorPoint 0.5, 0.5 berarti offset harus dikaliin manual, tapi karena ini pakai UDim2.new, aman.
             win.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
