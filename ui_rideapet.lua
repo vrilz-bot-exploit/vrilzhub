@@ -985,6 +985,9 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     local isOpen = false
     local selectedValue = default or items[1] or "Choose..."
 
+    -- ═══════════════════════════════════════════════════════
+    -- CONTAINER (field yang diklik)
+    -- ═══════════════════════════════════════════════════════
     local container = Instance.new("Frame")
     container.Size = UDim2.new(1, 0, 0, CFG.DROPDOWN_H)
     container.BackgroundColor3 = C.Surface3
@@ -992,11 +995,21 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     container.ZIndex = 3
     container.Parent = anchorFrame
     registerTheme(container, "Surface3", "BackgroundColor3")
-    container.BackgroundTransparency = 0.55
+    container.BackgroundTransparency = 0.35
 
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 9)
     corner.Parent = container
+
+    -- Gradient body (realistis, bukan flat)
+    local containerGrad = Instance.new("UIGradient")
+    containerGrad.Rotation = 90
+    containerGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 46)),
+        ColorSequenceKeypoint.new(0.5, C.Surface3),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(18, 18, 22)),
+    })
+    containerGrad.Parent = container
 
     local stroke = Instance.new("UIStroke")
     stroke.Color = C.Accent
@@ -1005,21 +1018,47 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     stroke.Parent = container
     registerTheme(stroke, "Accent", "Color")
 
+    -- Top gloss line (realistis)
+    local gloss = Instance.new("Frame")
+    gloss.Size = UDim2.new(1, -14, 0, 1)
+    gloss.Position = UDim2.fromOffset(7, 1)
+    gloss.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    gloss.BackgroundTransparency = 0.85
+    gloss.BorderSizePixel = 0
+    gloss.ZIndex = 4
+    gloss.Parent = container
+    local glossCorner = Instance.new("UICorner")
+    glossCorner.CornerRadius = UDim.new(1, 0)
+    glossCorner.Parent = gloss
+
+    -- ⭐ BINTANG KECIL di kiri (dekorasi)
+    local fieldStar = Instance.new("TextLabel")
+    fieldStar.Size = UDim2.fromOffset(14, 14)
+    fieldStar.Position = UDim2.new(0, 8, 0.5, -7)
+    fieldStar.BackgroundTransparency = 1
+    fieldStar.Text = "✦"
+    fieldStar.TextColor3 = C.Accent2
+    fieldStar.TextSize = 11
+    fieldStar.Font = Enum.Font.GothamBold
+    fieldStar.ZIndex = 4
+    fieldStar.Parent = container
+    registerTheme(fieldStar, "Accent2", "TextColor3")
+
     local selectedLbl = Instance.new("TextLabel")
-    selectedLbl.Size = UDim2.new(1, -44, 1, 0)
-    selectedLbl.Position = UDim2.fromOffset(12, 0)
+    selectedLbl.Size = UDim2.new(1, -54, 1, 0)
+    selectedLbl.Position = UDim2.fromOffset(26, 0)
     selectedLbl.BackgroundTransparency = 1
     selectedLbl.Text = selectedValue
     selectedLbl.TextColor3 = C.Text
     selectedLbl.Font = Enum.Font.GothamSemibold
     selectedLbl.TextSize = CFG.FONT_LABEL
     selectedLbl.TextXAlignment = Enum.TextXAlignment.Left
+    selectedLbl.TextTruncate = Enum.TextTruncate.AtEnd
     selectedLbl.ZIndex = 4
     selectedLbl.Parent = container
     registerTheme(selectedLbl, "Text", "TextColor3")
 
-    -- Real chevron: draw the two strokes instead of using a glyph.
-    -- This guarantees the icon can never render as a square/tofu character.
+    -- Chevron (2 stroke)
     local arrow = Instance.new("Frame")
     arrow.Name = "DropdownChevron"
     arrow.Size = UDim2.fromOffset(IS_MOBILE and 20 or 22, IS_MOBILE and 16 or 18)
@@ -1051,6 +1090,9 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     chevronR.Parent = arrow
     registerTheme(chevronR, "Accent2", "BackgroundColor3")
 
+    -- ═══════════════════════════════════════════════════════
+    -- POPUP
+    -- ═══════════════════════════════════════════════════════
     local listFrame = Instance.new("ScrollingFrame")
     local popupWidth = CFG.DROPDOWN_POPUP_W
     listFrame.Size = UDim2.fromOffset(popupWidth, 0)
@@ -1061,17 +1103,19 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     listFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
     listFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
     listFrame.Visible = false
+    listFrame.ClipsDescendants = true
     listFrame.ZIndex = 2001
     listFrame.Parent = _G.VRILZ_DropdownLayer
     registerTheme(listFrame, "Surface2", "BackgroundColor3")
 
+    -- Shadow luar
     local listShadow = Instance.new("Frame")
     listShadow.Name = "DropdownShadow"
     listShadow.AnchorPoint = Vector2.new(0.5, 0.5)
     listShadow.Position = UDim2.new(0.5, 0, 0.5, 6)
-    listShadow.Size = UDim2.new(1, 10, 1, 10)
+    listShadow.Size = UDim2.new(1, 12, 1, 12)
     listShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    listShadow.BackgroundTransparency = 0.35
+    listShadow.BackgroundTransparency = 0.4
     listShadow.BorderSizePixel = 0
     listShadow.ZIndex = 2000
     listShadow.Visible = false
@@ -1080,30 +1124,118 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     listShadowCorner.CornerRadius = UDim.new(0, 12)
     listShadowCorner.Parent = listShadow
 
+    -- Gradient popup
     local listGradient = Instance.new("UIGradient")
     listGradient.Rotation = 90
     listGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 31, 36)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(12, 13, 16)),
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(38, 40, 48)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(24, 25, 32)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(14, 15, 20)),
     })
     listGradient.Parent = listFrame
 
     local listCorner = Instance.new("UICorner")
-    listCorner.CornerRadius = UDim.new(0, 10)
+    listCorner.CornerRadius = UDim.new(0, 11)
     listCorner.Parent = listFrame
 
     local listStroke = Instance.new("UIStroke")
     listStroke.Color = C.Accent
-    listStroke.Transparency = 0.2
+    listStroke.Transparency = 0.15
     listStroke.Thickness = 2
     listStroke.Parent = listFrame
     registerTheme(listStroke, "Accent", "Color")
 
+    -- ⭐ TOP HEADER POPUP dengan BINTANG (dekorasi realistis)
+    local popupHeader = Instance.new("Frame")
+    popupHeader.Size = UDim2.new(1, -8, 0, 22)
+    popupHeader.Position = UDim2.fromOffset(4, 4)
+    popupHeader.BackgroundColor3 = C.Surface3
+    popupHeader.BackgroundTransparency = 0.3
+    popupHeader.BorderSizePixel = 0
+    popupHeader.ZIndex = 2004
+    popupHeader.Parent = listFrame
+    registerTheme(popupHeader, "Surface3", "BackgroundColor3")
+
+    local phCorner = Instance.new("UICorner")
+    phCorner.CornerRadius = UDim.new(0, 7)
+    phCorner.Parent = popupHeader
+
+    local phGrad = Instance.new("UIGradient")
+    phGrad.Rotation = 0
+    phGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, C.Accent),
+        ColorSequenceKeypoint.new(0.5, C.Accent2),
+        ColorSequenceKeypoint.new(1, C.Accent),
+    })
+    phGrad.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.75),
+        NumberSequenceKeypoint.new(0.5, 0.55),
+        NumberSequenceKeypoint.new(1, 0.75),
+    })
+    phGrad.Parent = popupHeader
+
+    local phStarL = Instance.new("TextLabel")
+    phStarL.Size = UDim2.fromOffset(16, 16)
+    phStarL.Position = UDim2.new(0, 4, 0.5, -8)
+    phStarL.BackgroundTransparency = 1
+    phStarL.Text = "✦"
+    phStarL.TextColor3 = C.Accent2
+    phStarL.TextSize = 12
+    phStarL.Font = Enum.Font.GothamBold
+    phStarL.ZIndex = 2005
+    phStarL.Parent = popupHeader
+    registerTheme(phStarL, "Accent2", "TextColor3")
+
+    local phTitle = Instance.new("TextLabel")
+    phTitle.Size = UDim2.new(1, -50, 1, 0)
+    phTitle.Position = UDim2.fromOffset(22, 0)
+    phTitle.BackgroundTransparency = 1
+    phTitle.Text = "PILIH OPSI"
+    phTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    phTitle.Font = Enum.Font.GothamBold
+    phTitle.TextSize = IS_MOBILE and 9 or 10
+    phTitle.TextXAlignment = Enum.TextXAlignment.Left
+    phTitle.ZIndex = 2005
+    phTitle.Parent = popupHeader
+
+    local phStarR = Instance.new("TextLabel")
+    phStarR.Size = UDim2.fromOffset(16, 16)
+    phStarR.Position = UDim2.new(1, -20, 0.5, -8)
+    phStarR.BackgroundTransparency = 1
+    phStarR.Text = "✦"
+    phStarR.TextColor3 = C.Accent2
+    phStarR.TextSize = 12
+    phStarR.Font = Enum.Font.GothamBold
+    phStarR.ZIndex = 2005
+    phStarR.Parent = popupHeader
+    registerTheme(phStarR, "Accent2", "TextColor3")
+
+    -- Sparkle animation di header
+    task.spawn(function()
+        local stars = {phStarL, phStarR}
+        while popupHeader.Parent do
+            task.wait(0.6 + math.random() * 0.6)
+            if not popupHeader.Parent then break end
+            for _, s in ipairs(stars) do
+                if s.Parent then
+                    TweenService:Create(s, TweenInfo.new(0.3), {TextTransparency = 0.7}):Play()
+                end
+            end
+            task.wait(0.3)
+            for _, s in ipairs(stars) do
+                if s.Parent then
+                    TweenService:Create(s, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
+                end
+            end
+        end
+    end)
+
+    -- Top glow bar
     local listTopGlow = Instance.new("Frame")
     listTopGlow.Size = UDim2.new(1, -18, 0, 2)
     listTopGlow.Position = UDim2.fromOffset(9, 1)
     listTopGlow.BackgroundColor3 = C.Accent2
-    listTopGlow.BackgroundTransparency = 0.08
+    listTopGlow.BackgroundTransparency = 0.05
     listTopGlow.BorderSizePixel = 0
     listTopGlow.ZIndex = 2003
     listTopGlow.Parent = listFrame
@@ -1114,9 +1246,9 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
 
     local popupHighlight = Instance.new("Frame")
     popupHighlight.Size = UDim2.new(1, -16, 0, 1)
-    popupHighlight.Position = UDim2.fromOffset(8, 4)
+    popupHighlight.Position = UDim2.fromOffset(8, 3)
     popupHighlight.BackgroundColor3 = Color3.new(1, 1, 1)
-    popupHighlight.BackgroundTransparency = 0.88
+    popupHighlight.BackgroundTransparency = 0.85
     popupHighlight.BorderSizePixel = 0
     popupHighlight.ZIndex = 2003
     popupHighlight.Parent = listFrame
@@ -1126,15 +1258,16 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
     listLayout.SortOrder = Enum.SortOrder.LayoutOrder
     listLayout.Parent = listFrame
 
+    -- ⚠️ Padding top dinaikkan biar item gak nabrak header popup
     local listPad = Instance.new("UIPadding")
-    listPad.PaddingTop = UDim.new(0, 4)
+    listPad.PaddingTop = UDim.new(0, 30)
     listPad.PaddingBottom = UDim.new(0, 4)
     listPad.PaddingLeft = UDim.new(0, 4)
     listPad.PaddingRight = UDim.new(0, 4)
     listPad.Parent = listFrame
 
     local itemHeight = CFG.DROPDOWN_ITEM
-    local maxH = math.min(#items * (itemHeight + 2) + 10, IS_MOBILE and 126 or 148)
+    local maxH = math.min(#items * (itemHeight + 2) + 34, IS_MOBILE and 160 or 190)
 
     local function closeList()
         isOpen = false
@@ -1158,11 +1291,11 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
 
         isOpen = true
         listFrame.Visible = true
+        listShadow.Visible = true
         chevronL.Rotation = -45
         chevronR.Rotation = 45
 
-        -- Compact popover: jangan selebar field/window.
-        local width = math.min(CFG.DROPDOWN_POPUP_W, math.max(140, container.AbsoluteSize.X - 12))
+        local width = math.min(CFG.DROPDOWN_POPUP_W + 30, math.max(160, container.AbsoluteSize.X - 8))
         listFrame.Size = UDim2.fromOffset(width, 0)
 
         local containerAbsX = container.AbsolutePosition.X
@@ -1173,9 +1306,8 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
         local screenW = viewport.X
         local screenH = viewport.Y
         local spaceBelow = screenH - (containerAbsY + containerAbsH + 8)
-        local realMaxH = math.min(maxH, math.max(spaceBelow, 90))
+        local realMaxH = math.min(maxH, math.max(spaceBelow, 100))
 
-        -- Tetap tepat di bawah dropdown, rata kanan dengan tombol <>.
         local popupRight = math.min(screenW - 8, containerAbsX + containerAbsW)
         local popupLeft = math.max(8, popupRight - width)
         listFrame.Position = UDim2.fromOffset(popupLeft, containerAbsY + containerAbsH + 6)
@@ -1201,25 +1333,36 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
         end
     end)
 
+    -- ═══════════════════════════════════════════════════════
+    -- ITEMS
+    -- ═══════════════════════════════════════════════════════
     for i, item in ipairs(items) do
         local opt = Instance.new("TextButton")
         opt.Size = UDim2.new(1, -8, 0, itemHeight)
         opt.Position = UDim2.fromOffset(4, 0)
         opt.BackgroundColor3 = C.Surface3
-        opt.Text = item
-        opt.TextColor3 = C.Text
-        opt.Font = Enum.Font.GothamSemibold
-        opt.TextSize = CFG.FONT_LABEL
+        opt.Text = ""
         opt.AutoButtonColor = false
         opt.ZIndex = 2002
         opt.LayoutOrder = i
         opt.Parent = listFrame
         registerTheme(opt, "Surface3", "BackgroundColor3")
-        registerTheme(opt, "Text", "TextColor3")
 
         local optCorner = Instance.new("UICorner")
-        optCorner.CornerRadius = UDim.new(0, 8)
+        optCorner.CornerRadius = UDim.new(0, 7)
         optCorner.Parent = opt
+
+        local optGrad = Instance.new("UIGradient")
+        optGrad.Rotation = 90
+        optGrad.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 41, 48)),
+            ColorSequenceKeypoint.new(1, C.Surface3),
+        })
+        optGrad.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.7),
+            NumberSequenceKeypoint.new(1, 0.9),
+        })
+        optGrad.Parent = opt
 
         local optStroke = Instance.new("UIStroke")
         optStroke.Color = C.Accent
@@ -1227,20 +1370,51 @@ local function makeDropdownGlobal(anchorFrame, items, default, onSelect)
         optStroke.Transparency = 1
         optStroke.Parent = opt
 
+        -- ⭐ Bintang kecil di tiap item
+        local itemStar = Instance.new("TextLabel")
+        itemStar.Size = UDim2.fromOffset(14, 14)
+        itemStar.Position = UDim2.fromOffset(6, (itemHeight - 14) / 2)
+        itemStar.BackgroundTransparency = 1
+        itemStar.Text = (item == selectedValue) and "★" or "✦"
+        itemStar.TextColor3 = (item == selectedValue) and C.Accent2 or C.Muted
+        itemStar.TextSize = 11
+        itemStar.Font = Enum.Font.GothamBold
+        itemStar.ZIndex = 2003
+        itemStar.Parent = opt
+        registerTheme(itemStar, "Muted", "TextColor3")
+
+        local optTxt = Instance.new("TextLabel")
+        optTxt.Size = UDim2.new(1, -30, 1, 0)
+        optTxt.Position = UDim2.fromOffset(24, 0)
+        optTxt.BackgroundTransparency = 1
+        optTxt.Text = item
+        optTxt.TextColor3 = C.Text
+        optTxt.Font = Enum.Font.GothamSemibold
+        optTxt.TextSize = CFG.FONT_LABEL
+        optTxt.TextXAlignment = Enum.TextXAlignment.Left
+        optTxt.TextTruncate = Enum.TextTruncate.AtEnd
+        optTxt.ZIndex = 2003
+        optTxt.Parent = opt
+        registerTheme(optTxt, "Text", "TextColor3")
+
         if item == selectedValue then
             opt.BackgroundColor3 = C.Accent
+            opt.BackgroundTransparency = 0.35
             optStroke.Transparency = 0.15
+            itemStar.TextColor3 = Color3.fromRGB(255, 255, 255)
         end
 
         opt.MouseEnter:Connect(function()
             if item ~= selectedValue then
                 TweenService:Create(opt, TweenInfo.new(0.12), {BackgroundColor3 = C.Surface2}):Play()
+                TweenService:Create(itemStar, TweenInfo.new(0.12), {TextColor3 = C.Accent2}):Play()
             end
             TweenService:Create(optStroke, TweenInfo.new(0.12), {Transparency = item == selectedValue and 0.15 or 0.45}):Play()
         end)
         opt.MouseLeave:Connect(function()
             if item ~= selectedValue then
                 TweenService:Create(opt, TweenInfo.new(0.12), {BackgroundColor3 = C.Surface3}):Play()
+                TweenService:Create(itemStar, TweenInfo.new(0.12), {TextColor3 = C.Muted}):Play()
             end
             TweenService:Create(optStroke, TweenInfo.new(0.12), {Transparency = item == selectedValue and 0.15 or 1}):Play()
         end)
@@ -1267,10 +1441,20 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     container.ZIndex = 3
     container.Parent = anchorFrame
     registerTheme(container, "Surface3", "BackgroundColor3")
+    container.BackgroundTransparency = 0.35
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
+    corner.CornerRadius = UDim.new(0, 9)
     corner.Parent = container
+
+    local containerGrad = Instance.new("UIGradient")
+    containerGrad.Rotation = 90
+    containerGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 46)),
+        ColorSequenceKeypoint.new(0.5, C.Surface3),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(18, 18, 22)),
+    })
+    containerGrad.Parent = container
 
     local stroke = Instance.new("UIStroke")
     stroke.Color = C.Accent
@@ -1279,20 +1463,47 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     stroke.Parent = container
     registerTheme(stroke, "Accent", "Color")
 
+    -- Top gloss
+    local gloss = Instance.new("Frame")
+    gloss.Size = UDim2.new(1, -14, 0, 1)
+    gloss.Position = UDim2.fromOffset(7, 1)
+    gloss.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    gloss.BackgroundTransparency = 0.85
+    gloss.BorderSizePixel = 0
+    gloss.ZIndex = 4
+    gloss.Parent = container
+    local glossCorner = Instance.new("UICorner")
+    glossCorner.CornerRadius = UDim.new(1, 0)
+    glossCorner.Parent = gloss
+
+    -- ⭐ Bintang kiri
+    local fieldStar = Instance.new("TextLabel")
+    fieldStar.Size = UDim2.fromOffset(14, 14)
+    fieldStar.Position = UDim2.new(0, 8, 0.5, -7)
+    fieldStar.BackgroundTransparency = 1
+    fieldStar.Text = "✦"
+    fieldStar.TextColor3 = C.Accent2
+    fieldStar.TextSize = 11
+    fieldStar.Font = Enum.Font.GothamBold
+    fieldStar.ZIndex = 4
+    fieldStar.Parent = container
+    registerTheme(fieldStar, "Accent2", "TextColor3")
+
     local selectedLbl = Instance.new("TextLabel")
-    selectedLbl.Size = UDim2.new(1, -44, 1, 0)
-    selectedLbl.Position = UDim2.fromOffset(12, 0)
+    selectedLbl.Size = UDim2.new(1, -54, 1, 0)
+    selectedLbl.Position = UDim2.fromOffset(26, 0)
     selectedLbl.BackgroundTransparency = 1
     selectedLbl.Text = "..."
     selectedLbl.TextColor3 = C.Text
     selectedLbl.Font = Enum.Font.GothamSemibold
     selectedLbl.TextSize = CFG.FONT_LABEL
     selectedLbl.TextXAlignment = Enum.TextXAlignment.Left
+    selectedLbl.TextTruncate = Enum.TextTruncate.AtEnd
     selectedLbl.ZIndex = 4
     selectedLbl.Parent = container
     registerTheme(selectedLbl, "Text", "TextColor3")
 
-    -- Draw the rarity chevron from two small strokes so it never becomes a square/tofu glyph.
+    -- Chevron
     local arrow = Instance.new("Frame")
     arrow.Name = "RarityChevron"
     arrow.Size = UDim2.fromOffset(IS_MOBILE and 20 or 22, IS_MOBILE and 16 or 18)
@@ -1322,6 +1533,9 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     arrowR.Parent = arrow
     registerTheme(arrowR, "Accent", "BackgroundColor3")
 
+    -- ═══════════════════════════════════════════════════════
+    -- POPUP MULTI
+    -- ═══════════════════════════════════════════════════════
     local listFrame = Instance.new("ScrollingFrame")
     local popupWidth = CFG.DROPDOWN_POPUP_W
     listFrame.Size = UDim2.fromOffset(popupWidth, 0)
@@ -1332,6 +1546,7 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     listFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
     listFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
     listFrame.Visible = false
+    listFrame.ClipsDescendants = true
     listFrame.ZIndex = 2001
     listFrame.Parent = _G.VRILZ_DropdownLayer
     registerTheme(listFrame, "Surface2", "BackgroundColor3")
@@ -1339,18 +1554,19 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     local listGradient = Instance.new("UIGradient")
     listGradient.Rotation = 90
     listGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 31, 36)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(12, 13, 16)),
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(38, 40, 48)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(24, 25, 32)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(14, 15, 20)),
     })
     listGradient.Parent = listFrame
 
     local listCorner = Instance.new("UICorner")
-    listCorner.CornerRadius = UDim.new(0, 10)
+    listCorner.CornerRadius = UDim.new(0, 11)
     listCorner.Parent = listFrame
 
     local listStroke = Instance.new("UIStroke")
     listStroke.Color = C.Accent
-    listStroke.Transparency = 0.2
+    listStroke.Transparency = 0.15
     listStroke.Thickness = 2
     listStroke.Parent = listFrame
     registerTheme(listStroke, "Accent", "Color")
@@ -1359,9 +1575,9 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     listShadow.Name = "DropdownShadow"
     listShadow.AnchorPoint = Vector2.new(0.5, 0.5)
     listShadow.Position = UDim2.new(0.5, 0, 0.5, 6)
-    listShadow.Size = UDim2.new(1, 10, 1, 10)
+    listShadow.Size = UDim2.new(1, 12, 1, 12)
     listShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    listShadow.BackgroundTransparency = 0.35
+    listShadow.BackgroundTransparency = 0.4
     listShadow.BorderSizePixel = 0
     listShadow.ZIndex = 2000
     listShadow.Visible = false
@@ -1370,11 +1586,95 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     listShadowCorner.CornerRadius = UDim.new(0, 12)
     listShadowCorner.Parent = listShadow
 
+    -- ⭐ POPUP HEADER dengan bintang
+    local popupHeader = Instance.new("Frame")
+    popupHeader.Size = UDim2.new(1, -8, 0, 22)
+    popupHeader.Position = UDim2.fromOffset(4, 4)
+    popupHeader.BackgroundColor3 = C.Surface3
+    popupHeader.BackgroundTransparency = 0.3
+    popupHeader.BorderSizePixel = 0
+    popupHeader.ZIndex = 2004
+    popupHeader.Parent = listFrame
+    registerTheme(popupHeader, "Surface3", "BackgroundColor3")
+
+    local phCorner = Instance.new("UICorner")
+    phCorner.CornerRadius = UDim.new(0, 7)
+    phCorner.Parent = popupHeader
+
+    local phGrad = Instance.new("UIGradient")
+    phGrad.Rotation = 0
+    phGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, C.Accent),
+        ColorSequenceKeypoint.new(0.5, C.Accent2),
+        ColorSequenceKeypoint.new(1, C.Accent),
+    })
+    phGrad.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.75),
+        NumberSequenceKeypoint.new(0.5, 0.55),
+        NumberSequenceKeypoint.new(1, 0.75),
+    })
+    phGrad.Parent = popupHeader
+
+    local phStarL = Instance.new("TextLabel")
+    phStarL.Size = UDim2.fromOffset(16, 16)
+    phStarL.Position = UDim2.new(0, 4, 0.5, -8)
+    phStarL.BackgroundTransparency = 1
+    phStarL.Text = "✦"
+    phStarL.TextColor3 = C.Accent2
+    phStarL.TextSize = 12
+    phStarL.Font = Enum.Font.GothamBold
+    phStarL.ZIndex = 2005
+    phStarL.Parent = popupHeader
+    registerTheme(phStarL, "Accent2", "TextColor3")
+
+    local phTitle = Instance.new("TextLabel")
+    phTitle.Size = UDim2.new(1, -50, 1, 0)
+    phTitle.Position = UDim2.fromOffset(22, 0)
+    phTitle.BackgroundTransparency = 1
+    phTitle.Text = "PILIH (BISA BANYAK)"
+    phTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    phTitle.Font = Enum.Font.GothamBold
+    phTitle.TextSize = IS_MOBILE and 9 or 10
+    phTitle.TextXAlignment = Enum.TextXAlignment.Left
+    phTitle.ZIndex = 2005
+    phTitle.Parent = popupHeader
+
+    local phStarR = Instance.new("TextLabel")
+    phStarR.Size = UDim2.fromOffset(16, 16)
+    phStarR.Position = UDim2.new(1, -20, 0.5, -8)
+    phStarR.BackgroundTransparency = 1
+    phStarR.Text = "✦"
+    phStarR.TextColor3 = C.Accent2
+    phStarR.TextSize = 12
+    phStarR.Font = Enum.Font.GothamBold
+    phStarR.ZIndex = 2005
+    phStarR.Parent = popupHeader
+    registerTheme(phStarR, "Accent2", "TextColor3")
+
+    task.spawn(function()
+        local stars = {phStarL, phStarR}
+        while popupHeader.Parent do
+            task.wait(0.6 + math.random() * 0.6)
+            if not popupHeader.Parent then break end
+            for _, s in ipairs(stars) do
+                if s.Parent then
+                    TweenService:Create(s, TweenInfo.new(0.3), {TextTransparency = 0.7}):Play()
+                end
+            end
+            task.wait(0.3)
+            for _, s in ipairs(stars) do
+                if s.Parent then
+                    TweenService:Create(s, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
+                end
+            end
+        end
+    end)
+
     local popupHighlight = Instance.new("Frame")
     popupHighlight.Size = UDim2.new(1, -16, 0, 1)
-    popupHighlight.Position = UDim2.fromOffset(8, 4)
+    popupHighlight.Position = UDim2.fromOffset(8, 3)
     popupHighlight.BackgroundColor3 = Color3.new(1, 1, 1)
-    popupHighlight.BackgroundTransparency = 0.88
+    popupHighlight.BackgroundTransparency = 0.85
     popupHighlight.BorderSizePixel = 0
     popupHighlight.ZIndex = 2003
     popupHighlight.Parent = listFrame
@@ -1385,14 +1685,14 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
     listLayout.Parent = listFrame
 
     local listPad = Instance.new("UIPadding")
-    listPad.PaddingTop = UDim.new(0, 4)
+    listPad.PaddingTop = UDim.new(0, 30)
     listPad.PaddingBottom = UDim.new(0, 4)
     listPad.PaddingLeft = UDim.new(0, 4)
     listPad.PaddingRight = UDim.new(0, 4)
     listPad.Parent = listFrame
 
     local itemHeight = CFG.DROPDOWN_ITEM
-    local maxH = math.min(#items * (itemHeight + 2) + 10, IS_MOBILE and 126 or 148)
+    local maxH = math.min(#items * (itemHeight + 2) + 34, IS_MOBILE and 160 or 190)
 
     local optionButtons = {}
 
@@ -1416,8 +1716,10 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         local opt = optionButtons[item]
         if not opt then return end
         local on = sharedTable[item] == true
-        opt.chk.Text = on and "✓" or "○"
-        opt.bg.BackgroundColor3 = on and C.Surface2 or C.Surface3
+        opt.chk.Text = on and "★" or "☆"
+        opt.chk.TextColor3 = on and C.Accent2 or C.Muted
+        opt.bg.BackgroundColor3 = on and C.Accent or C.Surface3
+        opt.bg.BackgroundTransparency = on and 0.35 or 0
         opt.txt.TextColor3 = C.Text
     end
 
@@ -1443,11 +1745,11 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
 
         isOpen = true
         listFrame.Visible = true
+        listShadow.Visible = true
         arrowL.Rotation = -45
         arrowR.Rotation = 45
 
-        -- Compact popover: jangan selebar field/window.
-        local width = math.min(CFG.DROPDOWN_POPUP_W, math.max(140, container.AbsoluteSize.X - 12))
+        local width = math.min(CFG.DROPDOWN_POPUP_W + 30, math.max(160, container.AbsoluteSize.X - 8))
         listFrame.Size = UDim2.fromOffset(width, 0)
 
         local containerAbsX = container.AbsolutePosition.X
@@ -1458,9 +1760,8 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         local screenW = viewport.X
         local screenH = viewport.Y
         local spaceBelow = screenH - (containerAbsY + containerAbsH + 8)
-        local realMaxH = math.min(maxH, math.max(spaceBelow, 90))
+        local realMaxH = math.min(maxH, math.max(spaceBelow, 100))
 
-        -- Tetap tepat di bawah dropdown, rata kanan dengan tombol <>.
         local popupRight = math.min(screenW - 8, containerAbsX + containerAbsW)
         local popupLeft = math.max(8, popupRight - width)
         listFrame.Position = UDim2.fromOffset(popupLeft, containerAbsY + containerAbsH + 6)
@@ -1499,35 +1800,51 @@ local function makeDropdownMulti(anchorFrame, items, sharedTable, itemColors, on
         registerTheme(opt, "Surface3", "BackgroundColor3")
 
         local optCorner = Instance.new("UICorner")
-        optCorner.CornerRadius = UDim.new(0, 5)
+        optCorner.CornerRadius = UDim.new(0, 7)
         optCorner.Parent = opt
 
+        local optGrad = Instance.new("UIGradient")
+        optGrad.Rotation = 90
+        optGrad.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 41, 48)),
+            ColorSequenceKeypoint.new(1, C.Surface3),
+        })
+        optGrad.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.7),
+            NumberSequenceKeypoint.new(1, 0.9),
+        })
+        optGrad.Parent = opt
+
+        -- ⭐ Bintang check (★ = on, ☆ = off)
         local chk = Instance.new("TextLabel")
-        chk.Size = UDim2.fromOffset(24, itemHeight)
-        chk.Position = UDim2.fromOffset(8, 0)
+        chk.Size = UDim2.fromOffset(20, itemHeight)
+        chk.Position = UDim2.fromOffset(6, 0)
         chk.BackgroundTransparency = 1
-        chk.Text = sharedTable[item] and "✓" or "○"
-        chk.TextColor3 = C.Accent
+        chk.Text = sharedTable[item] and "★" or "☆"
+        chk.TextColor3 = sharedTable[item] and C.Accent2 or C.Muted
         chk.Font = Enum.Font.GothamBold
         chk.TextSize = 14
         chk.ZIndex = 2003
         chk.Parent = opt
+        registerTheme(chk, "Accent2", "TextColor3")
 
         local txt = Instance.new("TextLabel")
         txt.Size = UDim2.new(1, -40, 1, 0)
-        txt.Position = UDim2.fromOffset(36, 0)
+        txt.Position = UDim2.fromOffset(30, 0)
         txt.BackgroundTransparency = 1
         txt.Text = item
         txt.TextColor3 = C.Text
         txt.Font = Enum.Font.GothamBold
         txt.TextSize = CFG.FONT_LABEL
         txt.TextXAlignment = Enum.TextXAlignment.Left
+        txt.TextTruncate = Enum.TextTruncate.AtEnd
         txt.ZIndex = 2003
         txt.Parent = opt
+        registerTheme(txt, "Text", "TextColor3")
 
         if sharedTable[item] then
-            opt.BackgroundColor3 = C.Surface2
-            txt.TextColor3 = C.Text
+            opt.BackgroundColor3 = C.Accent
+            opt.BackgroundTransparency = 0.35
         end
 
         optionButtons[item] = {bg = opt, chk = chk, txt = txt}
