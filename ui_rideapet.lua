@@ -2683,6 +2683,7 @@ local GFX = {
     LoopThread = nil,
     TextureBackup = {},
     HiddenParts = {},
+    Connections = {},
 }
 
 local function gfx_save(obj, prop)
