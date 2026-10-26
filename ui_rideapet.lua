@@ -3625,7 +3625,7 @@ local function buildEggExecutorGUI(screenGui)
     task.spawn(function()
         local lastHolding = nil
         while task.wait(0.5) do
-            local holding, eggName = pcall(function()
+            local ok, holding, eggName = pcall(function()
                 local char = LocalPlayer.Character
                 if not char then return false, nil end
                 local wooden = char:FindFirstChild("Wooden")
@@ -3637,7 +3637,7 @@ local function buildEggExecutorGUI(screenGui)
                 end
                 return false, nil
             end)
-            if holding and eggName and eggName ~= lastHolding then
+            if ok and holding == true and type(eggName) == "string" and eggName ~= lastHolding then
                 lastHolding = eggName
                 local clean = eggName:gsub("_Model$", ""):gsub("_", " ")
                 clean = clean:gsub("%s*Egg%s*$", "")
