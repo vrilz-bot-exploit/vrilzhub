@@ -2819,10 +2819,10 @@ function Features.startVolcanicHunt()
                                     if not Shared.VolcanicHunt_Enabled then break end
                                     task.wait(1)
                                     if isHoldingEggMutation() then
-                                        if Shared.Notify then
-                                            Shared.Notify("🔥 Wait 4 seconds!", "success")
-                                        end
-                                        break
+                                    if Shared.Notify then
+                                       Shared.Notify(getWaitNotifText(), "success")  -- ⭐ pake fungsi
+                                       end
+                                     break
                                     end
                                 end
                             end
@@ -5384,11 +5384,12 @@ local function seStealNormalEgg(egg)
     local waitStart = os.clock()
     while os.clock() - waitStart < 20 do
         task.wait(1)
-        if isHoldingEggMutation() then
-            StealExecState.Status = "✅ Mutation complete!"
-            if Shared.Notify then Shared.Notify("🔥 Wait 4 seconds!", "success") end
-            task.wait(4)   -- ⭐ 4 detik persis kayak request lu
-            break
+if isHoldingEggMutation() then
+    StealExecState.Status = "✅ Mutation complete!"
+    if Shared.Notify then Shared.Notify(getWaitNotifText(), "success") end
+    -- ⭐ Wait dinamis: Instant → 8s, Step → 6s
+    task.wait((Shared.ReturnMode or "Step") == "Instant" and 8 or 6)
+         break
         end
     end
 
