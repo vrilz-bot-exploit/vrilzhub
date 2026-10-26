@@ -3771,19 +3771,40 @@ local function buildEggExecutorGUI(screenGui)
     })
     pGrad.Parent = planet
 
+    -- ⭐ UPGRADED STARFIELD (Lebih gacor, kelap-kelip smooth, warna warni)
     local starLayer = Instance.new("Frame")
     starLayer.Size = UDim2.fromScale(1, 1); starLayer.BackgroundTransparency = 1; starLayer.ZIndex = 3; starLayer.Parent = bgFrame
+
+    local starColors = {
+        Color3.fromRGB(255, 255, 255), Color3.fromRGB(180, 220, 255),
+        Color3.fromRGB(255, 220, 180), Color3.fromRGB(200, 180, 255), Color3.fromRGB(255, 180, 220)
+    }
     local stars = {}
-    for i = 1, 100 do
+    -- Tambah jadi 160 bintang
+    for i = 1, 160 do
         local star = Instance.new("Frame")
         local sz = math.random(1, 3)
         star.Size = UDim2.fromOffset(sz, sz)
-        star.Position = UDim2.fromScale(math.random(0, 100)/100, math.random(0, 100)/100)
-        star.BackgroundColor3 = i % 5 == 0 and COLOR_GOLD or Color3.fromRGB(255, 255, 255)
-        star.BackgroundTransparency = math.random(20, 90) / 100
+        star.Position = UDim2.fromScale(math.random(0, 1000)/1000, math.random(0, 1000)/1000)
+        star.BackgroundColor3 = i % 7 == 0 and COLOR_GOLD or starColors[math.random(1, #starColors)]
+        star.BackgroundTransparency = math.random(20, 80) / 100
         star.BorderSizePixel = 0; star.ZIndex = 4; star.Parent = starLayer
         local sCorner = Instance.new("UICorner"); sCorner.CornerRadius = UDim.new(1, 0); sCorner.Parent = star
-        table.insert(stars, { frame = star, baseTrans = star.BackgroundTransparency, speed = math.random(10, 40) / 100, offset = math.random() * math.pi * 2 })
+        
+        -- Glow halo
+        local glow = Instance.new("Frame")
+        glow.AnchorPoint = Vector2.new(0.5, 0.5); glow.Position = UDim2.fromScale(0.5, 0.5)
+        glow.Size = UDim2.new(3, 0, 3, 0); glow.BackgroundColor3 = star.BackgroundColor3
+        glow.BackgroundTransparency = 0.9; glow.BorderSizePixel = 0; glow.ZIndex = 3; glow.Parent = star
+        local gCorner = Instance.new("UICorner"); gCorner.CornerRadius = UDim.new(1, 0); gCorner.Parent = glow
+
+        table.insert(stars, {
+            frame = star, glow = glow,
+            baseTrans = star.BackgroundTransparency,
+            baseGlowTrans = glow.BackgroundTransparency,
+            speed = math.random(20, 60) / 100,
+            offset = math.random() * math.pi * 2
+        })
     end
 
     task.spawn(function()
@@ -3793,7 +3814,13 @@ local function buildEggExecutorGUI(screenGui)
             local t = tick()
             for _, s in ipairs(stars) do
                 if s.frame.Parent then
-                    s.frame.BackgroundTransparency = math.clamp(s.baseTrans + math.sin(t * s.speed + s.offset) * 0.4, 0, 1)
+                    -- Animasi twinkle smooth pakai Sine
+                    local twinkle = math.sin(t * s.speed + s.offset)
+                    s.frame.BackgroundTransparency = math.clamp(s.baseTrans + twinkle * 0.4, 0, 1)
+                    s.glow.BackgroundTransparency = math.clamp(s.baseGlowTrans + twinkle * 0.1, 0, 1)
+                    
+                    -- Sedikit pergerakan rotasi biar hidup
+                    s.frame.Rotation = s.frame.Rotation + 0.5
                 end
             end
         end
@@ -3810,7 +3837,6 @@ local function buildEggExecutorGUI(screenGui)
 
     local whCorner = Instance.new("UICorner"); whCorner.CornerRadius = UDim.new(0, 16); whCorner.Parent = winHeader
     
-    -- Shine effect di header
     local headerShine = Instance.new("Frame")
     headerShine.Size = UDim2.new(0, 150, 1, 0)
     headerShine.Position = UDim2.new(-1, 0, 0, 0)
@@ -3860,7 +3886,7 @@ local function buildEggExecutorGUI(screenGui)
     winClose.MouseEnter:Connect(function() TweenService:Create(winClose, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 80, 80), BackgroundTransparency = 0}):Play() end)
     winClose.MouseLeave:Connect(function() TweenService:Create(winClose, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(180, 50, 50), BackgroundTransparency = 0.3}):Play() end)
 
-    -- ═══ TAB BAR (Premium dengan Glow & Icons) ═══
+    -- ═══ TAB BAR ═══
     local tabBar = Instance.new("Frame")
     tabBar.Size = UDim2.new(1, -32, 0, 44); tabBar.Position = UDim2.fromOffset(16, 74)
     tabBar.BackgroundColor3 = COLOR_GLASS; tabBar.BackgroundTransparency = 0.5
@@ -3904,7 +3930,7 @@ local function buildEggExecutorGUI(screenGui)
     content.Size = UDim2.new(1, -32, 1, -140); content.Position = UDim2.fromOffset(16, 124)
     content.BackgroundTransparency = 1; content.ZIndex = 8; content.ClipsDescendants = true; content.Parent = win
 
-    -- ═══ TAB: STATS (Premium) ═══
+    -- ═══ TAB: STATS ═══
     local statsTab = Instance.new("Frame")
     statsTab.Size = UDim2.fromScale(1, 1); statsTab.BackgroundTransparency = 1; statsTab.ZIndex = 9; statsTab.Parent = content
 
@@ -3969,7 +3995,7 @@ local function buildEggExecutorGUI(screenGui)
     local rareCard, rareVal = makeStatCard("💎", "RARE EGGS", Color3.fromRGB(255, 100, 255)); rareCard.Parent = grid
     local avgCard, avgVal = makeStatCard("📈", "AVG/JAM", Color3.fromRGB(100, 200, 255)); avgCard.Parent = grid
 
-    -- ═══ TAB: EGGS (Premium) ═══
+    -- ═══ TAB: EGGS ═══
     local eggsTab = Instance.new("Frame")
     eggsTab.Size = UDim2.fromScale(1, 1); eggsTab.BackgroundTransparency = 1; eggsTab.Visible = false; eggsTab.ZIndex = 9; eggsTab.Parent = content
 
@@ -3982,7 +4008,7 @@ local function buildEggExecutorGUI(screenGui)
     local eggListLayout = Instance.new("UIListLayout")
     eggListLayout.SortOrder = Enum.SortOrder.LayoutOrder; eggListLayout.Padding = UDim.new(0, 8); eggListLayout.Parent = eggScroll
 
-    -- ═══ TAB: AVATAR (Premium) ═══
+    -- ═══ TAB: AVATAR ═══
     local avatarTab = Instance.new("Frame")
     avatarTab.Size = UDim2.fromScale(1, 1); avatarTab.BackgroundTransparency = 1; avatarTab.Visible = false; avatarTab.ZIndex = 9; avatarTab.Parent = content
 
@@ -4003,12 +4029,15 @@ local function buildEggExecutorGUI(screenGui)
     avPlaceholder.Text = "👤 Loading avatar..."; avPlaceholder.TextColor3 = COLOR_CYAN
     avPlaceholder.Font = Enum.Font.GothamBold; avPlaceholder.TextSize = 16; avPlaceholder.ZIndex = 11; avPlaceholder.Parent = viewportFrame
 
-    -- ⭐ AVATAR LOAD, DRAG & ZOOM CONTROL
+    -- ⭐ AVATAR SMOOTH ROTATION & ZOOM
     local avatarClone = nil
     local isDraggingAv = false
     local dragStartX, dragStartY = 0, 0
+    
+    -- ⭐ INI KUNCI SMOOTHNYA: Target vs Current
+    local targetRotX, targetRotY = 0, 0
     local currentRotX, currentRotY = 0, 0
-    local startRotX, startRotY = 0, 0
+    
     local currentZoom = -8.5
     local autoRotate = true
 
@@ -4042,8 +4071,10 @@ local function buildEggExecutorGUI(screenGui)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 isDraggingAv = true
                 dragStartX, dragStartY = input.Position.X, input.Position.Y
-                startRotX, startRotY = currentRotX, currentRotY
-                autoRotate = false -- Matikan auto-rotate saat di-drag
+                -- Simpan posisi target saat ini buat start drag
+                targetRotX = currentRotX
+                targetRotY = currentRotY
+                autoRotate = false
             end
         end)
 
@@ -4051,8 +4082,9 @@ local function buildEggExecutorGUI(screenGui)
             if isDraggingAv and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
                 local deltaX = input.Position.X - dragStartX
                 local deltaY = input.Position.Y - dragStartY
-                currentRotY = startRotY + (deltaX * 0.8)
-                currentRotX = startRotX + (deltaY * 0.5)
+                -- Update TARGET (bukan current) biar smooth
+                targetRotY = targetRotY + (deltaX * 0.8)
+                targetRotX = targetRotX + (deltaY * 0.5)
             end
         end)
 
@@ -4062,22 +4094,25 @@ local function buildEggExecutorGUI(screenGui)
             end
         end)
 
-        -- Animasi loop
-        task.spawn(function()
-            while viewportFrame.Parent and clone.Parent do
-                task.wait(0.03)
-                if not avatarTab.Visible then continue end
-                
-                if autoRotate and not isDraggingAv then
-                    currentRotY = currentRotY + 0.5
-                end
-
-                clone:PivotTo(CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(currentRotX), math.rad(currentRotY), 0))
-                
-                -- Kamera nyesuaiin zoom
-                local targetPos = hrp.Position
-                camera.CFrame = CFrame.lookAt(targetPos + Vector3.new(0, 1.5, currentZoom), targetPos + Vector3.new(0, 1, 0))
+        -- ⭐ ANIMASI LOOP (SMOOTH LERP)
+        RunService.RenderStepped:Connect(function(dt)
+            if not viewportFrame.Parent or not clone.Parent then return end
+            if not avatarTab.Visible then return end
+            
+            if autoRotate and not isDraggingAv then
+                targetRotY = targetRotY + 30 * dt -- Auto rotate smooth per detik
             end
+
+            -- LERP (Interpolasi) target ke current
+            local lerpSpeed = 15 * dt
+            currentRotX = currentRotX + (targetRotX - currentRotX) * lerpSpeed
+            currentRotY = currentRotY + (targetRotY - currentRotY) * lerpSpeed
+
+            clone:PivotTo(CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(currentRotX), math.rad(currentRotY), 0))
+            
+            -- Kamera nyesuaiin zoom
+            local targetPos = hrp.Position
+            camera.CFrame = CFrame.lookAt(targetPos + Vector3.new(0, 1.5, currentZoom), targetPos + Vector3.new(0, 1, 0))
         end)
     end)
 
@@ -4100,7 +4135,6 @@ local function buildEggExecutorGUI(screenGui)
     avatarSub.TextColor3 = COLOR_TEXT_DIM; avatarSub.Font = Enum.Font.GothamMedium; avatarSub.TextSize = 10
     avatarSub.ZIndex = 12; avatarSub.Parent = avatarInfo
 
-    -- Slider Zoom & Auto Rotate Toggle
     local zoomBtn = Instance.new("TextButton")
     zoomBtn.Size = UDim2.fromOffset(80, 24); zoomBtn.Position = UDim2.new(1, -170, 1, -40)
     zoomBtn.BackgroundColor3 = COLOR_SURFACE; zoomBtn.Text = "Auto-Rotate"
@@ -4142,7 +4176,7 @@ local function buildEggExecutorGUI(screenGui)
         if zoomDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local rel = math.clamp((input.Position.X - zoomSliderBg.AbsolutePosition.X) / zoomSliderBg.AbsoluteSize.X, 0, 1)
             zoomFill.Size = UDim2.new(rel, 0, 1, 0)
-            currentZoom = -3 - (rel * 10) -- -3 (zoom in) sampai -13 (zoom out)
+            currentZoom = -3 - (rel * 10)
         end
     end)
 
@@ -4165,10 +4199,9 @@ local function buildEggExecutorGUI(screenGui)
             end
         end
 
-        -- Animasi Fade & Slide
         local targetTab = (key == "stats" and statsTab) or (key == "eggs" and eggsTab) or avatarTab
         if targetTab then
-            targetTab.Position = UDim2.new(0, 20, 0, 0) -- Mulai dari kanan dikit
+            targetTab.Position = UDim2.new(0, 20, 0, 0)
             TweenService:Create(targetTab, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2.new(0, 0, 0, 0)}):Play()
         end
 
