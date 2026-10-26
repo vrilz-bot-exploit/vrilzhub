@@ -3788,15 +3788,13 @@ local function halloweenReturnToBase()
     local FLY_STEP = 75
     local FLY_WAIT = 0.08
 
-    -- ═══════════════════════════════════════════════════════════
-    -- ⭐ CEK JARAK HORIZONTAL (X/Z) — ≤ 100 studs = INSTANT TP
-    -- ═══════════════════════════════════════════════════════════
+    -- ⭐ Hitung jarak HORIZONTAL (X/Z) — ≤ 400 studs = INSTANT TP
     local dx = base.Position.X - root.Position.X
     local dz = base.Position.Z - root.Position.Z
     local flatDist = math.sqrt(dx * dx + dz * dz)
 
-       if flatDist <= 400 then
-        -- ⭐ INSTANT TP — langsung ke base, no fly, no step, NO WAIT
+    if flatDist <= 400 then
+        -- ⭐ INSTANT TP — no fly, no step, NO WAIT
         local finalCF = base.CFrame + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
 
         -- Kalo naik pet → pet ikut ke-TP bareng
@@ -3818,7 +3816,7 @@ local function halloweenReturnToBase()
                 local targetPivot = newSeatCF * pivotToSeat:Inverse()
                 pcall(function() pet:PivotTo(targetPivot) end)
 
-                return true   -- ⬅️ HAPUS task.wait(0.4)
+                return true
             end
         end
 
@@ -3826,18 +3824,11 @@ local function halloweenReturnToBase()
         root.CFrame = finalCF
         root.Velocity = Vector3.zero
         root.AssemblyLinearVelocity = Vector3.zero
-        return true   -- ⬅️ HAPUS task.wait(0.4)
-    end
-        -- Gak naik pet → TP langsung, NO WAIT
-        root.CFrame = finalCF
-        root.Velocity = Vector3.zero
-        root.AssemblyLinearVelocity = Vector3.zero
-        task.wait(HalloweenCfg.RETURN_WAIT)
         return true
     end
 
     -- ═══════════════════════════════════════════════════════════
-    -- JARAK > 100 → jalur normal (terbang 40 + step 75)
+    -- JARAK > 400 → jalur normal (terbang 40 + step 75)
     -- ═══════════════════════════════════════════════════════════
     local startY = root.Position.Y
     local targetY = startY + FLY_HEIGHT
@@ -3907,6 +3898,46 @@ local function halloweenReturnToBase()
             return true
         end
     end
+
+    -- STEP 3: Gak naik pet → step normal
+    local targetPos = base.Position + Vector3.new(0, FLY_HEIGHT, 0)
+    local startPos = root.Position
+    local totalDist = (targetPos - startPos).Magnitude
+    local steps = math.ceil(totalDist / FLY_STEP)
+
+    local dir = (targetPos - startPos)
+    dir = Vector3.new(dir.X, 0, dir.Z)
+    if dir.Magnitude > 1 then dir = dir.Unit
+    else
+        local ang = math.random() * math.pi * 2
+        dir = Vector3.new(math.cos(ang), 0, math.sin(ang))
+    end
+
+    for i = 1, steps do
+        local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if not r then break end
+
+        local dist = math.min(FLY_STEP * i, totalDist)
+        local pos = startPos + dir * dist
+        local flyPos = Vector3.new(pos.X, startPos.Y, pos.Z)
+
+        r.CFrame = CFrame.new(flyPos)
+        r.Velocity = Vector3.zero
+        r.AssemblyLinearVelocity = Vector3.zero
+
+        task.wait(FLY_WAIT)
+    end
+
+    local rFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if rFinal then
+        rFinal.CFrame = base.CFrame + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
+        rFinal.Velocity = Vector3.zero
+        rFinal.AssemblyLinearVelocity = Vector3.zero
+    end
+
+    task.wait(HalloweenCfg.RETURN_WAIT)
+    return true
+end
 
     -- STEP 3: Gak naik pet → step normal
     local targetPos = base.Position + Vector3.new(0, FLY_HEIGHT, 0)
