@@ -3789,22 +3789,17 @@ local function halloweenReturnToBase()
     local FLY_WAIT = 0.08
 
     -- ═══════════════════════════════════════════════════════════
-    -- ⭐ CEK JARAK DULU — sebelum terbang naik
-    -- ≤ 100 studs → INSTANT TP ke base Halloween
-    -- > 100 studs → jalur normal (naik 40 → step 75)
+    -- ⭐ CEK JARAK HORIZONTAL (X/Z) — ≤ 100 studs = INSTANT TP
     -- ═══════════════════════════════════════════════════════════
-        -- ⭐ Hitung jarak HORIZONTAL (X/Z doang) dari posisi sekarang ke base
     local dx = base.Position.X - root.Position.X
     local dz = base.Position.Z - root.Position.Z
     local flatDist = math.sqrt(dx * dx + dz * dz)
 
-    print(string.format("[HALLOWEEN RETURN] flatDist = %.1f studs (threshold 100)", flatDist))
-
     if flatDist <= 100 then
-        print("[HALLOWEEN RETURN] ✅ INSTANT TP ke base")
+        -- ⭐ INSTANT TP — langsung ke base, no fly, no step, no delay
         local finalCF = base.CFrame + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
 
-        -- Kalo naik pet → pet ikut ke-TP
+        -- Kalo naik pet → pet ikut ke-TP bareng
         if hum and hum.SeatPart then
             local pet = hum.SeatPart:FindFirstAncestorOfClass("Model")
             if pet then
@@ -3828,7 +3823,7 @@ local function halloweenReturnToBase()
             end
         end
 
-        -- Gak naik pet → TP langsung
+        -- Gak naik pet → TP langsung, NO WAIT
         root.CFrame = finalCF
         root.Velocity = Vector3.zero
         root.AssemblyLinearVelocity = Vector3.zero
@@ -3837,10 +3832,8 @@ local function halloweenReturnToBase()
     end
 
     -- ═══════════════════════════════════════════════════════════
-    -- JARAK > 100 → jalur normal
+    -- JARAK > 100 → jalur normal (terbang 40 + step 75)
     -- ═══════════════════════════════════════════════════════════
-
-    -- STEP 1: Terbang naik 40 studs
     local startY = root.Position.Y
     local targetY = startY + FLY_HEIGHT
 
