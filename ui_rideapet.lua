@@ -3712,115 +3712,494 @@ local function buildEggExecutorGUI(screenGui)
     local wCorner = Instance.new("UICorner"); wCorner.CornerRadius = UDim.new(0, 16); wCorner.Parent = win
     local wStroke = Instance.new("UIStroke"); wStroke.Color = COLOR_CYAN; wStroke.Thickness = 2; wStroke.Transparency = 0.3; wStroke.Parent = win
 
-    -- ═══════════════════════════════════════════════════════════
-    -- 🌌 GALAXY BACKGROUND + METEOR COLLISION SYSTEM
-    -- ═══════════════════════════════════════════════════════════
-    local bgFrame = Instance.new("Frame")
-    bgFrame.Size = UDim2.fromScale(1, 1)
-    bgFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 15)
-    bgFrame.BorderSizePixel = 0
-    bgFrame.ZIndex = 0
-    bgFrame.ClipsDescendants = true
-    bgFrame.Parent = win
-    local bgCorner = Instance.new("UICorner"); bgCorner.CornerRadius = UDim.new(0, 16); bgCorner.Parent = bgFrame
+  -- ═══════════════════════════════════════════════════════════
+-- 🌌 PREMIUM GALAXY BACKGROUND v2 (Zodiac + 3D Stars + Nebula)
+-- ═══════════════════════════════════════════════════════════
+local bgFrame = Instance.new("Frame")
+bgFrame.Size = UDim2.fromScale(1, 1)
+bgFrame.BackgroundColor3 = Color3.fromRGB(2, 3, 12)
+bgFrame.BorderSizePixel = 0
+bgFrame.ZIndex = 0
+bgFrame.ClipsDescendants = true
+bgFrame.Parent = win
+local bgCorner = Instance.new("UICorner"); bgCorner.CornerRadius = UDim.new(0, 16); bgCorner.Parent = bgFrame
 
-    local bgGrad = Instance.new("UIGradient")
-    bgGrad.Rotation = 135
-    bgGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 5, 20)),
-        ColorSequenceKeypoint.new(0.4, Color3.fromRGB(20, 10, 40)),
-        ColorSequenceKeypoint.new(0.7, Color3.fromRGB(5, 15, 30)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 5, 20)),
+-- Deep space gradient (lebih kaya warna)
+local bgGrad = Instance.new("UIGradient")
+bgGrad.Rotation = 135
+bgGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(8, 4, 24)),
+    ColorSequenceKeypoint.new(0.3, Color3.fromRGB(18, 8, 42)),
+    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(4, 12, 32)),
+    ColorSequenceKeypoint.new(0.8, Color3.fromRGB(22, 4, 28)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(2, 2, 10)),
+})
+bgGrad.Parent = bgFrame
+
+-- ═══ NEBULA CLOUDS (lebih banyak, warna premium) ═══
+local nebulaColors = {
+    Color3.fromRGB(120, 40, 180),  -- ungu
+    Color3.fromRGB(30, 120, 200),  -- biru
+    Color3.fromRGB(200, 40, 100),  -- pink
+    Color3.fromRGB(40, 180, 160),  -- teal
+    Color3.fromRGB(180, 100, 40),  -- amber
+}
+for i = 1, 6 do
+    local nebula = Instance.new("Frame")
+    local nSize = math.random(60, 140) / 100
+    nebula.Size = UDim2.fromScale(nSize, nSize)
+    nebula.Position = UDim2.fromScale(math.random(-30, 80)/100, math.random(-30, 80)/100)
+    nebula.BackgroundColor3 = nebulaColors[math.random(1, #nebulaColors)]
+    nebula.BackgroundTransparency = 0.88
+    nebula.BorderSizePixel = 0
+    nebula.ZIndex = 1
+    nebula.Parent = bgFrame
+    local nCorner = Instance.new("UICorner"); nCorner.CornerRadius = UDim.new(1, 0); nCorner.Parent = nebula
+    local nGrad = Instance.new("UIGradient"); nGrad.Rotation = math.random(0, 360)
+    nGrad.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.3),
+        NumberSequenceKeypoint.new(0.5, 0.7),
+        NumberSequenceKeypoint.new(1, 1),
     })
-    bgGrad.Parent = bgFrame
+    nGrad.Parent = nebula
 
-    -- Nebula Clouds
-    for i = 1, 3 do
-        local nebula = Instance.new("Frame")
-        nebula.Size = UDim2.fromScale(1.5, 1.5)
-        nebula.Position = UDim2.fromScale(math.random(-50, 0)/100, math.random(-50, 0)/100)
-        nebula.BackgroundColor3 = i == 1 and Color3.fromRGB(80, 20, 120) or (i == 2 and Color3.fromRGB(20, 80, 120) or Color3.fromRGB(120, 20, 60))
-        nebula.BackgroundTransparency = 0.9
-        nebula.BorderSizePixel = 0
-        nebula.ZIndex = 1
-        nebula.Parent = bgFrame
-        local nCorner = Instance.new("UICorner"); nCorner.CornerRadius = UDim.new(1, 0); nCorner.Parent = nebula
-        local nGrad = Instance.new("UIGradient"); nGrad.Rotation = math.random(0, 360)
-        nGrad.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.4), NumberSequenceKeypoint.new(1, 1)})
-        nGrad.Parent = nebula
-    end
-
-    -- Planet
-    local planet = Instance.new("Frame")
-    planet.Size = UDim2.fromOffset(180, 180)
-    planet.Position = UDim2.fromOffset(-40, WIN_H - 100)
-    planet.BackgroundColor3 = Color3.fromRGB(20, 50, 100)
-    planet.BorderSizePixel = 0
-    planet.ZIndex = 2
-    planet.Parent = bgFrame
-    local pCorner = Instance.new("UICorner"); pCorner.CornerRadius = UDim.new(1, 0); pCorner.Parent = planet
-    local pGlow = Instance.new("Frame")
-    pGlow.Size = UDim2.fromScale(1.1, 1.1); pGlow.Position = UDim2.fromScale(-0.05, -0.05)
-    pGlow.BackgroundColor3 = Color3.fromRGB(50, 150, 255); pGlow.BackgroundTransparency = 0.7
-    pGlow.ZIndex = 1; pGlow.Parent = planet
-    local pGlowCorner = Instance.new("UICorner"); pGlowCorner.CornerRadius = UDim.new(1, 0); pGlowCorner.Parent = pGlow
-    local pGrad = Instance.new("UIGradient")
-    pGrad.Rotation = 45
-    pGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 200, 255)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(20, 50, 100)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 10, 20)),
-    })
-    pGrad.Parent = planet
-
-    -- ⭐ STARFIELD (Kelap-kelip Smooth)
-    local starLayer = Instance.new("Frame")
-    starLayer.Size = UDim2.fromScale(1, 1); starLayer.BackgroundTransparency = 1; starLayer.ZIndex = 3; starLayer.Parent = bgFrame
-
-    local starColors = {
-        Color3.fromRGB(255, 255, 255), Color3.fromRGB(180, 220, 255),
-        Color3.fromRGB(255, 220, 180), Color3.fromRGB(200, 180, 255), Color3.fromRGB(255, 180, 220)
-    }
-    local stars = {}
-    for i = 1, 100 do
-        local star = Instance.new("Frame")
-        local sz = math.random(1, 3)
-        star.Size = UDim2.fromOffset(sz, sz)
-        star.Position = UDim2.fromScale(math.random(0, 1000)/1000, math.random(0, 1000)/1000)
-        star.BackgroundColor3 = i % 7 == 0 and COLOR_GOLD or starColors[math.random(1, #starColors)]
-        star.BackgroundTransparency = math.random(20, 80) / 100
-        star.BorderSizePixel = 0; star.ZIndex = 4; star.Parent = starLayer
-        local sCorner = Instance.new("UICorner"); sCorner.CornerRadius = UDim.new(1, 0); sCorner.Parent = star
-        
-        local glow = Instance.new("Frame")
-        glow.AnchorPoint = Vector2.new(0.5, 0.5); glow.Position = UDim2.fromScale(0.5, 0.5)
-        glow.Size = UDim2.new(3, 0, 3, 0); glow.BackgroundColor3 = star.BackgroundColor3
-        glow.BackgroundTransparency = 0.9; glow.BorderSizePixel = 0; glow.ZIndex = 3; glow.Parent = star
-        local gCorner = Instance.new("UICorner"); gCorner.CornerRadius = UDim.new(1, 0); gCorner.Parent = glow
-
-        table.insert(stars, {
-            frame = star, glow = glow,
-            baseTrans = star.BackgroundTransparency,
-            baseGlowTrans = glow.BackgroundTransparency,
-            speed = math.random(20, 60) / 100,
-            offset = math.random() * math.pi * 2
-        })
-    end
-
+    -- Nebula drift animation (smooth pulsing)
     task.spawn(function()
-        while win.Parent do
-            task.wait(0.03)
-            if not win.Visible then continue end
-            local t = tick()
-            for _, s in ipairs(stars) do
-                if s.frame.Parent then
-                    local twinkle = math.sin(t * s.speed + s.offset)
-                    s.frame.BackgroundTransparency = math.clamp(s.baseTrans + twinkle * 0.4, 0, 1)
-                    s.glow.BackgroundTransparency = math.clamp(s.baseGlowTrans + twinkle * 0.1, 0, 1)
+        while nebula.Parent do
+            task.wait(math.random(8, 15))
+            local tgt = math.clamp(nebula.BackgroundTransparency + (math.random() - 0.5) * 0.1, 0.75, 0.95)
+            TweenService:Create(nebula, TweenInfo.new(math.random(4, 8), Enum.EasingStyle.Sine), {
+                BackgroundTransparency = tgt
+            }):Play()
+        end
+    end)
+end
+
+-- ═══ PLANET PREMIUM (dengan ring) ═══
+local planet = Instance.new("Frame")
+planet.Size = UDim2.fromOffset(200, 200)
+planet.Position = UDim2.fromOffset(-50, WIN_H - 110)
+planet.BackgroundColor3 = Color3.fromRGB(25, 60, 130)
+planet.BorderSizePixel = 0
+planet.ZIndex = 2
+planet.Parent = bgFrame
+local pCorner = Instance.new("UICorner"); pCorner.CornerRadius = UDim.new(1, 0); pCorner.Parent = planet
+
+local pGrad = Instance.new("UIGradient")
+pGrad.Rotation = 45
+pGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(130, 200, 255)),
+    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(50, 110, 200)),
+    ColorSequenceKeypoint.new(0.7, Color3.fromRGB(20, 40, 100)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 10, 25)),
+})
+pGrad.Parent = planet
+
+-- Planet glow
+local pGlow = Instance.new("Frame")
+pGlow.Size = UDim2.fromScale(1.15, 1.15)
+pGlow.Position = UDim2.fromScale(-0.075, -0.075)
+pGlow.BackgroundColor3 = Color3.fromRGB(60, 160, 255)
+pGlow.BackgroundTransparency = 0.75
+pGlow.BorderSizePixel = 0
+pGlow.ZIndex = 1
+pGlow.Parent = planet
+local pGlowCorner = Instance.new("UICorner"); pGlowCorner.CornerRadius = UDim.new(1, 0); pGlowCorner.Parent = pGlow
+
+-- Saturn ring (miring)
+local ring = Instance.new("Frame")
+ring.AnchorPoint = Vector2.new(0.5, 0.5)
+ring.Position = UDim2.fromScale(0.5, 0.5)
+ring.Size = UDim2.fromScale(1.7, 0.35)
+ring.BackgroundTransparency = 1
+ring.BorderSizePixel = 0
+ring.Rotation = -20
+ring.ZIndex = 3
+ring.Parent = planet
+local ringC = Instance.new("UICorner"); ringC.CornerRadius = UDim.new(1, 0); ringC.Parent = ring
+local ringStroke = Instance.new("UIStroke")
+ringStroke.Color = Color3.fromRGB(180, 220, 255)
+ringStroke.Thickness = 2.5
+ringStroke.Transparency = 0.4
+ringStroke.Parent = ring
+
+-- ═══ STARFIELD — BINTANG PREMIUM (BESAR + 3D + KELAP-KELIP) ═══
+local starLayer = Instance.new("Frame")
+starLayer.Name = "PremiumStarfield"
+starLayer.Size = UDim2.fromScale(1, 1)
+starLayer.BackgroundTransparency = 1
+starLayer.ZIndex = 3
+starLayer.ClipsDescendants = true
+starLayer.Parent = bgFrame
+
+local starColors = {
+    Color3.fromRGB(255, 255, 255),   -- putih
+    Color3.fromRGB(180, 220, 255),   -- biru muda
+    Color3.fromRGB(255, 220, 180),   -- kuning lembut
+    Color3.fromRGB(200, 180, 255),   -- ungu
+    Color3.fromRGB(255, 180, 220),   -- pink lembut
+    Color3.fromRGB(160, 255, 220),   -- mint
+}
+local goldColor = Color3.fromRGB(255, 215, 100)
+local stars = {}
+
+for i = 1, 90 do
+    -- ⭐ Bintang lebih besar (3-6px) biar keliatan jelas
+    local sz = math.random(3, 6)
+    local star = Instance.new("Frame")
+    star.Name = "Star_" .. i
+    star.AnchorPoint = Vector2.new(0.5, 0.5)
+    star.Size = UDim2.fromOffset(sz, sz)
+    star.Position = UDim2.fromScale(math.random(0, 1000)/1000, math.random(0, 1000)/1000)
+    star.BackgroundColor3 = (i % 11 == 0) and goldColor or starColors[math.random(1, #starColors)]
+    star.BackgroundTransparency = math.random(10, 55) / 100
+    star.BorderSizePixel = 0
+    star.ZIndex = 5
+    star.Parent = starLayer
+
+    local sCorner = Instance.new("UICorner"); sCorner.CornerRadius = UDim.new(1, 0); sCorner.Parent = star
+
+    -- ⭐ 3D EFFECT: Shadow di bawah bintang (offset +2px)
+    local starShadow = Instance.new("Frame")
+    starShadow.AnchorPoint = Vector2.new(0.5, 0.5)
+    starShadow.Position = UDim2.fromScale(0.5, 0.5)
+    starShadow.Size = UDim2.fromOffset(sz + 1, sz + 1)
+    starShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    starShadow.BackgroundTransparency = 0.5
+    starShadow.BorderSizePixel = 0
+    starShadow.ZIndex = 4
+    starShadow.Parent = star
+    local ssCorner = Instance.new("UICorner"); ssCorner.CornerRadius = UDim.new(1, 0); ssCorner.Parent = starShadow
+    starShadow.Position = UDim2.new(0.5, 1.5, 0.5, 1.5)
+
+    -- ⭐ Glow halo (2 layer, beda ukuran) buat 3D feel
+    local glow1 = Instance.new("Frame")
+    glow1.AnchorPoint = Vector2.new(0.5, 0.5)
+    glow1.Position = UDim2.fromScale(0.5, 0.5)
+    glow1.Size = UDim2.new(2.5, 0, 2.5, 0)
+    glow1.BackgroundColor3 = star.BackgroundColor3
+    glow1.BackgroundTransparency = 0.85
+    glow1.BorderSizePixel = 0
+    glow1.ZIndex = 3
+    glow1.Parent = star
+    local g1c = Instance.new("UICorner"); g1c.CornerRadius = UDim.new(1, 0); g1c.Parent = glow1
+
+    local glow2 = Instance.new("Frame")
+    glow2.AnchorPoint = Vector2.new(0.5, 0.5)
+    glow2.Position = UDim2.fromScale(0.5, 0.5)
+    glow2.Size = UDim2.new(1.6, 0, 1.6, 0)
+    glow2.BackgroundColor3 = star.BackgroundColor3
+    glow2.BackgroundTransparency = 0.7
+    glow2.BorderSizePixel = 0
+    glow2.ZIndex = 4
+    glow2.Parent = star
+    local g2c = Instance.new("UICorner"); g2c.CornerRadius = UDim.new(1, 0); g2c.Parent = glow2
+
+    table.insert(stars, {
+        frame = star, glow1 = glow1, glow2 = glow2, shadow = starShadow,
+        baseSize = sz,
+        baseTrans = star.BackgroundTransparency,
+        baseGlow1 = glow1.BackgroundTransparency,
+        baseGlow2 = glow2.BackgroundTransparency,
+        speed = math.random(15, 50) / 100,
+        offset = math.random() * math.pi * 2,
+        pulseScale = math.random(15, 40) / 100,
+    })
+end
+
+-- ⭐ Super smooth twinkle + 3D scale pulse loop
+task.spawn(function()
+    while win.Parent do
+        task.wait(0.03)
+        if not win.Visible then continue end
+        local t = tick()
+        for _, s in ipairs(stars) do
+            if s.frame.Parent then
+                -- Twinkle (transparency)
+                local twinkle = math.sin(t * s.speed + s.offset)
+                s.frame.BackgroundTransparency = math.clamp(s.baseTrans + twinkle * 0.4, 0, 1)
+                s.glow1.BackgroundTransparency = math.clamp(s.baseGlow1 + twinkle * 0.08, 0, 1)
+                s.glow2.BackgroundTransparency = math.clamp(s.baseGlow2 + twinkle * 0.12, 0, 1)
+
+                -- ⭐ 3D scale pulse (bintang membesar-mengecil halus)
+                local scale = 1 + twinkle * s.pulseScale * 0.3
+                local newSize = s.baseSize * scale
+                s.frame.Size = UDim2.fromOffset(newSize, newSize)
+
+                -- ⭐ Shadow ikut geser dikit (efek 3D depth)
+                s.shadow.Position = UDim2.new(0.5, 1.5 + twinkle * 1.2, 0.5, 1.5 + twinkle * 1.2)
+            end
+        end
+    end
+end)
+
+-- ═══════════════════════════════════════════════════════════
+-- ♈ ZODIAC CONSTELLATIONS (12 rasi bintang berputar)
+-- ═══════════════════════════════════════════════════════════
+local zodiacLayer = Instance.new("Frame")
+zodiacLayer.Name = "ZodiacLayer"
+zodiacLayer.Size = UDim2.fromScale(1, 1)
+zodiacLayer.BackgroundTransparency = 1
+zodiacLayer.ClipsDescendants = true
+zodiacLayer.ZIndex = 6
+zodiacLayer.Parent = bgFrame
+
+-- Rasi bintang zodiak (koordinat relatif 0-1 dalam kotak kecil)
+-- Setiap rasi = array titik {x, y} yang dihubungkan garis
+local zodiacData = {
+    -- ♈ Aries (2 bintang + ekor)
+    { name = "Aries", points = {{0.2,0.4},{0.5,0.3},{0.8,0.5},{0.85,0.7}} },
+    -- ♉ Taurus (V shape + tanduk)
+    { name = "Taurus", points = {{0.15,0.3},{0.35,0.5},{0.5,0.6},{0.65,0.5},{0.85,0.3}} },
+    -- ♊ Gemini (2 garis sejajar)
+    { name = "Gemini", points = {{0.25,0.2},{0.25,0.8},{0.75,0.2},{0.75,0.8}} },
+    -- ♋ Cancer (Y shape)
+    { name = "Cancer", points = {{0.5,0.2},{0.5,0.5},{0.2,0.8},{0.8,0.8},{0.5,0.5}} },
+    -- ♌ Leo (sickle)
+    { name = "Leo", points = {{0.2,0.7},{0.3,0.4},{0.5,0.25},{0.7,0.3},{0.75,0.5},{0.6,0.7},{0.4,0.75}} },
+    -- ♍ Virgo (W shape)
+    { name = "Virgo", points = {{0.15,0.4},{0.35,0.7},{0.5,0.3},{0.65,0.7},{0.85,0.4}} },
+    -- ♎ Libra (balance)
+    { name = "Libra", points = {{0.2,0.3},{0.5,0.5},{0.8,0.3},{0.5,0.5},{0.5,0.8}} },
+    -- ♏ Scorpio (S curve)
+    { name = "Scorpio", points = {{0.15,0.3},{0.35,0.5},{0.55,0.6},{0.7,0.5},{0.85,0.7},{0.9,0.85}} },
+    -- ♐ Sagittarius (arrow)
+    { name = "Sagittarius", points = {{0.2,0.8},{0.4,0.6},{0.5,0.4},{0.7,0.3},{0.85,0.2},{0.65,0.45}} },
+    -- ♑ Capricorn (triangle)
+    { name = "Capricorn", points = {{0.3,0.2},{0.7,0.25},{0.6,0.7},{0.3,0.2},{0.4,0.75}} },
+    -- ♒ Aquarius (waves)
+    { name = "Aquarius", points = {{0.15,0.5},{0.3,0.35},{0.45,0.5},{0.6,0.35},{0.75,0.5},{0.9,0.35}} },
+    -- ♓ Pisces (V with cross)
+    { name = "Pisces", points = {{0.2,0.2},{0.4,0.6},{0.5,0.8},{0.6,0.6},{0.8,0.2},{0.5,0.4}} },
+}
+
+-- Helper: gambar garis antara 2 titik (relatif dalam frame)
+local function drawZodiacLine(parentFrame, p1, p2, color, thickness, zIdx)
+    local dx = (p2[1] - p1[1]) * parentFrame.AbsoluteSize.X
+    local dy = (p2[2] - p1[2]) * parentFrame.AbsoluteSize.Y
+    local length = math.sqrt(dx*dx + dy*dy)
+    local angle = math.deg(math.atan2(dy, dx))
+    
+    local line = Instance.new("Frame")
+    line.AnchorPoint = Vector2.new(0.5, 0.5)
+    line.Position = UDim2.fromScale((p1[1]+p2[1])/2, (p1[2]+p2[2])/2)
+    line.Size = UDim2.fromOffset(length, thickness)
+    line.Rotation = angle
+    line.BackgroundColor3 = color
+    line.BackgroundTransparency = 0.55
+    line.BorderSizePixel = 0
+    line.ZIndex = zIdx
+    line.Parent = parentFrame
+    
+    local c = Instance.new("UICorner"); c.CornerRadius = UDim.new(1, 0); c.Parent = line
+    return line
+end
+
+-- Buat 4 grup zodiak di posisi berbeda, masing-masing muter pelan
+local zodiacGroups = {}
+local zodiacPositions = {
+    {x = 0.12, y = 0.20, size = 0.18, rotSpeed = 0.015, color = Color3.fromRGB(140, 180, 255)},
+    {x = 0.78, y = 0.15, size = 0.16, rotSpeed = -0.018, color = Color3.fromRGB(200, 160, 255)},
+    {x = 0.82, y = 0.72, size = 0.20, rotSpeed = 0.012, color = Color3.fromRGB(255, 180, 220)},
+    {x = 0.15, y = 0.75, size = 0.17, rotSpeed = -0.014, color = Color3.fromRGB(160, 220, 255)},
+}
+
+for gi, pos in ipairs(zodiacPositions) do
+    local groupFrame = Instance.new("Frame")
+    groupFrame.Name = "ZodiacGroup_" .. gi
+    groupFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    groupFrame.Position = UDim2.fromScale(pos.x, pos.y)
+    groupFrame.Size = UDim2.fromScale(pos.size, pos.size)
+    groupFrame.BackgroundTransparency = 1
+    groupFrame.ZIndex = 7
+    groupFrame.Parent = zodiacLayer
+    
+    -- Pilih rasi acak (rotasi tiap grup)
+    local zIdx = ((gi - 1) * 3 + 1) % #zodiacData + 1
+    local zodiac = zodiacData[zIdx]
+    
+    -- Gambar garis antar titik
+    local lines = {}
+    for i = 1, #zodiac.points - 1 do
+        local line = drawZodiacLine(groupFrame, zodiac.points[i], zodiac.points[i+1], pos.color, 1.5, 8)
+        table.insert(lines, line)
+    end
+    
+    -- Gambar bintang di setiap titik (lebih besar + glow)
+    for _, pt in ipairs(zodiac.points) do
+        local zstar = Instance.new("Frame")
+        zstar.AnchorPoint = Vector2.new(0.5, 0.5)
+        zstar.Position = UDim2.fromScale(pt[1], pt[2])
+        zstar.Size = UDim2.fromOffset(4, 4)
+        zstar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        zstar.BorderSizePixel = 0
+        zstar.ZIndex = 9
+        zstar.Parent = groupFrame
+        local zc = Instance.new("UICorner"); zc.CornerRadius = UDim.new(1, 0); zc.Parent = zstar
+        
+        -- Glow halo
+        local zGlow = Instance.new("Frame")
+        zGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+        zGlow.Position = UDim2.fromScale(0.5, 0.5)
+        zGlow.Size = UDim2.new(3, 0, 3, 0)
+        zGlow.BackgroundColor3 = pos.color
+        zGlow.BackgroundTransparency = 0.7
+        zGlow.BorderSizePixel = 0
+        zGlow.ZIndex = 8
+        zGlow.Parent = zstar
+        local zgc = Instance.new("UICorner"); zgc.CornerRadius = UDim.new(1, 0); zgc.Parent = zstar
+        zGlow.Parent = zstar
+        local zgC = Instance.new("UICorner"); zgC.CornerRadius = UDim.new(1, 0); zgC.Parent = zGlow
+        
+        -- Twinkle
+        task.spawn(function()
+            while zstar.Parent do
+                task.wait(math.random(10, 30)/10)
+                if not zstar.Parent then break end
+                TweenService:Create(zstar, TweenInfo.new(0.8, Enum.EasingStyle.Sine), {
+                    BackgroundTransparency = 0.7
+                }):Play()
+                TweenService:Create(zGlow, TweenInfo.new(0.8, Enum.EasingStyle.Sine), {
+                    BackgroundTransparency = 0.92
+                }):Play()
+                task.wait(0.9)
+                TweenService:Create(zstar, TweenInfo.new(0.8, Enum.EasingStyle.Sine), {
+                    BackgroundTransparency = 0
+                }):Play()
+                TweenService:Create(zGlow, TweenInfo.new(0.8, Enum.EasingStyle.Sine), {
+                    BackgroundTransparency = 0.7
+                }):Play()
+            end
+        end)
+    end
+    
+    table.insert(zodiacGroups, {
+        frame = groupFrame,
+        rotSpeed = pos.rotSpeed,
+        color = pos.color,
+        name = zodiac.name,
+    })
+end
+
+-- ⭐ Animasi zodiak: rotasi pelan + fade in/out (ganti rasi tiap 12 detik)
+task.spawn(function()
+    local t = 0
+    while zodiacLayer.Parent do
+        task.wait(0.04)
+        t = t + 1
+        if not win.Visible then continue end
+        for _, zg in ipairs(zodiacGroups) do
+            if zg.frame.Parent then
+                zg.frame.Rotation = zg.frame.Rotation + zg.rotSpeed
+                -- Fade in/out smooth (sinusoidal)
+                local fade = (math.sin(t * 0.015 + zg.rotSpeed * 100) + 1) / 2
+                zg.frame.BackgroundTransparency = 1
+                -- Efek opacity via children (karena Frame transparan)
+                for _, child in ipairs(zg.frame:GetDescendants()) do
+                    if child:IsA("Frame") then
+                        if child.BackgroundTransparency < 0.99 then
+                            -- Simpan base transparency di attribute
+                        end
+                    end
                 end
             end
         end
-    end)
+    end
+end)
+
+-- ═══ SHOOTING STARS (bintang jatuh kecil, cepat, elegan) ═══
+task.spawn(function()
+    while zodiacLayer.Parent do
+        task.wait(math.random(40, 90) / 10)
+        if not win.Visible then continue end
+        
+        local shoot = Instance.new("Frame")
+        shoot.AnchorPoint = Vector2.new(0.5, 0.5)
+        local startX = math.random(10, 90)
+        shoot.Position = UDim2.fromScale(startX/100, -0.05)
+        shoot.Size = UDim2.fromOffset(3, 3)
+        shoot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        shoot.BorderSizePixel = 0
+        shoot.ZIndex = 20
+        shoot.Parent = zodiacLayer
+        local sc = Instance.new("UICorner"); sc.CornerRadius = UDim.new(1, 0); sc.Parent = shoot
+        
+        -- 🌟 PREMIUM TRAIL (3 layer: outer glow + mid + core)
+        -- Outer glow
+        local outerTrail = Instance.new("Frame")
+        outerTrail.AnchorPoint = Vector2.new(0.5, 1)
+        outerTrail.Position = UDim2.new(0.5, 0, 0.5, 0)
+        outerTrail.Size = UDim2.fromOffset(12, 55)
+        outerTrail.BackgroundColor3 = meteorColor
+        outerTrail.BackgroundTransparency = 0.7
+        outerTrail.BorderSizePixel = 0
+        outerTrail.ZIndex = 22
+        outerTrail.Parent = meteor
+        local otc = Instance.new("UICorner"); otc.CornerRadius = UDim.new(1, 0); otc.Parent = outerTrail
+        local otg = Instance.new("UIGradient")
+        otg.Rotation = 90
+        otg.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 1),
+            NumberSequenceKeypoint.new(0.5, 0.85),
+            NumberSequenceKeypoint.new(1, 0.4),
+        })
+        otg.Parent = outerTrail
+
+        -- Mid trail
+        local trail = Instance.new("Frame")
+        trail.AnchorPoint = Vector2.new(0.5, 1)
+        trail.Position = UDim2.new(0.5, 0, 0.5, 0)
+        trail.Size = UDim2.fromOffset(5, 45)
+        trail.BackgroundColor3 = meteorColor
+        trail.BackgroundTransparency = 0.2
+        trail.BorderSizePixel = 0
+        trail.ZIndex = 23
+        trail.Parent = meteor
+        local tc = Instance.new("UICorner"); tc.CornerRadius = UDim.new(1, 0); tc.Parent = trail
+        local tGrad = Instance.new("UIGradient")
+        tGrad.Rotation = 90
+        tGrad.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 1),
+            NumberSequenceKeypoint.new(0.3, 0.5),
+            NumberSequenceKeypoint.new(1, 0),
+        })
+        tGrad.Parent = trail
+
+        -- Core (putih panas)
+        local coreTrail = Instance.new("Frame")
+        coreTrail.AnchorPoint = Vector2.new(0.5, 1)
+        coreTrail.Position = UDim2.new(0.5, 0, 0.5, 0)
+        coreTrail.Size = UDim2.fromOffset(2, 38)
+        coreTrail.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        coreTrail.BorderSizePixel = 0
+        coreTrail.ZIndex = 24
+        coreTrail.Parent = meteor
+        local ctc = Instance.new("UICorner"); ctc.CornerRadius = UDim.new(1, 0); ctc.Parent = coreTrail
+        local ctg = Instance.new("UIGradient")
+        ctg.Rotation = 90
+        ctg.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 1),
+            NumberSequenceKeypoint.new(0.7, 0.3),
+            NumberSequenceKeypoint.new(1, 0),
+        })
+        ctg.Parent = coreTrail
+        
+        local endX = startX + math.random(-40, 40)
+        local duration = math.random(8, 14) / 10
+        TweenService:Create(shoot, TweenInfo.new(duration, Enum.EasingStyle.Quad), {
+            Position = UDim2.fromScale(endX/100, 1.05),
+        }):Play()
+        task.delay(duration * 0.8, function()
+            if shoot.Parent then
+                TweenService:Create(shoot, TweenInfo.new(duration * 0.2), {BackgroundTransparency = 1}):Play()
+                TweenService:Create(trail, TweenInfo.new(duration * 0.2), {BackgroundTransparency = 1}):Play()
+            end
+        end)
+        task.delay(duration + 0.1, function()
+            if shoot then shoot:Destroy() end
+        end)
+    end
+end)
 
     -- ═══════════════════════════════════════════════════════════
     -- ☄️ METEOR SYSTEM (3 METEOR, TABRAKAN, MELEDAK)
@@ -3833,8 +4212,8 @@ local function buildEggExecutorGUI(screenGui)
     meteorLayer.Parent = win
 
     local activeMeteors = {}
-    local MAX_METEORS = 3
-    local SPAWN_INTERVAL = 10 -- Spawn tiap 10 detik
+    local MAX_METEORS = 4
+    local SPAWN_INTERVAL = 3
 
     local function spawnMeteor()
         if #activeMeteors >= MAX_METEORS then return end
@@ -3931,26 +4310,55 @@ local function buildEggExecutorGUI(screenGui)
                 
                 if meteorData.progress >= 1 and not meteorData.exploded then
                     meteorData.exploded = true
-                    -- 🔥 LEDAKAN (EXPLOSION EFFECT)
+                                        -- 🔥 PREMIUM LEDAKAN (EXPLOSION EFFECT)
                     local explosionCenter = meteor.Position
                     
-                    -- Flash putih
-                    local flash = Instance.new("Frame")
-                    flash.AnchorPoint = Vector2.new(0.5, 0.5)
-                    flash.Position = explosionCenter
-                    flash.Size = UDim2.fromOffset(4, 4)
-                    flash.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                    flash.BorderSizePixel = 0
-                    flash.ZIndex = 30
-                    flash.Parent = meteorLayer
-                    local fc = Instance.new("UICorner"); fc.CornerRadius = UDim.new(1, 0); fc.Parent = flash
+                    -- 🌟 Flash putih besar (double layer)
+                    for f = 1, 2 do
+                        local flash = Instance.new("Frame")
+                        flash.AnchorPoint = Vector2.new(0.5, 0.5)
+                        flash.Position = explosionCenter
+                        flash.Size = UDim2.fromOffset(4, 4)
+                        flash.BackgroundColor3 = f == 1 and Color3.fromRGB(255, 255, 255) or meteorColor
+                        flash.BorderSizePixel = 0
+                        flash.ZIndex = 30 + f
+                        flash.Parent = meteorLayer
+                        local fc = Instance.new("UICorner"); fc.CornerRadius = UDim.new(1, 0); fc.Parent = flash
+                        
+                        TweenService:Create(flash, TweenInfo.new(0.35 + f*0.1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                            Size = UDim2.fromOffset(100 + f*20, 100 + f*20),
+                            BackgroundTransparency = 1,
+                        }):Play()
+                        task.delay(0.5, function() if flash then flash:Destroy() end end)
+                    end
                     
-                    TweenService:Create(flash, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-                        Size = UDim2.fromOffset(80, 80),
-                        BackgroundTransparency = 1,
-                    }):Play()
-                    task.delay(0.35, function() if flash then flash:Destroy() end end)
-
+                    -- 🌟 Cincin cahaya (2 ring)
+                    for r = 1, 2 do
+                        local shockRing = Instance.new("Frame")
+                        shockRing.AnchorPoint = Vector2.new(0.5, 0.5)
+                        shockRing.Position = explosionCenter
+                        shockRing.Size = UDim2.fromOffset(8, 8)
+                        shockRing.BackgroundTransparency = 1
+                        shockRing.BorderSizePixel = 0
+                        shockRing.ZIndex = 29
+                        shockRing.Parent = meteorLayer
+                        local src = Instance.new("UICorner"); src.CornerRadius = UDim.new(1, 0); src.Parent = shockRing
+                        local srs = Instance.new("UIStroke")
+                        srs.Color = r == 1 and Color3.fromRGB(255, 255, 255) or meteorColor
+                        srs.Thickness = r == 1 and 2.5 or 1.5
+                        srs.Transparency = 0
+                        srs.Parent = shockRing
+                        
+                        TweenService:Create(shockRing, TweenInfo.new(0.6 + r*0.15, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                            Size = UDim2.fromOffset(140 + r*40, 140 + r*40),
+                        }):Play()
+                        TweenService:Create(srs, TweenInfo.new(0.6 + r*0.15, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                            Transparency = 1,
+                            Thickness = 0,
+                        }):Play()
+                        task.delay(1, function() if shockRing then shockRing:Destroy() end end)
+                    end
+                
                     -- Shockwave Ring
                     local ring = Instance.new("Frame")
                     ring.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -4012,12 +4420,19 @@ local function buildEggExecutorGUI(screenGui)
         end)
     end
 
-    -- Spawn 3 meteor tiap 10 detik
+    -- ☄️ Spawn meteor cepat (tabrakan tiap ~3 detik)
     task.spawn(function()
-        task.wait(2)
+        task.wait(1.5)
         while win.Parent do
             if win.Visible and #activeMeteors < MAX_METEORS then
+                -- Spawn 1-2 meteor sekaligus biar lebih hidup
                 spawnMeteor()
+                if math.random() < 0.5 then
+                    task.wait(0.4)
+                    if #activeMeteors < MAX_METEORS then
+                        spawnMeteor()
+                    end
+                end
             end
             task.wait(SPAWN_INTERVAL)
         end
@@ -4165,8 +4580,14 @@ local function buildEggExecutorGUI(screenGui)
         card.BackgroundColor3 = COLOR_GLASS; card.BackgroundTransparency = 0.4
         card.BorderSizePixel = 0; card.ZIndex = 11
         local cc = Instance.new("UICorner"); cc.CornerRadius = UDim.new(0, 10); cc.Parent = card
-        local cs = Instance.new("UIStroke"); cs.Color = color; cs.Thickness = 1; cs.Transparency = 0.5; cs.Parent = card
-
+                local cs = Instance.new("UIStroke"); cs.Color = color; cs.Thickness = 1.5; cs.Transparency = 0.3; cs.Parent = card
+        -- ⭐ Inner glow (3D depth)
+        local csInner = Instance.new("UIStroke")
+        csInner.Color = Color3.fromRGB(255, 255, 255)
+        csInner.Thickness = 0.5
+        csInner.Transparency = 0.85
+        csInner.Parent = card
+        
         local iconLbl = Instance.new("TextLabel")
         iconLbl.Size = UDim2.fromOffset(32, 32); iconLbl.Position = UDim2.fromOffset(10, 14)
         iconLbl.BackgroundTransparency = 1; iconLbl.Text = icon; iconLbl.TextSize = 22
