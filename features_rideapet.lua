@@ -3813,18 +3813,47 @@ local function halloweenReturnToBase()
     hum = char and char:FindFirstChildOfClass("Humanoid")
     if not root then return false end
 
-    if hum and hum.SeatPart then
+        if hum and hum.SeatPart then
         local pet = hum.SeatPart:FindFirstAncestorOfClass("Model")
         if pet then
             local seat = hum.SeatPart
             local offset = root.CFrame:ToObjectSpace(seat.CFrame)
 
-            -- ⭐ FLY STEP-BY-STEP ke base
             local targetPos = base.Position + Vector3.new(0, FLY_HEIGHT, 0)
             local startPos = root.Position
             local totalDist = (targetPos - startPos).Magnitude
-            local steps = math.ceil(totalDist / FLY_STEP)
 
+            -- ⭐ INSTANT kalau jarak ≤ 100 studs (pet ikut ke-TP)
+            if totalDist <= 100 then
+                local newRootCF = CFrame.new(targetPos)
+                local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if r then
+                    r.CFrame = newRootCF
+                    r.Velocity = Vector3.zero
+                    r.AssemblyLinearVelocity = Vector3.zero
+                end
+
+                -- Pet ikut ke-TP bareng
+                local newSeatCF = newRootCF * offset
+                local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
+                local targetPivot = newSeatCF * pivotToSeat:Inverse()
+                pcall(function() pet:PivotTo(targetPivot) end)
+
+                task.wait(0.1)
+
+                -- Turun ke base
+                local rFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if rFinal then
+                    rFinal.CFrame = base.CFrame + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
+                    rFinal.Velocity = Vector3.zero
+                    rFinal.AssemblyLinearVelocity = Vector3.zero
+                end
+                task.wait(HalloweenCfg.RETURN_WAIT)
+                return true
+            end
+
+            -- Step normal kalau > 100
+            local steps = math.ceil(totalDist / FLY_STEP)
             local dir = (targetPos - startPos)
             if dir.Magnitude > 1 then dir = dir.Unit
             else dir = Vector3.new(0, 0, 0) end
@@ -3836,12 +3865,10 @@ local function halloweenReturnToBase()
                 local dist = math.min(FLY_STEP * i, totalDist)
                 local newRootCF = CFrame.new(startPos + dir * dist)
 
-                -- Gerakin root
                 r.CFrame = newRootCF
                 r.Velocity = Vector3.zero
                 r.AssemblyLinearVelocity = Vector3.zero
 
-                -- Gerakin pet model bareng
                 local newSeatCF = newRootCF * offset
                 local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
                 local targetPivot = newSeatCF * pivotToSeat:Inverse()
@@ -3850,7 +3877,6 @@ local function halloweenReturnToBase()
                 task.wait(FLY_WAIT)
             end
 
-            -- ⭐ Turun ke base
             local rFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
             if rFinal then
                 rFinal.CFrame = base.CFrame + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
