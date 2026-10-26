@@ -3766,6 +3766,78 @@ local function buildEggExecutorGUI(screenGui)
     wStroke.Transparency = 0.3
     wStroke.Parent = win
 
+    -- ⭐⭐⭐ GITHUB ANIME BACKGROUND — EGG EXECUTOR ⭐⭐⭐
+    local EGG_BG_URL = "https://raw.githubusercontent.com/vrilz-vd/anime/refs/heads/main/animeegg.jpe"
+    local EGG_BG_CACHE = "vrilz_egg_bg.jpe"
+
+    local function loadEggBgImage()
+        if not (writefile and isfile and getcustomasset) then
+            warn("[EGG BG] Executor gak support getcustomasset")
+            return nil
+        end
+        if isfile(EGG_BG_CACHE) then
+            local ok, asset = pcall(getcustomasset, EGG_BG_CACHE)
+            if ok and asset then
+                print("[EGG BG] ✅ Loaded dari cache")
+                return asset
+            end
+        end
+        print("[EGG BG] Download dari GitHub...")
+        local ok, content = pcall(function()
+            return game:HttpGet(EGG_BG_URL)
+        end)
+        if not ok or not content then
+            warn("[EGG BG] ❌ Gagal download dari GitHub")
+            return nil
+        end
+        pcall(writefile, EGG_BG_CACHE, content)
+        local ok2, asset = pcall(getcustomasset, EGG_BG_CACHE)
+        if ok2 and asset then
+            print("[EGG BG] ✅ Loaded dari GitHub")
+            return asset
+        end
+        warn("[EGG BG] ❌ Gagal convert ke asset")
+        return nil
+    end
+
+    local eggBgAsset = loadEggBgImage()
+
+    local eggBg = Instance.new("ImageLabel")
+    eggBg.Name = "EggExecutorBackground"
+    eggBg.Size = UDim2.fromScale(1, 1)
+    eggBg.Position = UDim2.fromScale(0, 0)
+    eggBg.BackgroundTransparency = 1
+    eggBg.ScaleType = Enum.ScaleType.Crop
+    eggBg.ZIndex = -1
+    eggBg.Parent = win
+
+    if eggBgAsset then
+        eggBg.Image = eggBgAsset
+    else
+        eggBg.Image = ""
+        eggBg.BackgroundColor3 = Color3.fromRGB(12, 12, 25)
+        eggBg.BackgroundTransparency = 0
+    end
+
+    local eggBgCorner = Instance.new("UICorner")
+    eggBgCorner.CornerRadius = UDim.new(0, 16)
+    eggBgCorner.Parent = eggBg
+
+    local eggOverlay = Instance.new("Frame")
+    eggOverlay.Name = "EggExecutorOverlay"
+    eggOverlay.Size = UDim2.fromScale(1, 1)
+    eggOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    eggOverlay.BackgroundTransparency = 0.45
+    eggOverlay.BorderSizePixel = 0
+    eggOverlay.ZIndex = -1
+    eggOverlay.Active = false
+    eggOverlay.Parent = win
+
+    local eggOverlayCorner = Instance.new("UICorner")
+    eggOverlayCorner.CornerRadius = UDim.new(0, 16)
+    eggOverlayCorner.Parent = eggOverlay
+    -- ⭐⭐⭐ END GITHUB ANIME BACKGROUND ⭐⭐⭐
+
     -- ═══ STAR FIELD (bintang 3D berputar) ═══
     local starLayer = Instance.new("Frame")
     starLayer.Name = "StarField"
