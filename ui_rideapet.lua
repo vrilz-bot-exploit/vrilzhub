@@ -2709,140 +2709,211 @@ local function gfx_cleanup()
     GFX.Created = {}
 end
 
--- ===== FPS BOOST (v3 — KILL ALL TREES + LEAVES) =====
+-- ===== FPS BOOST v4 — HIDE ALL VISUAL EFFECTS + REALISTIC COLOR =====
 local function gfx_enableFPS()
     if GFX.FPSEnabled then return end
     GFX.FPSEnabled = true
 
+    -- ═══════════════════════════════════════════════════════════
+    -- 1. LIGHTING: MATIIN SHADOW (BIAR RINGAN)
+    -- ═══════════════════════════════════════════════════════════
     pcall(function() Lighting.GlobalShadows = false end)
+    pcall(function() Lighting.ShadowSoftness = 0 end)
     pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
 
+    -- ═══════════════════════════════════════════════════════════
+    -- 2. HIDE SEMUA EFFECT OBJECTS (PARTICLE, BEAM, TRAIL, DLL)
+    -- ═══════════════════════════════════════════════════════════
+    local hidden = {}
+
+    local function hideEffect(obj)
+        if not obj or not obj.Parent then return end
+        pcall(function()
+            -- Simpan original state
+            table.insert(GFX.HiddenParts, {
+                obj = obj,
+                enabled = obj.Enabled,
+                transparency = obj.Transparency,
+                visible = obj.Visible,
+            })
+        end)
+        pcall(function() obj.Enabled = false end)
+        pcall(function() obj.Transparency = 1 end)
+        pcall(function() obj.Visible = false end)
+        pcall(function() obj.Rate = 0 end)
+        pcall(function() obj.Brightness = 0 end)
+        pcall(function() obj.LightEmission = 0 end)
+    end
+
+    -- ═══ SCAN SEMUA EFFECT DI WORKSPACE ═══
     task.spawn(function()
-        local hidden = {}
-        
-        -- ⭐ KEYWORD FILTER — ekspansi besar buat pohon & daun
-        local decoKeywords = {
-            -- Pohon
-            "tree", "palm", "oak", "birch", "pine", "willow", "maple", "cherry",
-            "tree_", "trees", "pinetree", "palmtree", "bigtree", "smalltree",
-            
-            -- Daun & ranting
-            "leaf", "leaves", "foliage", "canopy", "branch", "branches",
-            "twig", "vine", "ivy", "moss", "fern",
-            
-            -- Batang
-            "trunk", "wood", "log", "stump", "bark",
-            
-            -- Semak & tumbuhan
-            "bush", "shrub", "plant", "grass", "flower", "mushroom", "fungus",
-            "cactus", "succulent", "hedge",
-            
-            -- Alam & dekorasi
-            "rock", "stone", "boulder", "pebble", "crystal",
-            "cloud", "fog", "mist", "wind", "particle",
-            
-            -- Pagar & struktur ringan
-            "fence", "gate", "sign", "post", "lamp", "light", "torch",
-            
-            -- Dekorasi umum
-            "deco", "decoration", "prop", "scenery", "scenery_",
-            "vegetation", "foliage", "natural", "nature", "environment",
-        }
-        
-        -- ⭐ CEK 1 PART — apa dia pohon/daun/dekorasi?
-        local function isDecoPart(obj)
-            if not obj:IsA("BasePart") then return false end
-            
-            local name = string.lower(obj.Name)
-            local parentName = ""
-            if obj.Parent then
-                parentName = string.lower(obj.Parent.Name)
-            end
-            
-            -- ═══════════════════════════════════════
-            -- ⚠️ SAFETY: JANGAN SENTUH PART PENTING
-            -- ═══════════════════════════════════════
-            if obj:FindFirstChildWhichIsA("Humanoid") then return false end
-            if obj:FindFirstChildWhichIsA("ProximityPrompt") then return false end
-            if obj:FindFirstChildWhichIsA("ClickDetector") then return false end
-            
-            -- Skip egg / nest / plot / char / pet / spawn
-            if name:find("egg") or name:find("nest") then return false end
-            if parentName:find("plot") or parentName:find("char") 
-                or parentName:find("pet") or parentName:find("player")
-                or parentName:find("spawn") or parentName:find("egg")
-                or parentName:find("nest") then return false end
-            
-            -- Skip part dari karakter (pakai HumanoidRootPart parent check)
-            local ancestor = obj.Parent
-            for i = 1, 3 do
-                if not ancestor then break end
-                if ancestor:FindFirstChildWhichIsA("Humanoid") then return false end
-                ancestor = ancestor.Parent
-            end
-            
-            -- ═══════════════════════════════════════
-            -- ✅ CEK KEYWORD DI NAMA PART ATAU PARENT
-            -- ═══════════════════════════════════════
-            for _, kw in ipairs(decoKeywords) do
-                if name:find(kw) or parentName:find(kw) then
-                    return true
+        local function scanEffects()
+            for _, obj in ipairs(Workspace:GetDescendants()) do
+                -- Particle emitter
+                if obj:IsA("ParticleEmitter") then
+                    hideEffect(obj)
+                -- Beam
+                elseif obj:IsA("Beam") then
+                    hideEffect(obj)
+                -- Trail
+                elseif obj:IsA("Trail") then
+                    hideEffect(obj)
+                -- Smoke
+                elseif obj:IsA("Smoke") then
+                    hideEffect(obj)
+                -- Fire
+                elseif obj:IsA("Fire") then
+                    hideEffect(obj)
+                -- Sparkles
+                elseif obj:IsA("Sparkles") then
+                    hideEffect(obj)
+                -- Explosion (rare, tapi ada)
+                elseif obj:IsA("Explosion") then
+                    hideEffect(obj)
+                -- Lightning
+                elseif obj:IsA("Lightning") then
+                    hideEffect(obj)
+                -- PointLight
+                elseif obj:IsA("PointLight") then
+                    hideEffect(obj)
+                -- SpotLight
+                elseif obj:IsA("SpotLight") then
+                    hideEffect(obj)
+                -- SurfaceLight
+                elseif obj:IsA("SurfaceLight") then
+                    hideEffect(obj)
                 end
             end
-            
-            -- ═══════════════════════════════════════
-            -- ✅ CEK MATERIAL (daun biasanya Grass/LeafyGrass/Fabric)
-            -- ═══════════════════════════════════════
-            if obj.Material == Enum.Material.Grass 
-                or obj.Material == Enum.Material.LeafyGrass 
-                or obj.Material == Enum.Material.Fabric then
-                return true
-            end
-            
-            -- ═══════════════════════════════════════
--- ✅ CEK BENTUK (bush/daun biasanya Sphere/Cylinder kecil)
--- ═══════════════════════════════════════
-if obj:IsA("Part") and obj.Shape == Enum.PartType.Ball and obj.Size.Magnitude < 30 then
-    -- Ball kecil = kemungkinan bush/daun
-    -- Cek warna hijau (daun)
-    local r = obj.Color.R
-    local g = obj.Color.G
-    local b = obj.Color.B
-    if g > r and g > b and g > 0.3 then
-        return true  -- hijau = daun
-    end
-end
-            
-            -- Part transparan tinggi = dekorasi (bukan part penting)
-            if obj.Transparency >= 0.5 then
-                return true
-            end
-            
-            return false
         end
-        
-        -- ═══════════════════════════════════════
-        -- ⭐ SCAN SEMUA WORKSPACE
-        -- ═══════════════════════════════════════
-        for _, obj in ipairs(Workspace:GetDescendants()) do
-    if (obj:IsA("BasePart") or obj:IsA("MeshPart")) and isDecoPart(obj) then
-        if obj.Size.Magnitude < 300 then
-            pcall(function()
-                obj.LocalTransparencyModifier = 1
-                obj.Transparency = 1
-                obj.CanCollide = false
-                obj.CanTouch = false
-                obj.CanQuery = false
-                obj.CastShadow = false
-            end)
-            table.insert(hidden, obj)
+
+        scanEffects()
+
+        -- ═══ WATCH EFFECT BARU (muncul belakangan) ═══
+        local conn = Workspace.DescendantAdded:Connect(function(obj)
+            if not GFX.FPSEnabled then return end
+            task.wait(0.05) -- delay biar object udah fully init
+            if obj:IsA("ParticleEmitter") or obj:IsA("Beam") or obj:IsA("Trail")
+                or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles")
+                or obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
+                hideEffect(obj)
+            end
+        end)
+        table.insert(GFX.Connections, conn)
+
+        -- ═══ HIDE PARTICLE/DEBRIS DI LIGHTING JUGA ═══
+        for _, obj in ipairs(Lighting:GetDescendants()) do
+            if obj:IsA("ParticleEmitter") or obj:IsA("Beam") or obj:IsA("Trail") then
+                hideEffect(obj)
+            end
         end
-    end
-end
-        
-        GFX.HiddenParts = hidden
-        notify("FPS Boost: " .. #hidden .. " parts hidden 🌳", "info")
+
+        notify("✨ Effect hidden: " .. #GFX.HiddenParts, "info")
     end)
+
+    -- ═══════════════════════════════════════════════════════════
+    -- 3. HIDE DECALS / TEXTURES BERAT (opsional, biar makin ringan)
+    -- ═══════════════════════════════════════════════════════════
+    -- (skip, karena lu gak mau sentuh part penting)
+
+    -- ═══════════════════════════════════════════════════════════
+    -- 4. REALISTIC COLOR CORRECTION (GANTI ATMOSPHERE KERAS)
+    -- ═══════════════════════════════════════════════════════════
+    -- Simpan state asli
+    gfx_save(Lighting, "Ambient")
+    gfx_save(Lighting, "OutdoorAmbient")
+    gfx_save(Lighting, "Brightness")
+    gfx_save(Lighting, "ExposureCompensation")
+    gfx_save(Lighting, "ColorShift_Top")
+    gfx_save(Lighting, "ColorShift_Bottom")
+    gfx_save(Lighting, "EnvironmentDiffuseScale")
+    gfx_save(Lighting, "EnvironmentSpecularScale")
+    gfx_save(Lighting, "ClockTime")
+    gfx_save(Lighting, "GeographicLatitude")
+
+    pcall(function()
+        -- Warna natural, gak overbright, gak terlalu gelap
+        Lighting.Ambient = Color3.fromRGB(70, 72, 78)           -- abu-abu natural
+        Lighting.OutdoorAmbient = Color3.fromRGB(95, 100, 108)   -- outdoor lebih terang
+        Lighting.Brightness = 1.35                              -- natural (bukan 2.5)
+        Lighting.ExposureCompensation = 0                       -- netral
+        Lighting.EnvironmentDiffuseScale = 0.5
+        Lighting.EnvironmentSpecularScale = 0.5
+        Lighting.ColorShift_Top = Color3.fromRGB(0, 0, 0)        -- no weird tint
+        Lighting.ColorShift_Bottom = Color3.fromRGB(0, 0, 0)
+        Lighting.ClockTime = 14.5                               -- siang natural
+        Lighting.GeographicLatitude = 0
+    end)
+
+    -- ═══ COLOR CORRECTION EFFECT (REALISTIS) ═══
+    local oldCC = Lighting:FindFirstChild("VRILZ_FPS_CC")
+    if oldCC then oldCC:Destroy() end
+
+    local cc = Instance.new("ColorCorrectionEffect")
+    cc.Name = "VRILZ_FPS_CC"
+    cc.Brightness = 0          -- netral
+    cc.Contrast = 0.06         -- sedikit kontras biar gak flat
+    cc.Saturation = 0.05       -- sedikit saturasi biar warna hidup
+    cc.TintColor = Color3.fromRGB(255, 255, 255)  -- NO tint
+    cc.Parent = Lighting
+    gfx_add(cc)
+
+    -- ═══ BLOOM TIPIS (biar gak flat banget) ═══
+    local oldBloom = Lighting:FindFirstChild("VRILZ_FPS_Bloom")
+    if oldBloom then oldBloom:Destroy() end
+
+    local bloom = Instance.new("BloomEffect")
+    bloom.Name = "VRILZ_FPS_Bloom"
+    bloom.Intensity = 0.15     -- tipis (bukan 0.5)
+    bloom.Size = 16
+    bloom.Threshold = 1.2      -- cuma highlight yg glow
+    bloom.Parent = Lighting
+    gfx_add(bloom)
+
+    -- ═══ HAPUS ATMOSPHERE YANG BERAT (fog, haze) ═══
+    for _, obj in ipairs(Lighting:GetChildren()) do
+        if obj:IsA("Atmosphere") then
+            gfx_save(obj, "Density")
+            gfx_save(obj, "Haze")
+            pcall(function()
+                obj.Density = 0
+                obj.Haze = 0
+            end)
+        end
+    end
+
+    -- ═══ HAPUS SUN RAYS / DOF (berat) ═══
+    for _, obj in ipairs(Lighting:GetChildren()) do
+        if obj:IsA("SunRaysEffect") or obj:IsA("DepthOfFieldEffect") then
+            gfx_save(obj, "Enabled")
+            pcall(function() obj.Enabled = false end)
+        end
+    end
+
+    -- ═══════════════════════════════════════════════════════════
+    -- 5. RE-APPLY LOOP (effect baru kadang muncul lagi)
+    -- ═══════════════════════════════════════════════════════════
+    if not GFX.LoopThread then
+        GFX.LoopThread = task.spawn(function()
+            while GFX.FPSEnabled do
+                task.wait(3)
+                -- Re-apply color
+                pcall(function()
+                    Lighting.GlobalShadows = false
+                    Lighting.Brightness = 1.35
+                    Lighting.ExposureCompensation = 0
+                end)
+                -- Re-hide effect yang muncul lagi
+                for _, obj in ipairs(Workspace:GetDescendants()) do
+                    if obj:IsA("ParticleEmitter") or obj:IsA("Beam") or obj:IsA("Trail")
+                        or obj:IsA("Smoke") or obj:IsA("Fire") then
+                        if obj.Enabled ~= false then
+                            pcall(function() obj.Enabled = false end)
+                        end
+                    end
+                end
+            end
+        end)
+    end
 
     notify("FPS Boost enabled ✅", "success")
 end
@@ -2850,23 +2921,40 @@ end
 local function gfx_disableFPS()
     if not GFX.FPSEnabled then return end
     GFX.FPSEnabled = false
+    GFX.LoopThread = nil
 
+    -- ═══ RESTORE LIGHTING ═══
     pcall(function() Lighting.GlobalShadows = true end)
     pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level10 end)
 
-    for _, part in ipairs(GFX.HiddenParts) do
-        if part and part.Parent then
+    -- ═══ RESTORE SEMUA EFFECT YANG DISEMBUNYIKAN ═══
+    for _, item in ipairs(GFX.HiddenParts) do
+        if item.obj and item.obj.Parent then
             pcall(function()
-                part.LocalTransparencyModifier = 0
-                part.Transparency = 0
-                part.CanCollide = true
-                part.CanTouch = true
-                part.CanQuery = true
-                part.CastShadow = true
+                if item.enabled ~= nil then item.obj.Enabled = item.enabled end
+                if item.transparency ~= nil and item.obj:IsA("BasePart") then
+                    item.obj.Transparency = item.transparency
+                end
+                if item.visible ~= nil then item.obj.Visible = item.visible end
             end)
         end
     end
     GFX.HiddenParts = {}
+
+    -- ═══ DISCONNECT WATCHER ═══
+    for _, conn in ipairs(GFX.Connections) do
+        pcall(function() conn:Disconnect() end)
+    end
+    GFX.Connections = {}
+
+    -- ═══ RESTORE LIGHTING STATE ═══
+    gfx_restore()
+
+    -- ═══ HAPUS EFFECT TAMBAHAN ═══
+    for _, name in ipairs({"VRILZ_FPS_CC", "VRILZ_FPS_Bloom"}) do
+        local old = Lighting:FindFirstChild(name)
+        if old then old:Destroy() end
+    end
 
     notify("FPS Boost disabled", "info")
 end
