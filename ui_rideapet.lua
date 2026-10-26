@@ -3766,77 +3766,82 @@ local function buildEggExecutorGUI(screenGui)
     wStroke.Transparency = 0.3
     wStroke.Parent = win
 
-    -- ⭐⭐⭐ GITHUB ANIME BACKGROUND — EGG EXECUTOR ⭐⭐⭐
-    local EGG_BG_URL = "https://raw.githubusercontent.com/vrilz-vd/anime/refs/heads/main/animeegg.jpe"
-    local EGG_BG_CACHE = "vrilz_egg_bg.jpe"
+  -- ═══ DI DALAM buildEggExecutorGUI — GANTI BAGIAN INI ═══
+local EGG_BG_URL = "https://raw.githubusercontent.com/vrilz-vd/anime/refs/heads/main/animeegg.jpe"
+local EGG_BG_CACHE = "vrilz_egg_bg.png"   -- ← FIX: png, bukan .jpe
 
-    local function loadEggBgImage()
-        if not (writefile and isfile and getcustomasset) then
-            warn("[EGG BG] Executor gak support getcustomasset")
-            return nil
-        end
-        if isfile(EGG_BG_CACHE) then
-            local ok, asset = pcall(getcustomasset, EGG_BG_CACHE)
-            if ok and asset then
-                print("[EGG BG] ✅ Loaded dari cache")
-                return asset
-            end
-        end
-        print("[EGG BG] Download dari GitHub...")
-        local ok, content = pcall(function()
-            return game:HttpGet(EGG_BG_URL)
-        end)
-        if not ok or not content then
-            warn("[EGG BG] ❌ Gagal download dari GitHub")
-            return nil
-        end
-        pcall(writefile, EGG_BG_CACHE, content)
-        local ok2, asset = pcall(getcustomasset, EGG_BG_CACHE)
-        if ok2 and asset then
-            print("[EGG BG] ✅ Loaded dari GitHub")
-            return asset
-        end
-        warn("[EGG BG] ❌ Gagal convert ke asset")
+local function loadEggBgImage()
+    if not (writefile and isfile and getcustomasset) then
+        warn("[EGG BG] Executor gak support getcustomasset")
         return nil
     end
 
-    local eggBgAsset = loadEggBgImage()
-
-    local eggBg = Instance.new("ImageLabel")
-    eggBg.Name = "EggExecutorBackground"
-    eggBg.Size = UDim2.fromScale(1, 1)
-    eggBg.Position = UDim2.fromScale(0, 0)
-    eggBg.BackgroundTransparency = 1
-    eggBg.ScaleType = Enum.ScaleType.Crop
-    eggBg.ZIndex = -1
-    eggBg.Parent = win
-
-    if eggBgAsset then
-        eggBg.Image = eggBgAsset
-    else
-        eggBg.Image = ""
-        eggBg.BackgroundColor3 = Color3.fromRGB(12, 12, 25)
-        eggBg.BackgroundTransparency = 0
+    -- ⭐ Cek cache dulu
+    if isfile(EGG_BG_CACHE) then
+        local ok, asset = pcall(getcustomasset, EGG_BG_CACHE)
+        if ok and asset and asset ~= "" then
+            print("[EGG BG] ✅ Loaded dari cache")
+            return asset
+        end
     end
 
-    local eggBgCorner = Instance.new("UICorner")
-    eggBgCorner.CornerRadius = UDim.new(0, 16)
-    eggBgCorner.Parent = eggBg
+    -- ⭐ Download dari GitHub
+    print("[EGG BG] Download dari GitHub...")
+    local ok, content = pcall(function()
+        return game:HttpGet(EGG_BG_URL)
+    end)
 
-    local eggOverlay = Instance.new("Frame")
-    eggOverlay.Name = "EggExecutorOverlay"
-    eggOverlay.Size = UDim2.fromScale(1, 1)
-    eggOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    eggOverlay.BackgroundTransparency = 0.45
-    eggOverlay.BorderSizePixel = 0
-    eggOverlay.ZIndex = -1
-    eggOverlay.Active = false
-    eggOverlay.Parent = win
+    if not ok or not content or #content < 100 then
+        warn("[EGG BG] ❌ Gagal download dari GitHub")
+        return nil
+    end
 
-    local eggOverlayCorner = Instance.new("UICorner")
-    eggOverlayCorner.CornerRadius = UDim.new(0, 16)
-    eggOverlayCorner.Parent = eggOverlay
-    -- ⭐⭐⭐ END GITHUB ANIME BACKGROUND ⭐⭐⭐
+    -- ⭐ Simpan ke file lokal
+    local writeOk = pcall(writefile, EGG_BG_CACHE, content)
+    if not writeOk then
+        warn("[EGG BG] ❌ Gagal writefile")
+        return nil
+    end
+
+    -- ⭐ Convert ke asset
+    local ok2, asset = pcall(getcustomasset, EGG_BG_CACHE)
+    if ok2 and asset and asset ~= "" then
+        print("[EGG BG] ✅ Loaded dari GitHub")
+        return asset
+    end
+
+    warn("[EGG BG] ❌ Gagal convert ke asset")
+    return nil
+end
+
+local eggBgAsset = loadEggBgImage()
+
+local eggBg = Instance.new("ImageLabel")
+eggBg.Name = "EggExecutorBackground"
+eggBg.Size = UDim2.fromScale(1, 1)
+eggBg.Position = UDim2.fromScale(0, 0)
+eggBg.BackgroundTransparency = 1
+eggBg.ScaleType = Enum.ScaleType.Crop
+eggBg.ZIndex = -1
+eggBg.Parent = win
+
+if eggBgAsset then
+    eggBg.Image = eggBgAsset
+else
+    -- ⭐ FALLBACK: gradient cosmic biar gak polos
+    eggBg.Image = ""
+    eggBg.BackgroundColor3 = Color3.fromRGB(12, 12, 25)
+    eggBg.BackgroundTransparency = 0
+
+    local fallbackGrad = Instance.new("UIGradient")
+    fallbackGrad.Rotation = 135
+    fallbackGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 10, 40)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(5, 8, 20)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 5, 25)),
+    })
+    fallbackGrad.Parent = eggBg
+end
 
     -- ═══ STAR FIELD (bintang 3D berputar) ═══
     local starLayer = Instance.new("Frame")
@@ -4702,7 +4707,7 @@ animeBg.Position = UDim2.fromScale(0, 0)
 animeBg.BackgroundTransparency = 1
 -- ⭐⭐⭐ GITHUB IMAGE LOADER ⭐⭐⭐
 local GITHUB_ANIME_URL = "https://raw.githubusercontent.com/vrilz-vd/anime/refs/heads/main/images%20(2).jpe"
-local GITHUB_ANIME_CACHE = "vrilz_anime_bg.jpe"
+local GITHUB_ANIME_CACHE = "vrilz_anime_bg.png"
 
 local function loadGithubImage()
     -- Cek apakah executor support getcustomasset
@@ -5577,15 +5582,17 @@ if isAsset then
         end
 
                 local function switchTo()
-            for n, p in pairs(pages) do
-                if p then p.Visible = false end
-            end
-            if pages[id] then
-                pages[id].Visible = true
-            end
-            for n, x in pairs(navs) do
-                if n == id then
-                    x.btn.BackgroundColor3 = C.Accent
+    if not pages or not navs then return end
+    for n, p in pairs(pages) do
+        if p and p.Parent then p.Visible = false end
+    end
+    if pages[id] and pages[id].Parent then
+        pages[id].Visible = true
+    end
+    for n, x in pairs(navs) do
+        if not x or not x.btn or not x.btn.Parent then continue end
+        if n == id then
+            x.btn.BackgroundColor3 = C.Accent
                     x.btn.BackgroundTransparency = 0.35
                     if x.isAsset then
                         x.ic.ImageColor3 = Color3.new(1, 1, 1)
@@ -5608,10 +5615,15 @@ if isAsset then
             end
         end
 
-        btn.MouseButton1Click:Connect(switchTo)
+                btn.MouseButton1Click:Connect(function()
+            local ok, err = pcall(switchTo)
+            if not ok then warn("[TAB] switchTo error: " .. tostring(err)) end
+        end)
 
-        -- ⭐ TAMBAH 2 BARIS INI
-        _G.VRILZ_SwitchTab = _G.VRILZ_SwitchTab or {}
+        -- ⭐ FIX: pastikan _G.VRILZ_SwitchTab BENERAN table
+        if type(_G.VRILZ_SwitchTab) ~= "table" then
+            _G.VRILZ_SwitchTab = {}
+        end
         _G.VRILZ_SwitchTab[id] = switchTo
     end
 
@@ -8307,16 +8319,22 @@ end
     registerTab("Webhook", "🔔", "Webhook")
     registerTab("Settings", "⚙", "Settings")
 
-        -- ⭐ AUTO BUKA TAB INFO PAS PERTAMA LAUNCH
+                -- ⭐ AUTO BUKA TAB INFO PAS PERTAMA LAUNCH
     task.defer(function()
-        if _G.VRILZ_SwitchTab and _G.VRILZ_SwitchTab.Info then
-            local ok, err = pcall(_G.VRILZ_SwitchTab.Info)
-            if not ok then
-                warn("[TAB] Auto-open Info failed: " .. tostring(err))
+        local tries = 0
+        while tries < 30 do
+            if type(_G.VRILZ_SwitchTab) == "table"
+                and type(_G.VRILZ_SwitchTab.Info) == "function" then
+                local ok, err = pcall(_G.VRILZ_SwitchTab.Info)
+                if not ok then
+                    warn("[TAB] Auto-open Info failed: " .. tostring(err))
+                end
+                return
             end
-        else
-            warn("[TAB] _G.VRILZ_SwitchTab.Info not registered!")
+            task.wait(0.1)
+            tries = tries + 1
         end
+        warn("[TAB] _G.VRILZ_SwitchTab.Info not registered after 3s!")
     end)
 
         -- Drag handler (PC + Mobile) — single source of truth
