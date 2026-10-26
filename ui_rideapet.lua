@@ -2710,6 +2710,7 @@ local function gfx_cleanup()
 end
 
 -- ===== FPS BOOST =====
+-- ===== FPS BOOST (v2 — lebih agresif) =====
 local function gfx_enableFPS()
     if GFX.FPSEnabled then return end
     GFX.FPSEnabled = true
@@ -2719,28 +2720,68 @@ local function gfx_enableFPS()
 
     task.spawn(function()
         local hidden = {}
+        
+        -- ⭐ KEYWORD FILTER (diperluas)
+        local decoKeywords = {
+            "tree", "palm", "oak", "birch", "pine", "leaf", "leaves", "branch",
+            "bush", "shrub", "plant", "grass", "flower", "mushroom", "fungus",
+            "rock", "stone", "boulder", "pebble", "crystal",
+            "cloud", "fog", "mist", "wind",
+            "fence", "wall", "border", "gate", "sign", "post", "lamp", "light",
+            "deco", "decoration", "prop", "scenery", "scenery_",
+        }
+        
+        -- ⭐ CEK 1 PART — apa dia dekorasi?
+        local function isDecoPart(obj)
+            if not obj:IsA("BasePart") then return false end
+            
+            local name = string.lower(obj.Name)
+            local parentName = ""
+            if obj.Parent then
+                parentName = string.lower(obj.Parent.Name)
+            end
+            
+            -- JANGAN sentuh part penting
+            if obj:FindFirstChildWhichIsA("Humanoid") then return false end
+            if obj:FindFirstChildWhichIsA("ProximityPrompt") then return false end
+            if obj:FindFirstChildWhichIsA("ClickDetector") then return false end
+            
+            -- Skip egg / nest / plot / char
+            if name:find("egg") or name:find("nest") then return false end
+            if parentName:find("plot") or parentName:find("char") or parentName:find("pet") then return false end
+            
+            -- Cek keyword di nama part ATAU parent
+            for _, kw in ipairs(decoKeywords) do
+                if name:find(kw) or parentName:find(kw) then
+                    return true
+                end
+            end
+            
+            -- Part transparan tinggi = dekorasi
+            if obj.Transparency >= 0.5 then
+                -- KECUALI yang punya script/prompt/detector
+                return true
+            end
+            
+            return false
+        end
+        
+        -- ⭐ SCAN WORKSPACE
         for _, obj in ipairs(Workspace:GetDescendants()) do
-            if obj:IsA("BasePart") then
-                local name = string.lower(obj.Name)
-                local parentName = obj.Parent and string.lower(obj.Parent.Name) or ""
-                local skip = false
-                if obj:FindFirstChildWhichIsA("Humanoid") then skip = true end
-                if name:find("egg") or name:find("nest") then skip = true end
-                if parentName:find("plot") or parentName:find("char") then skip = true end
-                if obj:FindFirstChildWhichIsA("ProximityPrompt") then skip = true end
-                if not skip then
-                    local isDeco = false
-                    if obj.Transparency >= 0.5 then isDeco = true end
-                    if name:find("tree") or name:find("rock") or name:find("bush") then isDeco = true end
-                    if name:find("grass") or name:find("flower") or name:find("cloud") then isDeco = true end
-                    if isDeco and obj.Size.Magnitude < 50 then
-                        obj.LocalTransparencyModifier = 1
-                        obj.CanCollide = false
-                        table.insert(hidden, obj)
-                    end
+            if obj:IsA("BasePart") and isDecoPart(obj) then
+                -- Skip kalau terlalu besar (bisa jadi building)
+                if obj.Size.Magnitude < 200 then
+                    obj.LocalTransparencyModifier = 1     -- invisible
+                    obj.Transparency = 1                  -- invisible juga (server sync)
+                    obj.CanCollide = false                -- tembus
+                    obj.CanTouch = false                  -- gak bisa di-touch
+                    obj.CanQuery = false                  -- gak kena raycast
+                    obj.CastShadow = false                -- ⭐ gak ada shadow (FPS gain)
+                    table.insert(hidden, obj)
                 end
             end
         end
+        
         GFX.HiddenParts = hidden
         notify("FPS Boost: " .. #hidden .. " Parts hidden", "info")
     end)
@@ -2759,7 +2800,11 @@ local function gfx_disableFPS()
         if part and part.Parent then
             pcall(function()
                 part.LocalTransparencyModifier = 0
+                part.Transparency = 0
                 part.CanCollide = true
+                part.CanTouch = true
+                part.CanQuery = true
+                part.CastShadow = true
             end)
         end
     end
