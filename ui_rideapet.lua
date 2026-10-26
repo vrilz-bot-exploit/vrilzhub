@@ -4827,8 +4827,23 @@ end)
         if key == "eggs" then updateEggList() end
     end
 
+    -- ═══ TAB SWITCH & ANIMATION ═══
+    local function switchTab(key)
+        EggState.ActiveTab = key
+        -- ... (kode existing)
+    end
+
     for key, data in pairs(tabButtons) do
         data.btn.MouseButton1Click:Connect(function()
+            -- ⭐ PRESS EFFECT
+            TweenService:Create(data.btn, TweenInfo.new(0.08, Enum.EasingStyle.Quad), {
+                Size = UDim2.new(1/3 - 0.02, 0, 1, -12)
+            }):Play()
+            task.delay(0.1, function()
+                TweenService:Create(data.btn, TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                    Size = UDim2.new(1/3 - 0.02, 0, 1, -8)
+                }):Play()
+            end)
             pcall(switchTab, key)
         end)
     end
@@ -4869,6 +4884,44 @@ end)
             row.Size = UDim2.new(1, -8, 0, 42); row.BackgroundColor3 = COLOR_GLASS; row.BackgroundTransparency = 0.4
             row.BorderSizePixel = 0; row.LayoutOrder = idx; row.ZIndex = 11
             local rc = Instance.new("UICorner"); rc.CornerRadius = UDim.new(0, 8); rc.Parent = row
+
+                        -- ⭐ RIPPLE EFFECT DI CARD
+            row.Active = true
+            row.InputBegan:Connect(function(input)
+                if input.UserInputType ~= Enum.UserInputType.MouseButton1
+                    and input.UserInputType ~= Enum.UserInputType.Touch then return end
+                
+                local ripple = Instance.new("Frame")
+                ripple.AnchorPoint = Vector2.new(0.5, 0.5)
+                ripple.Position = UDim2.new(0.5, 0, 0.5, 0)
+                ripple.Size = UDim2.fromOffset(0, 0)
+                ripple.BackgroundColor3 = rarityColor
+                ripple.BackgroundTransparency = 0.5
+                ripple.BorderSizePixel = 0
+                ripple.ZIndex = 15
+                ripple.Parent = row
+                local rc2 = Instance.new("UICorner")
+                rc2.CornerRadius = UDim.new(1, 0)
+                rc2.Parent = ripple
+
+                TweenService:Create(ripple, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    Size = UDim2.fromOffset(280, 280),
+                    BackgroundTransparency = 1
+                }):Play()
+                task.delay(0.5, function()
+                    if ripple then ripple:Destroy() end
+                end)
+
+                -- Card press
+                TweenService:Create(row, TweenInfo.new(0.08), { Size = UDim2.new(1, -12, 0, 38) }):Play()
+                task.delay(0.12, function()
+                    if row and row.Parent then
+                        TweenService:Create(row, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                            Size = UDim2.new(1, -8, 0, 42)
+                        }):Play()
+                    end
+                end)
+            end)
 
             local rarityColor = COLOR_TEXT_DIM
             local rl = tostring(e.rarity):lower()
@@ -4957,6 +5010,43 @@ end)
     end)
 
         _G.VRILZ_EggExecutorRecordSteal = recordSteal
+
+    -- ⭐ ANIMASI CLICK MINI PANEL (PRESS EFFECT) — DIPINDAH KE SINI
+    local miniPressTween = nil
+    mini.MouseButton1Down:Connect(function()
+        if miniPressTween then miniPressTween:Cancel() end
+        miniPressTween = TweenService:Create(mini, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {
+            Size = UDim2.fromOffset(MINI_W - 8, MINI_H - 8)
+        })
+        miniPressTween:Play()
+        -- ⭐ Scale chart juga biar proporsional
+        TweenService:Create(chartFrame, TweenInfo.new(0.1), {
+            Size = UDim2.fromOffset(34, 30),
+            Position = UDim2.new(0.5, -17, 0.5, -15)
+        }):Play()
+    end)
+    mini.MouseButton1Up:Connect(function()
+        if miniPressTween then miniPressTween:Cancel() end
+        miniPressTween = TweenService:Create(mini, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = UDim2.fromOffset(MINI_W, MINI_H)
+        })
+        miniPressTween:Play()
+        TweenService:Create(chartFrame, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = UDim2.fromOffset(40, 36),
+            Position = UDim2.new(0.5, -20, 0.5, -18)
+        }):Play()
+    end)
+    mini.MouseLeave:Connect(function()
+        if miniPressTween then miniPressTween:Cancel() end
+        miniPressTween = TweenService:Create(mini, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
+            Size = UDim2.fromOffset(MINI_W, MINI_H)
+        })
+        miniPressTween:Play()
+        TweenService:Create(chartFrame, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
+            Size = UDim2.fromOffset(40, 36),
+            Position = UDim2.new(0.5, -20, 0.5, -18)
+        }):Play()
+    end)
 
     -- ============================================================
     -- ⭐ AUTO-HIDE PANEL — FIX TAB EGG & PET
