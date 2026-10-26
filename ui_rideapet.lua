@@ -2825,35 +2825,20 @@ local function gfx_enableFPS()
         -- ⭐ SCAN SEMUA WORKSPACE
         -- ═══════════════════════════════════════
         for _, obj in ipairs(Workspace:GetDescendants()) do
-            if obj:IsA("BasePart") and isDecoPart(obj) then
-                -- Skip kalau terlalu besar (kemungkinan baseplate/building)
-                if obj.Size.Magnitude < 300 then
-                    pcall(function()
-                        obj.LocalTransparencyModifier = 1     -- invisible (local)
-                        obj.Transparency = 1                  -- invisible (sync)
-                        obj.CanCollide = false                -- tembus
-                        obj.CanTouch = false                  -- gak bisa di-touch
-                        obj.CanQuery = false                  -- gak kena raycast
-                        obj.CastShadow = false                -- ⭐ no shadow (FPS gain)
-                    end)
-                    table.insert(hidden, obj)
-                end
-            end
-            -- ⭐ Handle MeshPart juga (banyak pohon pakai MeshPart)
-            elseif obj:IsA("MeshPart") and isDecoPart(obj) then
-                if obj.Size.Magnitude < 300 then
-                    pcall(function()
-                        obj.LocalTransparencyModifier = 1
-                        obj.Transparency = 1
-                        obj.CanCollide = false
-                        obj.CanTouch = false
-                        obj.CanQuery = false
-                        obj.CastShadow = false
-                    end)
-                    table.insert(hidden, obj)
-                end
-            end
+    if (obj:IsA("BasePart") or obj:IsA("MeshPart")) and isDecoPart(obj) then
+        if obj.Size.Magnitude < 300 then
+            pcall(function()
+                obj.LocalTransparencyModifier = 1
+                obj.Transparency = 1
+                obj.CanCollide = false
+                obj.CanTouch = false
+                obj.CanQuery = false
+                obj.CastShadow = false
+            end)
+            table.insert(hidden, obj)
         end
+    end
+end
         
         GFX.HiddenParts = hidden
         notify("FPS Boost: " .. #hidden .. " parts hidden 🌳", "info")
