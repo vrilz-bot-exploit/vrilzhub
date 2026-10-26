@@ -2630,19 +2630,19 @@ local function gfx_enableHD()
     gfx_save(Lighting, "FogStart")
     gfx_save(Lighting, "ShadowSoftness")
     pcall(function()
-        Lighting.GlobalShadows = true
-        Lighting.ShadowSoftness = 0.2
-        Lighting.EnvironmentDiffuseScale = 1
-        Lighting.EnvironmentSpecularScale = 1
-        Lighting.Brightness = 2.5
-        Lighting.ExposureCompensation = 0.3
-        Lighting.ClockTime = 14.5
-        Lighting.GeographicLatitude = 0
-        Lighting.Ambient = Color3.fromRGB(75, 78, 90)
-        Lighting.OutdoorAmbient = Color3.fromRGB(115, 120, 135)
-        Lighting.FogEnd = 100000
-        Lighting.FogStart = 0
-    end)
+    Lighting.GlobalShadows = true
+    Lighting.ShadowSoftness = 0.35
+    Lighting.EnvironmentDiffuseScale = 0.6
+    Lighting.EnvironmentSpecularScale = 0.6
+    Lighting.Brightness = 1.4          -- natural, bukan 2.5
+    Lighting.ExposureCompensation = 0  -- netral, gak overbright
+    Lighting.ClockTime = 14.5
+    Lighting.GeographicLatitude = 0
+    Lighting.Ambient = Color3.fromRGB(70, 72, 82)
+    Lighting.OutdoorAmbient = Color3.fromRGB(95, 100, 110)
+    Lighting.FogEnd = 100000
+    Lighting.FogStart = 0
+end)
     pcall(function()
         gfx_save(Lighting, "Technology")
         Lighting.Technology = Enum.Technology.Future
@@ -2656,49 +2656,49 @@ local function gfx_enableHD()
     end
 
     local bloom = Instance.new("BloomEffect")
-    bloom.Name = "VRILZ_HD_Bloom"
-    bloom.Intensity = 1.4
-    bloom.Size = 28
-    bloom.Threshold = 0.82
-    bloom.Parent = Lighting
-    gfx_add(bloom)
+bloom.Name = "VRILZ_HD_Bloom"
+bloom.Intensity = 0.5          -- dari 1.4 → 0.5 (halus)
+bloom.Size = 20
+bloom.Threshold = 1.1          -- cuma highlight yg glow, bukan semua
+bloom.Parent = Lighting
+gfx_add(bloom)
 
-    local sunRays = Instance.new("SunRaysEffect")
-    sunRays.Name = "VRILZ_HD_SunRays"
-    sunRays.Intensity = 0.18
-    sunRays.Spread = 0.95
-    sunRays.Parent = Lighting
-    gfx_add(sunRays)
+local sunRays = Instance.new("SunRaysEffect")
+sunRays.Name = "VRILZ_HD_SunRays"
+sunRays.Intensity = 0.08       -- dari 0.18 → 0.08 (tipis)
+sunRays.Spread = 0.6
+sunRays.Parent = Lighting
+gfx_add(sunRays)
 
-    local dof = Instance.new("DepthOfFieldEffect")
-    dof.Name = "VRILZ_HD_DOF"
-    dof.FarIntensity = 0.18
-    dof.FocusDistance = 38
-    dof.InFocusRadius = 28
-    dof.NearIntensity = 0.06
-    dof.Parent = Lighting
-    gfx_add(dof)
+local dof = Instance.new("DepthOfFieldEffect")
+dof.Name = "VRILZ_HD_DOF"
+dof.FarIntensity = 0.12
+dof.FocusDistance = 45
+dof.InFocusRadius = 32
+dof.NearIntensity = 0.04
+dof.Parent = Lighting
+gfx_add(dof)
 
-    local cc = Instance.new("ColorCorrectionEffect")
-    cc.Name = "VRILZ_HD_ColorCorrection"
-    cc.Brightness = 0.03
-    cc.Contrast = 0.18
-    cc.Saturation = 0.15
-    cc.TintColor = Color3.fromRGB(255, 252, 246)
-    cc.Parent = Lighting
-    gfx_add(cc)
+local cc = Instance.new("ColorCorrectionEffect")
+cc.Name = "VRILZ_HD_ColorCorrection"
+cc.Brightness = 0              -- dari 0.03 → 0
+cc.Contrast = 0.08             -- dari 0.18 → 0.08 (gak terlalu kontras)
+cc.Saturation = 0.06           -- dari 0.15 → 0.06 (natural)
+cc.TintColor = Color3.fromRGB(255, 255, 255)  -- netral, gak ada tint
+cc.Parent = Lighting
+gfx_add(cc)
 
-    local atmo = Instance.new("Atmosphere")
-    atmo.Name = "VRILZ_HD_Atmosphere"
-    atmo.Density = 0.32
-    atmo.Offset = 0.15
-    atmo.Color = Color3.fromRGB(200, 202, 208)
-    atmo.Decay = Color3.fromRGB(108, 115, 128)
-    atmo.Glare = 0.18
-    atmo.Haze = 1.3
-    atmo.Parent = Lighting
-    gfx_add(atmo)
-
+local atmo = Instance.new("Atmosphere")
+atmo.Name = "VRILZ_HD_Atmosphere"
+atmo.Density = 0.12            -- dari 0.32 → 0.12 (tipis)
+atmo.Offset = 0.1
+atmo.Color = Color3.fromRGB(200, 202, 208)
+atmo.Decay = Color3.fromRGB(108, 115, 128)
+atmo.Glare = 0.05              -- dari 0.18 → 0.05 (gak silau)
+atmo.Haze = 0.3                -- dari 1.3 → 0.3 (penting!)
+atmo.Parent = Lighting
+gfx_add(atmo)
+    
     if not Lighting:FindFirstChildOfClass("Sky") then
         local sky = Instance.new("Sky")
         sky.Name = "VRILZ_HD_Sky"
@@ -2759,18 +2759,20 @@ local function gfx_enableHD()
 
     -- Continuous re-apply
     if not GFX.LoopThread then
-        GFX.LoopThread = task.spawn(function()
-            while GFX.HDEnabled do
-                task.wait(2)
-                pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level10 end)
-                pcall(function()
-                    Lighting.GlobalShadows = true
-                    Lighting.EnvironmentDiffuseScale = 1
-                    Lighting.EnvironmentSpecularScale = 1
-                end)
-                pcall(function() workspace.StreamingTargetRadius = 1024 end)
-            end
+GFX.LoopThread = task.spawn(function()
+    while GFX.HDEnabled do
+        task.wait(2)
+        pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level10 end)
+        pcall(function()
+            Lighting.GlobalShadows = true
+            Lighting.EnvironmentDiffuseScale = 0.6
+            Lighting.EnvironmentSpecularScale = 0.6
+            Lighting.Brightness = 1.4
+            Lighting.ExposureCompensation = 0
         end)
+        pcall(function() workspace.StreamingTargetRadius = 1024 end)
+    end
+end)
     end
 
     notify("🎮 4K HD Mode: ON", "success")
