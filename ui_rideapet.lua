@@ -3587,28 +3587,25 @@ local function buildInfinityJumpSection(speedContent, makeToggle, C, CFG, notify
 end
 
 -- ============================================================
--- EGG EXECUTOR GUI v3.0 — 3D SPACE THEME (FIXED)
+-- EGG EXECUTOR GUI — FUNCTION TERPISAH
 -- Dipanggil dari buildMainWindow biar gak exceed local register
 -- ============================================================
 local function buildEggExecutorGUI(screenGui)
     local EGG_X, EGG_Y = 1348, 256
     local MINI_W, MINI_H = 72, 72
     local MINI_X, MINI_Y = EGG_X, EGG_Y - MINI_H - 6
-    local WIN_W, WIN_H = 600, 540      -- ⭐ lebih besar & beda dari window utama
+    local WIN_W, WIN_H = 580, 520
     local WIN_X, WIN_Y = 0.5, 0.5
 
-    -- ═══ COLORS (Deep Space Premium Theme) ═══
-    local COLOR_BG_MAIN    = Color3.fromRGB(4, 6, 16)
-    local COLOR_SURFACE    = Color3.fromRGB(12, 15, 28)
-    local COLOR_GLASS      = Color3.fromRGB(22, 26, 45)
+    -- ═══ COLORS (Premium Dark Theme) ═══
+    local COLOR_BG_MAIN    = Color3.fromRGB(8, 10, 18)
+    local COLOR_SURFACE    = Color3.fromRGB(16, 18, 30)
+    local COLOR_GLASS      = Color3.fromRGB(25, 28, 45)
     local COLOR_CYAN       = Color3.fromRGB(0, 240, 255)
     local COLOR_PURPLE     = Color3.fromRGB(180, 80, 255)
     local COLOR_GOLD       = Color3.fromRGB(255, 200, 50)
     local COLOR_TEXT       = Color3.fromRGB(255, 255, 255)
     local COLOR_TEXT_DIM   = Color3.fromRGB(140, 145, 170)
-    local COLOR_NEBULA_P   = Color3.fromRGB(120, 40, 180)
-    local COLOR_NEBULA_B   = Color3.fromRGB(40, 100, 180)
-    local COLOR_NEBULA_M   = Color3.fromRGB(180, 40, 100)
 
     local EggState = { WindowVisible = false, ActiveTab = "stats" }
     local EggCache = {}
@@ -3623,7 +3620,7 @@ local function buildEggExecutorGUI(screenGui)
     end
     _G.VRILZ_EggExecutorRecordSteal = recordSteal
 
-    -- Auto detect holding egg
+    -- Auto detect
     task.spawn(function()
         local lastHolding = nil
         while task.wait(0.5) do
@@ -3671,9 +3668,7 @@ local function buildEggExecutorGUI(screenGui)
     eggScreen.DisplayOrder = 600
     eggScreen.Parent = screenGui
 
-    -- ═══════════════════════════════════════════════════════════
-    -- MINI PANEL (3D glass icon)
-    -- ═══════════════════════════════════════════════════════════
+    -- ═══ MINI PANEL ═══
     local mini = Instance.new("TextButton")
     mini.Name = "MiniPanel"
     mini.Position = UDim2.fromOffset(MINI_X, MINI_Y)
@@ -3684,50 +3679,24 @@ local function buildEggExecutorGUI(screenGui)
     mini.AutoButtonColor = false
     mini.Parent = eggScreen
 
-    local mCorner = Instance.new("UICorner"); mCorner.CornerRadius = UDim.new(0, 16); mCorner.Parent = mini
-    local mGrad = Instance.new("UIGradient"); mGrad.Rotation = 135
-    mGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, COLOR_CYAN),
-        ColorSequenceKeypoint.new(0.5, COLOR_PURPLE),
-        ColorSequenceKeypoint.new(1, COLOR_CYAN),
-    })
+    local mCorner = Instance.new("UICorner"); mCorner.CornerRadius = UDim.new(0, 14); mCorner.Parent = mini
+    local mGrad = Instance.new("UIGradient"); mGrad.Rotation = 90
+    mGrad.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, COLOR_CYAN), ColorSequenceKeypoint.new(1, COLOR_PURPLE)})
     mGrad.Parent = mini
+    local mStroke = Instance.new("UIStroke"); mStroke.Color = Color3.new(1,1,1); mStroke.Thickness = 2; mStroke.Transparency = 0.5; mStroke.Parent = mini
 
-    local mStroke = Instance.new("UIStroke")
-    mStroke.Color = Color3.new(1, 1, 1)
-    mStroke.Thickness = 2
-    mStroke.Transparency = 0.4
-    mStroke.Parent = mini
-
-    -- 3D chart bars
     local chartFrame = Instance.new("Frame")
-    chartFrame.Size = UDim2.fromOffset(44, 40)
-    chartFrame.Position = UDim2.new(0.5, -22, 0.5, -20)
-    chartFrame.BackgroundTransparency = 1
-    chartFrame.Parent = mini
-
+    chartFrame.Size = UDim2.fromOffset(40, 36); chartFrame.Position = UDim2.new(0.5, -20, 0.5, -18)
+    chartFrame.BackgroundTransparency = 1; chartFrame.Parent = mini
     for i = 1, 3 do
-        local h = i * 13
         local bar = Instance.new("Frame")
-        bar.Size = UDim2.fromOffset(9, h)
-        bar.Position = UDim2.fromOffset((i - 1) * 13, 40 - h)
-        bar.BackgroundColor3 = Color3.new(1, 1, 1)
-        bar.BorderSizePixel = 0
-        bar.Parent = chartFrame
+        local h = i * 12
+        bar.Size = UDim2.fromOffset(8, h); bar.Position = UDim2.fromOffset((i-1)*12, 36 - h)
+        bar.BackgroundColor3 = Color3.new(1,1,1); bar.BorderSizePixel = 0; bar.Parent = chartFrame
         local bc = Instance.new("UICorner"); bc.CornerRadius = UDim.new(0, 3); bc.Parent = bar
-
-        local barGrad = Instance.new("UIGradient")
-        barGrad.Rotation = 90
-        barGrad.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 220, 255)),
-        })
-        barGrad.Parent = bar
     end
 
-    -- ═══════════════════════════════════════════════════════════
-    -- BIG WINDOW (beda dari window utama)
-    -- ═══════════════════════════════════════════════════════════
+    -- ═══ BIG WINDOW ═══
     local win = Instance.new("Frame")
     win.Name = "BigWindow"
     win.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -3740,220 +3709,121 @@ local function buildEggExecutorGUI(screenGui)
     win.ClipsDescendants = true
     win.Parent = eggScreen
 
-    local wCorner = Instance.new("UICorner"); wCorner.CornerRadius = UDim.new(0, 20); wCorner.Parent = win
-    local wStroke = Instance.new("UIStroke")
-    wStroke.Color = COLOR_CYAN
-    wStroke.Thickness = 2.5
-    wStroke.Transparency = 0.15
-    wStroke.Parent = win
+    local wCorner = Instance.new("UICorner"); wCorner.CornerRadius = UDim.new(0, 16); wCorner.Parent = win
+    local wStroke = Instance.new("UIStroke"); wStroke.Color = COLOR_CYAN; wStroke.Thickness = 2; wStroke.Transparency = 0.3; wStroke.Parent = win
 
     -- ═══════════════════════════════════════════════════════════
-    -- 🌌 3D SPACE BACKGROUND (NEBULA, PLANET RING, ASTEROID BELT)
+    -- 🌌 GALAXY BACKGROUND + METEOR COLLISION SYSTEM
     -- ═══════════════════════════════════════════════════════════
     local bgFrame = Instance.new("Frame")
-    bgFrame.Name = "SpaceBackground"
     bgFrame.Size = UDim2.fromScale(1, 1)
-    bgFrame.BackgroundColor3 = Color3.fromRGB(2, 3, 10)
+    bgFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 15)
     bgFrame.BorderSizePixel = 0
     bgFrame.ZIndex = 0
     bgFrame.ClipsDescendants = true
     bgFrame.Parent = win
-    local bgCorner = Instance.new("UICorner")
-    bgCorner.CornerRadius = UDim.new(0, 20)
-    bgCorner.Parent = bgFrame
+    local bgCorner = Instance.new("UICorner"); bgCorner.CornerRadius = UDim.new(0, 16); bgCorner.Parent = bgFrame
 
-    -- Deep space gradient
     local bgGrad = Instance.new("UIGradient")
     bgGrad.Rotation = 135
     bgGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(8, 5, 20)),
-        ColorSequenceKeypoint.new(0.3, Color3.fromRGB(15, 8, 35)),
-        ColorSequenceKeypoint.new(0.6, Color3.fromRGB(5, 12, 28)),
-        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(20, 4, 15)),
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 5, 20)),
+        ColorSequenceKeypoint.new(0.4, Color3.fromRGB(20, 10, 40)),
+        ColorSequenceKeypoint.new(0.7, Color3.fromRGB(5, 15, 30)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 5, 20)),
     })
     bgGrad.Parent = bgFrame
 
-    -- 🌫️ NEBULA CLOUDS (3 layer, slow drift)
-    local nebulaColors = { COLOR_NEBULA_P, COLOR_NEBULA_B, COLOR_NEBULA_M }
-    for i, col in ipairs(nebulaColors) do
+    -- Nebula Clouds
+    for i = 1, 3 do
         local nebula = Instance.new("Frame")
-        nebula.Size = UDim2.fromScale(1.6, 1.6)
-        nebula.Position = UDim2.fromScale(
-            math.random(-60, 20) / 100,
-            math.random(-60, 20) / 100
-        )
-        nebula.BackgroundColor3 = col
-        nebula.BackgroundTransparency = 0.92
+        nebula.Size = UDim2.fromScale(1.5, 1.5)
+        nebula.Position = UDim2.fromScale(math.random(-50, 0)/100, math.random(-50, 0)/100)
+        nebula.BackgroundColor3 = i == 1 and Color3.fromRGB(80, 20, 120) or (i == 2 and Color3.fromRGB(20, 80, 120) or Color3.fromRGB(120, 20, 60))
+        nebula.BackgroundTransparency = 0.9
         nebula.BorderSizePixel = 0
         nebula.ZIndex = 1
         nebula.Parent = bgFrame
-        local nc = Instance.new("UICorner"); nc.CornerRadius = UDim.new(1, 0); nc.Parent = nebula
-        local ng = Instance.new("UIGradient")
-        ng.Rotation = math.random(0, 360)
-        ng.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.3),
-            NumberSequenceKeypoint.new(0.5, 0.6),
-            NumberSequenceKeypoint.new(1, 1),
-        })
-        ng.Parent = nebula
-
-        -- Slow drift
-        task.spawn(function()
-            while nebula.Parent do
-                task.wait(8)
-                TweenService:Create(nebula, TweenInfo.new(10, Enum.EasingStyle.Sine), {
-                    Position = UDim2.fromScale(
-                        math.random(-60, 20) / 100,
-                        math.random(-60, 20) / 100
-                    ),
-                }):Play()
-            end
-        end)
+        local nCorner = Instance.new("UICorner"); nCorner.CornerRadius = UDim.new(1, 0); nCorner.Parent = nebula
+        local nGrad = Instance.new("UIGradient"); nGrad.Rotation = math.random(0, 360)
+        nGrad.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.4), NumberSequenceKeypoint.new(1, 1)})
+        nGrad.Parent = nebula
     end
 
-    -- 🪐 PLANET WITH RING (bawah kiri)
-    local planetSize = 200
-    local planetX = -50
-    local planetY = WIN_H - 120
-
-    -- Ring ellipse (behind planet)
-    local planetRing = Instance.new("Frame")
-    planetRing.AnchorPoint = Vector2.new(0.5, 0.5)
-    planetRing.Position = UDim2.fromOffset(planetX + planetSize / 2, planetY + planetSize / 2)
-    planetRing.Size = UDim2.fromOffset(planetSize * 1.9, planetSize * 0.35)
-    planetRing.BackgroundTransparency = 1
-    planetRing.Rotation = -15
-    planetRing.ZIndex = 2
-    planetRing.Parent = bgFrame
-    local prc = Instance.new("UICorner"); prc.CornerRadius = UDim.new(1, 0); prc.Parent = planetRing
-    local prs = Instance.new("UIStroke")
-    prs.Color = Color3.fromRGB(200, 160, 100)
-    prs.Thickness = 5
-    prs.Transparency = 0.35
-    prs.Parent = planetRing
-
-    -- Planet body
+    -- Planet
     local planet = Instance.new("Frame")
-    planet.Size = UDim2.fromOffset(planetSize, planetSize)
-    planet.Position = UDim2.fromOffset(planetX, planetY)
+    planet.Size = UDim2.fromOffset(180, 180)
+    planet.Position = UDim2.fromOffset(-40, WIN_H - 100)
     planet.BackgroundColor3 = Color3.fromRGB(20, 50, 100)
     planet.BorderSizePixel = 0
-    planet.ClipsDescendants = true
-    planet.ZIndex = 3
+    planet.ZIndex = 2
     planet.Parent = bgFrame
     local pCorner = Instance.new("UICorner"); pCorner.CornerRadius = UDim.new(1, 0); pCorner.Parent = planet
-
+    local pGlow = Instance.new("Frame")
+    pGlow.Size = UDim2.fromScale(1.1, 1.1); pGlow.Position = UDim2.fromScale(-0.05, -0.05)
+    pGlow.BackgroundColor3 = Color3.fromRGB(50, 150, 255); pGlow.BackgroundTransparency = 0.7
+    pGlow.ZIndex = 1; pGlow.Parent = planet
+    local pGlowCorner = Instance.new("UICorner"); pGlowCorner.CornerRadius = UDim.new(1, 0); pGlowCorner.Parent = pGlow
     local pGrad = Instance.new("UIGradient")
-    pGrad.Rotation = 135
+    pGrad.Rotation = 45
     pGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(120, 200, 255)),
-        ColorSequenceKeypoint.new(0.4, Color3.fromRGB(60, 130, 200)),
-        ColorSequenceKeypoint.new(0.7, Color3.fromRGB(30, 60, 120)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 10, 30)),
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 200, 255)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(20, 50, 100)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 10, 20)),
     })
     pGrad.Parent = planet
 
-    local pGlow = Instance.new("Frame")
-    pGlow.AnchorPoint = Vector2.new(0.5, 0.5)
-    pGlow.Position = UDim2.fromScale(0.5, 0.5)
-    pGlow.Size = UDim2.fromScale(1.25, 1.25)
-    pGlow.BackgroundColor3 = Color3.fromRGB(80, 160, 255)
-    pGlow.BackgroundTransparency = 0.85
-    pGlow.BorderSizePixel = 0
-    pGlow.ZIndex = 2
-    pGlow.Parent = planet
-    local pgc = Instance.new("UICorner"); pgc.CornerRadius = UDim.new(1, 0); pgc.Parent = pGlow
-
-    -- ☄️ ASTEROID BELT (30 rocks)
-    local asteroidBelt = Instance.new("Frame")
-    asteroidBelt.AnchorPoint = Vector2.new(0.5, 0.5)
-    asteroidBelt.Position = UDim2.fromOffset(planetX + planetSize / 2, planetY + planetSize / 2)
-    asteroidBelt.Size = UDim2.fromOffset(planetSize * 2.3, planetSize * 0.45)
-    asteroidBelt.BackgroundTransparency = 1
-    asteroidBelt.Rotation = -15
-    asteroidBelt.ZIndex = 4
-    asteroidBelt.Parent = bgFrame
-    local abc = Instance.new("UICorner"); abc.CornerRadius = UDim.new(1, 0); abc.Parent = asteroidBelt
-
-    for i = 1, 30 do
-        local rock = Instance.new("Frame")
-        rock.AnchorPoint = Vector2.new(0.5, 0.5)
-        rock.Size = UDim2.fromOffset(math.random(1, 3), math.random(1, 3))
-        rock.Position = UDim2.fromScale(math.random(), math.random())
-        rock.BackgroundColor3 = Color3.fromRGB(140, 130, 120)
-        rock.BackgroundTransparency = math.random(20, 70) / 100
-        rock.BorderSizePixel = 0
-        rock.ZIndex = 5
-        rock.Parent = asteroidBelt
-        local rc = Instance.new("UICorner"); rc.CornerRadius = UDim.new(1, 0); rc.Parent = rock
-    end
-
-    -- ⭐ STARFIELD (150 bintang, twinkle)
+    -- ⭐ STARFIELD (Kelap-kelip Smooth)
     local starLayer = Instance.new("Frame")
-    starLayer.Size = UDim2.fromScale(1, 1)
-    starLayer.BackgroundTransparency = 1
-    starLayer.ZIndex = 4
-    starLayer.Parent = bgFrame
+    starLayer.Size = UDim2.fromScale(1, 1); starLayer.BackgroundTransparency = 1; starLayer.ZIndex = 3; starLayer.Parent = bgFrame
 
     local starColors = {
-        Color3.fromRGB(255, 255, 255),
-        Color3.fromRGB(180, 220, 255),
-        Color3.fromRGB(255, 220, 180),
-        Color3.fromRGB(200, 180, 255),
-        Color3.fromRGB(255, 180, 220),
+        Color3.fromRGB(255, 255, 255), Color3.fromRGB(180, 220, 255),
+        Color3.fromRGB(255, 220, 180), Color3.fromRGB(200, 180, 255), Color3.fromRGB(255, 180, 220)
     }
     local stars = {}
-    for i = 1, 150 do
+    for i = 1, 100 do
         local star = Instance.new("Frame")
-        local sz = i % 10 == 0 and 3 or (i % 3 == 0 and 2 or 1)
+        local sz = math.random(1, 3)
         star.Size = UDim2.fromOffset(sz, sz)
-        star.Position = UDim2.fromScale(math.random(0, 1000) / 1000, math.random(0, 1000) / 1000)
-        star.BackgroundColor3 = starColors[math.random(1, #starColors)]
+        star.Position = UDim2.fromScale(math.random(0, 1000)/1000, math.random(0, 1000)/1000)
+        star.BackgroundColor3 = i % 7 == 0 and COLOR_GOLD or starColors[math.random(1, #starColors)]
         star.BackgroundTransparency = math.random(20, 80) / 100
-        star.BorderSizePixel = 0
-        star.ZIndex = 5
-        star.Parent = starLayer
-        local sc = Instance.new("UICorner"); sc.CornerRadius = UDim.new(1, 0); sc.Parent = star
-
+        star.BorderSizePixel = 0; star.ZIndex = 4; star.Parent = starLayer
+        local sCorner = Instance.new("UICorner"); sCorner.CornerRadius = UDim.new(1, 0); sCorner.Parent = star
+        
         local glow = Instance.new("Frame")
-        glow.AnchorPoint = Vector2.new(0.5, 0.5)
-        glow.Position = UDim2.fromScale(0.5, 0.5)
-        glow.Size = UDim2.new(3, 0, 3, 0)
-        glow.BackgroundColor3 = star.BackgroundColor3
-        glow.BackgroundTransparency = 0.92
-        glow.BorderSizePixel = 0
-        glow.ZIndex = 4
-        glow.Parent = star
-        local gc = Instance.new("UICorner"); gc.CornerRadius = UDim.new(1, 0); gc.Parent = glow
+        glow.AnchorPoint = Vector2.new(0.5, 0.5); glow.Position = UDim2.fromScale(0.5, 0.5)
+        glow.Size = UDim2.new(3, 0, 3, 0); glow.BackgroundColor3 = star.BackgroundColor3
+        glow.BackgroundTransparency = 0.9; glow.BorderSizePixel = 0; glow.ZIndex = 3; glow.Parent = star
+        local gCorner = Instance.new("UICorner"); gCorner.CornerRadius = UDim.new(1, 0); gCorner.Parent = glow
 
         table.insert(stars, {
             frame = star, glow = glow,
             baseTrans = star.BackgroundTransparency,
             baseGlowTrans = glow.BackgroundTransparency,
-            speed = math.random(15, 45) / 100,
-            offset = math.random() * math.pi * 2,
+            speed = math.random(20, 60) / 100,
+            offset = math.random() * math.pi * 2
         })
     end
 
-    -- Twinkle loop (RenderStepped — smooth)
-    local twinkleConn
-    twinkleConn = RunService.RenderStepped:Connect(function()
-        if not win.Parent or not win.Visible then return end
-        local t = tick()
-        for _, s in ipairs(stars) do
-            if s.frame.Parent then
-                local twinkle = math.sin(t * s.speed + s.offset)
-                s.frame.BackgroundTransparency = math.clamp(s.baseTrans + twinkle * 0.35, 0, 1)
-                s.glow.BackgroundTransparency = math.clamp(s.baseGlowTrans + twinkle * 0.08, 0, 1)
+    task.spawn(function()
+        while win.Parent do
+            task.wait(0.03)
+            if not win.Visible then continue end
+            local t = tick()
+            for _, s in ipairs(stars) do
+                if s.frame.Parent then
+                    local twinkle = math.sin(t * s.speed + s.offset)
+                    s.frame.BackgroundTransparency = math.clamp(s.baseTrans + twinkle * 0.4, 0, 1)
+                    s.glow.BackgroundTransparency = math.clamp(s.baseGlowTrans + twinkle * 0.1, 0, 1)
+                end
             end
         end
     end)
-    win.Destroying:Connect(function()
-        if twinkleConn then twinkleConn:Disconnect() end
-    end)
 
     -- ═══════════════════════════════════════════════════════════
-    -- ☄️ METEOR SYSTEM v3 — 3 DETIK, REALISTIS, TABRAKAN
+    -- ☄️ METEOR SYSTEM (3 METEOR, TABRAKAN, MELEDAK)
     -- ═══════════════════════════════════════════════════════════
     local meteorLayer = Instance.new("Frame")
     meteorLayer.Size = UDim2.fromScale(1, 1)
@@ -3964,282 +3834,187 @@ local function buildEggExecutorGUI(screenGui)
 
     local activeMeteors = {}
     local MAX_METEORS = 3
-    local SPAWN_INTERVAL = 3
+    local SPAWN_INTERVAL = 10 -- Spawn tiap 10 detik
 
     local function spawnMeteor()
         if #activeMeteors >= MAX_METEORS then return end
 
         local startX = math.random(10, 90)
-        local startY = -15
+        local startY = -10
         local targetX = math.random(10, 90)
-        local targetY = math.random(25, 75)
-        local speed = math.random(8, 14)
-
-        -- Realistic meteor colors
-        local headColor  = Color3.fromRGB(255, 255, 255)
-        local coreColor  = Color3.fromRGB(255, 220, 150)
-        local trailColor = Color3.fromRGB(255, 120, 40)
-        local glowColor  = Color3.fromRGB(255, 80, 20)
-
-        -- 1. HEAD (perfect circle, white hot)
+        local targetY = math.random(20, 80)
+        local speed = math.random(6, 12)
+        
+        local meteorColor = Color3.fromRGB(255, math.random(100, 200), math.random(0, 100))
+        
+        -- Meteor Head (Core)
         local meteor = Instance.new("Frame")
-        meteor.Name = "MeteorHead"
+        meteor.Name = "Meteor"
         meteor.AnchorPoint = Vector2.new(0.5, 0.5)
-        meteor.Size = UDim2.fromOffset(7, 7)
-        meteor.Position = UDim2.fromScale(startX / 100, startY / 100)
-        meteor.BackgroundColor3 = headColor
+        meteor.Size = UDim2.fromOffset(8, 8)
+        meteor.Position = UDim2.fromScale(startX/100, startY/100)
+        meteor.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         meteor.BorderSizePixel = 0
         meteor.ZIndex = 25
         meteor.Parent = meteorLayer
+        
         local mc = Instance.new("UICorner"); mc.CornerRadius = UDim.new(1, 0); mc.Parent = meteor
 
-        -- Halo glow 2 layer
-        local halo1 = Instance.new("Frame")
-        halo1.AnchorPoint = Vector2.new(0.5, 0.5)
-        halo1.Position = UDim2.fromScale(0.5, 0.5)
-        halo1.Size = UDim2.fromOffset(22, 22)
-        halo1.BackgroundColor3 = glowColor
-        halo1.BackgroundTransparency = 0.7
-        halo1.BorderSizePixel = 0
-        halo1.ZIndex = 24
-        halo1.Parent = meteor
-        local hc1 = Instance.new("UICorner"); hc1.CornerRadius = UDim.new(1, 0); hc1.Parent = halo1
+        -- Glow
+        local glow = Instance.new("Frame")
+        glow.AnchorPoint = Vector2.new(0.5, 0.5)
+        glow.Position = UDim2.fromScale(0.5, 0.5)
+        glow.Size = UDim2.new(3, 0, 3, 0)
+        glow.BackgroundColor3 = meteorColor
+        glow.BackgroundTransparency = 0.5
+        glow.BorderSizePixel = 0
+        glow.ZIndex = 24
+        glow.Parent = meteor
+        local gc = Instance.new("UICorner"); gc.CornerRadius = UDim.new(1, 0); gc.Parent = glow
 
-        local halo2 = Instance.new("Frame")
-        halo2.AnchorPoint = Vector2.new(0.5, 0.5)
-        halo2.Position = UDim2.fromScale(0.5, 0.5)
-        halo2.Size = UDim2.fromOffset(14, 14)
-        halo2.BackgroundColor3 = trailColor
-        halo2.BackgroundTransparency = 0.45
-        halo2.BorderSizePixel = 0
-        halo2.ZIndex = 25
-        halo2.Parent = meteor
-        local hc2 = Instance.new("UICorner"); hc2.CornerRadius = UDim.new(1, 0); hc2.Parent = halo2
+        -- Trail
+        local trail = Instance.new("Frame")
+        trail.AnchorPoint = Vector2.new(0.5, 1)
+        trail.Position = UDim2.new(0.5, 0, 0.5, 0)
+        trail.Size = UDim2.fromOffset(4, 40)
+        trail.BackgroundColor3 = meteorColor
+        trail.BackgroundTransparency = 0.2
+        trail.BorderSizePixel = 0
+        trail.ZIndex = 23
+        trail.Parent = meteor
+        local tc = Instance.new("UICorner"); tc.CornerRadius = UDim.new(1, 0); tc.Parent = trail
+        
+        local tGrad = Instance.new("UIGradient")
+        tGrad.Rotation = 90
+        tGrad.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(1, 0)})
+        tGrad.Parent = trail
 
-        -- 2. TRAIL (3 layer gradient)
-        local dx = targetX - startX
-        local dy = targetY - startY
-        local angle = math.deg(math.atan2(dy, dx)) - 90
-
-        local trailHolder = Instance.new("Frame")
-        trailHolder.AnchorPoint = Vector2.new(0.5, 0.5)
-        trailHolder.Position = UDim2.fromScale(0.5, 0.5)
-        trailHolder.Size = UDim2.fromOffset(1, 1)
-        trailHolder.BackgroundTransparency = 1
-        trailHolder.Rotation = angle
-        trailHolder.ZIndex = 22
-        trailHolder.Parent = meteor
-
-        local trailLen = math.random(50, 80)
-
-        local outer = Instance.new("Frame")
-        outer.AnchorPoint = Vector2.new(0.5, 1)
-        outer.Position = UDim2.new(0.5, 0, 0.5, 0)
-        outer.Size = UDim2.fromOffset(10, trailLen)
-        outer.BackgroundColor3 = glowColor
-        outer.BorderSizePixel = 0
-        outer.ZIndex = 21
-        outer.Parent = trailHolder
-        local oc = Instance.new("UICorner"); oc.CornerRadius = UDim.new(1, 0); oc.Parent = outer
-        local og = Instance.new("UIGradient")
-        og.Rotation = 90
-        og.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 1),
-            NumberSequenceKeypoint.new(0.7, 0.85),
-            NumberSequenceKeypoint.new(1, 0.35),
-        })
-        og.Parent = outer
-
-        local mid = Instance.new("Frame")
-        mid.AnchorPoint = Vector2.new(0.5, 1)
-        mid.Position = UDim2.new(0.5, 0, 0.5, 0)
-        mid.Size = UDim2.fromOffset(5, trailLen * 0.85)
-        mid.BackgroundColor3 = trailColor
-        mid.BorderSizePixel = 0
-        mid.ZIndex = 22
-        mid.Parent = trailHolder
-        local mc2 = Instance.new("UICorner"); mc2.CornerRadius = UDim.new(1, 0); mc2.Parent = mid
-        local mg = Instance.new("UIGradient")
-        mg.Rotation = 90
-        mg.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 1),
-            NumberSequenceKeypoint.new(0.6, 0.5),
-            NumberSequenceKeypoint.new(1, 0.1),
-        })
-        mg.Parent = mid
-
-        local core = Instance.new("Frame")
-        core.AnchorPoint = Vector2.new(0.5, 1)
-        core.Position = UDim2.new(0.5, 0, 0.5, 0)
-        core.Size = UDim2.fromOffset(2, trailLen * 0.6)
-        core.BackgroundColor3 = headColor
-        core.BorderSizePixel = 0
-        core.ZIndex = 23
-        core.Parent = trailHolder
-        local cc = Instance.new("UICorner"); cc.CornerRadius = UDim.new(1, 0); cc.Parent = core
-        local cg = Instance.new("UIGradient")
-        cg.Rotation = 90
-        cg.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 1),
-            NumberSequenceKeypoint.new(0.7, 0.3),
-            NumberSequenceKeypoint.new(1, 0),
-        })
-        cg.Parent = core
-
-        -- 3. Sparks
-        local sparks = {}
-        for i = 1, math.random(4, 7) do
+        -- Sparks
+        for i = 1, 3 do
             local spark = Instance.new("Frame")
             spark.AnchorPoint = Vector2.new(0.5, 0.5)
-            spark.Size = UDim2.fromOffset(math.random(1, 3), math.random(1, 3))
-            spark.Position = UDim2.new(0.5, math.random(-4, 4), 0.5, -math.random(5, trailLen - 5))
-            spark.BackgroundColor3 = coreColor
-            spark.BackgroundTransparency = math.random(20, 60) / 100
+            spark.Size = UDim2.fromOffset(math.random(2, 4), math.random(2, 4))
+            spark.BackgroundColor3 = meteorColor
+            spark.BackgroundTransparency = 0.3
             spark.BorderSizePixel = 0
             spark.ZIndex = 22
-            spark.Parent = trailHolder
+            spark.Parent = meteorLayer
             local sc = Instance.new("UICorner"); sc.CornerRadius = UDim.new(1, 0); sc.Parent = spark
-            table.insert(sparks, spark)
+            task.delay(math.random(1, 2), function() if spark then spark:Destroy() end end)
         end
 
         local meteorData = {
             frame = meteor,
-            trailHolder = trailHolder,
+            glow = glow,
+            trail = trail,
             startPos = Vector2.new(startX, startY),
             targetPos = Vector2.new(targetX, targetY),
             progress = 0,
             speed = speed,
+            color = meteorColor,
             exploded = false,
-            glowColor = glowColor,
-            trailColor = trailColor,
         }
         table.insert(activeMeteors, meteorData)
 
-        -- 4. Animate fall (RenderStepped — smooth)
-        local conn
-        conn = RunService.RenderStepped:Connect(function(dt)
-            if not meteor.Parent or meteorData.exploded then
-                if conn then conn:Disconnect() end
-                return
-            end
-
-            meteorData.progress = math.min(1, meteorData.progress + dt * meteorData.speed * 0.18)
-            local p = meteorData.progress
-
-            -- Gravity easing
-            local easedP = p * p
-            local curX = meteorData.startPos.X + (meteorData.targetPos.X - meteorData.startPos.X) * easedP
-            local curY = meteorData.startPos.Y + (meteorData.targetPos.Y - meteorData.startPos.Y) * easedP
-            meteor.Position = UDim2.fromScale(curX / 100, curY / 100)
-
-            -- Sparks jitter
-            for _, spark in ipairs(sparks) do
-                if spark.Parent then
-                    spark.Position = UDim2.new(
-                        0.5, math.random(-5, 5),
-                        0.5, -math.random(5, trailLen)
-                    )
+        -- Animasi Jatuh (Pakai RenderStepped)
+        task.spawn(function()
+            while meteor.Parent and not meteorData.exploded do
+                task.wait(0.03)
+                meteorData.progress = meteorData.progress + (0.03 * meteorData.speed)
+                if meteorData.progress >= 1 then
+                    meteorData.progress = 1
                 end
-            end
-
-            if p >= 1 and not meteorData.exploded then
-                meteorData.exploded = true
-                if conn then conn:Disconnect() end
-
-                -- 5. EXPLOSION
-                local boomPos = meteor.Position
-
-                -- A. Flash putih
-                local flash = Instance.new("Frame")
-                flash.AnchorPoint = Vector2.new(0.5, 0.5)
-                flash.Position = boomPos
-                flash.Size = UDim2.fromOffset(4, 4)
-                flash.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                flash.BorderSizePixel = 0
-                flash.ZIndex = 30
-                flash.Parent = meteorLayer
-                local fc = Instance.new("UICorner"); fc.CornerRadius = UDim.new(1, 0); fc.Parent = flash
-                TweenService:Create(flash, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-                    Size = UDim2.fromOffset(90, 90),
-                    BackgroundTransparency = 1,
-                }):Play()
-                task.delay(0.4, function() if flash then flash:Destroy() end end)
-
-                -- B. Shockwave ring
-                local ring = Instance.new("Frame")
-                ring.AnchorPoint = Vector2.new(0.5, 0.5)
-                ring.Position = boomPos
-                ring.Size = UDim2.fromOffset(8, 8)
-                ring.BackgroundTransparency = 1
-                ring.BorderSizePixel = 0
-                ring.ZIndex = 29
-                ring.Parent = meteorLayer
-                local rc = Instance.new("UICorner"); rc.CornerRadius = UDim.new(1, 0); rc.Parent = ring
-                local rs = Instance.new("UIStroke")
-                rs.Color = meteorData.trailColor
-                rs.Thickness = 3
-                rs.Transparency = 0
-                rs.Parent = ring
-                TweenService:Create(ring, TweenInfo.new(0.55, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-                    Size = UDim2.fromOffset(130, 130),
-                }):Play()
-                TweenService:Create(rs, TweenInfo.new(0.55, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-                    Transparency = 1,
-                    Thickness = 0,
-                }):Play()
-                task.delay(0.6, function() if ring then ring:Destroy() end end)
-
-                -- C. Particle burst (14 pieces)
-                for i = 1, 14 do
-                    local particle = Instance.new("Frame")
-                    particle.AnchorPoint = Vector2.new(0.5, 0.5)
-                    particle.Position = boomPos
-                    particle.Size = UDim2.fromOffset(math.random(3, 7), math.random(3, 7))
-                    particle.BackgroundColor3 = i % 2 == 0 and meteorData.trailColor or meteorData.glowColor
-                    particle.BorderSizePixel = 0
-                    particle.ZIndex = 28
-                    particle.Parent = meteorLayer
-                    local pc = Instance.new("UICorner"); pc.CornerRadius = UDim.new(1, 0); pc.Parent = particle
-
-                    local angleRad = math.rad(math.random(0, 360))
-                    local dist = math.random(40, 100)
-                    local tx = boomPos.X.Offset + math.cos(angleRad) * dist
-                    local ty = boomPos.Y.Offset + math.sin(angleRad) * dist
-
-                    TweenService:Create(particle, TweenInfo.new(math.random(6, 10) / 10, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                        Position = UDim2.fromOffset(tx, ty),
-                        Size = UDim2.fromOffset(1, 1),
+                local p = meteorData.progress
+                local currentX = meteorData.startPos.X + (meteorData.targetPos.X - meteorData.startPos.X) * p
+                local currentY = meteorData.startPos.Y + (meteorData.targetPos.Y - meteorData.startPos.Y) * p
+                meteor.Position = UDim2.fromScale(currentX/100, currentY/100)
+                
+                if meteorData.progress >= 1 and not meteorData.exploded then
+                    meteorData.exploded = true
+                    -- 🔥 LEDAKAN (EXPLOSION EFFECT)
+                    local explosionCenter = meteor.Position
+                    
+                    -- Flash putih
+                    local flash = Instance.new("Frame")
+                    flash.AnchorPoint = Vector2.new(0.5, 0.5)
+                    flash.Position = explosionCenter
+                    flash.Size = UDim2.fromOffset(4, 4)
+                    flash.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                    flash.BorderSizePixel = 0
+                    flash.ZIndex = 30
+                    flash.Parent = meteorLayer
+                    local fc = Instance.new("UICorner"); fc.CornerRadius = UDim.new(1, 0); fc.Parent = flash
+                    
+                    TweenService:Create(flash, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                        Size = UDim2.fromOffset(80, 80),
                         BackgroundTransparency = 1,
                     }):Play()
-                    task.delay(1, function() if particle then particle:Destroy() end end)
-                end
+                    task.delay(0.35, function() if flash then flash:Destroy() end end)
 
-                -- D. Cleanup meteor
-                if meteor then meteor:Destroy() end
-                for i, m in ipairs(activeMeteors) do
-                    if m == meteorData then
-                        table.remove(activeMeteors, i)
-                        break
+                    -- Shockwave Ring
+                    local ring = Instance.new("Frame")
+                    ring.AnchorPoint = Vector2.new(0.5, 0.5)
+                    ring.Position = explosionCenter
+                    ring.Size = UDim2.fromOffset(10, 10)
+                    ring.BackgroundTransparency = 1
+                    ring.BorderSizePixel = 0
+                    ring.ZIndex = 29
+                    ring.Parent = meteorLayer
+                    local rc = Instance.new("UICorner"); rc.CornerRadius = UDim.new(1, 0); rc.Parent = ring
+                    local rs = Instance.new("UIStroke"); rs.Color = meteorColor; rs.Thickness = 3; rs.Transparency = 0; rs.Parent = ring
+                    
+                    TweenService:Create(ring, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                        Size = UDim2.fromOffset(120, 120),
+                    }):Play()
+                    TweenService:Create(rs, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                        Transparency = 1,
+                        Thickness = 0,
+                    }):Play()
+                    task.delay(0.55, function() if ring then ring:Destroy() end end)
+
+                    -- Partikel ledakan
+                    for i = 1, 12 do
+                        local particle = Instance.new("Frame")
+                        particle.AnchorPoint = Vector2.new(0.5, 0.5)
+                        particle.Position = explosionCenter
+                        particle.Size = UDim2.fromOffset(math.random(3, 6), math.random(3, 6))
+                        particle.BackgroundColor3 = meteorColor
+                        particle.BorderSizePixel = 0
+                        particle.ZIndex = 28
+                        particle.Parent = meteorLayer
+                        local pc = Instance.new("UICorner"); pc.CornerRadius = UDim.new(1, 0); pc.Parent = particle
+                        
+                        local angle = math.random(0, 360)
+                        local distance = math.random(30, 80)
+                        local targetX = explosionCenter.X.Offset + math.cos(math.rad(angle)) * distance
+                        local targetY = explosionCenter.Y.Offset + math.sin(math.rad(angle)) * distance
+                        
+                        TweenService:Create(particle, TweenInfo.new(math.random(4, 8)/10, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                            Position = UDim2.fromOffset(targetX, targetY),
+                            Size = UDim2.fromOffset(1, 1),
+                            BackgroundTransparency = 1,
+                        }):Play()
+                        task.delay(0.8, function() if particle then particle:Destroy() end end)
                     end
-                end
-            end
-        end)
 
-        task.delay(8, function()
-            if conn then conn:Disconnect() end
-            if meteor and meteor.Parent then meteor:Destroy() end
-            for i, m in ipairs(activeMeteors) do
-                if m == meteorData then
-                    table.remove(activeMeteors, i)
-                    break
+                    -- Hapus meteor
+                    if meteor then meteor:Destroy() end
+                    
+                    -- Hapus dari list
+                    for i, m in ipairs(activeMeteors) do
+                        if m == meteorData then
+                            table.remove(activeMeteors, i)
+                            break
+                        end
+                    end
                 end
             end
         end)
     end
 
-    -- Spawner — 3 detik
+    -- Spawn 3 meteor tiap 10 detik
     task.spawn(function()
-        task.wait(1.5)
+        task.wait(2)
         while win.Parent do
             if win.Visible and #activeMeteors < MAX_METEORS then
                 spawnMeteor()
@@ -4248,33 +4023,21 @@ local function buildEggExecutorGUI(screenGui)
         end
     end)
 
-    -- ═══════════════════════════════════════════════════════════
-    -- HEADER (3D premium, beda dari window utama)
-    -- ═══════════════════════════════════════════════════════════
+    -- ═══ HEADER (Premium) ═══
     local winHeader = Instance.new("Frame")
-    winHeader.Size = UDim2.new(1, 0, 0, 68)
+    winHeader.Size = UDim2.new(1, 0, 0, 64)
     winHeader.BackgroundColor3 = COLOR_SURFACE
-    winHeader.BackgroundTransparency = 0.15
+    winHeader.BackgroundTransparency = 0.2
     winHeader.BorderSizePixel = 0
     winHeader.ZIndex = 10
     winHeader.Parent = win
 
-    local whCorner = Instance.new("UICorner"); whCorner.CornerRadius = UDim.new(0, 20); whCorner.Parent = winHeader
-
-    -- Header gradient
-    local hGrad = Instance.new("UIGradient")
-    hGrad.Rotation = 90
-    hGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 25, 45)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 10, 20)),
-    })
-    hGrad.Parent = winHeader
-
-    -- Shine strip (moving)
+    local whCorner = Instance.new("UICorner"); whCorner.CornerRadius = UDim.new(0, 16); whCorner.Parent = winHeader
+    
     local headerShine = Instance.new("Frame")
-    headerShine.Size = UDim2.new(0, 150, 2, 0)
-    headerShine.Position = UDim2.new(-1, 0, -0.5, 0)
-    headerShine.BackgroundColor3 = Color3.new(1, 1, 1)
+    headerShine.Size = UDim2.new(0, 150, 1, 0)
+    headerShine.Position = UDim2.new(-1, 0, 0, 0)
+    headerShine.BackgroundColor3 = Color3.new(1,1,1)
     headerShine.BackgroundTransparency = 0.9
     headerShine.BorderSizePixel = 0
     headerShine.Rotation = 20
@@ -4282,253 +4045,144 @@ local function buildEggExecutorGUI(screenGui)
     headerShine.Parent = winHeader
 
     task.spawn(function()
-        while headerShine.Parent do
+        while winHeader.Parent do
             task.wait(4)
-            headerShine.Position = UDim2.new(-1, 0, -0.5, 0)
-            TweenService:Create(headerShine, TweenInfo.new(1.2, Enum.EasingStyle.Quad), {Position = UDim2.new(2, 0, 1.5, 0)}):Play()
+            headerShine.Position = UDim2.new(-1, 0, 0, 0)
+            TweenService:Create(headerShine, TweenInfo.new(1.2, Enum.EasingStyle.Quad), {Position = UDim2.new(2, 0, 0, 0)}):Play()
             task.wait(1.4)
         end
     end)
 
-    -- Accent bar
-    local accentLine = Instance.new("Frame")
-    accentLine.Size = UDim2.new(0, 4, 1, -24)
-    accentLine.Position = UDim2.fromOffset(16, 12)
-    accentLine.BackgroundColor3 = COLOR_CYAN
-    accentLine.BorderSizePixel = 0
-    accentLine.ZIndex = 12
-    accentLine.Parent = winHeader
+    local accentLine = Instance.new("Frame"); accentLine.Size = UDim2.new(0, 4, 1, -20); accentLine.Position = UDim2.fromOffset(16, 10)
+    accentLine.BackgroundColor3 = COLOR_CYAN; accentLine.BorderSizePixel = 0; accentLine.ZIndex = 12; accentLine.Parent = winHeader
     local alCorner = Instance.new("UICorner"); alCorner.CornerRadius = UDim.new(1, 0); alCorner.Parent = accentLine
 
-    -- Title
     local winTitle = Instance.new("TextLabel")
-    winTitle.Size = UDim2.new(1, -80, 0, 28)
-    winTitle.Position = UDim2.fromOffset(32, 10)
-    winTitle.BackgroundTransparency = 1
-    winTitle.Text = "🎨 EGG EXECUTOR"
-    winTitle.TextColor3 = COLOR_CYAN
-    winTitle.Font = Enum.Font.GothamBlack
-    winTitle.TextSize = 22
-    winTitle.TextXAlignment = Enum.TextXAlignment.Left
-    winTitle.ZIndex = 12
-    winTitle.Parent = winHeader
-
+    winTitle.Size = UDim2.new(1, -60, 0, 26); winTitle.Position = UDim2.fromOffset(32, 8)
+    winTitle.BackgroundTransparency = 1; winTitle.Text = "🎨 EGG EXECUTOR"
+    winTitle.TextColor3 = COLOR_CYAN; winTitle.Font = Enum.Font.GothamBlack; winTitle.TextSize = 20
+    winTitle.TextXAlignment = Enum.TextXAlignment.Left; winTitle.ZIndex = 12; winTitle.Parent = winHeader
+    
     local titleGrad = Instance.new("UIGradient")
-    titleGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, COLOR_CYAN),
-        ColorSequenceKeypoint.new(1, COLOR_PURPLE),
-    })
+    titleGrad.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, COLOR_CYAN), ColorSequenceKeypoint.new(1, COLOR_PURPLE)})
     titleGrad.Parent = winTitle
 
-    -- Subtitle
     local winSub = Instance.new("TextLabel")
-    winSub.Size = UDim2.new(1, -80, 0, 18)
-    winSub.Position = UDim2.fromOffset(32, 38)
-    winSub.BackgroundTransparency = 1
-    winSub.Text = "◆ 3D SPACE DASHBOARD · v3.0 ◆"
-    winSub.TextColor3 = COLOR_TEXT_DIM
-    winSub.Font = Enum.Font.GothamBold
-    winSub.TextSize = 11
-    winSub.TextXAlignment = Enum.TextXAlignment.Left
-    winSub.ZIndex = 12
-    winSub.Parent = winHeader
+    winSub.Size = UDim2.new(1, -60, 0, 16); winSub.Position = UDim2.fromOffset(32, 34)
+    winSub.BackgroundTransparency = 1; winSub.Text = "PREMIUM GALAXY DASHBOARD"
+    winSub.TextColor3 = COLOR_TEXT_DIM; winSub.Font = Enum.Font.GothamBold; winSub.TextSize = 10
+    winSub.TextXAlignment = Enum.TextXAlignment.Left; winSub.ZIndex = 12; winSub.Parent = winHeader
 
-    -- Close button (3D)
     local winClose = Instance.new("TextButton")
-    winClose.Size = UDim2.fromOffset(36, 36)
-    winClose.Position = UDim2.new(1, -52, 0.5, -18)
-    winClose.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-    winClose.BackgroundTransparency = 0.3
-    winClose.Text = "✕"
-    winClose.TextColor3 = Color3.new(1, 1, 1)
-    winClose.Font = Enum.Font.GothamBold
-    winClose.TextSize = 18
-    winClose.BorderSizePixel = 0
-    winClose.ZIndex = 12
-    winClose.Parent = winHeader
+    winClose.Size = UDim2.fromOffset(32, 32); winClose.Position = UDim2.new(1, -48, 0.5, -16)
+    winClose.BackgroundColor3 = Color3.fromRGB(180, 50, 50); winClose.BackgroundTransparency = 0.3
+    winClose.Text = "✕"; winClose.TextColor3 = Color3.new(1, 1, 1); winClose.Font = Enum.Font.GothamBold
+    winClose.TextSize = 18; winClose.BorderSizePixel = 0; winClose.ZIndex = 12; winClose.Parent = winHeader
     local wcCorner = Instance.new("UICorner"); wcCorner.CornerRadius = UDim.new(1, 0); wcCorner.Parent = winClose
+    
+    winClose.MouseEnter:Connect(function() TweenService:Create(winClose, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 80, 80), BackgroundTransparency = 0}):Play() end)
+    winClose.MouseLeave:Connect(function() TweenService:Create(winClose, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(180, 50, 50), BackgroundTransparency = 0.3}):Play() end)
 
-    winClose.MouseEnter:Connect(function()
-        TweenService:Create(winClose, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 80, 80), BackgroundTransparency = 0}):Play()
-    end)
-    winClose.MouseLeave:Connect(function()
-        TweenService:Create(winClose, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(180, 50, 50), BackgroundTransparency = 0.3}):Play()
-    end)
-
-    -- ═══════════════════════════════════════════════════════════
-    -- TAB BAR (3D glass)
-    -- ═══════════════════════════════════════════════════════════
+    -- ═══ TAB BAR ═══
     local tabBar = Instance.new("Frame")
-    tabBar.Size = UDim2.new(1, -32, 0, 48)
-    tabBar.Position = UDim2.fromOffset(16, 78)
-    tabBar.BackgroundColor3 = COLOR_GLASS
-    tabBar.BackgroundTransparency = 0.5
-    tabBar.BorderSizePixel = 0
-    tabBar.ZIndex = 9
-    tabBar.Parent = win
-    local tbCorner = Instance.new("UICorner"); tbCorner.CornerRadius = UDim.new(0, 14); tbCorner.Parent = tabBar
+    tabBar.Size = UDim2.new(1, -32, 0, 44); tabBar.Position = UDim2.fromOffset(16, 74)
+    tabBar.BackgroundColor3 = COLOR_GLASS; tabBar.BackgroundTransparency = 0.5
+    tabBar.BorderSizePixel = 0; tabBar.ZIndex = 9; tabBar.Parent = win
+    local tbCorner = Instance.new("UICorner"); tbCorner.CornerRadius = UDim.new(0, 12); tbCorner.Parent = tabBar
 
     local tabs = {
-        { name = "Stats", icon = "📊", key = "stats" },
-        { name = "Eggs", icon = "🥚", key = "eggs" },
-        { name = "Avatar", icon = "👤", key = "avatar" },
+        {name = "Stats", icon = "📊", key = "stats"},
+        {name = "Eggs", icon = "🥚", key = "eggs"},
+        {name = "Avatar", icon = "👤", key = "avatar"},
     }
     local tabButtons = {}
 
     for i, tab in ipairs(tabs) do
         local btn = Instance.new("TextButton")
         btn.Name = "Tab_" .. tab.key
-        btn.Size = UDim2.new(1/3 - 0.02, 0, 1, -8)
-        btn.Position = UDim2.new((i - 1)/3 + 0.01, 0, 0, 4)
+        btn.Size = UDim2.new(1/3 - 0.02, 0, 1, -8); btn.Position = UDim2.new((i-1)/3 + 0.01, 0, 0, 4)
         btn.BackgroundColor3 = Color3.fromRGB(30, 35, 55)
         btn.BackgroundTransparency = 0.4
         btn.Text = ""
         btn.BorderSizePixel = 0
-        btn.ZIndex = 10
-        btn.Parent = tabBar
-        local btnCorner = Instance.new("UICorner"); btnCorner.CornerRadius = UDim.new(0, 10); btnCorner.Parent = btn
-
+        btn.ZIndex = 10; btn.Parent = tabBar
+        local btnCorner = Instance.new("UICorner"); btnCorner.CornerRadius = UDim.new(0, 8); btnCorner.Parent = btn
+        
         local iconLbl = Instance.new("TextLabel")
-        iconLbl.Size = UDim2.new(0, 24, 1, 0)
-        iconLbl.Position = UDim2.fromOffset(10, 0)
-        iconLbl.BackgroundTransparency = 1
-        iconLbl.Text = tab.icon
-        iconLbl.TextSize = 16
-        iconLbl.ZIndex = 11
-        iconLbl.Parent = btn
+        iconLbl.Size = UDim2.new(0, 24, 1, 0); iconLbl.Position = UDim2.fromOffset(10, 0)
+        iconLbl.BackgroundTransparency = 1; iconLbl.Text = tab.icon; iconLbl.TextSize = 16
+        iconLbl.ZIndex = 11; iconLbl.Parent = btn
 
         local nameLbl = Instance.new("TextLabel")
-        nameLbl.Size = UDim2.new(1, -40, 1, 0)
-        nameLbl.Position = UDim2.fromOffset(36, 0)
-        nameLbl.BackgroundTransparency = 1
-        nameLbl.Text = tab.name
-        nameLbl.TextColor3 = COLOR_TEXT_DIM
-        nameLbl.Font = Enum.Font.GothamBold
-        nameLbl.TextSize = 12
-        nameLbl.TextXAlignment = Enum.TextXAlignment.Left
-        nameLbl.ZIndex = 11
-        nameLbl.Parent = btn
-
-        tabButtons[tab.key] = { btn = btn, icon = iconLbl, name = nameLbl }
+        nameLbl.Size = UDim2.new(1, -40, 1, 0); nameLbl.Position = UDim2.fromOffset(36, 0)
+        nameLbl.BackgroundTransparency = 1; nameLbl.Text = tab.name; nameLbl.TextColor3 = COLOR_TEXT_DIM
+        nameLbl.Font = Enum.Font.GothamBold; nameLbl.TextSize = 12; nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+        nameLbl.ZIndex = 11; nameLbl.Parent = btn
+        
+        tabButtons[tab.key] = {btn = btn, icon = iconLbl, name = nameLbl}
     end
 
-    -- ═══════════════════════════════════════════════════════════
-    -- CONTENT AREA
-    -- ═══════════════════════════════════════════════════════════
+    -- ═══ CONTENT AREA ═══
     local content = Instance.new("Frame")
-    content.Size = UDim2.new(1, -32, 1, -154)
-    content.Position = UDim2.fromOffset(16, 134)
-    content.BackgroundTransparency = 1
-    content.ZIndex = 8
-    content.ClipsDescendants = true
-    content.Parent = win
+    content.Size = UDim2.new(1, -32, 1, -140); content.Position = UDim2.fromOffset(16, 124)
+    content.BackgroundTransparency = 1; content.ZIndex = 8; content.ClipsDescendants = true; content.Parent = win
 
-    -- ═══════════════════════════════════════════════════════════
-    -- TAB: STATS
-    -- ═══════════════════════════════════════════════════════════
+    -- ═══ TAB: STATS ═══
     local statsTab = Instance.new("Frame")
-    statsTab.Size = UDim2.fromScale(1, 1)
-    statsTab.BackgroundTransparency = 1
-    statsTab.ZIndex = 9
-    statsTab.Parent = content
+    statsTab.Size = UDim2.fromScale(1, 1); statsTab.BackgroundTransparency = 1; statsTab.ZIndex = 9; statsTab.Parent = content
 
-    -- Counter BG
     local counterBg = Instance.new("Frame")
-    counterBg.Size = UDim2.new(1, 0, 0, 120)
-    counterBg.BackgroundColor3 = COLOR_GLASS
-    counterBg.BackgroundTransparency = 0.3
-    counterBg.BorderSizePixel = 0
-    counterBg.ZIndex = 10
-    counterBg.Parent = statsTab
-    local cbCorner = Instance.new("UICorner"); cbCorner.CornerRadius = UDim.new(0, 16); cbCorner.Parent = counterBg
+    counterBg.Size = UDim2.new(1, 0, 0, 120); counterBg.BackgroundColor3 = COLOR_GLASS
+    counterBg.BackgroundTransparency = 0.3; counterBg.BorderSizePixel = 0; counterBg.ZIndex = 10; counterBg.Parent = statsTab
+    local cbCorner = Instance.new("UICorner"); cbCorner.CornerRadius = UDim.new(0, 14); cbCorner.Parent = counterBg
     local cbStroke = Instance.new("UIStroke"); cbStroke.Color = COLOR_CYAN; cbStroke.Thickness = 1.5; cbStroke.Transparency = 0.4; cbStroke.Parent = counterBg
-    local cbGrad = Instance.new("UIGradient")
-    cbGrad.Rotation = 90
-    cbGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 40, 60)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 20, 35)),
-    })
+    local cbGrad = Instance.new("UIGradient"); cbGrad.Rotation = 90
+    cbGrad.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 40, 60)), ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 20, 35))})
     cbGrad.Parent = counterBg
 
     local totalLabel = Instance.new("TextLabel")
-    totalLabel.Size = UDim2.fromScale(1, 0.5)
-    totalLabel.Position = UDim2.fromScale(0, 0.1)
-    totalLabel.BackgroundTransparency = 1
-    totalLabel.Text = "0"
-    totalLabel.TextColor3 = COLOR_CYAN
-    totalLabel.TextStrokeColor3 = Color3.fromRGB(0, 100, 80)
-    totalLabel.TextStrokeTransparency = 0.3
-    totalLabel.Font = Enum.Font.GothamBlack
-    totalLabel.TextSize = 54
-    totalLabel.ZIndex = 11
-    totalLabel.Parent = counterBg
+    totalLabel.Size = UDim2.fromScale(1, 0.5); totalLabel.Position = UDim2.fromScale(0, 0.1)
+    totalLabel.BackgroundTransparency = 1; totalLabel.Text = "0"
+    totalLabel.TextColor3 = COLOR_CYAN; totalLabel.TextStrokeColor3 = Color3.fromRGB(0, 100, 80)
+    totalLabel.TextStrokeTransparency = 0.3; totalLabel.Font = Enum.Font.GothamBlack
+    totalLabel.TextSize = 54; totalLabel.ZIndex = 11; totalLabel.Parent = counterBg
 
     local totalDesc = Instance.new("TextLabel")
-    totalDesc.Size = UDim2.fromScale(1, 0.3)
-    totalDesc.Position = UDim2.fromScale(0, 0.65)
-    totalDesc.BackgroundTransparency = 1
-    totalDesc.Text = "TOTAL STOLEN EGGS"
-    totalDesc.TextColor3 = COLOR_TEXT_DIM
-    totalDesc.Font = Enum.Font.GothamBold
-    totalDesc.TextSize = 12
-    totalDesc.ZIndex = 11
-    totalDesc.Parent = counterBg
+    totalDesc.Size = UDim2.fromScale(1, 0.3); totalDesc.Position = UDim2.fromScale(0, 0.65)
+    totalDesc.BackgroundTransparency = 1; totalDesc.Text = "TOTAL STOLEN EGGS"
+    totalDesc.TextColor3 = COLOR_TEXT_DIM; totalDesc.Font = Enum.Font.GothamBold
+    totalDesc.TextSize = 12; totalDesc.ZIndex = 11; totalDesc.Parent = counterBg
 
-    -- Stats grid
     local grid = Instance.new("Frame")
-    grid.Size = UDim2.new(1, 0, 1, -130)
-    grid.Position = UDim2.fromOffset(0, 130)
-    grid.BackgroundTransparency = 1
-    grid.ZIndex = 10
-    grid.Parent = statsTab
+    grid.Size = UDim2.new(1, 0, 1, -130); grid.Position = UDim2.fromOffset(0, 130)
+    grid.BackgroundTransparency = 1; grid.ZIndex = 10; grid.Parent = statsTab
     local gridLayout = Instance.new("UIGridLayout")
-    gridLayout.CellSize = UDim2.new(0.5, -5, 0, 60)
-    gridLayout.CellPadding = UDim2.fromOffset(10, 10)
-    gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    gridLayout.Parent = grid
+    gridLayout.CellSize = UDim2.new(0.5, -5, 0, 60); gridLayout.CellPadding = UDim2.fromOffset(10, 10)
+    gridLayout.SortOrder = Enum.SortOrder.LayoutOrder; gridLayout.Parent = grid
 
     local function makeStatCard(icon, label, color)
         local card = Instance.new("Frame")
-        card.BackgroundColor3 = COLOR_GLASS
-        card.BackgroundTransparency = 0.4
-        card.BorderSizePixel = 0
-        card.ZIndex = 11
-        local cc = Instance.new("UICorner"); cc.CornerRadius = UDim.new(0, 12); cc.Parent = card
+        card.BackgroundColor3 = COLOR_GLASS; card.BackgroundTransparency = 0.4
+        card.BorderSizePixel = 0; card.ZIndex = 11
+        local cc = Instance.new("UICorner"); cc.CornerRadius = UDim.new(0, 10); cc.Parent = card
         local cs = Instance.new("UIStroke"); cs.Color = color; cs.Thickness = 1; cs.Transparency = 0.5; cs.Parent = card
 
         local iconLbl = Instance.new("TextLabel")
-        iconLbl.Size = UDim2.fromOffset(32, 32)
-        iconLbl.Position = UDim2.fromOffset(10, 14)
-        iconLbl.BackgroundTransparency = 1
-        iconLbl.Text = icon
-        iconLbl.TextSize = 22
-        iconLbl.ZIndex = 12
-        iconLbl.Parent = card
+        iconLbl.Size = UDim2.fromOffset(32, 32); iconLbl.Position = UDim2.fromOffset(10, 14)
+        iconLbl.BackgroundTransparency = 1; iconLbl.Text = icon; iconLbl.TextSize = 22
+        iconLbl.ZIndex = 12; iconLbl.Parent = card
 
         local valLbl = Instance.new("TextLabel")
-        valLbl.Name = "Value"
-        valLbl.Size = UDim2.new(1, -55, 0, 22)
-        valLbl.Position = UDim2.fromOffset(50, 10)
-        valLbl.BackgroundTransparency = 1
-        valLbl.Text = "0"
-        valLbl.TextColor3 = color
-        valLbl.Font = Enum.Font.GothamBlack
-        valLbl.TextSize = 18
-        valLbl.TextXAlignment = Enum.TextXAlignment.Left
-        valLbl.ZIndex = 12
-        valLbl.Parent = card
+        valLbl.Name = "Value"; valLbl.Size = UDim2.new(1, -55, 0, 22); valLbl.Position = UDim2.fromOffset(50, 10)
+        valLbl.BackgroundTransparency = 1; valLbl.Text = "0"; valLbl.TextColor3 = color
+        valLbl.Font = Enum.Font.GothamBlack; valLbl.TextSize = 18; valLbl.TextXAlignment = Enum.TextXAlignment.Left
+        valLbl.ZIndex = 12; valLbl.Parent = card
 
         local lblLbl = Instance.new("TextLabel")
-        lblLbl.Size = UDim2.new(1, -55, 0, 14)
-        lblLbl.Position = UDim2.fromOffset(50, 32)
-        lblLbl.BackgroundTransparency = 1
-        lblLbl.Text = label
-        lblLbl.TextColor3 = COLOR_TEXT_DIM
-        lblLbl.Font = Enum.Font.GothamBold
-        lblLbl.TextSize = 9
-        lblLbl.TextXAlignment = Enum.TextXAlignment.Left
-        lblLbl.ZIndex = 12
-        lblLbl.Parent = card
+        lblLbl.Size = UDim2.new(1, -55, 0, 14); lblLbl.Position = UDim2.fromOffset(50, 32)
+        lblLbl.BackgroundTransparency = 1; lblLbl.Text = label; lblLbl.TextColor3 = COLOR_TEXT_DIM
+        lblLbl.Font = Enum.Font.GothamBold; lblLbl.TextSize = 9; lblLbl.TextXAlignment = Enum.TextXAlignment.Left
+        lblLbl.ZIndex = 12; lblLbl.Parent = card
 
         return card, valLbl
     end
@@ -4538,83 +4192,52 @@ local function buildEggExecutorGUI(screenGui)
     local rareCard, rareVal = makeStatCard("💎", "RARE EGGS", Color3.fromRGB(255, 100, 255)); rareCard.Parent = grid
     local avgCard, avgVal = makeStatCard("📈", "AVG/JAM", Color3.fromRGB(100, 200, 255)); avgCard.Parent = grid
 
-    -- ═══════════════════════════════════════════════════════════
-    -- TAB: EGGS
-    -- ═══════════════════════════════════════════════════════════
+    -- ═══ TAB: EGGS ═══
     local eggsTab = Instance.new("Frame")
-    eggsTab.Size = UDim2.fromScale(1, 1)
-    eggsTab.BackgroundTransparency = 1
-    eggsTab.Visible = false
-    eggsTab.ZIndex = 9
-    eggsTab.Parent = content
+    eggsTab.Size = UDim2.fromScale(1, 1); eggsTab.BackgroundTransparency = 1; eggsTab.Visible = false; eggsTab.ZIndex = 9; eggsTab.Parent = content
 
     local eggScroll = Instance.new("ScrollingFrame")
     eggScroll.Size = UDim2.fromScale(1, 1)
-    eggScroll.BackgroundTransparency = 1
-    eggScroll.BorderSizePixel = 0
-    eggScroll.ScrollBarThickness = 4
-    eggScroll.ScrollBarImageColor3 = COLOR_CYAN
-    eggScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-    eggScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    eggScroll.ZIndex = 10
-    eggScroll.Parent = eggsTab
+    eggScroll.BackgroundTransparency = 1; eggScroll.BorderSizePixel = 0; eggScroll.ScrollBarThickness = 4
+    eggScroll.ScrollBarImageColor3 = COLOR_CYAN; eggScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    eggScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y; eggScroll.ZIndex = 10; eggScroll.Parent = eggsTab
 
     local eggListLayout = Instance.new("UIListLayout")
-    eggListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    eggListLayout.Padding = UDim.new(0, 8)
-    eggListLayout.Parent = eggScroll
+    eggListLayout.SortOrder = Enum.SortOrder.LayoutOrder; eggListLayout.Padding = UDim.new(0, 8); eggListLayout.Parent = eggScroll
 
-    -- ═══════════════════════════════════════════════════════════
-    -- TAB: AVATAR (SUPER SMOOTH v3)
-    -- ═══════════════════════════════════════════════════════════
+    -- ═══ TAB: AVATAR (SUPER SMOOTH) ═══
     local avatarTab = Instance.new("Frame")
-    avatarTab.Size = UDim2.fromScale(1, 1)
-    avatarTab.BackgroundTransparency = 1
-    avatarTab.Visible = false
-    avatarTab.ZIndex = 9
-    avatarTab.Parent = content
+    avatarTab.Size = UDim2.fromScale(1, 1); avatarTab.BackgroundTransparency = 1; avatarTab.Visible = false; avatarTab.ZIndex = 9; avatarTab.Parent = content
 
     local viewportFrame = Instance.new("ViewportFrame")
-    viewportFrame.Name = "AvatarPreview"
-    viewportFrame.Size = UDim2.fromScale(1, 1)
-    viewportFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 20)
-    viewportFrame.BackgroundTransparency = 0.1
-    viewportFrame.BorderSizePixel = 0
-    viewportFrame.Ambient = Color3.fromRGB(150, 150, 170)
-    viewportFrame.LightColor = Color3.new(1, 1, 1)
-    viewportFrame.ZIndex = 10
-    viewportFrame.Parent = avatarTab
-    local vpCorner = Instance.new("UICorner"); vpCorner.CornerRadius = UDim.new(0, 14); vpCorner.Parent = viewportFrame
+    viewportFrame.Name = "AvatarPreview"; viewportFrame.Size = UDim2.fromScale(1, 1)
+    viewportFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 20); viewportFrame.BackgroundTransparency = 0.1
+    viewportFrame.BorderSizePixel = 0; viewportFrame.Ambient = Color3.fromRGB(150, 150, 170)
+    viewportFrame.LightColor = Color3.new(1,1,1); viewportFrame.ZIndex = 10; viewportFrame.Parent = avatarTab
+
+    local vpCorner = Instance.new("UICorner"); vpCorner.CornerRadius = UDim.new(0, 12); vpCorner.Parent = viewportFrame
     local vpStroke = Instance.new("UIStroke"); vpStroke.Color = COLOR_CYAN; vpStroke.Thickness = 2; vpStroke.Transparency = 0.3; vpStroke.Parent = viewportFrame
 
-    local worldModel = Instance.new("WorldModel")
-    worldModel.Parent = viewportFrame
-
-    local camera = Instance.new("Camera")
-    camera.FieldOfView = 30
-    camera.Parent = viewportFrame
-    viewportFrame.CurrentCamera = camera
+    local worldModel = Instance.new("WorldModel"); worldModel.Parent = viewportFrame
+    local camera = Instance.new("Camera"); camera.FieldOfView = 30; camera.Parent = viewportFrame; viewportFrame.CurrentCamera = camera
 
     local avPlaceholder = Instance.new("TextLabel")
-    avPlaceholder.Size = UDim2.fromScale(1, 1)
-    avPlaceholder.BackgroundTransparency = 1
-    avPlaceholder.Text = "👤 Loading avatar..."
-    avPlaceholder.TextColor3 = COLOR_CYAN
-    avPlaceholder.Font = Enum.Font.GothamBold
-    avPlaceholder.TextSize = 16
-    avPlaceholder.ZIndex = 11
-    avPlaceholder.Parent = viewportFrame
+    avPlaceholder.Size = UDim2.fromScale(1, 1); avPlaceholder.BackgroundTransparency = 1
+    avPlaceholder.Text = "👤 Loading avatar..."; avPlaceholder.TextColor3 = COLOR_CYAN
+    avPlaceholder.Font = Enum.Font.GothamBold; avPlaceholder.TextSize = 16; avPlaceholder.ZIndex = 11; avPlaceholder.Parent = viewportFrame
 
-    -- ⭐ SMOOTH ROTATION STATE (frame-rate independent)
+    -- ⭐ SUPER SMOOTH AVATAR ROTATION
     local avatarClone = nil
     local isDraggingAv = false
     local dragStartX, dragStartY = 0, 0
-
+    
+    -- ⭐ TARGET vs CURRENT (Smooth Lerp)
     local targetRotX, targetRotY = 0, 0
     local currentRotX, currentRotY = 0, 0
-    local currentZoom = 8.5
-    local targetZoom = 8.5
+    
+    local currentZoom = -8.5
     local autoRotate = true
+    local lastAutoRotateTime = tick()
 
     task.spawn(function()
         local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -4623,143 +4246,98 @@ local function buildEggExecutorGUI(screenGui)
         local ok, clone = pcall(char.Clone, char)
         char.Archivable = oldArch
 
-        if not ok or not clone then
-            avPlaceholder.Text = "❌ Gagal clone avatar"
-            return
-        end
+        if not ok or not clone then avPlaceholder.Text = "❌ Gagal clone avatar" return end
         clone.Name = "AvatarPreview_" .. LocalPlayer.Name
 
         for _, d in ipairs(clone:GetDescendants()) do
-            if d:IsA("Script") or d:IsA("LocalScript") or d:IsA("ModuleScript") then
-                d:Destroy()
-            end
-            if d:IsA("BasePart") then
-                d.Anchored = true
-                d.CanCollide = false
-                d.CanTouch = false
-                d.CanQuery = false
-            end
+            if d:IsA("Script") or d:IsA("LocalScript") or d:IsA("ModuleScript") then d:Destroy() end
+            if d:IsA("BasePart") then d.Anchored = true; d.CanCollide = false end
         end
         clone.Parent = worldModel
         avatarClone = clone
         avPlaceholder:Destroy()
 
-        local hrp = clone:FindFirstChild("HumanoidRootPart")
-            or clone:FindFirstChild("UpperTorso")
-            or clone:FindFirstChild("Torso")
-        if not hrp then
-            avPlaceholder.Text = "❌ No body part"
-            return
-        end
+        local hrp = clone:FindFirstChild("HumanoidRootPart") or clone:FindFirstChild("Torso") or clone:FindFirstChild("UpperTorso")
+        if not hrp then avPlaceholder.Text = "❌ No body part" return end
 
-        -- Center avatar
-        local _, size = clone:GetBoundingBox()
-        local centerY = size.Y * 0.5
         clone:PivotTo(CFrame.new(0, 0, 0))
-        local focusPoint = Vector3.new(0, centerY * 0.9, 0)
-
-        -- Drag input
+        local targetPos = hrp.Position
+        
+        -- Setup Drag
         viewportFrame.Active = true
         viewportFrame.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1
-                or input.UserInputType == Enum.UserInputType.Touch then
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 isDraggingAv = true
                 dragStartX, dragStartY = input.Position.X, input.Position.Y
+                targetRotX = currentRotX
+                targetRotY = currentRotY
                 autoRotate = false
             end
         end)
 
         UserInputService.InputChanged:Connect(function(input)
-            if not isDraggingAv then return end
-            if input.UserInputType == Enum.UserInputType.MouseMovement
-                or input.UserInputType == Enum.UserInputType.Touch then
-                local dx = input.Position.X - dragStartX
-                local dy = input.Position.Y - dragStartY
-                targetRotY = targetRotY + dx * 0.7
-                targetRotX = math.clamp(targetRotX + dy * 0.4, -60, 60)
+            if isDraggingAv and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                local deltaX = input.Position.X - dragStartX
+                local deltaY = input.Position.Y - dragStartY
+                -- Update TARGET (bukan current) biar smooth
+                targetRotY = targetRotY + (deltaX * 0.8)
+                targetRotX = targetRotX + (deltaY * 0.5)
             end
         end)
 
         UserInputService.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1
-                or input.UserInputType == Enum.UserInputType.Touch then
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 isDraggingAv = false
             end
         end)
 
-        -- ⭐ SMOOTH RENDER LOOP
-        local renderConn
-        renderConn = RunService.RenderStepped:Connect(function(dt)
-            if not viewportFrame.Parent or not clone.Parent then
-                if renderConn then renderConn:Disconnect() end
-                return
-            end
+        -- ⭐ SUPER SMOOTH LERP LOOP
+        RunService.RenderStepped:Connect(function(dt)
+            if not viewportFrame.Parent or not clone.Parent then return end
             if not avatarTab.Visible then return end
-
+            
+            -- Auto Rotate Smooth
             if autoRotate and not isDraggingAv then
-                targetRotY = targetRotY + 25 * dt
+                targetRotY = targetRotY + 30 * dt
             end
 
-            -- Super smooth lerp (frame-rate independent)
-            local smoothing = 1 - math.exp(-12 * dt)
-            currentRotX = currentRotX + (targetRotX - currentRotX) * smoothing
-            currentRotY = currentRotY + (targetRotY - currentRotY) * smoothing
-            currentZoom = currentZoom + (targetZoom - currentZoom) * smoothing
+            -- Super Smooth Lerp (Biar gak patah-patah)
+            local lerpSpeed = 15 * dt
+            currentRotX = currentRotX + (targetRotX - currentRotX) * lerpSpeed
+            currentRotY = currentRotY + (targetRotY - currentRotY) * lerpSpeed
 
-            clone:PivotTo(
-                CFrame.new(0, 0, 0)
-                * CFrame.Angles(math.rad(currentRotX), math.rad(currentRotY), 0)
-            )
-
-            local camPos = focusPoint + Vector3.new(0, 1.2, currentZoom)
-            camera.CFrame = CFrame.lookAt(camPos, focusPoint)
+            clone:PivotTo(CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(currentRotX), math.rad(currentRotY), 0))
+            
+            -- Kamera nyesuaiin zoom
+            local targetPos = hrp.Position
+            camera.CFrame = CFrame.lookAt(targetPos + Vector3.new(0, 1.5, currentZoom), targetPos + Vector3.new(0, 1, 0))
         end)
     end)
 
-    -- Avatar info overlay
+    -- Avatar Info & Controls Overlay
     local avatarInfo = Instance.new("Frame")
-    avatarInfo.Size = UDim2.new(1, 0, 0, 60)
-    avatarInfo.Position = UDim2.new(0, 0, 1, -60)
-    avatarInfo.BackgroundColor3 = COLOR_GLASS
-    avatarInfo.BackgroundTransparency = 0.3
-    avatarInfo.BorderSizePixel = 0
-    avatarInfo.ZIndex = 11
-    avatarInfo.Parent = avatarTab
+    avatarInfo.Size = UDim2.new(1, 0, 0, 60); avatarInfo.Position = UDim2.new(0, 0, 1, -60)
+    avatarInfo.BackgroundColor3 = COLOR_GLASS; avatarInfo.BackgroundTransparency = 0.3
+    avatarInfo.BorderSizePixel = 0; avatarInfo.ZIndex = 11; avatarInfo.Parent = avatarTab
     local aiCorner = Instance.new("UICorner"); aiCorner.CornerRadius = UDim.new(0, 12); aiCorner.Parent = avatarInfo
 
     local avatarName = Instance.new("TextLabel")
-    avatarName.Size = UDim2.new(1, -20, 0, 20)
-    avatarName.Position = UDim2.fromOffset(12, 8)
-    avatarName.BackgroundTransparency = 1
-    avatarName.Text = "👤 " .. LocalPlayer.DisplayName
-    avatarName.TextColor3 = COLOR_CYAN
-    avatarName.Font = Enum.Font.GothamBold
-    avatarName.TextSize = 14
-    avatarName.ZIndex = 12
-    avatarName.Parent = avatarInfo
+    avatarName.Size = UDim2.new(1, -20, 0, 20); avatarName.Position = UDim2.fromOffset(12, 8)
+    avatarName.BackgroundTransparency = 1; avatarName.Text = "👤 " .. LocalPlayer.DisplayName
+    avatarName.TextColor3 = COLOR_CYAN; avatarName.Font = Enum.Font.GothamBold; avatarName.TextSize = 14
+    avatarName.ZIndex = 12; avatarName.Parent = avatarInfo
 
     local avatarSub = Instance.new("TextLabel")
-    avatarSub.Size = UDim2.new(1, -20, 0, 16)
-    avatarSub.Position = UDim2.fromOffset(12, 30)
-    avatarSub.BackgroundTransparency = 1
-    avatarSub.Text = "User ID: " .. LocalPlayer.UserId .. "  ·  Drag to rotate"
-    avatarSub.TextColor3 = COLOR_TEXT_DIM
-    avatarSub.Font = Enum.Font.GothamMedium
-    avatarSub.TextSize = 10
-    avatarSub.ZIndex = 12
-    avatarSub.Parent = avatarInfo
+    avatarSub.Size = UDim2.new(1, -20, 0, 16); avatarSub.Position = UDim2.fromOffset(12, 30)
+    avatarSub.BackgroundTransparency = 1; avatarSub.Text = "User ID: " .. LocalPlayer.UserId .. "  ·  Drag to rotate"
+    avatarSub.TextColor3 = COLOR_TEXT_DIM; avatarSub.Font = Enum.Font.GothamMedium; avatarSub.TextSize = 10
+    avatarSub.ZIndex = 12; avatarSub.Parent = avatarInfo
 
-    -- Zoom controls
     local zoomBtn = Instance.new("TextButton")
-    zoomBtn.Size = UDim2.fromOffset(90, 24)
-    zoomBtn.Position = UDim2.new(1, -180, 1, -40)
-    zoomBtn.BackgroundColor3 = COLOR_SURFACE
-    zoomBtn.Text = "Auto-Rotate"
-    zoomBtn.TextColor3 = COLOR_CYAN
-    zoomBtn.Font = Enum.Font.GothamBold
-    zoomBtn.TextSize = 10
-    zoomBtn.ZIndex = 12
-    zoomBtn.Parent = avatarTab
+    zoomBtn.Size = UDim2.fromOffset(80, 24); zoomBtn.Position = UDim2.new(1, -170, 1, -40)
+    zoomBtn.BackgroundColor3 = COLOR_SURFACE; zoomBtn.Text = "Auto-Rotate"
+    zoomBtn.TextColor3 = COLOR_CYAN; zoomBtn.Font = Enum.Font.GothamBold; zoomBtn.TextSize = 10
+    zoomBtn.ZIndex = 12; zoomBtn.Parent = avatarTab
     local zbCorner = Instance.new("UICorner"); zbCorner.CornerRadius = UDim.new(1, 0); zbCorner.Parent = zoomBtn
     local zbStroke = Instance.new("UIStroke"); zbStroke.Color = COLOR_CYAN; zbStroke.Transparency = 0.5; zbStroke.Parent = zoomBtn
 
@@ -4770,52 +4348,37 @@ local function buildEggExecutorGUI(screenGui)
         zbStroke.Color = autoRotate and COLOR_CYAN or COLOR_GOLD
     end)
 
-    -- Zoom slider
     local zoomSliderBg = Instance.new("Frame")
-    zoomSliderBg.Size = UDim2.fromOffset(110, 4)
-    zoomSliderBg.Position = UDim2.new(1, -180, 1, -12)
-    zoomSliderBg.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
-    zoomSliderBg.BorderSizePixel = 0
-    zoomSliderBg.ZIndex = 12
-    zoomSliderBg.Parent = avatarTab
+    zoomSliderBg.Size = UDim2.fromOffset(100, 4); zoomSliderBg.Position = UDim2.new(1, -170, 1, -12)
+    zoomSliderBg.BackgroundColor3 = Color3.fromRGB(60, 60, 80); zoomSliderBg.BorderSizePixel = 0
+    zoomSliderBg.ZIndex = 12; zoomSliderBg.Parent = avatarTab
     local zsbCorner = Instance.new("UICorner"); zsbCorner.CornerRadius = UDim.new(1, 0); zsbCorner.Parent = zoomSliderBg
 
     local zoomFill = Instance.new("Frame")
-    zoomFill.Size = UDim2.new(0.5, 0, 1, 0)
-    zoomFill.BackgroundColor3 = COLOR_CYAN
-    zoomFill.BorderSizePixel = 0
-    zoomFill.ZIndex = 13
-    zoomFill.Parent = zoomSliderBg
+    zoomFill.Size = UDim2.new(0.5, 0, 1, 0); zoomFill.BackgroundColor3 = COLOR_CYAN
+    zoomFill.BorderSizePixel = 0; zoomFill.ZIndex = 13; zoomFill.Parent = zoomSliderBg
     local zfCorner = Instance.new("UICorner"); zfCorner.CornerRadius = UDim.new(1, 0); zfCorner.Parent = zoomFill
 
     local zoomDragging = false
     zoomSliderBg.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1
-            or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             zoomDragging = true
         end
     end)
     UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1
-            or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             zoomDragging = false
         end
     end)
     UserInputService.InputChanged:Connect(function(input)
-        if zoomDragging and (input.UserInputType == Enum.UserInputType.MouseMovement
-            or input.UserInputType == Enum.UserInputType.Touch) then
-            local rel = math.clamp(
-                (input.Position.X - zoomSliderBg.AbsolutePosition.X) / zoomSliderBg.AbsoluteSize.X,
-                0, 1
-            )
+        if zoomDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local rel = math.clamp((input.Position.X - zoomSliderBg.AbsolutePosition.X) / zoomSliderBg.AbsoluteSize.X, 0, 1)
             zoomFill.Size = UDim2.new(rel, 0, 1, 0)
-            targetZoom = 3.5 + (rel * 10)
+            currentZoom = -3 - (rel * 10)
         end
     end)
 
-    -- ═══════════════════════════════════════════════════════════
-    -- TAB SWITCH
-    -- ═══════════════════════════════════════════════════════════
+    -- ═══ TAB SWITCH & ANIMATION ═══
     local function switchTab(key)
         EggState.ActiveTab = key
         statsTab.Visible = (key == "stats")
@@ -4824,28 +4387,20 @@ local function buildEggExecutorGUI(screenGui)
 
         for k, data in pairs(tabButtons) do
             if k == key then
-                TweenService:Create(data.btn, TweenInfo.new(0.3), {
-                    BackgroundColor3 = COLOR_CYAN,
-                    BackgroundTransparency = 0.1,
-                }):Play()
-                data.name.TextColor3 = Color3.new(0, 0, 0)
-                data.icon.TextColor3 = Color3.new(0, 0, 0)
+                TweenService:Create(data.btn, TweenInfo.new(0.3), {BackgroundColor3 = COLOR_CYAN, BackgroundTransparency = 0.1}):Play()
+                data.name.TextColor3 = Color3.new(0,0,0)
+                data.icon.TextColor3 = Color3.new(0,0,0)
             else
-                TweenService:Create(data.btn, TweenInfo.new(0.3), {
-                    BackgroundColor3 = Color3.fromRGB(30, 35, 55),
-                    BackgroundTransparency = 0.4,
-                }):Play()
+                TweenService:Create(data.btn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(30, 35, 55), BackgroundTransparency = 0.4}):Play()
                 data.name.TextColor3 = COLOR_TEXT_DIM
-                data.icon.TextColor3 = Color3.new(1, 1, 1)
+                data.icon.TextColor3 = Color3.new(1,1,1)
             end
         end
 
         local targetTab = (key == "stats" and statsTab) or (key == "eggs" and eggsTab) or avatarTab
         if targetTab then
             targetTab.Position = UDim2.new(0, 20, 0, 0)
-            TweenService:Create(targetTab, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-                Position = UDim2.new(0, 0, 0, 0),
-            }):Play()
+            TweenService:Create(targetTab, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2.new(0, 0, 0, 0)}):Play()
         end
 
         if key == "eggs" then updateEggList() end
@@ -4857,9 +4412,7 @@ local function buildEggExecutorGUI(screenGui)
         end)
     end
 
-    -- ═══════════════════════════════════════════════════════════
-    -- UPDATE STATS & EGG LIST
-    -- ═══════════════════════════════════════════════════════════
+    -- ═══ UPDATE STATS & EGG LIST ═══
     local updateEggList
     local updateStatsDisplay
 
@@ -4867,8 +4420,7 @@ local function buildEggExecutorGUI(screenGui)
         if not win.Parent then return end
         local activeTime = os.time() - StealStats.SessionStart
         local total = StealStats.TotalSteals
-        totalLabel.Text = tostring(total)
-        sessionVal.Text = formatTime(activeTime)
+        totalLabel.Text = tostring(total); sessionVal.Text = formatTime(activeTime)
 
         local minutes = math.max(activeTime / 60, 1)
         rateVal.Text = string.format("%.1f", total / minutes)
@@ -4876,10 +4428,7 @@ local function buildEggExecutorGUI(screenGui)
         local rareCount = 0
         for _, e in ipairs(StealStats.StolenEggs) do
             local r = tostring(e.rarity):lower()
-            if r:find("legendary") or r:find("mythic") or r:find("divine")
-                or r:find("secret") or r:find("ethereal") then
-                rareCount = rareCount + 1
-            end
+            if r:find("legendary") or r:find("mythic") or r:find("divine") or r:find("secret") or r:find("ethereal") then rareCount = rareCount + 1 end
         end
         rareVal.Text = tostring(rareCount)
         local perHour = total / math.max(activeTime / 3600, 0.01)
@@ -4896,13 +4445,9 @@ local function buildEggExecutorGUI(screenGui)
             local e = eggs[i]
             local idx = count - i + 1
             local row = Instance.new("Frame")
-            row.Size = UDim2.new(1, -8, 0, 42)
-            row.BackgroundColor3 = COLOR_GLASS
-            row.BackgroundTransparency = 0.4
-            row.BorderSizePixel = 0
-            row.LayoutOrder = idx
-            row.ZIndex = 11
-            local rc = Instance.new("UICorner"); rc.CornerRadius = UDim.new(0, 10); rc.Parent = row
+            row.Size = UDim2.new(1, -8, 0, 42); row.BackgroundColor3 = COLOR_GLASS; row.BackgroundTransparency = 0.4
+            row.BorderSizePixel = 0; row.LayoutOrder = idx; row.ZIndex = 11
+            local rc = Instance.new("UICorner"); rc.CornerRadius = UDim.new(0, 8); rc.Parent = row
 
             local rarityColor = COLOR_TEXT_DIM
             local rl = tostring(e.rarity):lower()
@@ -4916,135 +4461,66 @@ local function buildEggExecutorGUI(screenGui)
             elseif rl:find("secret") then rarityColor = COLOR_CYAN
             elseif rl:find("ethereal") then rarityColor = Color3.fromRGB(200, 255, 255) end
 
-            local stroke = Instance.new("UIStroke")
-            stroke.Color = rarityColor
-            stroke.Thickness = 1
-            stroke.Transparency = 0.5
-            stroke.Parent = row
+            local stroke = Instance.new("UIStroke"); stroke.Color = rarityColor; stroke.Thickness = 1; stroke.Transparency = 0.5; stroke.Parent = row
+            local numLbl = Instance.new("TextLabel"); numLbl.Size = UDim2.fromOffset(30, 42); numLbl.BackgroundTransparency = 1
+            numLbl.Text = "#" .. idx; numLbl.TextColor3 = rarityColor; numLbl.Font = Enum.Font.GothamBlack; numLbl.TextSize = 12; numLbl.ZIndex = 12; numLbl.Parent = row
 
-            local numLbl = Instance.new("TextLabel")
-            numLbl.Size = UDim2.fromOffset(30, 42)
-            numLbl.BackgroundTransparency = 1
-            numLbl.Text = "#" .. idx
-            numLbl.TextColor3 = rarityColor
-            numLbl.Font = Enum.Font.GothamBlack
-            numLbl.TextSize = 12
-            numLbl.ZIndex = 12
-            numLbl.Parent = row
+            local nameLbl = Instance.new("TextLabel"); nameLbl.Size = UDim2.new(0.6, -40, 0, 20); nameLbl.Position = UDim2.fromOffset(35, 4)
+            nameLbl.BackgroundTransparency = 1; nameLbl.Text = "🥚 " .. e.name; nameLbl.TextColor3 = rarityColor
+            nameLbl.Font = Enum.Font.GothamBold; nameLbl.TextSize = 13; nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+            nameLbl.TextTruncate = Enum.TextTruncate.AtEnd; nameLbl.ZIndex = 12; nameLbl.Parent = row
 
-            local nameLbl = Instance.new("TextLabel")
-            nameLbl.Size = UDim2.new(0.6, -40, 0, 20)
-            nameLbl.Position = UDim2.fromOffset(35, 4)
-            nameLbl.BackgroundTransparency = 1
-            nameLbl.Text = "🥚 " .. e.name
-            nameLbl.TextColor3 = rarityColor
-            nameLbl.Font = Enum.Font.GothamBold
-            nameLbl.TextSize = 13
-            nameLbl.TextXAlignment = Enum.TextXAlignment.Left
-            nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
-            nameLbl.ZIndex = 12
-            nameLbl.Parent = row
+            local infoLbl = Instance.new("TextLabel"); infoLbl.Size = UDim2.new(0.6, -40, 0, 14); infoLbl.Position = UDim2.fromOffset(35, 24)
+            infoLbl.BackgroundTransparency = 1; infoLbl.Text = e.rarity .. " · " .. e.weight; infoLbl.TextColor3 = Color3.fromRGB(150, 150, 180)
+            infoLbl.Font = Enum.Font.GothamMedium; infoLbl.TextSize = 10; infoLbl.TextXAlignment = Enum.TextXAlignment.Left; infoLbl.ZIndex = 12; infoLbl.Parent = row
 
-            local infoLbl = Instance.new("TextLabel")
-            infoLbl.Size = UDim2.new(0.6, -40, 0, 14)
-            infoLbl.Position = UDim2.fromOffset(35, 24)
-            infoLbl.BackgroundTransparency = 1
-            infoLbl.Text = e.rarity .. " · " .. e.weight
-            infoLbl.TextColor3 = Color3.fromRGB(150, 150, 180)
-            infoLbl.Font = Enum.Font.GothamMedium
-            infoLbl.TextSize = 10
-            infoLbl.TextXAlignment = Enum.TextXAlignment.Left
-            infoLbl.ZIndex = 12
-            infoLbl.Parent = row
-
-            local timeLbl = Instance.new("TextLabel")
-            timeLbl.Size = UDim2.fromOffset(80, 42)
-            timeLbl.Position = UDim2.new(1, -90, 0, 0)
-            timeLbl.BackgroundTransparency = 1
-            timeLbl.Text = os.date("%H:%M:%S", e.time)
-            timeLbl.TextColor3 = Color3.fromRGB(120, 120, 150)
-            timeLbl.Font = Enum.Font.GothamMedium
-            timeLbl.TextSize = 10
-            timeLbl.TextXAlignment = Enum.TextXAlignment.Right
-            timeLbl.ZIndex = 12
-            timeLbl.Parent = row
+            local timeLbl = Instance.new("TextLabel"); timeLbl.Size = UDim2.fromOffset(80, 42); timeLbl.Position = UDim2.new(1, -90, 0, 0)
+            timeLbl.BackgroundTransparency = 1; timeLbl.Text = os.date("%H:%M:%S", e.time); timeLbl.TextColor3 = Color3.fromRGB(120, 120, 150)
+            timeLbl.Font = Enum.Font.GothamMedium; timeLbl.TextSize = 10; timeLbl.TextXAlignment = Enum.TextXAlignment.Right; timeLbl.ZIndex = 12; timeLbl.Parent = row
 
             row.Parent = eggScroll
         end
-        task.defer(function()
-            if eggScroll then
-                eggScroll.CanvasSize = UDim2.new(0, 0, 0, eggListLayout.AbsoluteContentSize.Y + 10)
-            end
-        end)
+        task.defer(function() if eggScroll then eggScroll.CanvasSize = UDim2.new(0, 0, 0, eggListLayout.AbsoluteContentSize.Y + 10) end end)
         if count == 0 then
-            local emptyLbl = Instance.new("TextLabel")
-            emptyLbl.Size = UDim2.new(1, 0, 0, 40)
-            emptyLbl.BackgroundTransparency = 1
-            emptyLbl.Text = "📭 Belum ada egg.\nAktifkan fitur steal!"
-            emptyLbl.TextColor3 = COLOR_TEXT_DIM
-            emptyLbl.Font = Enum.Font.GothamMedium
-            emptyLbl.TextSize = 13
-            emptyLbl.ZIndex = 11
-            emptyLbl.Parent = eggScroll
+            local emptyLbl = Instance.new("TextLabel"); emptyLbl.Size = UDim2.new(1, 0, 0, 40); emptyLbl.BackgroundTransparency = 1
+            emptyLbl.Text = "📭 Belum ada egg.\nAktifkan fitur steal!"; emptyLbl.TextColor3 = COLOR_TEXT_DIM
+            emptyLbl.Font = Enum.Font.GothamMedium; emptyLbl.TextSize = 13; emptyLbl.ZIndex = 11; emptyLbl.Parent = eggScroll
         end
     end
 
-    -- ═══════════════════════════════════════════════════════════
-    -- OPEN / CLOSE / DRAG / UPDATE
-    -- ═══════════════════════════════════════════════════════════
+    -- ═══ OPEN/CLOSE, DRAG, UPDATE LOOP ═══
     local function openWindow()
-        EggState.WindowVisible = true
-        win.Visible = true
+        EggState.WindowVisible = true; win.Visible = true
         win.Position = UDim2.new(WIN_X, 0, WIN_Y, 150)
-        TweenService:Create(win, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Position = UDim2.new(WIN_X, 0, WIN_Y, 0),
-        }):Play()
+        TweenService:Create(win, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(WIN_X, 0, WIN_Y, 0)}):Play()
     end
 
     local function closeWindow()
         EggState.WindowVisible = false
-        TweenService:Create(win, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
-            Position = UDim2.new(WIN_X, 0, WIN_Y, 150),
-        }):Play()
-        task.delay(0.3, function()
-            if not EggState.WindowVisible then win.Visible = false end
-        end)
+        TweenService:Create(win, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Position = UDim2.new(WIN_X, 0, WIN_Y, 150)}):Play()
+        task.delay(0.3, function() if not EggState.WindowVisible then win.Visible = false end end)
     end
 
     winClose.MouseButton1Click:Connect(closeWindow)
-    mini.MouseButton1Click:Connect(function()
-        if EggState.WindowVisible then closeWindow() else openWindow() end
-    end)
+    mini.MouseButton1Click:Connect(function() if EggState.WindowVisible then closeWindow() else openWindow() end end)
 
-    -- Drag window
     local dragging = false
     local dragStart, startPos
     winHeader.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1
-            or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = win.Position
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true; dragStart = input.Position; startPos = win.Position
         end
     end)
     UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
-            or input.UserInputType == Enum.UserInputType.Touch) then
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - dragStart
-            win.Position = UDim2.new(
-                startPos.X.Scale, startPos.X.Offset + delta.X,
-                startPos.Y.Scale, startPos.Y.Offset + delta.Y
-            )
+            win.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
     UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1
-            or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
     end)
 
-    -- Update loops
     task.spawn(function()
         while win.Parent do
             task.wait(1)
@@ -5055,9 +4531,7 @@ local function buildEggExecutorGUI(screenGui)
     task.spawn(function()
         while eggScroll.Parent do
             task.wait(1.5)
-            if EggState.ActiveTab == "eggs" and EggState.WindowVisible then
-                pcall(updateEggList)
-            end
+            if EggState.ActiveTab == "eggs" and EggState.WindowVisible then pcall(updateEggList) end
         end
     end)
 
