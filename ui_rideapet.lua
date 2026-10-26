@@ -3713,7 +3713,7 @@ local function buildEggExecutorGUI(screenGui)
     local wStroke = Instance.new("UIStroke"); wStroke.Color = COLOR_CYAN; wStroke.Thickness = 2; wStroke.Transparency = 0.3; wStroke.Parent = win
 
     -- ═══════════════════════════════════════════════════════════
-    -- 🌌 GALAXY BACKGROUND (Premium 3D Parallax)
+    -- 🌌 GALAXY BACKGROUND + METEOR COLLISION SYSTEM
     -- ═══════════════════════════════════════════════════════════
     local bgFrame = Instance.new("Frame")
     bgFrame.Size = UDim2.fromScale(1, 1)
@@ -3734,6 +3734,7 @@ local function buildEggExecutorGUI(screenGui)
     })
     bgGrad.Parent = bgFrame
 
+    -- Nebula Clouds
     for i = 1, 3 do
         local nebula = Instance.new("Frame")
         nebula.Size = UDim2.fromScale(1.5, 1.5)
@@ -3749,6 +3750,7 @@ local function buildEggExecutorGUI(screenGui)
         nGrad.Parent = nebula
     end
 
+    -- Planet
     local planet = Instance.new("Frame")
     planet.Size = UDim2.fromOffset(180, 180)
     planet.Position = UDim2.fromOffset(-40, WIN_H - 100)
@@ -3771,7 +3773,7 @@ local function buildEggExecutorGUI(screenGui)
     })
     pGrad.Parent = planet
 
-    -- ⭐ UPGRADED STARFIELD (Lebih gacor, kelap-kelip smooth, warna warni)
+    -- ⭐ STARFIELD (Kelap-kelip Smooth)
     local starLayer = Instance.new("Frame")
     starLayer.Size = UDim2.fromScale(1, 1); starLayer.BackgroundTransparency = 1; starLayer.ZIndex = 3; starLayer.Parent = bgFrame
 
@@ -3780,8 +3782,7 @@ local function buildEggExecutorGUI(screenGui)
         Color3.fromRGB(255, 220, 180), Color3.fromRGB(200, 180, 255), Color3.fromRGB(255, 180, 220)
     }
     local stars = {}
-    -- Tambah jadi 160 bintang
-    for i = 1, 160 do
+    for i = 1, 100 do
         local star = Instance.new("Frame")
         local sz = math.random(1, 3)
         star.Size = UDim2.fromOffset(sz, sz)
@@ -3791,7 +3792,6 @@ local function buildEggExecutorGUI(screenGui)
         star.BorderSizePixel = 0; star.ZIndex = 4; star.Parent = starLayer
         local sCorner = Instance.new("UICorner"); sCorner.CornerRadius = UDim.new(1, 0); sCorner.Parent = star
         
-        -- Glow halo
         local glow = Instance.new("Frame")
         glow.AnchorPoint = Vector2.new(0.5, 0.5); glow.Position = UDim2.fromScale(0.5, 0.5)
         glow.Size = UDim2.new(3, 0, 3, 0); glow.BackgroundColor3 = star.BackgroundColor3
@@ -3814,15 +3814,212 @@ local function buildEggExecutorGUI(screenGui)
             local t = tick()
             for _, s in ipairs(stars) do
                 if s.frame.Parent then
-                    -- Animasi twinkle smooth pakai Sine
                     local twinkle = math.sin(t * s.speed + s.offset)
                     s.frame.BackgroundTransparency = math.clamp(s.baseTrans + twinkle * 0.4, 0, 1)
                     s.glow.BackgroundTransparency = math.clamp(s.baseGlowTrans + twinkle * 0.1, 0, 1)
-                    
-                    -- Sedikit pergerakan rotasi biar hidup
-                    s.frame.Rotation = s.frame.Rotation + 0.5
                 end
             end
+        end
+    end)
+
+    -- ═══════════════════════════════════════════════════════════
+    -- ☄️ METEOR SYSTEM (3 METEOR, TABRAKAN, MELEDAK)
+    -- ═══════════════════════════════════════════════════════════
+    local meteorLayer = Instance.new("Frame")
+    meteorLayer.Size = UDim2.fromScale(1, 1)
+    meteorLayer.BackgroundTransparency = 1
+    meteorLayer.ZIndex = 20
+    meteorLayer.ClipsDescendants = true
+    meteorLayer.Parent = win
+
+    local activeMeteors = {}
+    local MAX_METEORS = 3
+    local SPAWN_INTERVAL = 10 -- Spawn tiap 10 detik
+
+    local function spawnMeteor()
+        if #activeMeteors >= MAX_METEORS then return end
+
+        local startX = math.random(10, 90)
+        local startY = -10
+        local targetX = math.random(10, 90)
+        local targetY = math.random(20, 80)
+        local speed = math.random(6, 12)
+        
+        local meteorColor = Color3.fromRGB(255, math.random(100, 200), math.random(0, 100))
+        
+        -- Meteor Head (Core)
+        local meteor = Instance.new("Frame")
+        meteor.Name = "Meteor"
+        meteor.AnchorPoint = Vector2.new(0.5, 0.5)
+        meteor.Size = UDim2.fromOffset(8, 8)
+        meteor.Position = UDim2.fromScale(startX/100, startY/100)
+        meteor.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        meteor.BorderSizePixel = 0
+        meteor.ZIndex = 25
+        meteor.Parent = meteorLayer
+        
+        local mc = Instance.new("UICorner"); mc.CornerRadius = UDim.new(1, 0); mc.Parent = meteor
+
+        -- Glow
+        local glow = Instance.new("Frame")
+        glow.AnchorPoint = Vector2.new(0.5, 0.5)
+        glow.Position = UDim2.fromScale(0.5, 0.5)
+        glow.Size = UDim2.new(3, 0, 3, 0)
+        glow.BackgroundColor3 = meteorColor
+        glow.BackgroundTransparency = 0.5
+        glow.BorderSizePixel = 0
+        glow.ZIndex = 24
+        glow.Parent = meteor
+        local gc = Instance.new("UICorner"); gc.CornerRadius = UDim.new(1, 0); gc.Parent = glow
+
+        -- Trail
+        local trail = Instance.new("Frame")
+        trail.AnchorPoint = Vector2.new(0.5, 1)
+        trail.Position = UDim2.new(0.5, 0, 0.5, 0)
+        trail.Size = UDim2.fromOffset(4, 40)
+        trail.BackgroundColor3 = meteorColor
+        trail.BackgroundTransparency = 0.2
+        trail.BorderSizePixel = 0
+        trail.ZIndex = 23
+        trail.Parent = meteor
+        local tc = Instance.new("UICorner"); tc.CornerRadius = UDim.new(1, 0); tc.Parent = trail
+        
+        local tGrad = Instance.new("UIGradient")
+        tGrad.Rotation = 90
+        tGrad.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(1, 0)})
+        tGrad.Parent = trail
+
+        -- Sparks
+        for i = 1, 3 do
+            local spark = Instance.new("Frame")
+            spark.AnchorPoint = Vector2.new(0.5, 0.5)
+            spark.Size = UDim2.fromOffset(math.random(2, 4), math.random(2, 4))
+            spark.BackgroundColor3 = meteorColor
+            spark.BackgroundTransparency = 0.3
+            spark.BorderSizePixel = 0
+            spark.ZIndex = 22
+            spark.Parent = meteorLayer
+            local sc = Instance.new("UICorner"); sc.CornerRadius = UDim.new(1, 0); sc.Parent = spark
+            task.delay(math.random(1, 2), function() if spark then spark:Destroy() end end)
+        end
+
+        local meteorData = {
+            frame = meteor,
+            glow = glow,
+            trail = trail,
+            startPos = Vector2.new(startX, startY),
+            targetPos = Vector2.new(targetX, targetY),
+            progress = 0,
+            speed = speed,
+            color = meteorColor,
+            exploded = false,
+        }
+        table.insert(activeMeteors, meteorData)
+
+        -- Animasi Jatuh (Pakai RenderStepped)
+        task.spawn(function()
+            while meteor.Parent and not meteorData.exploded do
+                task.wait(0.03)
+                meteorData.progress = meteorData.progress + (0.03 * meteorData.speed)
+                if meteorData.progress >= 1 then
+                    meteorData.progress = 1
+                end
+                local p = meteorData.progress
+                local currentX = meteorData.startPos.X + (meteorData.targetPos.X - meteorData.startPos.X) * p
+                local currentY = meteorData.startPos.Y + (meteorData.targetPos.Y - meteorData.startPos.Y) * p
+                meteor.Position = UDim2.fromScale(currentX/100, currentY/100)
+                
+                if meteorData.progress >= 1 and not meteorData.exploded then
+                    meteorData.exploded = true
+                    -- 🔥 LEDAKAN (EXPLOSION EFFECT)
+                    local explosionCenter = meteor.Position
+                    
+                    -- Flash putih
+                    local flash = Instance.new("Frame")
+                    flash.AnchorPoint = Vector2.new(0.5, 0.5)
+                    flash.Position = explosionCenter
+                    flash.Size = UDim2.fromOffset(4, 4)
+                    flash.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                    flash.BorderSizePixel = 0
+                    flash.ZIndex = 30
+                    flash.Parent = meteorLayer
+                    local fc = Instance.new("UICorner"); fc.CornerRadius = UDim.new(1, 0); fc.Parent = flash
+                    
+                    TweenService:Create(flash, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                        Size = UDim2.fromOffset(80, 80),
+                        BackgroundTransparency = 1,
+                    }):Play()
+                    task.delay(0.35, function() if flash then flash:Destroy() end end)
+
+                    -- Shockwave Ring
+                    local ring = Instance.new("Frame")
+                    ring.AnchorPoint = Vector2.new(0.5, 0.5)
+                    ring.Position = explosionCenter
+                    ring.Size = UDim2.fromOffset(10, 10)
+                    ring.BackgroundTransparency = 1
+                    ring.BorderSizePixel = 0
+                    ring.ZIndex = 29
+                    ring.Parent = meteorLayer
+                    local rc = Instance.new("UICorner"); rc.CornerRadius = UDim.new(1, 0); rc.Parent = ring
+                    local rs = Instance.new("UIStroke"); rs.Color = meteorColor; rs.Thickness = 3; rs.Transparency = 0; rs.Parent = ring
+                    
+                    TweenService:Create(ring, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                        Size = UDim2.fromOffset(120, 120),
+                    }):Play()
+                    TweenService:Create(rs, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                        Transparency = 1,
+                        Thickness = 0,
+                    }):Play()
+                    task.delay(0.55, function() if ring then ring:Destroy() end end)
+
+                    -- Partikel ledakan
+                    for i = 1, 12 do
+                        local particle = Instance.new("Frame")
+                        particle.AnchorPoint = Vector2.new(0.5, 0.5)
+                        particle.Position = explosionCenter
+                        particle.Size = UDim2.fromOffset(math.random(3, 6), math.random(3, 6))
+                        particle.BackgroundColor3 = meteorColor
+                        particle.BorderSizePixel = 0
+                        particle.ZIndex = 28
+                        particle.Parent = meteorLayer
+                        local pc = Instance.new("UICorner"); pc.CornerRadius = UDim.new(1, 0); pc.Parent = particle
+                        
+                        local angle = math.random(0, 360)
+                        local distance = math.random(30, 80)
+                        local targetX = explosionCenter.X.Offset + math.cos(math.rad(angle)) * distance
+                        local targetY = explosionCenter.Y.Offset + math.sin(math.rad(angle)) * distance
+                        
+                        TweenService:Create(particle, TweenInfo.new(math.random(4, 8)/10, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                            Position = UDim2.fromOffset(targetX, targetY),
+                            Size = UDim2.fromOffset(1, 1),
+                            BackgroundTransparency = 1,
+                        }):Play()
+                        task.delay(0.8, function() if particle then particle:Destroy() end end)
+                    end
+
+                    -- Hapus meteor
+                    if meteor then meteor:Destroy() end
+                    
+                    -- Hapus dari list
+                    for i, m in ipairs(activeMeteors) do
+                        if m == meteorData then
+                            table.remove(activeMeteors, i)
+                            break
+                        end
+                    end
+                end
+            end
+        end)
+    end
+
+    -- Spawn 3 meteor tiap 10 detik
+    task.spawn(function()
+        task.wait(2)
+        while win.Parent do
+            if win.Visible and #activeMeteors < MAX_METEORS then
+                spawnMeteor()
+            end
+            task.wait(SPAWN_INTERVAL)
         end
     end)
 
@@ -4008,7 +4205,7 @@ local function buildEggExecutorGUI(screenGui)
     local eggListLayout = Instance.new("UIListLayout")
     eggListLayout.SortOrder = Enum.SortOrder.LayoutOrder; eggListLayout.Padding = UDim.new(0, 8); eggListLayout.Parent = eggScroll
 
-    -- ═══ TAB: AVATAR ═══
+    -- ═══ TAB: AVATAR (SUPER SMOOTH) ═══
     local avatarTab = Instance.new("Frame")
     avatarTab.Size = UDim2.fromScale(1, 1); avatarTab.BackgroundTransparency = 1; avatarTab.Visible = false; avatarTab.ZIndex = 9; avatarTab.Parent = content
 
@@ -4029,17 +4226,18 @@ local function buildEggExecutorGUI(screenGui)
     avPlaceholder.Text = "👤 Loading avatar..."; avPlaceholder.TextColor3 = COLOR_CYAN
     avPlaceholder.Font = Enum.Font.GothamBold; avPlaceholder.TextSize = 16; avPlaceholder.ZIndex = 11; avPlaceholder.Parent = viewportFrame
 
-    -- ⭐ AVATAR SMOOTH ROTATION & ZOOM
+    -- ⭐ SUPER SMOOTH AVATAR ROTATION
     local avatarClone = nil
     local isDraggingAv = false
     local dragStartX, dragStartY = 0, 0
     
-    -- ⭐ INI KUNCI SMOOTHNYA: Target vs Current
+    -- ⭐ TARGET vs CURRENT (Smooth Lerp)
     local targetRotX, targetRotY = 0, 0
     local currentRotX, currentRotY = 0, 0
     
     local currentZoom = -8.5
     local autoRotate = true
+    local lastAutoRotateTime = tick()
 
     task.spawn(function()
         local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -4071,7 +4269,6 @@ local function buildEggExecutorGUI(screenGui)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 isDraggingAv = true
                 dragStartX, dragStartY = input.Position.X, input.Position.Y
-                -- Simpan posisi target saat ini buat start drag
                 targetRotX = currentRotX
                 targetRotY = currentRotY
                 autoRotate = false
@@ -4094,16 +4291,17 @@ local function buildEggExecutorGUI(screenGui)
             end
         end)
 
-        -- ⭐ ANIMASI LOOP (SMOOTH LERP)
+        -- ⭐ SUPER SMOOTH LERP LOOP
         RunService.RenderStepped:Connect(function(dt)
             if not viewportFrame.Parent or not clone.Parent then return end
             if not avatarTab.Visible then return end
             
+            -- Auto Rotate Smooth
             if autoRotate and not isDraggingAv then
-                targetRotY = targetRotY + 30 * dt -- Auto rotate smooth per detik
+                targetRotY = targetRotY + 30 * dt
             end
 
-            -- LERP (Interpolasi) target ke current
+            -- Super Smooth Lerp (Biar gak patah-patah)
             local lerpSpeed = 15 * dt
             currentRotX = currentRotX + (targetRotX - currentRotX) * lerpSpeed
             currentRotY = currentRotY + (targetRotY - currentRotY) * lerpSpeed
