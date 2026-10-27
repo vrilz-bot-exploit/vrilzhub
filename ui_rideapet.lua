@@ -8110,9 +8110,8 @@ end, "WebhookMentionEveryone")
                                 inline = true,
                             },
                         },
-                        footer = {
-                            text = "🏆 VRILZHUB PLATINUM  •  v2.5
-                                            ",
+                                footer = {
+                        text = "🏆 VRILZHUB PLATINUM  •  v2.5",
                         },
                         timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
                     }}
