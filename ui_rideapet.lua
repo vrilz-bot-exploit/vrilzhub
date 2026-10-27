@@ -8264,6 +8264,7 @@ end, "WebhookMentionEveryone")
             descLbl.Parent = row
         end
     end
+end
 
 -- TAB SETTINGS
 do
