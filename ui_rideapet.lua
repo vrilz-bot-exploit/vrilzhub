@@ -9298,6 +9298,7 @@ end, "AntiAFK_Enabled")
                 end
             end
         end)
+    end
 end
 
         -- ===== EVENT TAB =====
