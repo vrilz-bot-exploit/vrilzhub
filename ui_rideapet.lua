@@ -8271,585 +8271,825 @@ do
     local setPage, setLeft, setRight, setHeader = createTwoColumnPage("Settings")
     pages.Settings = setPage
 
-    -- ═══════════════════════════════════════════════════════════
-    -- 💾 CONFIG MANAGER — PALING ATAS, FULL WIDTH
-    -- ═══════════════════════════════════════════════════════════
-    local configCard, configContent = makeCard(setHeader, "💾 CONFIG MANAGER", 1)
+-- ═══════════════════════════════════════════════════════════
+-- 💾 CONFIG MANAGER — GLOW NEON EDITION v2
+-- ═══════════════════════════════════════════════════════════
+local configCard, configContent = makeCard(setHeader, "💾 CONFIG MANAGER", 1)
 
-    local configDesc = Instance.new("TextLabel")
-    configDesc.Size = UDim2.new(1, 0, 0, 30)
-    configDesc.BackgroundTransparency = 1
-    configDesc.Text = "💡 Auto-save aktif — config tersimpan otomatis saat kamu ganti setting."
-    configDesc.TextColor3 = C.Muted
-    configDesc.Font = Enum.Font.GothamSemibold
-    configDesc.TextSize = CFG.FONT_MUTED
-    configDesc.TextWrapped = true
-    configDesc.TextXAlignment = Enum.TextXAlignment.Left
-    configDesc.TextYAlignment = Enum.TextYAlignment.Top
-    configDesc.ZIndex = 3
-    configDesc.Parent = configContent
-    registerTheme(configDesc, "Muted", "TextColor3")
+-- ⭐ NEON COLORS
+local NEON_CYAN    = Color3.fromRGB(0, 255, 255)
+local NEON_PURPLE  = Color3.fromRGB(180, 80, 255)
+local NEON_GREEN   = Color3.fromRGB(0, 255, 140)
+local NEON_PINK    = Color3.fromRGB(255, 80, 180)
+local NEON_ORANGE  = Color3.fromRGB(255, 160, 50)
+local NEON_RED     = Color3.fromRGB(255, 70, 90)
 
-    local function getConfigAPI()
-        return _G.VRILZ_Config
+-- ═══ HERO STATUS PANEL (GLOWING) ═══
+local heroPanel = Instance.new("Frame")
+heroPanel.Size = UDim2.new(1, 0, 0, 64)
+heroPanel.BackgroundColor3 = Color3.fromRGB(8, 10, 18)
+heroPanel.BorderSizePixel = 0
+heroPanel.LayoutOrder = 1
+heroPanel.ClipsDescendants = true
+heroPanel.ZIndex = 3
+heroPanel.Parent = configContent
+
+local heroCorner = Instance.new("UICorner")
+heroCorner.CornerRadius = UDim.new(0, 12)
+heroCorner.Parent = heroPanel
+
+-- Deep gradient
+local heroGrad = Instance.new("UIGradient")
+heroGrad.Rotation = 135
+heroGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 25, 45)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(10, 15, 30)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 8, 18)),
+})
+heroGrad.Parent = heroPanel
+
+-- Outer glow stroke (neon cyan)
+local heroGlowStroke = Instance.new("UIStroke")
+heroGlowStroke.Color = NEON_CYAN
+heroGlowStroke.Thickness = 2
+heroGlowStroke.Transparency = 0.2
+heroGlowStroke.Parent = heroPanel
+
+-- Inner glow stroke
+local heroInnerStroke = Instance.new("UIStroke")
+heroInnerStroke.Color = Color3.fromRGB(255, 255, 255)
+heroInnerStroke.Thickness = 0.8
+heroInnerStroke.Transparency = 0.85
+heroInnerStroke.Parent = heroPanel
+
+-- Shine sweep
+local heroShine = Instance.new("Frame")
+heroShine.Size = UDim2.new(0, 80, 2, 0)
+heroShine.Position = UDim2.new(-0.3, 0, -0.5, 0)
+heroShine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+heroShine.BackgroundTransparency = 0.85
+heroShine.BorderSizePixel = 0
+heroShine.Rotation = 25
+heroShine.ZIndex = 4
+heroShine.Parent = heroPanel
+
+task.spawn(function()
+    while heroShine.Parent do
+        task.wait(3)
+        if not heroShine.Parent then break end
+        heroShine.Position = UDim2.new(-0.3, 0, -0.5, 0)
+        TweenService:Create(heroShine, TweenInfo.new(1.2, Enum.EasingStyle.Quad), {
+            Position = UDim2.new(1.5, 0, 1.5, 0)
+        }):Play()
+        task.wait(1.3)
     end
+end)
 
-    local CONFIG_EXPORT_FILE = "vrilz_share_config.txt"
+-- Status dot (pulsing)
+local statusDot = Instance.new("Frame")
+statusDot.Size = UDim2.fromOffset(10, 10)
+statusDot.Position = UDim2.new(0, 14, 0.5, -5)
+statusDot.BackgroundColor3 = NEON_RED
+statusDot.BorderSizePixel = 0
+statusDot.ZIndex = 5
+statusDot.Parent = heroPanel
 
-    -- ═══ POPUP HELPER ═══
-    local function showModalPopup(titleText, contentBuilder, onClose)
-        local popupGui = Instance.new("ScreenGui")
-        popupGui.Name = "VRILZ_ConfigPopup"
-        popupGui.ResetOnSpawn = false
-        popupGui.DisplayOrder = 9000
-        popupGui.Parent = game:GetService("CoreGui")
+local statusDotCorner = Instance.new("UICorner")
+statusDotCorner.CornerRadius = UDim.new(1, 0)
+statusDotCorner.Parent = statusDot
 
-        local popupBg = Instance.new("Frame")
-        popupBg.Size = UDim2.fromScale(1, 1)
-        popupBg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        popupBg.BackgroundTransparency = 0.5
-        popupBg.BorderSizePixel = 0
-        popupBg.Parent = popupGui
+-- Status dot glow
+local dotGlow = Instance.new("Frame")
+dotGlow.Size = UDim2.fromOffset(20, 20)
+dotGlow.Position = UDim2.new(0, 14, 0.5, -10)
+dotGlow.BackgroundColor3 = NEON_RED
+dotGlow.BackgroundTransparency = 0.6
+dotGlow.BorderSizePixel = 0
+dotGlow.ZIndex = 4
+dotGlow.Parent = heroPanel
 
-        local popup = Instance.new("Frame")
-        popup.Size = UDim2.fromOffset(IS_MOBILE and 300 or 420, IS_MOBILE and 220 or 240)
-        popup.Position = UDim2.fromScale(0.5, 0.5)
-        popup.AnchorPoint = Vector2.new(0.5, 0.5)
-        popup.BackgroundColor3 = C.Surface
-        popup.BorderSizePixel = 0
-        popup.Parent = popupBg
+local dotGlowCorner = Instance.new("UICorner")
+dotGlowCorner.CornerRadius = UDim.new(1, 0)
+dotGlowCorner.Parent = dotGlow
 
-        local pc = Instance.new("UICorner")
-        pc.CornerRadius = UDim.new(0, 12)
-        pc.Parent = popup
+-- Pulse animation
+task.spawn(function()
+    while dotGlow.Parent do
+        task.wait(0.8)
+        if not dotGlow.Parent then break end
+        TweenService:Create(dotGlow, TweenInfo.new(0.8, Enum.EasingStyle.Sine), {
+            Size = UDim2.fromOffset(28, 28),
+            Position = UDim2.new(0, 14, 0.5, -14),
+            BackgroundTransparency = 0.9,
+        }):Play()
+        task.wait(0.8)
+        TweenService:Create(dotGlow, TweenInfo.new(0.8, Enum.EasingStyle.Sine), {
+            Size = UDim2.fromOffset(20, 20),
+            Position = UDim2.new(0, 14, 0.5, -10),
+            BackgroundTransparency = 0.6,
+        }):Play()
+    end
+end)
 
-        local ps = Instance.new("UIStroke")
-        ps.Color = C.Accent
-        ps.Thickness = 2
-        ps.Transparency = 0.3
-        ps.Parent = popup
+-- Status text
+local heroStatusLabel = Instance.new("TextLabel")
+heroStatusLabel.Size = UDim2.new(1, -50, 0, 20)
+heroStatusLabel.Position = UDim2.fromOffset(36, 12)
+heroStatusLabel.BackgroundTransparency = 1
+heroStatusLabel.Text = "CONFIG SYSTEM READY"
+heroStatusLabel.TextColor3 = NEON_CYAN
+heroStatusLabel.Font = Enum.Font.GothamBlack
+heroStatusLabel.TextSize = CFG.FONT_LABEL
+heroStatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+heroStatusLabel.TextTruncate = Enum.TextTruncate.AtEnd
+heroStatusLabel.ZIndex = 5
+heroStatusLabel.Parent = heroPanel
 
-        local title = Instance.new("TextLabel")
-        title.Size = UDim2.new(1, -20, 0, 32)
-        title.Position = UDim2.fromOffset(10, 8)
-        title.BackgroundTransparency = 1
-        title.Text = titleText
-        title.TextColor3 = C.Text
-        title.Font = Enum.Font.GothamBold
-        title.TextSize = CFG.FONT_LABEL + 1
-        title.TextXAlignment = Enum.TextXAlignment.Left
-        title.Parent = popup
+-- Sub text
+local heroSubLabel = Instance.new("TextLabel")
+heroSubLabel.Size = UDim2.new(1, -50, 0, 14)
+heroSubLabel.Position = UDim2.fromOffset(36, 34)
+heroSubLabel.BackgroundTransparency = 1
+heroSubLabel.Text = "◆ Auto-save aktif ◆ Powered by VRILZHUB"
+heroSubLabel.TextColor3 = Color3.fromRGB(120, 140, 165)
+heroSubLabel.Font = Enum.Font.GothamSemibold
+heroSubLabel.TextSize = CFG.FONT_MUTED
+heroSubLabel.TextXAlignment = Enum.TextXAlignment.Left
+heroSubLabel.TextTruncate = Enum.TextTruncate.End
+heroSubLabel.ZIndex = 5
+heroSubLabel.Parent = heroPanel
 
-        local closeX = Instance.new("TextButton")
-        closeX.Size = UDim2.fromOffset(28, 28)
-        closeX.Position = UDim2.new(1, -36, 0, 10)
-        closeX.BackgroundColor3 = C.Surface3
-        closeX.Text = "✕"
-        closeX.TextColor3 = C.Text
-        closeX.Font = Enum.Font.GothamBold
-        closeX.TextSize = 16
-        closeX.BorderSizePixel = 0
-        closeX.Parent = popup
+-- ═══ HELPER: NEON BUTTON ═══
+local function makeNeonBtn(parent, text, icon, color, layoutOrder)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.49, 0, 0, 38)
+    btn.Position = (layoutOrder == 1) and UDim2.new(0, 0, 0, 0) or UDim2.new(0.51, 0, 0, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(12, 16, 25)
+    btn.Text = ""
+    btn.AutoButtonColor = false
+    btn.BorderSizePixel = 0
+    btn.ZIndex = 4
+    btn.Parent = parent
 
-        local cxCorner = Instance.new("UICorner")
-        cxCorner.CornerRadius = UDim.new(1, 0)
-        cxCorner.Parent = closeX
+    local bc = Instance.new("UICorner")
+    bc.CornerRadius = UDim.new(0, 8)
+    bc.Parent = btn
 
-        local contentArea = Instance.new("Frame")
-        contentArea.Size = UDim2.new(1, -20, 1, -55)
-        contentArea.Position = UDim2.fromOffset(10, 45)
-        contentArea.BackgroundTransparency = 1
-        contentArea.Parent = popup
+    -- Gradient background
+    local bg = Instance.new("UIGradient")
+    bg.Rotation = 135
+    bg.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 26, 38)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 13, 22)),
+    })
+    bg.Parent = btn
 
-        local contentLayout = Instance.new("UIListLayout")
-        contentLayout.Padding = UDim.new(0, 6)
-        contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        contentLayout.Parent = contentArea
+    -- Neon stroke
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = color
+    stroke.Thickness = 1.5
+    stroke.Transparency = 0.2
+    stroke.Parent = btn
 
-        local function close()
-            if onClose then pcall(onClose) end
-            popupGui:Destroy()
+    -- Icon
+    local iconLbl = Instance.new("TextLabel")
+    iconLbl.Size = UDim2.fromOffset(20, 20)
+    iconLbl.Position = UDim2.new(0, 10, 0.5, -10)
+    iconLbl.BackgroundTransparency = 1
+    iconLbl.Text = icon
+    iconLbl.TextSize = 14
+    iconLbl.Font = Enum.Font.GothamBold
+    iconLbl.TextColor3 = color
+    iconLbl.ZIndex = 5
+    iconLbl.Parent = btn
+
+    -- Text
+    local txtLbl = Instance.new("TextLabel")
+    txtLbl.Size = UDim2.new(1, -36, 1, 0)
+    txtLbl.Position = UDim2.fromOffset(34, 0)
+    txtLbl.BackgroundTransparency = 1
+    txtLbl.Text = text
+    txtLbl.TextColor3 = Color3.fromRGB(230, 240, 255)
+    txtLbl.Font = Enum.Font.GothamBold
+    txtLbl.TextSize = CFG.FONT_LABEL
+    txtLbl.TextXAlignment = Enum.TextXAlignment.Left
+    txtLbl.ZIndex = 5
+    txtLbl.Parent = btn
+
+    -- Hover effect
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(stroke, TweenInfo.new(0.2), { Transparency = 0, Thickness = 2 }):Play()
+        TweenService:Create(btn, TweenInfo.new(0.2), { BackgroundColor3 = Color3.fromRGB(18, 24, 36) }):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(stroke, TweenInfo.new(0.2), { Transparency = 0.2, Thickness = 1.5 }):Play()
+        TweenService:Create(btn, TweenInfo.new(0.2), { BackgroundColor3 = Color3.fromRGB(12, 16, 25) }):Play()
+    end)
+
+    -- Click animation
+    btn.MouseButton1Down:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.08), {
+            Size = UDim2.new(0.47, 0, 0, 36),
+        }):Play()
+    end)
+    btn.MouseButton1Up:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15, Enum.EasingStyle.Back), {
+            Size = UDim2.new(0.49, 0, 0, 38),
+        }):Play()
+    end)
+
+    return btn
+end
+
+-- ═══ HELPER: STATUS UPDATE ═══
+local configStatusLbl = Instance.new("TextLabel")
+configStatusLbl.Size = UDim2.new(1, 0, 0, 14)
+configStatusLbl.BackgroundTransparency = 1
+configStatusLbl.Text = "● READY"
+configStatusLbl.TextColor3 = NEON_GREEN
+configStatusLbl.Font = Enum.Font.Code
+configStatusLbl.TextSize = CFG.FONT_MUTED
+configStatusLbl.TextXAlignment = Enum.TextXAlignment.Left
+configStatusLbl.LayoutOrder = 10
+configStatusLbl.ZIndex = 3
+configStatusLbl.Parent = configContent
+
+local function setConfigStatus(txt, isError)
+    configStatusLbl.Text = "● " .. txt
+    configStatusLbl.TextColor3 = isError and NEON_RED or NEON_GREEN
+    -- Flash animation
+    TweenService:Create(configStatusLbl, TweenInfo.new(0.15), { TextTransparency = 0.3 }):Play()
+    task.delay(0.2, function()
+        if configStatusLbl.Parent then
+            TweenService:Create(configStatusLbl, TweenInfo.new(0.3), { TextTransparency = 0 }):Play()
         end
-
-        closeX.MouseButton1Click:Connect(close)
-
-        popupBg.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1
-                or input.UserInputType == Enum.UserInputType.Touch then
-                local pos = input.Position
-                local popupPos = popup.AbsolutePosition
-                local popupSize = popup.AbsoluteSize
-                if pos.X < popupPos.X or pos.X > popupPos.X + popupSize.X
-                    or pos.Y < popupPos.Y or pos.Y > popupPos.Y + popupSize.Y then
-                    close()
-                end
-            end
-        end)
-
-        contentBuilder(contentArea, close)
-    end
-
-    -- ═══ HELPER: tombol modal option ═══
-    local function makeModalOption(parent, icon, label, desc, color, callback)
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, 0, 0, 48)
-        btn.BackgroundColor3 = C.Surface3
-        btn.Text = ""
-        btn.AutoButtonColor = false
-        btn.BorderSizePixel = 0
-        btn.LayoutOrder = 1
-        btn.Parent = parent
-
-        local bc = Instance.new("UICorner")
-        bc.CornerRadius = UDim.new(0, 8)
-        bc.Parent = btn
-
-        local bs = Instance.new("UIStroke")
-        bs.Color = color
-        bs.Thickness = 1
-        bs.Transparency = 0.5
-        bs.Parent = btn
-
-        local iconBox = Instance.new("Frame")
-        iconBox.Size = UDim2.fromOffset(34, 34)
-        iconBox.Position = UDim2.new(0, 8, 0.5, -17)
-        iconBox.BackgroundColor3 = color
-        iconBox.BackgroundTransparency = 0.8
-        iconBox.BorderSizePixel = 0
-        iconBox.Parent = btn
-
-        local ibc = Instance.new("UICorner")
-        ibc.CornerRadius = UDim.new(0, 8)
-        ibc.Parent = iconBox
-
-        local iconLbl = Instance.new("TextLabel")
-        iconLbl.Size = UDim2.fromScale(1, 1)
-        iconLbl.BackgroundTransparency = 1
-        iconLbl.Text = icon
-        iconLbl.TextSize = 16
-        iconLbl.Font = Enum.Font.GothamBold
-        iconLbl.Parent = iconBox
-
-        local lbl = Instance.new("TextLabel")
-        lbl.Size = UDim2.new(1, -60, 0, 16)
-        lbl.Position = UDim2.fromOffset(50, 8)
-        lbl.BackgroundTransparency = 1
-        lbl.Text = label
-        lbl.TextColor3 = C.Text
-        lbl.Font = Enum.Font.GothamBold
-        lbl.TextSize = CFG.FONT_LABEL
-        lbl.TextXAlignment = Enum.TextXAlignment.Left
-        lbl.Parent = btn
-
-        local dLbl = Instance.new("TextLabel")
-        dLbl.Size = UDim2.new(1, -60, 0, 14)
-        dLbl.Position = UDim2.fromOffset(50, 26)
-        dLbl.BackgroundTransparency = 1
-        dLbl.Text = desc
-        dLbl.TextColor3 = C.Muted
-        dLbl.Font = Enum.Font.GothamSemibold
-        dLbl.TextSize = CFG.FONT_MUTED
-        dLbl.TextXAlignment = Enum.TextXAlignment.Left
-        dLbl.Parent = btn
-
-        btn.MouseEnter:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = C.Surface2}):Play()
-            TweenService:Create(bs, TweenInfo.new(0.15), {Transparency = 0.2}):Play()
-        end)
-        btn.MouseLeave:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = C.Surface3}):Play()
-            TweenService:Create(bs, TweenInfo.new(0.15), {Transparency = 0.5}):Play()
-        end)
-
-        btn.MouseButton1Click:Connect(function()
-            btn.Active = false
-            if callback then callback() end
-        end)
-
-        return btn
-    end
-
-    -- ═══ HELPER: tombol vertikal full-width ═══
-    local function makeConfigBtn(labelText, color, textColor, layoutOrder)
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, 0, 0, 36)
-        btn.BackgroundColor3 = color
-        btn.Text = labelText
-        btn.TextColor3 = textColor or Color3.new(1, 1, 1)
-        btn.Font = Enum.Font.GothamBold
-        btn.TextSize = CFG.FONT_LABEL
-        btn.AutoButtonColor = false
-        btn.BorderSizePixel = 0
-        btn.LayoutOrder = layoutOrder
-        btn.ZIndex = 4
-        btn.Parent = configContent
-
-        local bc = Instance.new("UICorner")
-        bc.CornerRadius = UDim.new(0, 8)
-        bc.Parent = btn
-
-        local bs = Instance.new("UIStroke")
-        bs.Color = color
-        bs.Thickness = 1
-        bs.Transparency = 0.4
-        bs.Parent = btn
-
-        btn.MouseButton1Down:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(0.08), {
-                Size = UDim2.new(0.96, 0, 0, 34)
-            }):Play()
-        end)
-        btn.MouseButton1Up:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                Size = UDim2.new(1, 0, 0, 36)
-            }):Play()
-        end)
-
-        return btn
-    end
-
-    -- ═══ STATUS LABEL ═══
-    local configStatusLbl = Instance.new("TextLabel")
-    configStatusLbl.Size = UDim2.new(1, 0, 0, 16)
-    configStatusLbl.BackgroundTransparency = 1
-    configStatusLbl.Text = "Status: Ready"
-    configStatusLbl.TextColor3 = C.Muted
-    configStatusLbl.Font = Enum.Font.Code
-    configStatusLbl.TextSize = CFG.FONT_SMALL
-    configStatusLbl.TextXAlignment = Enum.TextXAlignment.Left
-    configStatusLbl.LayoutOrder = 10
-    configStatusLbl.ZIndex = 3
-    configStatusLbl.Parent = configContent
-    registerTheme(configStatusLbl, "Muted", "TextColor3")
-
-    local function setConfigStatus(txt, isError)
-        configStatusLbl.Text = "Status: " .. txt
-        configStatusLbl.TextColor3 = isError and C.Error or C.Success
-        task.delay(3, function()
-            if configStatusLbl.Parent then
-                configStatusLbl.Text = "Status: Ready"
-                configStatusLbl.TextColor3 = C.Muted
-            end
-        end)
-    end
-
-    -- ═══ SAVE ═══
-    local saveConfigBtn = makeConfigBtn("💾 SAVE CONFIG", C.Success, Color3.new(1, 1, 1), 2)
-
-    saveConfigBtn.MouseButton1Click:Connect(function()
-        local api = getConfigAPI()
-        if not api then
-            setConfigStatus("❌ Config system not loaded!", true)
-            notify("❌ Config system belum ready", "error")
-            return
+    end)
+    task.delay(3, function()
+        if configStatusLbl.Parent then
+            configStatusLbl.Text = "● READY"
+            configStatusLbl.TextColor3 = NEON_GREEN
         end
+    end)
+end
 
-        local ok = api.save(false)
-        if ok then
-            setConfigStatus("✅ Config saved!", false)
-        else
-            setConfigStatus("❌ Save failed", true)
+-- ═══ POPUP HELPER (dengan efek glow) ═══
+local function showModalPopup(titleText, contentBuilder, onClose)
+    local popupGui = Instance.new("ScreenGui")
+    popupGui.Name = "VRILZ_ConfigPopup"
+    popupGui.ResetOnSpawn = false
+    popupGui.DisplayOrder = 9000
+    popupGui.Parent = game:GetService("CoreGui")
+
+    local popupBg = Instance.new("Frame")
+    popupBg.Size = UDim2.fromScale(1, 1)
+    popupBg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    popupBg.BackgroundTransparency = 0.5
+    popupBg.BorderSizePixel = 0
+    popupBg.Parent = popupGui
+
+    local popup = Instance.new("Frame")
+    popup.Size = UDim2.fromOffset(IS_MOBILE and 300 or 420, IS_MOBILE and 220 or 240)
+    popup.Position = UDim2.fromScale(0.5, 0.5)
+    popup.AnchorPoint = Vector2.new(0.5, 0.5)
+    popup.BackgroundColor3 = Color3.fromRGB(10, 12, 20)
+    popup.BorderSizePixel = 0
+    popup.Parent = popupBg
+
+    -- Glow
+    local pc = Instance.new("UICorner")
+    pc.CornerRadius = UDim.new(0, 14)
+    pc.Parent = popup
+
+    local ps = Instance.new("UIStroke")
+    ps.Color = NEON_CYAN
+    ps.Thickness = 2
+    ps.Transparency = 0.1
+    ps.Parent = popup
+
+    -- Pop animation
+    popup.Size = UDim2.fromOffset(0, 0)
+    TweenService:Create(popup, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(IS_MOBILE and 300 or 420, IS_MOBILE and 220 or 240),
+    }):Play()
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, -20, 0, 32)
+    title.Position = UDim2.fromOffset(10, 8)
+    title.BackgroundTransparency = 1
+    title.Text = titleText
+    title.TextColor3 = NEON_CYAN
+    title.Font = Enum.Font.GothamBlack
+    title.TextSize = CFG.FONT_LABEL + 1
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = popup
+
+    local closeX = Instance.new("TextButton")
+    closeX.Size = UDim2.fromOffset(28, 28)
+    closeX.Position = UDim2.new(1, -36, 0, 10)
+    closeX.BackgroundColor3 = Color3.fromRGB(25, 30, 45)
+    closeX.Text = "✕"
+    closeX.TextColor3 = NEON_RED
+    closeX.Font = Enum.Font.GothamBold
+    closeX.TextSize = 16
+    closeX.BorderSizePixel = 0
+    closeX.Parent = popup
+
+    local cxCorner = Instance.new("UICorner")
+    cxCorner.CornerRadius = UDim.new(1, 0)
+    cxCorner.Parent = closeX
+
+    local cxStroke = Instance.new("UIStroke")
+    cxStroke.Color = NEON_RED
+    cxStroke.Thickness = 1
+    cxStroke.Transparency = 0.3
+    cxStroke.Parent = closeX
+
+    local contentArea = Instance.new("Frame")
+    contentArea.Size = UDim2.new(1, -20, 1, -55)
+    contentArea.Position = UDim2.fromOffset(10, 45)
+    contentArea.BackgroundTransparency = 1
+    contentArea.Parent = popup
+
+    local contentLayout = Instance.new("UIListLayout")
+    contentLayout.Padding = UDim.new(0, 6)
+    contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    contentLayout.Parent = contentArea
+
+    local function close()
+        if onClose then pcall(onClose) end
+        TweenService:Create(popup, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+            Size = UDim2.fromOffset(0, 0),
+        }):Play()
+        task.wait(0.2)
+        popupGui:Destroy()
+    end
+
+    closeX.MouseButton1Click:Connect(close)
+
+    popupBg.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch then
+            local pos = input.Position
+            local popupPos = popup.AbsolutePosition
+            local popupSize = popup.AbsoluteSize
+            if pos.X < popupPos.X or pos.X > popupPos.X + popupSize.X
+                or pos.Y < popupPos.Y or pos.Y > popupPos.Y + popupSize.Y then
+                close()
+            end
         end
     end)
 
-    -- ═══ LOAD ═══
-    local loadConfigBtn = makeConfigBtn("📂 LOAD CONFIG", C.Accent, Color3.new(1, 1, 1), 3)
+    contentBuilder(contentArea, close)
+end
 
-    loadConfigBtn.MouseButton1Click:Connect(function()
-        local api = getConfigAPI()
-        if not api then
-            setConfigStatus("❌ Config system not loaded!", true)
-            notify("❌ Config system belum ready", "error")
-            return
-        end
+-- ═══ HELPER: MODAL OPTION (glow) ═══
+local function makeModalOption(parent, icon, label, desc, color, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 48)
+    btn.BackgroundColor3 = Color3.fromRGB(15, 18, 28)
+    btn.Text = ""
+    btn.AutoButtonColor = false
+    btn.BorderSizePixel = 0
+    btn.LayoutOrder = 1
+    btn.Parent = parent
 
-        local ok = api.load(false)
-        if ok then
-            setConfigStatus("✅ Config loaded!", false)
-            if _G.VRILZ_RefreshAllUI then
-                pcall(_G.VRILZ_RefreshAllUI)
-            end
-        else
-            setConfigStatus("⚠️ No config file / corrupted", true)
-        end
+    local bc = Instance.new("UICorner")
+    bc.CornerRadius = UDim.new(0, 8)
+    bc.Parent = btn
+
+    local bs = Instance.new("UIStroke")
+    bs.Color = color
+    bs.Thickness = 1
+    bs.Transparency = 0.3
+    bs.Parent = btn
+
+    local iconBox = Instance.new("Frame")
+    iconBox.Size = UDim2.fromOffset(34, 34)
+    iconBox.Position = UDim2.new(0, 8, 0.5, -17)
+    iconBox.BackgroundColor3 = color
+    iconBox.BackgroundTransparency = 0.8
+    iconBox.BorderSizePixel = 0
+    iconBox.Parent = btn
+
+    local ibc = Instance.new("UICorner")
+    ibc.CornerRadius = UDim.new(0, 8)
+    ibc.Parent = iconBox
+
+    local ibs = Instance.new("UIStroke")
+    ibs.Color = color
+    ibs.Thickness = 1
+    ibs.Transparency = 0.2
+    ibs.Parent = iconBox
+
+    local iconLbl = Instance.new("TextLabel")
+    iconLbl.Size = UDim2.fromScale(1, 1)
+    iconLbl.BackgroundTransparency = 1
+    iconLbl.Text = icon
+    iconLbl.TextSize = 16
+    iconLbl.Font = Enum.Font.GothamBold
+    iconLbl.Parent = iconBox
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, -60, 0, 16)
+    lbl.Position = UDim2.fromOffset(50, 8)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = label
+    lbl.TextColor3 = Color3.fromRGB(230, 240, 255)
+    lbl.Font = Enum.Font.GothamBold
+    lbl.TextSize = CFG.FONT_LABEL
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = btn
+
+    local dLbl = Instance.new("TextLabel")
+    dLbl.Size = UDim2.new(1, -60, 0, 14)
+    dLbl.Position = UDim2.fromOffset(50, 26)
+    dLbl.BackgroundTransparency = 1
+    dLbl.Text = desc
+    dLbl.TextColor3 = Color3.fromRGB(130, 145, 165)
+    dLbl.Font = Enum.Font.GothamSemibold
+    dLbl.TextSize = CFG.FONT_MUTED
+    dLbl.TextXAlignment = Enum.TextXAlignment.Left
+    dLbl.Parent = btn
+
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(22, 28, 42) }):Play()
+        TweenService:Create(bs, TweenInfo.new(0.15), { Transparency = 0, Thickness = 1.5 }):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(15, 18, 28) }):Play()
+        TweenService:Create(bs, TweenInfo.new(0.15), { Transparency = 0.3, Thickness = 1 }):Play()
     end)
 
-    -- ═══ EXPORT ═══
-    local exportConfigBtn = makeConfigBtn("📤 EXPORT CONFIG", C.Accent2, Color3.new(1, 1, 1), 4)
-
-    exportConfigBtn.MouseButton1Click:Connect(function()
-        local api = getConfigAPI()
-        if not api or not api.export then
-            setConfigStatus("❌ Export not available", true)
-            notify("❌ Export belum ready", "error")
-            return
-        end
-
-        local code, err = api.export()
-        if not code then
-            setConfigStatus("❌ Export failed: " .. tostring(err), true)
-            notify("❌ Export failed", "error")
-            return
-        end
-
-        showModalPopup("📤 EXPORT CONFIG — Pilih Metode", function(parent, close)
-            local hasClipboard = (setclipboard and type(setclipboard) == "function")
-            local hasFileSystem = (writefile and type(writefile) == "function")
-
-            if hasClipboard then
-                makeModalOption(parent, "📋", "Copy ke Clipboard", "Tempel di chat/Discord/Notes", C.Success, function()
-                    local okClip = pcall(function() setclipboard(code) end)
-                    if okClip then
-                        setConfigStatus("✅ Copied to clipboard!", false)
-                        notify("📤 Config code copied!", "success")
-                    else
-                        setConfigStatus("❌ Clipboard failed", true)
-                        notify("❌ Clipboard gagal", "error")
-                    end
-                    close()
-                end)
-            end
-
-            if hasFileSystem then
-                makeModalOption(parent, "💾", "Simpan ke File", "File: " .. CONFIG_EXPORT_FILE, C.Accent, function()
-                    local okWrite = pcall(function()
-                        writefile(CONFIG_EXPORT_FILE, code)
-                    end)
-                    if okWrite then
-                        setConfigStatus("✅ Saved to file!", false)
-                        notify("💾 Config saved ke " .. CONFIG_EXPORT_FILE, "success")
-                    else
-                        setConfigStatus("❌ File write failed", true)
-                        notify("❌ Gagal tulis file", "error")
-                    end
-                    close()
-                end)
-            end
-
-            if not hasClipboard and not hasFileSystem then
-                local displayBox = Instance.new("TextBox")
-                displayBox.Size = UDim2.new(1, 0, 0, 100)
-                displayBox.BackgroundColor3 = C.Surface3
-                displayBox.BorderSizePixel = 0
-                displayBox.Text = code
-                displayBox.TextColor3 = C.Text
-                displayBox.Font = Enum.Font.Code
-                displayBox.TextSize = CFG.FONT_SMALL
-                displayBox.TextWrapped = true
-                displayBox.TextEditable = false
-                displayBox.ClearTextOnFocus = false
-                displayBox.Parent = parent
-
-                local dbc = Instance.new("UICorner")
-                dbc.CornerRadius = UDim.new(0, 8)
-                dbc.Parent = displayBox
-
-                local dPad = Instance.new("UIPadding")
-                dPad.PaddingLeft = UDim.new(0, 6)
-                dPad.PaddingTop = UDim.new(0, 6)
-                dPad.Parent = displayBox
-            end
-        end)
+    btn.MouseButton1Click:Connect(function()
+        btn.Active = false
+        if callback then callback() end
     end)
 
-    -- ═══ IMPORT ═══
-    local importConfigBtn = makeConfigBtn("📥 IMPORT CONFIG", C.Accent3, Color3.fromRGB(30, 20, 0), 5)
+    return btn
+end
 
-    importConfigBtn.MouseButton1Click:Connect(function()
-        local api = getConfigAPI()
-        if not api or not api.import then
-            setConfigStatus("❌ Import not available", true)
-            notify("❌ Import belum ready", "error")
-            return
-        end
+-- ═══ FUNGSI API ═══
+local function getConfigAPI()
+    return _G.VRILZ_Config
+end
 
-        showModalPopup("📥 IMPORT CONFIG — Pilih Metode", function(parent, close)
-            local hasClipboard = (getclipboard and type(getclipboard) == "function")
-            local hasFileSystem = (readfile and isfile and type(readfile) == "function")
+local CONFIG_EXPORT_FILE = "vrilz_share_config.txt"
 
-            local function applyImport(code, sourceLabel)
-                if not code or code == "" then
-                    notify("❌ Code kosong / tidak valid", "error")
-                    return
-                end
-                code = code:gsub("^%s+", ""):gsub("%s+$", "")
-                if code:sub(1, 4) ~= "VH2:" then
-                    notify("❌ Code bukan format VH2:...", "error")
-                    return
-                end
+-- ═══════════════════════════════════════════════════════════
+-- ROW 1: SAVE | LOAD
+-- ═══════════════════════════════════════════════════════════
+local row1 = Instance.new("Frame")
+row1.Size = UDim2.new(1, 0, 0, 38)
+row1.BackgroundTransparency = 1
+row1.LayoutOrder = 2
+row1.ZIndex = 3
+row1.Parent = configContent
 
-                local success, err = api.import(code, false)
-                if success then
-                    setConfigStatus("✅ Imported from " .. sourceLabel, false)
-                    notify("📥 Config imported dari " .. sourceLabel .. "!", "success")
-                    close()
-                    if _G.VRILZ_RefreshAllUI then
-                        pcall(_G.VRILZ_RefreshAllUI)
-                    end
+local saveConfigBtn = makeNeonBtn(row1, "SAVE", "💾", NEON_GREEN, 1)
+local loadConfigBtn = makeNeonBtn(row1, "LOAD", "📂", NEON_CYAN, 2)
+
+saveConfigBtn.MouseButton1Click:Connect(function()
+    local api = getConfigAPI()
+    if not api then
+        setConfigStatus("CONFIG SYSTEM NOT LOADED", true)
+        notify("❌ Config belum ready", "error")
+        return
+    end
+    local ok = api.save(false)
+    if ok then setConfigStatus("SAVED SUCCESSFULLY", false)
+    else setConfigStatus("SAVE FAILED", true) end
+end)
+
+loadConfigBtn.MouseButton1Click:Connect(function()
+    local api = getConfigAPI()
+    if not api then
+        setConfigStatus("CONFIG SYSTEM NOT LOADED", true)
+        notify("❌ Config belum ready", "error")
+        return
+    end
+    local ok = api.load(false)
+    if ok then
+        setConfigStatus("LOADED SUCCESSFULLY", false)
+        if _G.VRILZ_RefreshAllUI then pcall(_G.VRILZ_RefreshAllUI) end
+    else
+        setConfigStatus("NO FILE / CORRUPTED", true)
+    end
+end)
+
+-- ═══════════════════════════════════════════════════════════
+-- ROW 2: EXPORT | IMPORT
+-- ═══════════════════════════════════════════════════════════
+local row2 = Instance.new("Frame")
+row2.Size = UDim2.new(1, 0, 0, 38)
+row2.BackgroundTransparency = 1
+row2.LayoutOrder = 3
+row2.ZIndex = 3
+row2.Parent = configContent
+
+local exportConfigBtn = makeNeonBtn(row2, "EXPORT", "📤", NEON_PURPLE, 1)
+local importConfigBtn = makeNeonBtn(row2, "IMPORT", "📥", NEON_ORANGE, 2)
+
+-- Export handler
+exportConfigBtn.MouseButton1Click:Connect(function()
+    local api = getConfigAPI()
+    if not api or not api.export then
+        setConfigStatus("EXPORT NOT AVAILABLE", true)
+        notify("❌ Export belum ready", "error")
+        return
+    end
+    local code, err = api.export()
+    if not code then
+        setConfigStatus("EXPORT FAILED", true)
+        notify("❌ Export failed", "error")
+        return
+    end
+    showModalPopup("📤 EXPORT CONFIG", function(parent, close)
+        local hasClipboard = (setclipboard and type(setclipboard) == "function")
+        local hasFileSystem = (writefile and type(writefile) == "function")
+
+        if hasClipboard then
+            makeModalOption(parent, "📋", "Copy ke Clipboard", "Tempel di chat/Discord", NEON_GREEN, function()
+                local okClip = pcall(function() setclipboard(code) end)
+                if okClip then
+                    setConfigStatus("COPIED TO CLIPBOARD", false)
+                    notify("📤 Copied!", "success")
                 else
-                    setConfigStatus("❌ Import failed: " .. tostring(err), true)
-                    notify("❌ " .. tostring(err), "error")
+                    setConfigStatus("CLIPBOARD FAILED", true)
                 end
-            end
+                close()
+            end)
+        end
 
-            if hasClipboard then
-                makeModalOption(parent, "📋", "Paste dari Clipboard", "Ambil code dari clipboard", C.Success, function()
-                    local okClip, clip = pcall(getclipboard)
-                    if okClip and clip and clip ~= "" then
-                        applyImport(clip, "clipboard")
-                    else
-                        notify("❌ Clipboard kosong", "warning")
-                    end
-                end)
-            end
-
-            if hasFileSystem then
-                makeModalOption(parent, "📂", "Load dari File", "Baca: " .. CONFIG_EXPORT_FILE, C.Accent, function()
-                    local okFile, exists = pcall(isfile, CONFIG_EXPORT_FILE)
-                    if not okFile or not exists then
-                        notify("📂 File gak ada — export dulu", "warning")
-                        return
-                    end
-                    local okRead, content = pcall(readfile, CONFIG_EXPORT_FILE)
-                    if okRead and content and content ~= "" then
-                        applyImport(content, "file")
-                    else
-                        notify("❌ File kosong / gagal baca", "error")
-                    end
-                end)
-            end
-
-            makeModalOption(parent, "✏️", "Input Manual", "Ketik/tempel code sendiri", C.Accent2, function()
-                for _, c in ipairs(parent:GetChildren()) do
-                    if c:IsA("TextButton") then c:Destroy() end
+        if hasFileSystem then
+            makeModalOption(parent, "💾", "Simpan ke File", "File: " .. CONFIG_EXPORT_FILE, NEON_CYAN, function()
+                local okWrite = pcall(function() writefile(CONFIG_EXPORT_FILE, code) end)
+                if okWrite then
+                    setConfigStatus("SAVED TO FILE", false)
+                    notify("💾 Saved to file!", "success")
+                else
+                    setConfigStatus("FILE WRITE FAILED", true)
                 end
+                close()
+            end)
+        end
 
-                local inputBox = Instance.new("TextBox")
-                inputBox.Size = UDim2.new(1, 0, 0, 100)
-                inputBox.BackgroundColor3 = C.Surface3
-                inputBox.BorderSizePixel = 0
-                inputBox.Text = ""
-                inputBox.PlaceholderText = "VH2:..."
-                inputBox.PlaceholderColor3 = C.Muted
-                inputBox.TextColor3 = C.Text
-                inputBox.Font = Enum.Font.Code
-                inputBox.TextSize = CFG.FONT_SMALL
-                inputBox.TextWrapped = true
-                inputBox.MultiLine = true
-                inputBox.ClearTextOnFocus = false
-                inputBox.LayoutOrder = 1
-                inputBox.Parent = parent
+        if not hasClipboard and not hasFileSystem then
+            local displayBox = Instance.new("TextBox")
+            displayBox.Size = UDim2.new(1, 0, 0, 100)
+            displayBox.BackgroundColor3 = Color3.fromRGB(15, 18, 28)
+            displayBox.BorderSizePixel = 0
+            displayBox.Text = code
+            displayBox.TextColor3 = NEON_CYAN
+            displayBox.Font = Enum.Font.Code
+            displayBox.TextSize = CFG.FONT_SMALL
+            displayBox.TextWrapped = true
+            displayBox.TextEditable = false
+            displayBox.ClearTextOnFocus = false
+            displayBox.Parent = parent
 
-                local ibc = Instance.new("UICorner")
-                ibc.CornerRadius = UDim.new(0, 8)
-                ibc.Parent = inputBox
+            local dbc = Instance.new("UICorner")
+            dbc.CornerRadius = UDim.new(0, 8)
+            dbc.Parent = displayBox
 
-                local ibPad = Instance.new("UIPadding")
-                ibPad.PaddingLeft = UDim.new(0, 6)
-                ibPad.PaddingTop = UDim.new(0, 6)
-                ibPad.Parent = inputBox
+            local dbs = Instance.new("UIStroke")
+            dbs.Color = NEON_CYAN
+            dbs.Thickness = 1
+            dbs.Transparency = 0.3
+            dbs.Parent = displayBox
+        end
+    end)
+end)
 
-                local actionRow = Instance.new("Frame")
-                actionRow.Size = UDim2.new(1, 0, 0, 32)
-                actionRow.BackgroundTransparency = 1
-                actionRow.LayoutOrder = 2
-                actionRow.Parent = parent
+-- Import handler
+importConfigBtn.MouseButton1Click:Connect(function()
+    local api = getConfigAPI()
+    if not api or not api.import then
+        setConfigStatus("IMPORT NOT AVAILABLE", true)
+        notify("❌ Import belum ready", "error")
+        return
+    end
+    showModalPopup("📥 IMPORT CONFIG", function(parent, close)
+        local hasClipboard = (getclipboard and type(getclipboard) == "function")
+        local hasFileSystem = (readfile and isfile and type(readfile) == "function")
 
-                local applyBtn = Instance.new("TextButton")
-                applyBtn.Size = UDim2.new(0.48, 0, 1, 0)
-                applyBtn.BackgroundColor3 = C.Success
-                applyBtn.Text = "✅ APPLY"
-                applyBtn.TextColor3 = Color3.new(1, 1, 1)
-                applyBtn.Font = Enum.Font.GothamBold
-                applyBtn.TextSize = CFG.FONT_LABEL
-                applyBtn.BorderSizePixel = 0
-                applyBtn.Parent = actionRow
+        local function applyImport(code, sourceLabel)
+            if not code or code == "" then
+                notify("❌ Code kosong", "error")
+                return
+            end
+            code = code:gsub("^%s+", ""):gsub("%s+$", "")
+            if code:sub(1, 4) ~= "VH2:" then
+                notify("❌ Bukan format VH2:...", "error")
+                return
+            end
+            local success, err = api.import(code, false)
+            if success then
+                setConfigStatus("IMPORTED FROM " .. sourceLabel:upper(), false)
+                notify("📥 Imported!", "success")
+                close()
+                if _G.VRILZ_RefreshAllUI then pcall(_G.VRILZ_RefreshAllUI) end
+            else
+                setConfigStatus("IMPORT FAILED", true)
+                notify("❌ " .. tostring(err), "error")
+            end
+        end
 
-                local abc = Instance.new("UICorner")
-                abc.CornerRadius = UDim.new(0, 8)
-                abc.Parent = applyBtn
+        if hasClipboard then
+            makeModalOption(parent, "📋", "Paste dari Clipboard", "Ambil code dari clipboard", NEON_GREEN, function()
+                local okClip, clip = pcall(getclipboard)
+                if okClip and clip and clip ~= "" then
+                    applyImport(clip, "clipboard")
+                else
+                    notify("❌ Clipboard kosong", "warning")
+                end
+            end)
+        end
 
-                local backBtn = Instance.new("TextButton")
-                backBtn.Size = UDim2.new(0.48, 0, 1, 0)
-                backBtn.Position = UDim2.new(0.52, 0, 0, 0)
-                backBtn.BackgroundColor3 = C.Surface3
-                backBtn.Text = "✕ CLOSE"
-                backBtn.TextColor3 = C.Text
-                backBtn.Font = Enum.Font.GothamBold
-                backBtn.TextSize = CFG.FONT_LABEL
-                backBtn.BorderSizePixel = 0
-                backBtn.Parent = actionRow
+        if hasFileSystem then
+            makeModalOption(parent, "📂", "Load dari File", "Baca: " .. CONFIG_EXPORT_FILE, NEON_CYAN, function()
+                local okFile, exists = pcall(isfile, CONFIG_EXPORT_FILE)
+                if not okFile or not exists then
+                    notify("📂 File gak ada", "warning")
+                    return
+                end
+                local okRead, content = pcall(readfile, CONFIG_EXPORT_FILE)
+                if okRead and content and content ~= "" then
+                    applyImport(content, "file")
+                else
+                    notify("❌ File kosong", "error")
+                end
+            end)
+        end
 
-                local bbc = Instance.new("UICorner")
-                bbc.CornerRadius = UDim.new(0, 8)
-                bbc.Parent = backBtn
+        makeModalOption(parent, "✏️", "Input Manual", "Ketik/tempel code", NEON_PURPLE, function()
+            for _, c in ipairs(parent:GetChildren()) do
+                if c:IsA("TextButton") then c:Destroy() end
+            end
 
-                backBtn.MouseButton1Click:Connect(close)
+            local inputBox = Instance.new("TextBox")
+            inputBox.Size = UDim2.new(1, 0, 0, 100)
+            inputBox.BackgroundColor3 = Color3.fromRGB(15, 18, 28)
+            inputBox.BorderSizePixel = 0
+            inputBox.Text = ""
+            inputBox.PlaceholderText = "VH2:..."
+            inputBox.PlaceholderColor3 = Color3.fromRGB(100, 115, 140)
+            inputBox.TextColor3 = NEON_CYAN
+            inputBox.Font = Enum.Font.Code
+            inputBox.TextSize = CFG.FONT_SMALL
+            inputBox.TextWrapped = true
+            inputBox.MultiLine = true
+            inputBox.ClearTextOnFocus = false
+            inputBox.LayoutOrder = 1
+            inputBox.Parent = parent
 
-                applyBtn.MouseButton1Click:Connect(function()
-                    applyImport(inputBox.Text, "manual input")
-                end)
+            local ibc = Instance.new("UICorner")
+            ibc.CornerRadius = UDim.new(0, 8)
+            ibc.Parent = inputBox
+
+            local ibs = Instance.new("UIStroke")
+            ibs.Color = NEON_CYAN
+            ibs.Thickness = 1
+            ibs.Transparency = 0.3
+            ibs.Parent = inputBox
+
+            local ibPad = Instance.new("UIPadding")
+            ibPad.PaddingLeft = UDim.new(0, 6)
+            ibPad.PaddingTop = UDim.new(0, 6)
+            ibPad.Parent = inputBox
+
+            local actionRow = Instance.new("Frame")
+            actionRow.Size = UDim2.new(1, 0, 0, 32)
+            actionRow.BackgroundTransparency = 1
+            actionRow.LayoutOrder = 2
+            actionRow.Parent = parent
+
+            local applyBtn = Instance.new("TextButton")
+            applyBtn.Size = UDim2.new(0.48, 0, 1, 0)
+            applyBtn.BackgroundColor3 = NEON_GREEN
+            applyBtn.Text = "✅ APPLY"
+            applyBtn.TextColor3 = Color3.fromRGB(10, 30, 15)
+            applyBtn.Font = Enum.Font.GothamBlack
+            applyBtn.TextSize = CFG.FONT_LABEL
+            applyBtn.BorderSizePixel = 0
+            applyBtn.Parent = actionRow
+
+            local abc = Instance.new("UICorner")
+            abc.CornerRadius = UDim.new(0, 8)
+            abc.Parent = applyBtn
+
+            local closeBtn2 = Instance.new("TextButton")
+            closeBtn2.Size = UDim2.new(0.48, 0, 1, 0)
+            closeBtn2.Position = UDim2.new(0.52, 0, 0, 0)
+            closeBtn2.BackgroundColor3 = Color3.fromRGB(25, 30, 45)
+            closeBtn2.Text = "✕ CLOSE"
+            closeBtn2.TextColor3 = NEON_RED
+            closeBtn2.Font = Enum.Font.GothamBold
+            closeBtn2.TextSize = CFG.FONT_LABEL
+            closeBtn2.BorderSizePixel = 0
+            closeBtn2.Parent = actionRow
+
+            local bbc = Instance.new("UICorner")
+            bbc.CornerRadius = UDim.new(0, 8)
+            bbc.Parent = closeBtn2
+
+            closeBtn2.MouseButton1Click:Connect(close)
+            applyBtn.MouseButton1Click:Connect(function()
+                applyImport(inputBox.Text, "manual input")
             end)
         end)
     end)
+end)
 
-    -- ═══ DELETE ═══
-    local deleteConfigBtn = makeConfigBtn("🗑 DELETE CONFIG (reset semua)", C.Error, Color3.new(1, 1, 1), 6)
+-- ═══════════════════════════════════════════════════════════
+-- ROW 3: DELETE (RED GLOW)
+-- ═══════════════════════════════════════════════════════════
+local deleteConfigBtn = Instance.new("TextButton")
+deleteConfigBtn.Size = UDim2.new(1, 0, 0, 30)
+deleteConfigBtn.BackgroundColor3 = Color3.fromRGB(30, 10, 15)
+deleteConfigBtn.Text = "🗑  DELETE CONFIG"
+deleteConfigBtn.TextColor3 = NEON_RED
+deleteConfigBtn.Font = Enum.Font.GothamBlack
+deleteConfigBtn.TextSize = CFG.FONT_MUTED
+deleteConfigBtn.AutoButtonColor = false
+deleteConfigBtn.BorderSizePixel = 0
+deleteConfigBtn.LayoutOrder = 4
+deleteConfigBtn.ZIndex = 4
+deleteConfigBtn.Parent = configContent
 
-    deleteConfigBtn.MouseButton1Click:Connect(function()
-        local api = getConfigAPI()
-        if not api then
-            setConfigStatus("❌ Config system not loaded!", true)
-            return
-        end
+local dcbCorner = Instance.new("UICorner")
+dcbCorner.CornerRadius = UDim.new(0, 8)
+dcbCorner.Parent = deleteConfigBtn
 
-        if deleteConfigBtn:GetAttribute("ConfirmDelete") ~= true then
-            deleteConfigBtn:SetAttribute("ConfirmDelete", true)
-            deleteConfigBtn.Text = "⚠️ CLICK AGAIN TO CONFIRM"
-            deleteConfigBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 50)
-            task.delay(3, function()
-                if deleteConfigBtn.Parent then
-                    deleteConfigBtn:SetAttribute("ConfirmDelete", false)
-                    deleteConfigBtn.Text = "🗑 DELETE CONFIG (reset semua)"
-                    deleteConfigBtn.BackgroundColor3 = C.Error
-                end
-            end)
-            return
-        end
+local deleteConfigBtnStroke = Instance.new("UIStroke")
+deleteConfigBtnStroke.Color = NEON_RED
+deleteConfigBtnStroke.Thickness = 1.5
+deleteConfigBtnStroke.Transparency = 0.2
+deleteConfigBtnStroke.Parent = deleteConfigBtn
 
-        deleteConfigBtn:SetAttribute("ConfirmDelete", false)
-        deleteConfigBtn.Text = "🗑 DELETE CONFIG (reset semua)"
-        deleteConfigBtn.BackgroundColor3 = C.Error
+deleteConfigBtn.MouseEnter:Connect(function()
+    TweenService:Create(deleteConfigBtnStroke, TweenInfo.new(0.15), { Transparency = 0, Thickness = 2 }):Play()
+end)
+deleteConfigBtn.MouseLeave:Connect(function()
+    TweenService:Create(deleteConfigBtnStroke, TweenInfo.new(0.15), { Transparency = 0.2, Thickness = 1.5 }):Play()
+end)
 
-        local ok = api.delete()
-        if ok then
-            setConfigStatus("🗑 Config deleted", false)
-        else
-            setConfigStatus("❌ Delete failed", true)
-        end
-    end)
+deleteConfigBtn.MouseButton1Click:Connect(function()
+    local api = getConfigAPI()
+    if not api then
+        setConfigStatus("CONFIG SYSTEM NOT LOADED", true)
+        return
+    end
 
-    -- ═══ SYNC STATUS AWAL ═══
-    task.defer(function()
+    if deleteConfigBtn:GetAttribute("ConfirmDelete") ~= true then
+        deleteConfigBtn:SetAttribute("ConfirmDelete", true)
+        deleteConfigBtn.Text = "⚠️  KLIK LAGI BUAT CONFIRM"
+        deleteConfigBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 10)
+        deleteConfigBtn.TextColor3 = NEON_ORANGE
+        TweenService:Create(deleteConfigBtnStroke, TweenInfo.new(0.15), { Color = NEON_ORANGE }):Play()
+        task.delay(3, function()
+            if deleteConfigBtn.Parent then
+                deleteConfigBtn:SetAttribute("ConfirmDelete", false)
+                deleteConfigBtn.Text = "🗑  DELETE CONFIG"
+                deleteConfigBtn.BackgroundColor3 = Color3.fromRGB(30, 10, 15)
+                deleteConfigBtn.TextColor3 = NEON_RED
+                TweenService:Create(deleteConfigBtnStroke, TweenInfo.new(0.15), { Color = NEON_RED }):Play()
+            end
+        end)
+        return
+    end
+
+    deleteConfigBtn:SetAttribute("ConfirmDelete", false)
+    deleteConfigBtn.Text = "🗑  DELETE CONFIG"
+    deleteConfigBtn.BackgroundColor3 = Color3.fromRGB(30, 10, 15)
+    deleteConfigBtn.TextColor3 = NEON_RED
+    TweenService:Create(deleteConfigBtnStroke, TweenInfo.new(0.15), { Color = NEON_RED }):Play()
+
+    local ok = api.delete()
+    if ok then setConfigStatus("DELETED SUCCESSFULLY", false)
+    else setConfigStatus("DELETE FAILED", true) end
+end)
+
+-- ═══ SYNC STATUS AWAL ═══
+task.defer(function()
+    local api = getConfigAPI()
+    if api and api.isReady and api.isReady() then
+        setConfigStatus("READY", false)
+    else
+        setConfigStatus("WAITING...", false)
+    end
+end)
+
+task.spawn(function()
+    while configStatusLbl.Parent do
+        task.wait(2)
         local api = getConfigAPI()
         if api and api.isReady and api.isReady() then
-            setConfigStatus("Ready (watcher active)", false)
-        else
-            setConfigStatus("Waiting for Features...", false)
-        end
-    end)
-
-    task.spawn(function()
-        while configStatusLbl.Parent do
-            task.wait(2)
-            local api = getConfigAPI()
-            if api and api.isReady and api.isReady() then
-                if configStatusLbl.Text:find("Waiting") then
-                    setConfigStatus("Ready (watcher active)", false)
-                end
+            if configStatusLbl.Text:find("WAITING") then
+                setConfigStatus("READY (WATCHER ACTIVE)", false)
             end
         end
-    end)
+    end
+end)
 
     -- ═══ ANTI-AFK CARD (kolom kiri) ═══
     local afkCard, afkContent = makeCard(setLeft, "🛡 ANTI-AFK", 1)
