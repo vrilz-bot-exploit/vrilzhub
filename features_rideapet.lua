@@ -5168,6 +5168,7 @@ function Features.startAutoYinRitual()
             if not YinRitualState.Enabled then
                 YinRitualState.Status = "⏸️ Idle"
                 YinRitualState.Active = false
+                YinRitualState._scanStart = nil   -- ⭐ reset biar gak debug spam
                 continue
             end
 
@@ -5318,13 +5319,24 @@ function Features.startAutoYinRitual()
                     YinRitualState.Status = "🔵 Collecting Yin..."
                     if yinCollect("Yin") then
                         YinRitualState.YinCount = YinRitualState.YinCount + 1
-                        -- ⭐ LANGSUNG PLACE setelah collect (chain)
-                        task.wait(0.3)
-                        if isHoldingRitualItem("Yin") and not isYinPlaced() then
+                        -- ⭐ TUNGGU SAMPE BENERAN DI TANGAN (max 3 detik)
+                        local waitStart = os.clock()
+                        local gotYin = false
+                        while os.clock() - waitStart < 3 do
+                            if isHoldingRitualItem("Yin") then
+                                gotYin = true
+                                break
+                            end
+                            task.wait(0.2)
+                        end
+                        
+                        if gotYin then
                             YinRitualState.Status = "🔮 Placing Yin..."
                             if yinPlace("Yin") then
                                 YinRitualState.Status = "✅ Yin placed!"
                             end
+                        else
+                            YinRitualState.Status = "⚠️ Yin gak masuk tangan — retry..."
                         end
                     end
                     task.wait(0.5)
@@ -5341,13 +5353,24 @@ function Features.startAutoYinRitual()
                     YinRitualState.Status = "🔴 Collecting Yang..."
                     if yinCollect("Yang") then
                         YinRitualState.YangCount = YinRitualState.YangCount + 1
-                        -- ⭐ LANGSUNG PLACE setelah collect (chain)
-                        task.wait(0.3)
-                        if isHoldingRitualItem("Yang") and not isYangPlaced() then
+                        -- ⭐ TUNGGU SAMPE BENERAN DI TANGAN (max 3 detik)
+                        local waitStart = os.clock()
+                        local gotYang = false
+                        while os.clock() - waitStart < 3 do
+                            if isHoldingRitualItem("Yang") then
+                                gotYang = true
+                                break
+                            end
+                            task.wait(0.2)
+                        end
+                        
+                        if gotYang then
                             YinRitualState.Status = "🔮 Placing Yang..."
                             if yinPlace("Yang") then
                                 YinRitualState.Status = "✅ Yang placed!"
                             end
+                        else
+                            YinRitualState.Status = "⚠️ Yang gak masuk tangan — retry..."
                         end
                     end
                     task.wait(0.5)
@@ -5358,6 +5381,23 @@ function Features.startAutoYinRitual()
             -- ────── STEP 3: SCAN LAGI ──────
             YinRitualState.Active = false
             YinRitualState.Status = "🔍 Scanning Yin & Yang..."
+            
+            -- ⭐ SAFETY: kalau stuck di scan >10 detik & gak ada apapun, log debug
+            if not YinRitualState._scanStart then
+                YinRitualState._scanStart = os.clock()
+            end
+            if os.clock() - YinRitualState._scanStart > 10 then
+                print("[YIN DEBUG] Stuck 10s — State check:")
+                print("  Yin holding:", isHoldingRitualItem("Yin"))
+                print("  Yang holding:", isHoldingRitualItem("Yang"))
+                print("  Yin placed:", isYinPlaced())
+                print("  Yang placed:", isYangPlaced())
+                print("  Yin in runtime:", findRitualItem("Yin") ~= nil)
+                print("  Yang in runtime:", findRitualItem("Yang") ~= nil)
+                print("  Cave cooldown:", isCaveOnCooldown())
+                YinRitualState._scanStart = os.clock()  -- reset
+            end
+            
             task.wait(0.5)
         end
     end)
