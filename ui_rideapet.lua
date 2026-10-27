@@ -7372,7 +7372,7 @@ makeToggle(petEspContent, "Pet ESP", false, function(v) Shared.ESP_Pets_Enabled 
 makeToggle(petEspContent, "Show Name", false, function(v) Shared.ESP_PetName_Enabled = v end, "ESP_PetName_Enabled")
 makeToggle(petEspContent, "Show Cash", false, function(v) Shared.ESP_PetCash_Enabled = v end, "ESP_PetCash_Enabled")
 makeToggle(petEspContent, "Show Speed", false, function(v) Shared.ESP_PetSpeed_Enabled = v end, "ESP_PetSpeed_Enabled")
-
+end
        -- TAB AUTO (2 KOLOM)
 do
     local autoPage, autoLeft, autoRight = createTwoColumnPage("Auto")
