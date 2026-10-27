@@ -4540,7 +4540,7 @@ local function _refreshYinUICache()
 end
 
 local function isHoldingRitualItem(itemName)
-    -- ⭐ 1. CEK ATTRIBUTE PLAYER (Paling akurat)
+    -- ⭐ 1. Attribute player (PALING AKURAT)
     if itemName == "Yin" and LocalPlayer:GetAttribute("RitualYin") == true then return true end
     if itemName == "Yang" and LocalPlayer:GetAttribute("RitualYang") == true then return true end
 
@@ -4549,7 +4549,7 @@ local function isHoldingRitualItem(itemName)
     if itemName == "Yin" and _yinUICache.yin then return true end
     if itemName == "Yang" and _yinUICache.yang then return true end
 
-    -- ⭐ 3. Cek normal (Character & Backpack)
+    -- ⭐ 3. Cek character & backpack
     local lowerName = itemName:lower()
     local char = LocalPlayer.Character
     local backpack = LocalPlayer:FindFirstChild("Backpack")
@@ -4570,19 +4570,35 @@ local function isHoldingRitualItem(itemName)
         end
     end
 
+    -- ⭐ 4. FALLBACK: cek item ada di dunia (di deket player) — artinya udah di-collect
+    local hr = Workspace:FindFirstChild("HeadlessRitual")
+    if hr then
+        local rt = hr:FindFirstChild("Runtime")
+        -- Kalo Runtime HILANG item (gak ada di runtime) DAN ada di sekitar player → holding
+        -- (sebenarnya ini ambigu, skip aja biar gak false positive)
+    end
+
     return false
 end
 
+-- ⭐ FIX TOTAL: placed harus berdasarkan UI + ALTAR, bukan Runtime kosong
 local function isYinPlaced()
     _refreshYinUICache()
     if _yinUICache.yinP then return true end
 
+    -- ⭐ Cek di ALTAR (Model "Yin" muncul di altar setelah place)
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if hr then
-        local rt = hr:FindFirstChild("Runtime")
-        if rt and rt:FindFirstChild("Yin") == nil then
-            if not isHoldingRitualItem("Yin") then
-                return true
+        -- Cek di HeadlessRitual langsung
+        if hr:FindFirstChild("Yin") ~= nil then return true end
+        -- Cek di Altar
+        local altar = hr:FindFirstChild("Altar")
+        if altar and altar:FindFirstChild("Yin") ~= nil then return true end
+        -- Cek di RitualPlatforms
+        local platforms = hr:FindFirstChild("RitualPlatforms")
+        if platforms then
+            for _, p in ipairs(platforms:GetChildren()) do
+                if p.Name == "Yin" or p.Name:find("Yin", 1, true) then return true end
             end
         end
     end
@@ -4596,15 +4612,18 @@ local function isYangPlaced()
 
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if hr then
-        local rt = hr:FindFirstChild("Runtime")
-        if rt and rt:FindFirstChild("Yang") == nil then
-            if not isHoldingRitualItem("Yang") then
-                return true
+        if hr:FindFirstChild("Yang") ~= nil then return true end
+        local altar = hr:FindFirstChild("Altar")
+        if altar and altar:FindFirstChild("Yang") ~= nil then return true end
+        local platforms = hr:FindFirstChild("RitualPlatforms")
+        if platforms then
+            for _, p in ipairs(platforms:GetChildren()) do
+                if p.Name == "Yang" or p.Name:find("Yang", 1, true) then return true end
             end
         end
     end
 
-        return false
+    return false
 end
 
 -- 3) CEK ITEM HANDLED
@@ -4732,15 +4751,12 @@ local function yinCollect(itemName)
     return isHoldingRitualItem(itemName)
 end
 
--- 7) PLACE YIN/YANG — ABORT CEPAT KALAU COOLDOWN
+-- 7) PLACE YIN/YANG — FIXED
 local function yinPlace(itemName)
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then return false end
 
-    if itemName == "Yin" and isYinPlaced() then return true end
-    if itemName == "Yang" and isYangPlaced() then return true end
-
-    -- ⭐ CEK COOLDOWN DI AWAL — ABORT LANGSUNG
+    -- ⭐ Cek cooldown di awal
     local onCd, sisaCd = isCaveOnCooldown()
     if onCd then
         print("[YIN PLACE] ⏳ Cave cooldown " .. sisaCd .. "s — ABORT")
@@ -4750,12 +4766,19 @@ local function yinPlace(itemName)
     print("[YIN PLACE] 🎯 Mencari prompt 'Place " .. itemName .. "'...")
     local startTime = os.clock()
     local lastFireTime = 0
+    local isPlacedFn = (itemName == "Yin") and isYinPlaced or isYangPlaced
 
     local function findPlacementPrompt()
         local targetAction = "place " .. itemName:lower()
         for _, d in ipairs(hr:GetDescendants()) do
-            if d:IsA("ProximityPrompt") and (d.ActionText or ""):lower():find(targetAction, 1, true) then
-                return d
+            if d:IsA("ProximityPrompt") then
+                local at = (d.ActionText or ""):lower()
+                local ot = (d.ObjectText or ""):lower()
+                -- ⭐ HARUS ada "place" DAN nama item
+                if at:find("place", 1, true)
+                   and (at:find(itemName:lower(), 1, true) or ot:find(itemName:lower(), 1, true)) then
+                    return d
+                end
             end
         end
         return nil
@@ -4777,18 +4800,13 @@ local function yinPlace(itemName)
     while os.clock() - startTime < 20 do
         if not YinRitualState.Enabled then return false end
 
-        if itemName == "Yin" and isYinPlaced() then
-            YinRitualState._forcedHolding["Yin"] = nil
-            print("[YIN PLACE] ✅ Yin BERHASIL DI-PLACE!")
-            return true
-        end
-        if itemName == "Yang" and isYangPlaced() then
-            YinRitualState._forcedHolding["Yang"] = nil
-            print("[YIN PLACE] ✅ Yang BERHASIL DI-PLACE!")
+        -- ⭐ Cek udah placed belum
+        if isPlacedFn() then
+            print("[YIN PLACE] ✅ " .. itemName .. " udah di-place!")
             return true
         end
 
-        -- ⭐ CEK COOLDOWN TIAP LOOP
+        -- ⭐ Cek cooldown tiap loop
         local cdNow, sisaNow = isCaveOnCooldown()
         if cdNow then
             print("[YIN PLACE] ⏳ Cave cooldown muncul " .. sisaNow .. "s — ABORT")
@@ -4796,7 +4814,10 @@ local function yinPlace(itemName)
         end
 
         local prompt = findPlacementPrompt()
-        if not prompt then task.wait(0.5) continue end
+        if not prompt then
+            task.wait(0.5)
+            continue
+        end
 
         local pos = getPromptPos(prompt)
         if pos then
@@ -4805,7 +4826,7 @@ local function yinPlace(itemName)
                 curRoot.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
                 curRoot.Velocity = Vector3.zero
                 curRoot.AssemblyLinearVelocity = Vector3.zero
-                task.wait(0.5)
+                task.wait(0.3)
             end
         end
 
@@ -4826,7 +4847,13 @@ local function yinPlace(itemName)
         task.wait(0.5)
     end
 
-    return (itemName == "Yin") and isYinPlaced() or isYangPlaced()
+    -- Final check
+    if isPlacedFn() then
+        print("[YIN PLACE] ✅ " .. itemName .. " placed di final check!")
+        return true
+    end
+    print("[YIN PLACE] ❌ Timeout 20s — " .. itemName .. " gagal place")
+    return false
 end
 
 -- 8) COLLECT REWARD — FIXED v3 (detect reward INSTAN)
@@ -5240,82 +5267,95 @@ function Features.startAutoYinRitual()
                 continue
             end
 
-            -- ═══ STEP 2: PRIORITAS MUTLAK ═══
-local yinHolding  = isHoldingRitualItem("Yin")
-local yangHolding = isHoldingRitualItem("Yang")
-local yinPlaced   = isYinPlaced()
-local yangPlaced  = isYangPlaced()
+            -- ═══ STEP 2: LOGIKA URUTAN FIX ═══
+            -- Aturan server Ride a Pet:
+            --   1. Collect Yin (kalo belum)
+            --   2. Place Yin (kalo belum)
+            --   3. Collect Yang (kalo belum)
+            --   4. Place Yang (kalo belum)
+            --   5. Reward muncul, collect
+            --
+            -- ⚠️ Server cuma spawn Yin DULU. Yang baru muncul SETELAH Yin placed.
 
--- PRIORITAS #1: Yin di tangan & BELUM placed
-if yinHolding and not yinPlaced then
-    YinRitualState.Active = true
-    YinRitualState.Status = "🔮 Placing Yin (di tangan)..."
-    local ok = yinPlace("Yin")
-    if ok then
-        YinRitualState.Status = "✅ Yin placed!"
-        YinRitualState._forcedHolding["Yin"] = nil -- ⭐ HAPUS STATE PAKSA
-    else
-        YinRitualState.Status = "⚠️ Yin place gagal — retry..."
-    end
-    task.wait(0.5)
-    continue
-end
+            local yinHolding  = isHoldingRitualItem("Yin")
+            local yangHolding = isHoldingRitualItem("Yang")
+            local yinPlaced   = isYinPlaced()
+            local yangPlaced  = isYangPlaced()
 
--- PRIORITAS #2: Yang di tangan & BELUM placed
-if yangHolding and not yangPlaced then
-    YinRitualState.Active = true
-    YinRitualState.Status = "🔮 Placing Yang (di tangan)..."
-    local ok = yinPlace("Yang")
-    if ok then
-        YinRitualState.Status = "✅ Yang placed!"
-        YinRitualState._forcedHolding["Yang"] = nil -- ⭐ HAPUS STATE PAKSA
-    else
-        YinRitualState.Status = "⚠️ Yang place gagal — retry..."
-    end
-    task.wait(0.5)
-    continue
-end
-
-            -- PRIORITAS #3: Yin ada di runtime & belum di-place & belum di tangan → collect
-            local yinItem = findRitualItem("Yin")
-            local yangItem = findRitualItem("Yang")
-
-            if yinItem and not yinPlaced and not yinHolding then
+            -- ────── PRIORITAS #1: PLACE YIN (kalo di tangan & belum placed) ──────
+            if yinHolding and not yinPlaced then
                 YinRitualState.Active = true
-                YinRitualState.Status = "🔵 Collecting Yin..."
-                if yinCollect("Yin") then
-                    YinRitualState.YinCount = YinRitualState.YinCount + 1
-                    YinRitualState.Status = "🔮 Placing Yin..."
-                    task.wait(0.3)
-                    if yinPlace("Yin") then
-                        YinRitualState.Status = "✅ Yin placed!"
-                    else
-                        YinRitualState.Status = "⚠️ Yin place gagal"
-                    end
-                    task.wait(0.5)
+                YinRitualState.Status = "🔮 Placing Yin..."
+                local ok = yinPlace("Yin")
+                if ok then
+                    YinRitualState.Status = "✅ Yin placed!"
+                else
+                    YinRitualState.Status = "⚠️ Yin place gagal — retry..."
                 end
+                task.wait(0.5)
                 continue
             end
 
-                        -- PRIORITAS #4: Yang ada di runtime & belum di-place & belum di tangan → collect
-            if yangItem and not yangPlaced and not yangHolding then
+            -- ────── PRIORITAS #2: PLACE YANG (kalo di tangan & belum placed) ──────
+            if yangHolding and not yangPlaced then
                 YinRitualState.Active = true
-                YinRitualState.Status = "🔴 Collecting Yang..."
-                if yinCollect("Yang") then
-                    YinRitualState.YangCount = YinRitualState.YangCount + 1
-                    YinRitualState.Status = "🔮 Placing Yang..."
-                    task.wait(0.3)
-                    if yinPlace("Yang") then
-                        YinRitualState.Status = "✅ Yang placed!"
-                    else
-                        YinRitualState.Status = "⚠️ Yang place gagal"
-                    end
-                    task.wait(0.5)
+                YinRitualState.Status = "🔮 Placing Yang..."
+                local ok = yinPlace("Yang")
+                if ok then
+                    YinRitualState.Status = "✅ Yang placed!"
+                else
+                    YinRitualState.Status = "⚠️ Yang place gagal — retry..."
                 end
+                task.wait(0.5)
                 continue
             end
 
-            -- STEP 4: SCAN LAGI
+            -- ────── PRIORITAS #3: COLLECT YIN (kalo ada di runtime & belum di tangan & belum placed) ──────
+            if not yinHolding and not yinPlaced then
+                local yinItem = findRitualItem("Yin")
+                if yinItem then
+                    YinRitualState.Active = true
+                    YinRitualState.Status = "🔵 Collecting Yin..."
+                    if yinCollect("Yin") then
+                        YinRitualState.YinCount = YinRitualState.YinCount + 1
+                        -- ⭐ LANGSUNG PLACE setelah collect (chain)
+                        task.wait(0.3)
+                        if isHoldingRitualItem("Yin") and not isYinPlaced() then
+                            YinRitualState.Status = "🔮 Placing Yin..."
+                            if yinPlace("Yin") then
+                                YinRitualState.Status = "✅ Yin placed!"
+                            end
+                        end
+                    end
+                    task.wait(0.5)
+                    continue
+                end
+            end
+
+            -- ────── PRIORITAS #4: COLLECT YANG (kalo ada di runtime & belum di tangan & belum placed) ──────
+            -- ⚠️ Yang cuma muncul SETELAH Yin placed
+            if not yangHolding and not yangPlaced and yinPlaced then
+                local yangItem = findRitualItem("Yang")
+                if yangItem then
+                    YinRitualState.Active = true
+                    YinRitualState.Status = "🔴 Collecting Yang..."
+                    if yinCollect("Yang") then
+                        YinRitualState.YangCount = YinRitualState.YangCount + 1
+                        -- ⭐ LANGSUNG PLACE setelah collect (chain)
+                        task.wait(0.3)
+                        if isHoldingRitualItem("Yang") and not isYangPlaced() then
+                            YinRitualState.Status = "🔮 Placing Yang..."
+                            if yinPlace("Yang") then
+                                YinRitualState.Status = "✅ Yang placed!"
+                            end
+                        end
+                    end
+                    task.wait(0.5)
+                    continue
+                end
+            end
+
+            -- ────── STEP 3: SCAN LAGI ──────
             YinRitualState.Active = false
             YinRitualState.Status = "🔍 Scanning Yin & Yang..."
             task.wait(0.5)
