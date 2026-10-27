@@ -3873,6 +3873,23 @@ local function halloweenReturnToBase()
                 local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                 if not r then break end
 
+                -- ⭐ SISA ≤ 200 STUD → LANGSUNG TP (pet ikut)
+                local remaining = (base.Position - r.Position).Magnitude
+                if remaining <= 200 then
+                    local finalCF = base.CFrame + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
+                    r.CFrame = finalCF
+                    r.Velocity = Vector3.zero
+                    r.AssemblyLinearVelocity = Vector3.zero
+
+                    local newSeatCF = finalCF * offset
+                    local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
+                    local targetPivot = newSeatCF * pivotToSeat:Inverse()
+                    pcall(function() pet:PivotTo(targetPivot) end)
+
+                    task.wait(HalloweenCfg.RETURN_WAIT)
+                    return true
+                end
+
                 local dist = math.min(FLY_STEP * i, totalDist)
                 local newRootCF = CFrame.new(startPos + dir * dist)
 
@@ -3895,7 +3912,7 @@ local function halloweenReturnToBase()
                 rFinal.AssemblyLinearVelocity = Vector3.zero
             end
 
-                        task.wait(HalloweenCfg.RETURN_WAIT)
+            task.wait(HalloweenCfg.RETURN_WAIT)
             return true
         end
     end
@@ -3917,6 +3934,16 @@ local function halloweenReturnToBase()
     for i = 1, steps do
         local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if not r then break end
+
+        -- ⭐ SISA ≤ 200 STUD → LANGSUNG TP
+        local remaining = (base.Position - r.Position).Magnitude
+        if remaining <= 200 then
+            r.CFrame = base.CFrame + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
+            r.Velocity = Vector3.zero
+            r.AssemblyLinearVelocity = Vector3.zero
+            task.wait(HalloweenCfg.RETURN_WAIT)
+            return true
+        end
 
         local dist = math.min(FLY_STEP * i, totalDist)
         local pos = startPos + dir * dist
@@ -5648,72 +5675,6 @@ function Features.startStealExecutor()
         end
     end)
 end
-
--- ============================================================
--- 👻 HALLOWEEN RETURN WATCHER — TP paksa kalau udah deket base
--- TIDAK mengubah halloweenReturnToBase() — cuma mantau posisi
--- ============================================================
-task.spawn(function()
-    while task.wait(0.1) do
-        -- Cuma aktif kalau Auto Halloween lagi jalan
-        local hs = Features.getHalloweenState and Features.getHalloweenState()
-        if not hs or not hs.Enabled then
-            continue
-        end
-
-        -- Cuma aktif kalau status lagi "Returning to Halloween base..."
-        local status = tostring(hs.Status or "")
-        if not status:find("Returning to Halloween base", 1, true) then
-            continue
-        end
-
-        -- Ambil base
-        local base = getHalloweenBase()
-        if not base then continue end
-
-        -- Ambil posisi karakter
-        local char = LocalPlayer.Character
-        local root = char and char:FindFirstChild("HumanoidRootPart")
-        if not root then continue end
-
-        -- Hitung jarak ke base
-        local dist = (base.Position - root.Position).Magnitude
-
-        -- ⭐ Kalau udah ≤100 studs → TP paksa langsung
-        if dist <= 100 then
-            local finalCF = base.CFrame + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
-
-            -- Kalau naik pet → pet ikut TP
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            if hum and hum.SeatPart then
-                local pet = hum.SeatPart:FindFirstAncestorOfClass("Model")
-                if pet then
-                    local seat = hum.SeatPart
-                    local offset = root.CFrame:ToObjectSpace(seat.CFrame)
-
-                    root.CFrame = finalCF
-                    root.Velocity = Vector3.zero
-                    root.AssemblyLinearVelocity = Vector3.zero
-
-                    local newSeatCF = finalCF * offset
-                    local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
-                    local targetPivot = newSeatCF * pivotToSeat:Inverse()
-                    pcall(function() pet:PivotTo(targetPivot) end)
-                else
-                    root.CFrame = finalCF
-                    root.Velocity = Vector3.zero
-                    root.AssemblyLinearVelocity = Vector3.zero
-                end
-            else
-                root.CFrame = finalCF
-                root.Velocity = Vector3.zero
-                root.AssemblyLinearVelocity = Vector3.zero
-            end
-
-            print("[Halloween Watcher] ⚡ TP paksa — jarak", math.floor(dist), "studs")
-        end
-    end
-end)
 
 -- ============================================================
 -- FEATURES.INIT
