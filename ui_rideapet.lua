@@ -8508,6 +8508,485 @@ end)
                 notify("⚡ Lightning Effect: OFF", "info")
             end
         end)
+
+        -- ═══════════════════════════════════════════════════════════
+        -- 💾 CONFIG MANAGER CARD — SAVE / LOAD / EXPORT / IMPORT / DELETE
+        -- ═══════════════════════════════════════════════════════════
+        local configCard, configContent = makeCard(setRight, "💾 CONFIG MANAGER", 4)
+
+        local configDesc = Instance.new("TextLabel")
+        configDesc.Size = UDim2.new(1, 0, 0, 30)
+        configDesc.BackgroundTransparency = 1
+        configDesc.Text = "💡 Auto-save aktif — config tersimpan otomatis saat kamu ganti setting."
+        configDesc.TextColor3 = C.Muted
+        configDesc.Font = Enum.Font.GothamSemibold
+        configDesc.TextSize = CFG.FONT_MUTED
+        configDesc.TextWrapped = true
+        configDesc.TextXAlignment = Enum.TextXAlignment.Left
+        configDesc.TextYAlignment = Enum.TextYAlignment.Top
+        configDesc.ZIndex = 3
+        configDesc.Parent = configContent
+        registerTheme(configDesc, "Muted", "TextColor3")
+
+        -- Helper: cek config system ready
+        local function getConfigAPI()
+            if _G.VRILZ_Config then return _G.VRILZ_Config end
+            return nil
+        end
+
+        -- ═══ BUTTON ROW 1: SAVE + LOAD ═══
+        local btnRow1 = Instance.new("Frame")
+        btnRow1.Size = UDim2.new(1, 0, 0, 36)
+        btnRow1.BackgroundTransparency = 1
+        btnRow1.ZIndex = 3
+        btnRow1.Parent = configContent
+
+        local saveConfigBtn = Instance.new("TextButton")
+        saveConfigBtn.Size = UDim2.new(0.48, 0, 1, 0)
+        saveConfigBtn.BackgroundColor3 = C.Success
+        saveConfigBtn.Text = "💾 SAVE"
+        saveConfigBtn.TextColor3 = Color3.new(1, 1, 1)
+        saveConfigBtn.Font = Enum.Font.GothamBold
+        saveConfigBtn.TextSize = CFG.FONT_LABEL
+        saveConfigBtn.AutoButtonColor = false
+        saveConfigBtn.BorderSizePixel = 0
+        saveConfigBtn.ZIndex = 4
+        saveConfigBtn.Parent = btnRow1
+
+        local scbCorner = Instance.new("UICorner")
+        scbCorner.CornerRadius = UDim.new(0, 8)
+        scbCorner.Parent = saveConfigBtn
+
+        local saveConfigBtnStroke = Instance.new("UIStroke")
+        saveConfigBtnStroke.Color = C.Success
+        saveConfigBtnStroke.Thickness = 1
+        saveConfigBtnStroke.Transparency = 0.4
+        saveConfigBtnStroke.Parent = saveConfigBtn
+
+        local loadConfigBtn = Instance.new("TextButton")
+        loadConfigBtn.Size = UDim2.new(0.48, 0, 1, 0)
+        loadConfigBtn.Position = UDim2.new(0.52, 0, 0, 0)
+        loadConfigBtn.BackgroundColor3 = C.Accent
+        loadConfigBtn.Text = "📂 LOAD"
+        loadConfigBtn.TextColor3 = Color3.new(1, 1, 1)
+        loadConfigBtn.Font = Enum.Font.GothamBold
+        loadConfigBtn.TextSize = CFG.FONT_LABEL
+        loadConfigBtn.AutoButtonColor = false
+        loadConfigBtn.BorderSizePixel = 0
+        loadConfigBtn.ZIndex = 4
+        loadConfigBtn.Parent = btnRow1
+
+        local lcbCorner = Instance.new("UICorner")
+        lcbCorner.CornerRadius = UDim.new(0, 8)
+        lcbCorner.Parent = loadConfigBtn
+
+        local loadConfigBtnStroke = Instance.new("UIStroke")
+        loadConfigBtnStroke.Color = C.Accent
+        loadConfigBtnStroke.Thickness = 1
+        loadConfigBtnStroke.Transparency = 0.4
+        loadConfigBtnStroke.Parent = loadConfigBtn
+
+        -- ═══ BUTTON ROW 2: EXPORT + IMPORT ═══
+        local btnRow2 = Instance.new("Frame")
+        btnRow2.Size = UDim2.new(1, 0, 0, 36)
+        btnRow2.BackgroundTransparency = 1
+        btnRow2.ZIndex = 3
+        btnRow2.Parent = configContent
+
+        local exportConfigBtn = Instance.new("TextButton")
+        exportConfigBtn.Size = UDim2.new(0.48, 0, 1, 0)
+        exportConfigBtn.BackgroundColor3 = C.Accent2
+        exportConfigBtn.Text = "📤 EXPORT"
+        exportConfigBtn.TextColor3 = Color3.new(1, 1, 1)
+        exportConfigBtn.Font = Enum.Font.GothamBold
+        exportConfigBtn.TextSize = CFG.FONT_LABEL
+        exportConfigBtn.AutoButtonColor = false
+        exportConfigBtn.BorderSizePixel = 0
+        exportConfigBtn.ZIndex = 4
+        exportConfigBtn.Parent = btnRow2
+
+        local ecbCorner = Instance.new("UICorner")
+        ecbCorner.CornerRadius = UDim.new(0, 8)
+        ecbCorner.Parent = exportConfigBtn
+
+        local exportConfigBtnStroke = Instance.new("UIStroke")
+        exportConfigBtnStroke.Color = C.Accent2
+        exportConfigBtnStroke.Thickness = 1
+        exportConfigBtnStroke.Transparency = 0.4
+        exportConfigBtnStroke.Parent = exportConfigBtn
+
+        local importConfigBtn = Instance.new("TextButton")
+        importConfigBtn.Size = UDim2.new(0.48, 0, 1, 0)
+        importConfigBtn.Position = UDim2.new(0.52, 0, 0, 0)
+        importConfigBtn.BackgroundColor3 = C.Accent3
+        importConfigBtn.Text = "📥 IMPORT"
+        importConfigBtn.TextColor3 = Color3.fromRGB(30, 20, 0)
+        importConfigBtn.Font = Enum.Font.GothamBold
+        importConfigBtn.TextSize = CFG.FONT_LABEL
+        importConfigBtn.AutoButtonColor = false
+        importConfigBtn.BorderSizePixel = 0
+        importConfigBtn.ZIndex = 4
+        importConfigBtn.Parent = btnRow2
+
+        local icbCorner = Instance.new("UICorner")
+        icbCorner.CornerRadius = UDim.new(0, 8)
+        icbCorner.Parent = importConfigBtn
+
+        local importConfigBtnStroke = Instance.new("UIStroke")
+        importConfigBtnStroke.Color = C.Accent3
+        importConfigBtnStroke.Thickness = 1
+        importConfigBtnStroke.Transparency = 0.4
+        importConfigBtnStroke.Parent = importConfigBtn
+
+        -- ═══ BUTTON ROW 3: DELETE (full width, merah) ═══
+        local deleteConfigBtn = Instance.new("TextButton")
+        deleteConfigBtn.Size = UDim2.new(1, 0, 0, 32)
+        deleteConfigBtn.BackgroundColor3 = C.Error
+        deleteConfigBtn.Text = "🗑 DELETE CONFIG (reset semua)"
+        deleteConfigBtn.TextColor3 = Color3.new(1, 1, 1)
+        deleteConfigBtn.Font = Enum.Font.GothamBold
+        deleteConfigBtn.TextSize = CFG.FONT_MUTED
+        deleteConfigBtn.AutoButtonColor = false
+        deleteConfigBtn.BorderSizePixel = 0
+        deleteConfigBtn.ZIndex = 4
+        deleteConfigBtn.Parent = configContent
+
+        local dcbCorner = Instance.new("UICorner")
+        dcbCorner.CornerRadius = UDim.new(0, 8)
+        dcbCorner.Parent = deleteConfigBtn
+
+        local deleteConfigBtnStroke = Instance.new("UIStroke")
+        deleteConfigBtnStroke.Color = C.Error
+        deleteConfigBtnStroke.Thickness = 1
+        deleteConfigBtnStroke.Transparency = 0.4
+        deleteConfigBtnStroke.Parent = deleteConfigBtn
+
+        -- ═══ STATUS LABEL ═══
+        local configStatusLbl = Instance.new("TextLabel")
+        configStatusLbl.Size = UDim2.new(1, 0, 0, 16)
+        configStatusLbl.BackgroundTransparency = 1
+        configStatusLbl.Text = "Status: Ready"
+        configStatusLbl.TextColor3 = C.Muted
+        configStatusLbl.Font = Enum.Font.Code
+        configStatusLbl.TextSize = CFG.FONT_SMALL
+        configStatusLbl.TextXAlignment = Enum.TextXAlignment.Left
+        configStatusLbl.ZIndex = 3
+        configStatusLbl.Parent = configContent
+        registerTheme(configStatusLbl, "Muted", "TextColor3")
+
+        local function setConfigStatus(txt, isError)
+            configStatusLbl.Text = "Status: " .. txt
+            configStatusLbl.TextColor3 = isError and C.Error or C.Success
+            task.delay(3, function()
+                if configStatusLbl.Parent then
+                    configStatusLbl.Text = "Status: Ready"
+                    configStatusLbl.TextColor3 = C.Muted
+                end
+            end)
+        end
+
+        -- ═══ SAVE BUTTON ═══
+        saveConfigBtn.MouseButton1Click:Connect(function()
+            local api = getConfigAPI()
+            if not api then
+                setConfigStatus("❌ Config system not loaded!", true)
+                notify("❌ Config system belum ready", "error")
+                return
+            end
+
+            local ok = api.save(false)  -- not silent → notify
+            if ok then
+                setConfigStatus("✅ Config saved!", false)
+            else
+                setConfigStatus("❌ Save failed", true)
+            end
+
+            -- Click animation
+            TweenService:Create(saveConfigBtn, TweenInfo.new(0.08), {
+                Size = UDim2.new(0.46, 0, 0.92, 0)
+            }):Play()
+            task.delay(0.12, function()
+                TweenService:Create(saveConfigBtn, TweenInfo.new(0.15), {
+                    Size = UDim2.new(0.48, 0, 1, 0)
+                }):Play()
+            end)
+        end)
+
+        -- ═══ LOAD BUTTON ═══
+        loadConfigBtn.MouseButton1Click:Connect(function()
+            local api = getConfigAPI()
+            if not api then
+                setConfigStatus("❌ Config system not loaded!", true)
+                notify("❌ Config system belum ready", "error")
+                return
+            end
+
+            local ok = api.load(false)  -- not silent → notify
+            if ok then
+                setConfigStatus("✅ Config loaded!", false)
+                -- Refresh semua widget
+                if _G.VRILZ_RefreshAllUI then
+                    pcall(_G.VRILZ_RefreshAllUI)
+                end
+            else
+                setConfigStatus("⚠️ No config file / corrupted", true)
+            end
+
+            TweenService:Create(loadConfigBtn, TweenInfo.new(0.08), {
+                Size = UDim2.new(0.46, 0, 0.92, 0)
+            }):Play()
+            task.delay(0.12, function()
+                TweenService:Create(loadConfigBtn, TweenInfo.new(0.15), {
+                    Size = UDim2.new(0.48, 0, 1, 0)
+                }):Play()
+            end)
+        end)
+
+        -- ═══ EXPORT BUTTON ═══
+        exportConfigBtn.MouseButton1Click:Connect(function()
+            local api = getConfigAPI()
+            if not api or not api.export then
+                setConfigStatus("❌ Export not available", true)
+                notify("❌ Export belum ready", "error")
+                return
+            end
+
+            local code, err = api.export()
+            if code then
+                -- Copy ke clipboard
+                if setclipboard then
+                    pcall(function() setclipboard(code) end)
+                    setConfigStatus("✅ Exported & copied!", false)
+                    notify("📤 Config code copied to clipboard!", "success")
+                else
+                    -- Fallback: tampilkan di console
+                    print("[CONFIG EXPORT]", code)
+                    setConfigStatus("⚠️ No clipboard — see console", true)
+                    notify("📤 Code printed to console (no clipboard)", "warning")
+                end
+            else
+                setConfigStatus("❌ Export failed: " .. tostring(err), true)
+                notify("❌ Export failed", "error")
+            end
+
+            TweenService:Create(exportConfigBtn, TweenInfo.new(0.08), {
+                Size = UDim2.new(0.46, 0, 0.92, 0)
+            }):Play()
+            task.delay(0.12, function()
+                TweenService:Create(exportConfigBtn, TweenInfo.new(0.15), {
+                    Size = UDim2.new(0.48, 0, 1, 0)
+                }):Play()
+            end)
+        end)
+
+        -- ═══ IMPORT BUTTON ═══
+        importConfigBtn.MouseButton1Click:Connect(function()
+            local api = getConfigAPI()
+            if not api or not api.import then
+                setConfigStatus("❌ Import not available", true)
+                notify("❌ Import belum ready", "error")
+                return
+            end
+
+            -- Pakai TextBox popup
+            local popupGui = Instance.new("ScreenGui")
+            popupGui.Name = "VRILZ_ImportPopup"
+            popupGui.ResetOnSpawn = false
+            popupGui.DisplayOrder = 9000
+            popupGui.Parent = game:GetService("CoreGui")
+
+            local popupBg = Instance.new("Frame")
+            popupBg.Size = UDim2.fromScale(1, 1)
+            popupBg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            popupBg.BackgroundTransparency = 0.5
+            popupBg.BorderSizePixel = 0
+            popupBg.Parent = popupGui
+
+            local popup = Instance.new("Frame")
+            popup.Size = UDim2.fromOffset(IS_MOBILE and 300 or 420, IS_MOBILE and 200 or 220)
+            popup.Position = UDim2.fromScale(0.5, 0.5)
+            popup.AnchorPoint = Vector2.new(0.5, 0.5)
+            popup.BackgroundColor3 = C.Surface
+            popup.BorderSizePixel = 0
+            popup.Parent = popupBg
+
+            local pc = Instance.new("UICorner")
+            pc.CornerRadius = UDim.new(0, 12)
+            pc.Parent = popup
+
+            local ps = Instance.new("UIStroke")
+            ps.Color = C.Accent
+            ps.Thickness = 2
+            ps.Transparency = 0.3
+            ps.Parent = popup
+
+            local title = Instance.new("TextLabel")
+            title.Size = UDim2.new(1, -20, 0, 30)
+            title.Position = UDim2.fromOffset(10, 8)
+            title.BackgroundTransparency = 1
+            title.Text = "📥 Paste Config Code (VH1:...)"
+            title.TextColor3 = C.Text
+            title.Font = Enum.Font.GothamBold
+            title.TextSize = CFG.FONT_LABEL
+            title.TextXAlignment = Enum.TextXAlignment.Left
+            title.Parent = popup
+
+            local inputBox = Instance.new("TextBox")
+            inputBox.Size = UDim2.new(1, -20, 0, 80)
+            inputBox.Position = UDim2.fromOffset(10, 45)
+            inputBox.BackgroundColor3 = C.Surface3
+            inputBox.BorderSizePixel = 0
+            inputBox.Text = ""
+            inputBox.PlaceholderText = "VH1:..."
+            inputBox.PlaceholderColor3 = C.Muted
+            inputBox.TextColor3 = C.Text
+            inputBox.Font = Enum.Font.Code
+            inputBox.TextSize = CFG.FONT_SMALL
+            inputBox.TextXAlignment = Enum.TextXAlignment.Left
+            inputBox.TextYAlignment = Enum.TextYAlignment.Top
+            inputBox.TextWrapped = true
+            inputBox.ClearTextOnFocus = false
+            inputBox.MultiLine = true
+            inputBox.Parent = popup
+
+            local ibc = Instance.new("UICorner")
+            ibc.CornerRadius = UDim.new(0, 8)
+            ibc.Parent = inputBox
+
+            local ibp = Instance.new("UIPadding")
+            ibp.PaddingLeft = UDim.new(0, 8)
+            ibp.PaddingTop = UDim.new(0, 6)
+            ibp.Parent = inputBox
+
+            -- Paste from clipboard (kalau ada)
+            if getclipboard then
+                local okClip, clip = pcall(getclipboard)
+                if okClip and clip and clip:sub(1, 3) == "VH1" then
+                    inputBox.Text = clip
+                end
+            end
+
+            local okBtn = Instance.new("TextButton")
+            okBtn.Size = UDim2.new(0.48, 0, 0, 32)
+            okBtn.Position = UDim2.new(0.02, 0, 1, -42)
+            okBtn.BackgroundColor3 = C.Success
+            okBtn.Text = "✅ IMPORT"
+            okBtn.TextColor3 = Color3.new(1, 1, 1)
+            okBtn.Font = Enum.Font.GothamBold
+            okBtn.TextSize = CFG.FONT_LABEL
+            okBtn.BorderSizePixel = 0
+            okBtn.Parent = popup
+
+            local okCorner = Instance.new("UICorner")
+            okCorner.CornerRadius = UDim.new(0, 8)
+            okCorner.Parent = okBtn
+
+            local cancelBtn = Instance.new("TextButton")
+            cancelBtn.Size = UDim2.new(0.48, 0, 0, 32)
+            cancelBtn.Position = UDim2.new(0.5, 0, 1, -42)
+            cancelBtn.BackgroundColor3 = C.Error
+            cancelBtn.Text = "✕ CANCEL"
+            cancelBtn.TextColor3 = Color3.new(1, 1, 1)
+            cancelBtn.Font = Enum.Font.GothamBold
+            cancelBtn.TextSize = CFG.FONT_LABEL
+            cancelBtn.BorderSizePixel = 0
+            cancelBtn.Parent = popup
+
+            local cc = Instance.new("UICorner")
+            cc.CornerRadius = UDim.new(0, 8)
+            cc.Parent = cancelBtn
+
+            cancelBtn.MouseButton1Click:Connect(function()
+                popupGui:Destroy()
+            end)
+
+            okBtn.MouseButton1Click:Connect(function()
+                local code = inputBox.Text:gsub("^%s+", ""):gsub("%s+$", "")
+                if code == "" then
+                    notify("❌ Code empty!", "error")
+                    return
+                end
+
+                local success, err = api.import(code, false)  -- not silent
+                if success then
+                    setConfigStatus("✅ Config imported!", false)
+                    popupGui:Destroy()
+                    if _G.VRILZ_RefreshAllUI then
+                        pcall(_G.VRILZ_RefreshAllUI)
+                    end
+                else
+                    setConfigStatus("❌ Import failed: " .. tostring(err), true)
+                    notify("❌ " .. tostring(err), "error")
+                end
+            end)
+
+            TweenService:Create(importConfigBtn, TweenInfo.new(0.08), {
+                Size = UDim2.new(0.46, 0, 0.92, 0)
+            }):Play()
+            task.delay(0.12, function()
+                TweenService:Create(importConfigBtn, TweenInfo.new(0.15), {
+                    Size = UDim2.new(0.48, 0, 1, 0)
+                }):Play()
+            end)
+        end)
+
+        -- ═══ DELETE BUTTON ═══
+        deleteConfigBtn.MouseButton1Click:Connect(function()
+            local api = getConfigAPI()
+            if not api then
+                setConfigStatus("❌ Config system not loaded!", true)
+                return
+            end
+
+            -- Konfirmasi double-click (biar gak accidental)
+            if deleteConfigBtn:GetAttribute("ConfirmDelete") ~= true then
+                deleteConfigBtn:SetAttribute("ConfirmDelete", true)
+                deleteConfigBtn.Text = "⚠️ CLICK AGAIN TO CONFIRM"
+                deleteConfigBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 50)
+                task.delay(3, function()
+                    if deleteConfigBtn.Parent then
+                        deleteConfigBtn:SetAttribute("ConfirmDelete", false)
+                        deleteConfigBtn.Text = "🗑 DELETE CONFIG (reset semua)"
+                        deleteConfigBtn.BackgroundColor3 = C.Error
+                    end
+                end)
+                return
+            end
+
+            deleteConfigBtn:SetAttribute("ConfirmDelete", false)
+            deleteConfigBtn.Text = "🗑 DELETE CONFIG (reset semua)"
+            deleteConfigBtn.BackgroundColor3 = C.Error
+
+            local ok = api.delete()
+            if ok then
+                setConfigStatus("🗑 Config deleted", false)
+            else
+                setConfigStatus("❌ Delete failed", true)
+            end
+        end)
+
+        -- ═══ SYNC STATUS AWAL ═══
+        task.defer(function()
+            local api = getConfigAPI()
+            if api and api.isReady and api.isReady() then
+                setConfigStatus("Ready (watcher active)", false)
+            else
+                setConfigStatus("Waiting for Features...", false)
+            end
+        end)
+
+        -- Watcher: sync status tiap 2 detik
+        task.spawn(function()
+            while configStatusLbl.Parent do
+                task.wait(2)
+                local api = getConfigAPI()
+                if api and api.isReady and api.isReady() then
+                    if configStatusLbl.Text:find("Waiting") then
+                        setConfigStatus("Ready (watcher active)", false)
+                    end
+                end
+            end
+        end)
 end
 
         -- ===== EVENT TAB =====
