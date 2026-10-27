@@ -9088,14 +9088,14 @@ end, "AntiAFK_Enabled")
                 local hasFileSystem = (readfile and isfile and type(readfile) == "function")
 
                 local function applyImport(code, sourceLabel)
-                    if not code or code == "" then
-                        notify("❌ Code kosong / tidak valid", "error")
-                        return
+                       if not code or code == "" then
+                       notify("❌ Code kosong / tidak valid", "error")
+                       return
                     end
-                    code = code:gsub("^%s+", ""):gsub("%s+$", "")
-                    if code:sub(1, 3) ~= "VH1" then
-                        notify("❌ Code bukan format VH1:...", "error")
-                        return
+                       code = code:gsub("^%s+", ""):gsub("%s+$", "")
+                           if code:sub(1, 4) ~= "VH2:" then
+                           notify("❌ Code bukan format VH2:...", "error")
+                       return
                     end
 
                     local success, err = api.import(code, false)
