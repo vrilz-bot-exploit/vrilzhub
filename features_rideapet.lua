@@ -5190,7 +5190,6 @@ if findRewardPrompt() then
                     YinRitualState.Status = "✅ Reward #" .. YinRitualState.RewardCount .. " ke-tangan!"
                     YinRitualState.Status = "🏠 Returning to base..."
                     yinReturnToBase()
-                    YinRitualState._lastRewardTime = tick()
                     YinRitualState.Status = "⏳ Cooldown 20s..."
                 else
                     YinRitualState.Status = "⚠️ Reward retry..."
@@ -5265,7 +5264,6 @@ if findRewardPrompt() then
                     YinRitualState.Status = "✅ Reward #" .. YinRitualState.RewardCount .. " ke-tangan!"
                     YinRitualState.Status = "🏠 Returning to base..."
                     yinReturnToBase()
-                    YinRitualState._lastRewardTime = tick()
                     YinRitualState.Status = "⏳ Cooldown 20s..."
                 else
                     YinRitualState.Status = "⚠️ Reward retry..."
