@@ -4785,85 +4785,136 @@ local function yinPlace(itemName)
     return (itemName == "Yin") and isYinPlaced() or isYangPlaced()
 end
 
--- 8) COLLECT REWARD — juga HILANG di file lo!
+-- 8) COLLECT REWARD — FIXED v2
 local function yinCollectReward()
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then
-        print("[YIN REWARD] HeadlessRitual gak ada")
+        print("[YIN REWARD] ❌ HeadlessRitual gak ada")
         return false
     end
 
-          local prompt, pos
-    for try = 1, 10 do
-        prompt = findRewardPrompt()
-        if prompt then
-            local p = prompt.Parent
-            while p and p ~= hr and not pos do
-                if p:IsA("BasePart") then
-                    pos = p.Position
-                elseif p:IsA("Model") then
-                    local ok, pivot = pcall(function() return p:GetPivot().Position end)
-                    if ok then pos = pivot end
+    print("[YIN REWARD] 🎁 Mulai collect reward...")
+    local startTime = os.clock()
+    local lastTpTime = 0
+
+    -- ⭐ Loop utama — cek prompt terus, TP ulang tiap 1 detik kalo masih ada
+    while os.clock() - startTime < 20 do
+        if not YinRitualState.Enabled then
+            print("[YIN REWARD] ⏸️ Yin OFF — abort")
+            return false
+        end
+
+        -- ⭐ Re-find prompt SETIAP LOOP (jangan pake cache busuk)
+        _cachedRewardPrompt = nil
+        local prompt = findRewardPrompt()
+
+        -- ⭐ Kalo prompt gak ada → reward udah ke-tangan
+        if not prompt then
+            print("[YIN REWARD] ✅ Prompt hilang — reward ke-tangan!")
+
+            -- Verifikasi tambahan: cek backpack / character
+            local backpack = LocalPlayer:FindFirstChild("Backpack")
+            if backpack then
+                for _, obj in ipairs(backpack:GetChildren()) do
+                    if (obj:IsA("Tool") or obj:IsA("Model")) and obj.Name:lower():find("candy") then
+                        print("[YIN REWARD] ✅ Candy ada di backpack")
+                        return true
+                    end
                 end
-                p = p.Parent
             end
-            if pos then break end
-        end
-        -- ⭐ hapus task.wait(0.3) — langsung loop
-    end
 
-    if not pos then
-        local rp = hr:FindFirstChild("RewardPoints")
-        if rp then
-            for _, d in ipairs(rp:GetChildren()) do
-                if d:IsA("BasePart") then pos = d.Position; break end
-                if d:IsA("Attachment") then pos = d.WorldPosition; break end
+            local char = LocalPlayer.Character
+            if char then
+                for _, obj in ipairs(char:GetChildren()) do
+                    if (obj:IsA("Model") or obj:IsA("Tool")) and obj.Name:lower():find("candy") then
+                        print("[YIN REWARD] ✅ Candy di character")
+                        return true
+                    end
+                end
             end
+
+            -- Cek reward folder di Runtime
+            local rt = hr:FindFirstChild("Runtime")
+            if rt then
+                local hasReward = false
+                for _, f in ipairs(rt:GetChildren()) do
+                    if f:IsA("Folder") and f.Name:lower():find("reward", 1, true) then
+                        hasReward = true
+                        break
+                    end
+                end
+                if not hasReward then
+                    print("[YIN REWARD] ✅ Reward folder hilang — sukses")
+                    return true
+                end
+            end
+
+            return true  -- prompt hilang = sukses
         end
-    end
 
-    if not pos then
-        local altar = hr:FindFirstChild("Altar")
-        if altar and altar:IsA("BasePart") then
-            pos = altar.Position + Vector3.new(0, 10, 0)
-        end
-    end
-
-    if not pos then
-        print("[YIN REWARD] ❌ Gak dapet posisi reward")
-        return false
-    end
-
-    for attempt = 1, 20 do
-        if not YinRitualState.Enabled then return false end
-
-        local curPrompt = findRewardPrompt()
-        if not curPrompt then
-            print("[YIN REWARD] ✅ Reward ke-tangan (attempt " .. attempt .. ")")
-            return true
-        end
-        prompt = curPrompt
-
+        -- ⭐ Prompt masih ada — cari posisi FRESH setiap kali
+        local pos = nil
         local p = prompt.Parent
-        while p and p ~= hr and not p:IsA("BasePart") and not p:IsA("Model") do
-            p = p.Parent
-        end
-        if p then
+        while p and p ~= hr do
             if p:IsA("BasePart") then
                 pos = p.Position
+                break
             elseif p:IsA("Model") then
                 local ok, pivot = pcall(function() return p:GetPivot().Position end)
-                if ok then pos = pivot end
+                if ok then
+                    pos = pivot
+                    break
+                end
+            end
+            p = p.Parent
+        end
+
+        -- Fallback: RewardPoints
+        if not pos then
+            local rp = hr:FindFirstChild("RewardPoints")
+            if rp then
+                for _, d in ipairs(rp:GetChildren()) do
+                    if d:IsA("BasePart") then
+                        pos = d.Position
+                        break
+                    elseif d:IsA("Attachment") then
+                        pos = d.WorldPosition
+                        break
+                    end
+                end
             end
         end
 
+        -- Fallback: Altar
+        if not pos then
+            local altar = hr:FindFirstChild("Altar")
+            if altar and altar:IsA("BasePart") then
+                pos = altar.Position + Vector3.new(0, 10, 0)
+            end
+        end
+
+        if not pos then
+            print("[YIN REWARD] ⚠️ Prompt ada tapi pos gak ketemu — retry...")
+            task.wait(0.5)
+            continue
+        end
+
+        -- ⭐ TP ke posisi reward + loop diem 0.5s (biar server baca)
         local char = LocalPlayer.Character
-        if not char then return false end
+        if not char then
+            task.wait(0.3)
+            continue
+        end
         local root = char:FindFirstChild("HumanoidRootPart")
-        if not root then return false end
+        if not root then
+            task.wait(0.3)
+            continue
+        end
 
         local targetCF = CFrame.new(pos + Vector3.new(0, 3, 0))
         local hum = char:FindFirstChildOfClass("Humanoid")
+
+        -- Handle naik pet (pet ikut TP)
         if hum and hum.SeatPart then
             local pet = hum.SeatPart:FindFirstAncestorOfClass("Model")
             if pet then
@@ -4888,8 +4939,18 @@ local function yinCollectReward()
             root.AssemblyLinearVelocity = Vector3.zero
         end
 
-        task.wait(0.15)
+        -- ⭐ Loop diem 0.5s biar server register posisi
+        local stickStart = os.clock()
+        while os.clock() - stickStart < 0.5 do
+            local r = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if not r then break end
+            r.CFrame = targetCF
+            r.Velocity = Vector3.zero
+            r.AssemblyLinearVelocity = Vector3.zero
+            task.wait(0.05)
+        end
 
+        -- ⭐ Fire prompt 3x dengan jeda (jangan langsung 0.1s doang)
         pcall(function()
             prompt.Enabled = true
             prompt.HoldDuration = 0
@@ -4897,62 +4958,27 @@ local function yinCollectReward()
             prompt.RequiresLineOfSight = false
         end)
 
-        if typeof(fireproximityprompt) == "function" then
-            pcall(fireproximityprompt, prompt)
-        end
-        task.wait(0.1)
-        pcall(function()
-            prompt:InputHoldBegin()
-            task.wait(0.1)
-            prompt:InputHoldEnd()
-        end)
-        task.wait(0.2)
-    end
-
-    if not findRewardPrompt() then
-        print("[YIN REWARD] ✅ Reward ke-tangan (prompt hilang)")
-        return true
-    end
-
-    local backpack = LocalPlayer:FindFirstChild("Backpack")
-    if backpack then
-        for _, obj in ipairs(backpack:GetChildren()) do
-            if (obj:IsA("Tool") or obj:IsA("Model")) and obj.Name:lower():find("candy") then
-                print("[YIN REWARD] ✅ Reward ada di backpack")
-                return true
+        for i = 1, 3 do
+            if typeof(fireproximityprompt) == "function" then
+                pcall(fireproximityprompt, prompt)
             end
+            task.wait(0.2)
         end
+
+        -- ⭐ Cek reward udah ke-tangan BELUM — kalo iya, break
+        task.wait(0.3)
+        _cachedRewardPrompt = nil
+        if not findRewardPrompt() then
+            print("[YIN REWARD] ✅ Reward ke-tangan setelah fire prompt!")
+            return true
+        end
+
+        -- ⭐ Kalo masih ada prompt, TP ulang + fire ulang
+        lastTpTime = os.clock()
+        task.wait(0.3)
     end
 
-    local hr2 = Workspace:FindFirstChild("HeadlessRitual")
-    if hr2 then
-        local rt2 = hr2:FindFirstChild("Runtime")
-        if rt2 then
-            local hasRewardFolder = false
-            for _, f in ipairs(rt2:GetChildren()) do
-                if f:IsA("Folder") and f.Name:lower():find("reward", 1, true) then
-                    hasRewardFolder = true
-                    break
-                end
-            end
-            if not hasRewardFolder then
-                print("[YIN REWARD] ✅ Gak ada reward folder → reward ke-ambil")
-                return true
-            end
-        end
-    end
-
-    local char = LocalPlayer.Character
-    if char then
-        for _, obj in ipairs(char:GetChildren()) do
-            if (obj:IsA("Model") or obj:IsA("Tool")) and obj.Name:lower():find("candy") then
-                print("[YIN REWARD] ✅ Reward ke-tangan (candy di character)")
-                return true
-            end
-        end
-    end
-
-    warn("[YIN REWARD] ❌ Gagal collect reward")
+    print("[YIN REWARD] ❌ Timeout 20s — gagal collect reward")
     return false
 end
 
