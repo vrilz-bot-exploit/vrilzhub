@@ -886,7 +886,7 @@ local function makeCard(parent, title, layoutOrder)
 end
 
 -- ====== TOGGLE ======
-local function makeToggle(parent, text, default, callback)
+local function makeToggle(parent, text, default, callback, sharedKey)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, CFG.TOGGLE_H)
     frame.BackgroundTransparency = 1
@@ -938,17 +938,51 @@ local function makeToggle(parent, text, default, callback)
     knobCorner.CornerRadius = UDim.new(1, 0)
     knobCorner.Parent = knob
 
+    -- ⭐ STATE: kalau sharedKey dikasih, baca dari Shared. Kalau ngga, pakai local
     local state = default
+    if sharedKey and Shared and Shared[sharedKey] ~= nil then
+        state = Shared[sharedKey]
+    end
+
+    -- ⭐ FUNGSI VISUAL: dipisah biar bisa dipanggil dari refresh
+    local function updateVisual(v, animate)
+        state = v
+        local bgTarget = v and C.Accent or C.Surface3
+        local knobTarget = v 
+            and UDim2.new(1, -(CFG.TOGGLE_KNOB + 3), 0.5, -CFG.TOGGLE_KNOB/2)
+            or UDim2.new(0, 3, 0.5, -CFG.TOGGLE_KNOB/2)
+        
+        if animate then
+            TweenService:Create(btn, TweenInfo.new(0.2), { BackgroundColor3 = bgTarget }):Play()
+            TweenService:Create(knob, TweenInfo.new(0.2), { Position = knobTarget }):Play()
+        else
+            btn.BackgroundColor3 = bgTarget
+            knob.Position = knobTarget
+        end
+    end
+
+    -- Apply state awal
+    updateVisual(state, false)
+
     btn.MouseButton1Click:Connect(function()
-        state = not state
-        TweenService:Create(btn, TweenInfo.new(0.2), {
-            BackgroundColor3 = state and C.Accent or C.Surface3
-        }):Play()
-        TweenService:Create(knob, TweenInfo.new(0.2), {
-            Position = state and UDim2.new(1, -(CFG.TOGGLE_KNOB + 3), 0.5, -CFG.TOGGLE_KNOB/2) or UDim2.new(0, 3, 0.5, -CFG.TOGGLE_KNOB/2)
-        }):Play()
-        if callback then callback(state) end
+        local newState = not state
+        updateVisual(newState, true)
+        if sharedKey and Shared then
+            Shared[sharedKey] = newState
+        end
+        if callback then callback(newState) end
     end)
+
+    -- ⭐ REGISTER KE REFRESH SYSTEM
+    if sharedKey and _G.VRILZ_RegisterWidget then
+        _G.VRILZ_RegisterWidget(function()
+            if not btn.Parent then return end
+            local fresh = Shared and Shared[sharedKey]
+            if fresh ~= nil and fresh ~= state then
+                updateVisual(fresh, false)
+            end
+        end)
+    end
 end
 
 -- ====== DROPDOWN GLOBAL ======
@@ -3216,7 +3250,7 @@ local function buildEventTab(eventLeft, eventRight, makeCard, makeToggle, makeDr
         if F and F.getHalloweenState then F.getHalloweenState().Enabled = v end
         if v then notify("Halloween Auto: ON", "success")
         else notify("Halloween Auto: OFF", "info") end
-    end)
+    end, "Halloween_Enabled")
 
     makeToggle(eventContent, "Auto Yin Ritual", false, function(v)
         Shared.YinRitual_Enabled = v
@@ -3224,7 +3258,7 @@ local function buildEventTab(eventLeft, eventRight, makeCard, makeToggle, makeDr
         if F and F.setYinRitualEnabled then F.setYinRitualEnabled(v) end
         if v then notify("🔮 Yin Ritual: ON", "success")
         else notify("🔮 Yin Ritual: OFF", "info") end
-    end)
+    end, "YinRitual_Enabled")
 
     makeToggle(eventContent, "Auto Obby (Talk + Finish)", false, function(v)
         if v then
@@ -3238,7 +3272,7 @@ local function buildEventTab(eventLeft, eventRight, makeCard, makeToggle, makeDr
         else
             notify("🏃 Auto Obby: OFF", "info")
         end
-    end)
+    end, "AutoObby_Enabled")
 
     local eventNote = Instance.new("TextLabel")
     eventNote.Size = UDim2.new(1, 0, 0, 32)
@@ -3507,7 +3541,7 @@ local function buildInfinityJumpSection(speedContent, makeToggle, C, CFG, notify
         else
             notify("♾️ Infinity Jump: OFF", "info")
         end
-    end)
+    end, "InfinityJump_Enabled")
 
     -- Label Height
     local infHeightLbl = Instance.new("TextLabel")
@@ -7244,9 +7278,9 @@ do
 
     -- ═══ KOLOM KIRI ═══
     local eggEspCard, eggEspContent = makeCard(eggLeft, "EGG ESP", 1)
-    makeToggle(eggEspContent, "Enable Egg ESP", false, function(v) Shared.ESP_Eggs_Enabled = v end)
-    makeToggle(eggEspContent, "Show Name", false, function(v) Shared.ESP_EggName_Enabled = v end)
-    makeToggle(eggEspContent, "Show Luck", false, function(v) Shared.ESP_EggLuck_Enabled = v end)
+makeToggle(eggEspContent, "Enable Egg ESP", false, function(v) Shared.ESP_Eggs_Enabled = v end, "ESP_Eggs_Enabled")
+makeToggle(eggEspContent, "Show Name", false, function(v) Shared.ESP_EggName_Enabled = v end, "ESP_EggName_Enabled")
+makeToggle(eggEspContent, "Show Luck", false, function(v) Shared.ESP_EggLuck_Enabled = v end, "ESP_EggLuck_Enabled")
 
     -- ═══ KOLOM KANAN ═══
     local hatchLuckCard, hatchLuckContent = makeCard(eggRight, "🥚 EGG PLOT", 1)
@@ -7255,7 +7289,7 @@ do
     makeToggle(hatchLuckContent, "Auto Hatch", false, function(v)
         Shared.AutoHatch_Enabled = v
         if v then notify("Auto Hatch: ON", "success") else notify("Auto Hatch: OFF", "info") end
-    end)
+    end, "AutoHatch_Enabled")
 
     -- Auto Hatch Luck
     makeToggle(hatchLuckContent, "Auto Hatch Luck", false, function(v)
@@ -7263,7 +7297,7 @@ do
         local F = getFeatures()
         if F and F.getHatchLuckState then F.getHatchLuckState().Enabled = v end
         if v then notify("Hatch Luck: ON", "success") else notify("Hatch Luck: OFF", "info") end
-    end)
+    end, "AutoHatchLuck_Enabled")
 
     -- Hatch Luck Mode
     local hatchModeLbl = Instance.new("TextLabel")
@@ -7290,7 +7324,7 @@ do
         local F = getFeatures()
         if F and F.getAutoPlantState then F.getAutoPlantState().Enabled = v end
         if v then notify("Auto Plant: ON", "success") else notify("Auto Plant: OFF", "info") end
-    end)
+    end, "AutoPlantEgg_Enabled")
 
     -- Auto Plant Filter (by name)
     local plantFilterLbl = Instance.new("TextLabel")
@@ -7328,17 +7362,16 @@ do
 
     -- ═══ KOLOM KIRI ═══
     local pEspCard, pEspContent = makeCard(visLeft, "PLAYER ESP", 1)
-    makeToggle(pEspContent, "Player ESP", false, function(v) Shared.ESP_Players_Enabled = v end)
-    makeToggle(pEspContent, "Player Chams", false, function(v) Shared.ESP_PlayerChams_Enabled = v end)
-    makeToggle(pEspContent, "Player Studs", false, function(v) Shared.ESP_PlayerStuds_Enabled = v end)
+makeToggle(pEspContent, "Player ESP", false, function(v) Shared.ESP_Players_Enabled = v end, "ESP_Players_Enabled")
+makeToggle(pEspContent, "Player Chams", false, function(v) Shared.ESP_PlayerChams_Enabled = v end, "ESP_PlayerChams_Enabled")
+makeToggle(pEspContent, "Player Studs", false, function(v) Shared.ESP_PlayerStuds_Enabled = v end, "ESP_PlayerStuds_Enabled")
 
     -- ═══ KOLOM KANAN ═══
-    local petEspCard, petEspContent = makeCard(visRight, "PET ESP", 1)
-    makeToggle(petEspContent, "Pet ESP", false, function(v) Shared.ESP_Pets_Enabled = v end)
-    makeToggle(petEspContent, "Show Name", false, function(v) Shared.ESP_PetName_Enabled = v end)
-    makeToggle(petEspContent, "Show Cash", false, function(v) Shared.ESP_PetCash_Enabled = v end)
-    makeToggle(petEspContent, "Show Speed", false, function(v) Shared.ESP_PetSpeed_Enabled = v end)
-end
+local petEspCard, petEspContent = makeCard(visRight, "PET ESP", 1)
+makeToggle(petEspContent, "Pet ESP", false, function(v) Shared.ESP_Pets_Enabled = v end, "ESP_Pets_Enabled")
+makeToggle(petEspContent, "Show Name", false, function(v) Shared.ESP_PetName_Enabled = v end, "ESP_PetName_Enabled")
+makeToggle(petEspContent, "Show Cash", false, function(v) Shared.ESP_PetCash_Enabled = v end, "ESP_PetCash_Enabled")
+makeToggle(petEspContent, "Show Speed", false, function(v) Shared.ESP_PetSpeed_Enabled = v end, "ESP_PetSpeed_Enabled")
 
        -- TAB AUTO (2 KOLOM)
 do
@@ -7347,7 +7380,7 @@ do
 
     -- ═══ KOLOM KIRI: SPEED + FLY ═══
     local speedCard, speedContent = makeCard(autoLeft, "SPEED", 1)
-    makeToggle(speedContent, "Enable Speed", false, function(v) Shared.Speed_Enabled = v end)
+   makeToggle(speedContent, "Enable Speed", false, function(v) Shared.Speed_Enabled = v end, "Speed_Enabled")
 
     local speedLbl = Instance.new("TextLabel")
     speedLbl.Size = UDim2.new(1, 0, 0, 16)
@@ -7417,7 +7450,7 @@ do
         if F and F.setFlyEnabled then F.setFlyEnabled(v) end
         if v then notify("🛸 Fly: ON", "success")
         else notify("🛸 Fly: OFF", "info") end
-    end)
+    end, "Fly_Enabled")
 
     local flyHeightLbl = Instance.new("TextLabel")
     flyHeightLbl.Size = UDim2.new(1, 0, 0, 16)
@@ -7479,7 +7512,7 @@ do
 
     -- ═══ KOLOM KANAN: INSTANT PICKUP + OTHER AUTO ═══
     local ipCard, ipContent = makeCard(autoRight, "INSTANT PICKUP", 1)
-    makeToggle(ipContent, "Enable Instant Pickup", false, function(v) Shared.InstantPickup_Enabled = v end)
+    makeToggle(ipContent, "Enable Instant Pickup", false, function(v) Shared.InstantPickup_Enabled = v end, "InstantPickup_Enabled")
 
     local ipNote = Instance.new("TextLabel")
     ipNote.Size = UDim2.new(1, 0, 0, 14)
@@ -7501,7 +7534,7 @@ do
             if F and F.setAutoRideEnabled then F.setAutoRideEnabled(v) end
             if v then notify("🐉 Auto Ride Pet: ON", "success")
             else notify("🐉 Auto Ride Pet: OFF", "info") end
-        end)
+        end, "AutoRidePet_Enabled")
 
         local ridePetLbl = Instance.new("TextLabel")
         ridePetLbl.Size = UDim2.new(1, 0, 0, 16)
@@ -7549,8 +7582,7 @@ do
         end)
     end
 
-    makeToggle(autoContent, "Auto Equip Best", false, function(v) Shared.AutoEquipBest_Enabled = v end)
-end
+    makeToggle(autoContent, "Auto Equip Best", false, function(v) Shared.AutoEquipBest_Enabled = v end, "AutoEquipBest_Enabled")
 
       -- ═══════════════════════════════════════════════════════════
     -- 🏆 TAB WEBHOOK — PLATINUM EDITION
@@ -7806,7 +7838,7 @@ end
                 heroStroke.Color = Color3.fromRGB(200, 210, 225)
                 notify("🔔 Webhook: OFFLINE", "info")
             end
-        end)
+        end, "WebhookEnabled")
 makeToggle(toggleContent, "Ping @everyone", Shared.WebhookMentionEveryone or false, function(v)
     Shared.WebhookMentionEveryone = v
     if v then
@@ -7814,7 +7846,7 @@ makeToggle(toggleContent, "Ping @everyone", Shared.WebhookMentionEveryone or fal
     else
         notify("🔕 @everyone ping: OFF", "info")
     end
-end)
+end, "WebhookMentionEveryone")
 
         -- ╔═══════════════════════════════════════════════════════╗
         -- ║  URL INPUT — Platinum Style                            ║
@@ -8230,11 +8262,11 @@ end)
         afkLbl.Parent = afkContent
         registerTheme(afkLbl, "Muted", "TextColor3")
 
-        makeToggle(afkContent, "Enable Anti-AFK", true, function(v)
-            Shared.AntiAFK_Enabled = v
-            if v then notify("🛡 Anti-AFK: ON", "success")
-            else notify("🛡 Anti-AFK: OFF", "info") end
-        end)
+makeToggle(afkContent, "Enable Anti-AFK", true, function(v)
+    Shared.AntiAFK_Enabled = v
+    if v then notify("🛡 Anti-AFK: ON", "success")
+    else notify("🛡 Anti-AFK: OFF", "info") end
+end, "AntiAFK_Enabled")
 
         -- ===== THEME CARD =====
         local themeCard, themeContent = makeCard(setLeft, "THEME", 2)
@@ -8276,7 +8308,7 @@ end)
             if _G.VRILZ_RefreshTitle then _G.VRILZ_RefreshTitle() end
             if v then notify("👑 Title: ON", "success")
             else notify("👑 Title: OFF", "info") end
-        end)
+        end, "ShowTitle")
 
         local customTitleHolder = Instance.new("Frame")
         customTitleHolder.Name = "CustomTitleHolder"
@@ -8472,12 +8504,12 @@ end)
         makeToggle(fpsContent, "FPS Boost", false, function(v)
             Shared.FPSBoost_Enabled = v
             if v then gfx_enableFPS() else gfx_disableFPS() end
-        end)
+        end, "FPSBoost_Enabled")
 
         makeToggle(fpsContent, "4K HD Mode", false, function(v)
             Shared.HD4K_Enabled = v
             if v then gfx_enableHD() else gfx_disableHD() end
-        end)
+        end, "HD4K_Enabled")
 
         makeToggle(fpsContent, "FPS Window", false, function(v)
             if fpsWin then fpsWin.Visible = v end
@@ -8494,7 +8526,7 @@ end)
             else
                 notify("✨ Lights Effect: OFF", "info")
             end
-        end)
+        end, "LightsEffect_Enabled")
 
         -- ⚡ TOGGLE LIGHTNING EFFECT (petir merah terpisah)
         makeToggle(fpsContent, "Lightning Effect", false, function(v)
@@ -8507,7 +8539,7 @@ end)
             else
                 notify("⚡ Lightning Effect: OFF", "info")
             end
-        end)
+        end, "LightningEffect_Enabled")
 
                 -- ═══════════════════════════════════════════════════════════
         -- 💾 CONFIG MANAGER CARD — SAVE / LOAD / EXPORT / IMPORT / DELETE
@@ -8533,7 +8565,7 @@ end)
         end
 
         -- ═══ FILE CONSTANTS ═══
-        local CONFIG_EXPORT_FILE = "vrilz_config_export.txt"
+        local CONFIG_EXPORT_FILE = "vrilz_share_config.txt"
 
         -- ═══ POPUP HELPER — generic modal ═══
         local function showModalPopup(titleText, contentBuilder, onClose)
@@ -9350,7 +9382,7 @@ end
             Shared.MutationSteal_Enabled = v
             if v then notify("🎯 Steal: ON", "success")
             else notify("🎯 Steal: OFF", "info") end
-        end)
+        end, "MutationSteal_Enabled")
 
         local rarityLbl = Instance.new("TextLabel")
         rarityLbl.Size = UDim2.new(1, 0, 0, 16)
@@ -9399,13 +9431,13 @@ end
             Shared.AutoMutation_Enabled = v
             if v then notify("🔥 Auto Mutation: ON", "success")
             else notify("🔥 Auto Mutation: OFF", "info") end
-        end)
+        end, "AutoMutation_Enabled")
 
         makeToggle(mutContent, "Auto Return to Plot", false, function(v)
             Shared.MutationReturn_Enabled = v
             if v then notify("🏠 Return: ON", "success")
             else notify("🏠 Return: OFF", "info") end
-        end)
+        end, "MutationReturn_Enabled")
 
         local returnModeLbl = Instance.new("TextLabel")
         returnModeLbl.Size = UDim2.new(1, 0, 0, 16)
