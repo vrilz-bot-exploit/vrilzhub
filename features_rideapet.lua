@@ -3786,7 +3786,7 @@ local function halloweenReturnToBase()
 
     local FLY_HEIGHT = 40
     local FLY_STEP = 75
-    local FLY_WAIT = 0.08
+    local FLY_WAIT = 0.07
 
     -- ⭐ Hitung jarak FULL 3D (X/Y/Z) — ≤ 400 studs = INSTANT TP
     local dx = base.Position.X - root.Position.X
@@ -3841,7 +3841,7 @@ local function halloweenReturnToBase()
         r.CFrame = r.CFrame + Vector3.new(0, 15, 0)
         r.Velocity = Vector3.zero
         r.AssemblyLinearVelocity = Vector3.zero
-        task.wait(0.03)
+        task.wait(0.02)
 
         root = r
     end
