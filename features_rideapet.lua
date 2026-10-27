@@ -5172,23 +5172,25 @@ function Features.startAutoYinRitual()
                 continue
             end
 
-                        -- ⭐⭐⭐ PRIORITAS MUTLAK: CEK REWARD DULU — WALAU CAVE COOLDOWN ⭐⭐⭐
-            -- Server set cooldown SETELAH place Yin+Yang, DAN reward muncul SELAMA cooldown
-            -- Jadi reward WAJIB diambil dulu, baru skip fitur lain
-            if findRewardPrompt() then
-                YinRitualState.Active = true
-                YinRitualState.Status = "🎁 Collecting reward..."
+-- ⭐ GUARD: skip reward kalau baru aja sukses collect (< 15 detik)
+-- biar gak double-collect prompt yang sama (prompt belum ke-clear server)
+if YinRitualState._lastRewardTime and (tick() - YinRitualState._lastRewardTime) < 15 then
+    task.wait(0.5)
+    continue
+end
 
-                local got = yinCollectReward()
-
-                if got then
-                    YinRitualState._lastRewardTime = os.clock()
+if findRewardPrompt() then
+    YinRitualState.Active = true
+    YinRitualState.Status = "🎁 Collecting reward..."
+    local got = yinCollectReward()
+    if got then
+                YinRitualState._lastRewardTime = tick()
                     YinRitualState.RewardCount = YinRitualState.RewardCount + 1
                     YinRitualState.RitualCount = YinRitualState.RitualCount + 1
                     YinRitualState.Status = "✅ Reward #" .. YinRitualState.RewardCount .. " ke-tangan!"
                     YinRitualState.Status = "🏠 Returning to base..."
                     yinReturnToBase()
-                    YinRitualState._lastRewardTime = os.clock()
+                    YinRitualState._lastRewardTime = tick()
                     YinRitualState.Status = "⏳ Cooldown 20s..."
                 else
                     YinRitualState.Status = "⚠️ Reward retry..."
@@ -5206,7 +5208,7 @@ function Features.startAutoYinRitual()
             end
 
             -- Global cooldown reward
-            local _now = os.clock()
+            local _now = tick()
             if YinRitualState._lastRewardTime and (_now - YinRitualState._lastRewardTime) < 20 then
                 YinRitualState.Status = "⏳ Reward cooldown... (" ..
                     math.floor(20 - (_now - YinRitualState._lastRewardTime)) .. "s)"
@@ -5247,20 +5249,23 @@ function Features.startAutoYinRitual()
             end
 
                         -- ═══ STEP 1: REWARD ═══
-            if findRewardPrompt() then
-                YinRitualState.Active = true
-                YinRitualState.Status = "🎁 Collecting reward..."
+if YinRitualState._lastRewardTime and (tick() - YinRitualState._lastRewardTime) < 15 then
+    task.wait(0.5)
+    continue
+end
 
-                local got = yinCollectReward()
-
-                if got then
-                    YinRitualState._lastRewardTime = os.clock()
+if findRewardPrompt() then
+    YinRitualState.Active = true
+    YinRitualState.Status = "🎁 Collecting reward..."
+    local got = yinCollectReward()
+    if got then
+                YinRitualState._lastRewardTime = tick()
                     YinRitualState.RewardCount = YinRitualState.RewardCount + 1
                     YinRitualState.RitualCount = YinRitualState.RitualCount + 1
                     YinRitualState.Status = "✅ Reward #" .. YinRitualState.RewardCount .. " ke-tangan!"
                     YinRitualState.Status = "🏠 Returning to base..."
                     yinReturnToBase()
-                    YinRitualState._lastRewardTime = os.clock()
+                    YinRitualState._lastRewardTime = tick()
                     YinRitualState.Status = "⏳ Cooldown 20s..."
                 else
                     YinRitualState.Status = "⚠️ Reward retry..."
