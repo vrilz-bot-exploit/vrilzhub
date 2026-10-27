@@ -6147,7 +6147,7 @@ if isAsset then
         return page
     end
 
--- ===== 2-COLUMN PAGE HELPER (khusus tab Info) =====
+-- ===== 2-COLUMN PAGE HELPER (support header slot) =====
 local function createTwoColumnPage(name)
     local page = Instance.new("ScrollingFrame")
     page.Name = name
@@ -6164,11 +6164,33 @@ local function createTwoColumnPage(name)
     page.ZIndex = 7
     page.Parent = pageHolder
 
-    -- Layout horizontal: kiri | kanan
+    -- ⭐ LAYOUT UTAMA VERTIKAL
+    local mainLayout = Instance.new("UIListLayout")
+    mainLayout.Padding = UDim.new(0, IS_MOBILE and 8 or 12)
+    mainLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    mainLayout.Parent = page
+
+    -- ⭐ HEADER SLOT (full-width paling atas)
+    local headerSlot = Instance.new("Frame")
+    headerSlot.Name = "HeaderSlot"
+    headerSlot.Size = UDim2.new(1, 0, 0, 0)
+    headerSlot.AutomaticSize = Enum.AutomaticSize.Y
+    headerSlot.BackgroundTransparency = 1
+    headerSlot.LayoutOrder = 1
+    headerSlot.ZIndex = 7
+    headerSlot.Parent = page
+
+    local headerLayout = Instance.new("UIListLayout")
+    headerLayout.Padding = UDim.new(0, IS_MOBILE and 8 or 12)
+    headerLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    headerLayout.Parent = headerSlot
+
+    -- Row 2 kolom (kiri | kanan)
     local row = Instance.new("Frame")
     row.Size = UDim2.new(1, 0, 0, 0)
     row.AutomaticSize = Enum.AutomaticSize.Y
     row.BackgroundTransparency = 1
+    row.LayoutOrder = 2
     row.ZIndex = 7
     row.Parent = page
 
@@ -6210,12 +6232,13 @@ local function createTwoColumnPage(name)
 
     -- Sync canvas height
     local function syncCanvas()
-        page.CanvasSize = UDim2.new(0, 0, 0, rowLayout.AbsoluteContentSize.Y + 120)
+        page.CanvasSize = UDim2.new(0, 0, 0, mainLayout.AbsoluteContentSize.Y + 120)
     end
-    rowLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(syncCanvas)
+    mainLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(syncCanvas)
     task.defer(syncCanvas)
 
-    return page, leftCol, rightCol
+    -- ⭐ RETURN 4 VALUE
+    return page, leftCol, rightCol, headerSlot
 end
 
 -- TAB INFO (2 KOLOM)
