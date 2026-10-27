@@ -4108,7 +4108,8 @@ function Features.startAutoHalloween()
         while task.wait(HalloweenCfg.LOOP_WAIT) do
            if not HalloweenState.Enabled then
     HalloweenState.Status = "⏸️ Idle"
-    _G.VRILZ_HalloweenBusy = false   -- ⭐ FIX: reset flag pas OFF
+    _G.VRILZ_HalloweenBusy = false
+    HalloweenState._yinWaitStart = nil   -- ⭐ reset timer
     continue
 end
 
@@ -4122,11 +4123,16 @@ if Shared.AutoMutation_Enabled then
     end
 end
 
--- ⭐ PRIORITY 2: Auto Yin Ritual — cuma nunggu kalau cave GAK cooldown
+-- ⭐ PRIORITY 2: Auto Yin Ritual — JANGAN stuck, max tunggu 15 detik
 if Shared.YinRitual_Enabled then
     local yinState = Features.getYinRitualState and Features.getYinRitualState()
 
-    -- Cek cave cooldown — kalau cooldown, jangan nunggu Yin
+    -- ⭐ Inisialisasi timer wait (biar gak stuck selamanya)
+    if not HalloweenState._yinWaitStart then
+        HalloweenState._yinWaitStart = os.clock()
+    end
+
+    -- ⭐ Cek cave cooldown
     local caveOnCd = false
     do
         local hr = Workspace:FindFirstChild("HeadlessRitual")
@@ -4141,14 +4147,26 @@ if Shared.YinRitual_Enabled then
         end
     end
 
-    -- Cuma nunggu kalau Yin AKTIF dan cave GAK cooldown
-    if yinState and yinState.Active and not caveOnCd then
-        HalloweenState.Status = "⏸️ Waiting Yin Ritual selesai..."
+    -- ⭐ Cuma nunggu kalau Yin BENERAN aktif DAN cave GAK cooldown
+    local yinReallyActive = yinState and yinState.Active and not caveOnCd
+
+    -- ⭐ SAFETY: max tunggu 15 detik, abis itu paksa lanjut
+    local waitElapsed = os.clock() - HalloweenState._yinWaitStart
+    if yinReallyActive and waitElapsed < 15 then
+        HalloweenState.Status = string.format("⏸️ Waiting Yin Ritual (%.0fs)...", 15 - waitElapsed)
         task.wait(1)
         continue
     end
 
-    -- Cek masih ada Yin/Yang di runtime DAN cave gak cooldown
+    -- ⭐ Reset timer kalau udah selesai / timeout
+    if not yinReallyActive or waitElapsed >= 15 then
+        HalloweenState._yinWaitStart = nil
+        if waitElapsed >= 15 and yinReallyActive then
+            HalloweenState.Status = "⚠️ Yin timeout — Halloween lanjut"
+        end
+    end
+
+    -- ⭐ Cek Runtime cuma kalau cave GAK cooldown DAN gak ada item di tangan player
     if not caveOnCd then
         local hr = Workspace:FindFirstChild("HeadlessRitual")
         local rt = hr and hr:FindFirstChild("Runtime")
@@ -4160,10 +4178,10 @@ if Shared.YinRitual_Enabled then
                     break
                 end
             end
-            if hasItem then
-                HalloweenState.Status = "⏸️ Waiting Yin Ritual (masih ada item)..."
-                task.wait(1)
-                continue
+
+            -- ⭐ Cuma nunggu kalau ada item DAN cave GAK cooldown DAN Yin gak idle lama
+            if hasItem and yinState and yinState.Active then
+                -- Timer udah dicek di atas, jadi aman
             end
         end
     end
@@ -4421,27 +4439,44 @@ local function findRewardPrompt()
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then return nil end
 
-    -- 1. Scan SEMUA ProximityPrompt di HeadlessRitual
-    for _, d in ipairs(hr:GetDescendants()) do
-        if d:IsA("ProximityPrompt") then
-            local at = (d.ActionText or ""):lower()
-            local ot = (d.ObjectText or ""):lower()
-            if at:find("pick", 1, true) or ot:find("candy", 1, true)
-               or ot:find("pot", 1, true) or ot:find("ritual", 1, true)
-               or at:find("collect", 1, true) then
-                _cachedRewardPrompt = d
-                return d
-            end
-        end
+    -- ⭐ STRICT: cuma prompt yang ActionText/ObjectText-nya JELAS reward
+    -- ActionText: "Collect", "Pick Up", "Take", "Claim"
+    -- ObjectText: "Reward", "Candy", "Prize"
+    local function isRewardPrompt(d)
+        if not d:IsA("ProximityPrompt") then return false end
+        local at = (d.ActionText or ""):lower()
+        local ot = (d.ObjectText or ""):lower()
+
+        -- ⭐ BLACKLIST: kalau ada "place", "yin", "yang" → BUKAN reward
+        if at:find("place", 1, true) then return false end
+        if ot:find("yin", 1, true) then return false end
+        if ot:find("yang", 1, true) then return false end
+        if at:find("place yin", 1, true) then return false end
+        if at:find("place yang", 1, true) then return false end
+
+        -- ⭐ WHITELIST: harus ada kata reward-specific
+        local actionOk = at:find("collect", 1, true)
+                      or at:find("pick up", 1, true)
+                      or at:find("pickup", 1, true)
+                      or at:find("take", 1, true)
+                      or at:find("claim", 1, true)
+                      or at:find("open", 1, true)
+
+        local objectOk = ot:find("reward", 1, true)
+                      or ot:find("candy", 1, true)
+                      or ot:find("prize", 1, true)
+                      or ot:find("pot", 1, true)
+
+        return (actionOk or objectOk)
     end
 
-    -- 2. Fallback: cari prompt di dalam folder "Rewards_"
+    -- ⭐ Scan folder Reward_* dulu (paling reliable)
     local rt = hr:FindFirstChild("Runtime")
     if rt then
         for _, folder in ipairs(rt:GetChildren()) do
             if folder:IsA("Folder") and folder.Name:lower():find("reward", 1, true) then
                 for _, d in ipairs(folder:GetDescendants()) do
-                    if d:IsA("ProximityPrompt") then
+                    if isRewardPrompt(d) then
                         _cachedRewardPrompt = d
                         return d
                     end
@@ -4450,19 +4485,28 @@ local function findRewardPrompt()
         end
     end
 
-    -- 3. Fallback: cek RewardPoints
+    -- ⭐ Scan RewardPoints
     local rp = hr:FindFirstChild("RewardPoints")
     if rp then
-        for _, d in ipairs(rp:GetChildren()) do
-            if d:IsA("ProximityPrompt") then
+        for _, d in ipairs(rp:GetDescendants()) do
+            if isRewardPrompt(d) then
                 _cachedRewardPrompt = d
                 return d
             end
         end
     end
 
+    -- ⭐ Scan semua prompt di HR TAPI pake filter ketat
+    for _, d in ipairs(hr:GetDescendants()) do
+        if isRewardPrompt(d) then
+            _cachedRewardPrompt = d
+            return d
+        end
+    end
+
     return nil
 end
+
 -- ═══════════════════════════════════════════════════════════
 -- CACHE SCAN UI — biar gak freeze (max 1x/detik)
 -- ═══════════════════════════════════════════════════════════
@@ -5291,6 +5335,10 @@ function Features.setYinRitualEnabled(v)
     else
         YinRitualState.Status = "⏸️ Idle"
         YinRitualState.Active = false
+    end
+    -- ⭐ Reset Halloween timer
+    if HalloweenState then
+        HalloweenState._yinWaitStart = nil
     end
 end
 
