@@ -8610,11 +8610,6 @@ local function showModalPopup(titleText, contentBuilder, onClose)
     contentArea.BackgroundTransparency = 1
     contentArea.Parent = popup
 
-    local contentLayout = Instance.new("UIListLayout")
-    contentLayout.Padding = UDim.new(0, 6)
-    contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    contentLayout.Parent = contentArea
-
     local function close()
         if onClose then pcall(onClose) end
         TweenService:Create(popup, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
@@ -8625,6 +8620,11 @@ local function showModalPopup(titleText, contentBuilder, onClose)
     end
 
     closeX.MouseButton1Click:Connect(close)
+
+    local contentLayout = Instance.new("UIListLayout")
+    contentLayout.Padding = UDim.new(0, 6)
+    contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    contentLayout.Parent = contentArea
 
     popupBg.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1
