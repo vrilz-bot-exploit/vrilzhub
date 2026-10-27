@@ -5677,10 +5677,526 @@ function Features.startStealExecutor()
 end
 
 -- ============================================================
+-- 💾 CONFIG SYSTEM — Auto-save / Auto-load / Manual control
+-- (HttpService udah di-declare di atas — jangan redeclare!)
+-- ============================================================
+local CONFIG_FILE = "vrilz_config.json"
+local CONFIG_VERSION = 2
+
+-- Keys Shared yang di-save
+local CONFIG_KEYS = {
+    -- Toggles
+    "AutoSteal_Enabled", "AutoReturn_Enabled", "AutoHatch_Enabled",
+    "AutoPlantEgg_Enabled", "AutoRidePet_Enabled", "AutoEquipBest_Enabled",
+    "AutoFarm_Enabled", "AntiAFK_Enabled", "InstantPickup_Enabled",
+    "AutoMutation_Enabled", "MutationReturn_Enabled", "MutationSteal_Enabled",
+    "VolcanicHunt_Enabled", "VolcanicReturn_Enabled", "VolcanicMutation_Enabled",
+    "AutoHatchLuck_Enabled", "Speed_Enabled",
+    "FPSBoost_Enabled", "HD4K_Enabled", "LightsEffect_Enabled", "LightningEffect_Enabled",
+    "ShowTitle", "WebhookEnabled", "WebhookMentionEveryone",
+    "YinRitual_Enabled", "InfinityJump_Enabled",
+    "Halloween_Enabled",                                          -- ⭐ TAMBAH INI
+    "ESP_Eggs_Enabled", "ESP_EggName_Enabled", "ESP_EggLuck_Enabled",
+    "ESP_Pets_Enabled", "ESP_PetName_Enabled", "ESP_PetCash_Enabled", "ESP_PetSpeed_Enabled",
+    -- Dropdown / string
+    "StealMode", "ReturnMode", "HatchLuck_Mode", "TP_Method",
+    "MutationStealMode", "AutoPlantEgg_Filter", "AutoRideSelectedPet",
+    "SelectedEgg", "RarityNotifThreshold",
+
+    -- Number
+    "Speed_Value", "Fly_Height", "Fly_Speed", "InfinityJump_Height",
+
+    -- Table (multi-select)
+    "SelectedRarities", "MutationSelectedEggs",
+}
+
+local ConfigState = {
+    Loading = false,
+    LastSaveTime = 0,
+    _saveDebounce = nil,
+    _ready = false,
+}
+
+local function config_serializeValue(v)
+    if type(v) == "table" then
+        local copy = {}
+        for k, vv in pairs(v) do
+            if type(vv) == "boolean" or type(vv) == "number" or type(vv) == "string" then
+                copy[k] = vv
+            end
+        end
+        return copy
+    end
+    return v
+end
+
+-- ═══ SAVE ═══
+local function config_save(silent)
+    if not writefile then return false end
+    if ConfigState.Loading then return false end
+    if not Shared then return false end
+
+    local data = {
+        _version = CONFIG_VERSION,
+        _saved_at = os.time(),
+        _theme = _G.VRILZ_CurrentTheme or "Brutal",
+    }
+
+    for _, key in ipairs(CONFIG_KEYS) do
+        local v = Shared[key]
+        if v ~= nil then
+            data[key] = config_serializeValue(v)
+        end
+    end
+
+    local ok = pcall(function()
+        writefile(CONFIG_FILE, HttpService:JSONEncode(data))
+    end)
+
+    if ok then
+        ConfigState.LastSaveTime = os.clock()
+        if not silent and Shared.Notify then
+            Shared.Notify("💾 Config saved", "success")
+        end
+    elseif Shared.Notify and not silent then
+        Shared.Notify("❌ Config save failed", "error")
+    end
+    return ok
+end
+
+-- ═══ LOAD ═══
+local function config_load(silent)
+    if not (readfile and isfile) then return false end
+    if not Shared then return false end
+
+    local okFile, exists = pcall(isfile, CONFIG_FILE)
+    if not okFile or not exists then
+        if Shared.Notify and not silent then
+            Shared.Notify("📂 No config file found", "warning")
+        end
+        return false
+    end
+
+    local okRead, content = pcall(readfile, CONFIG_FILE)
+    if not okRead or not content or content == "" then return false end
+
+    local okDecode, data = pcall(function() return HttpService:JSONDecode(content) end)
+    if not okDecode or type(data) ~= "table" then
+        if Shared.Notify and not silent then
+            Shared.Notify("❌ Config corrupted", "error")
+        end
+        return false
+    end
+
+    local ver = tonumber(data._version or 0) or 0
+    if ver > CONFIG_VERSION then
+        warn("[CONFIG] Config version mismatch")
+        return false
+    end
+
+    ConfigState.Loading = true
+
+    for _, key in ipairs(CONFIG_KEYS) do
+        if data[key] ~= nil then
+            Shared[key] = data[key]
+        end
+    end
+
+    if data._theme then
+        _G.VRILZ_ApplyThemeFromConfig = data._theme
+    end
+
+    -- ⭐ Sync fitur yang butuh setter khusus
+    task.defer(function()
+        pcall(function()
+            if Shared.AutoRidePet_Enabled ~= nil and Features.setAutoRideEnabled then
+                Features.setAutoRideEnabled(Shared.AutoRidePet_Enabled)
+            end
+        end)
+        pcall(function()
+            if Shared.InfinityJump_Enabled ~= nil and Features.setInfinityJumpEnabled then
+                Features.setInfinityJumpEnabled(Shared.InfinityJump_Enabled)
+            end
+        end)
+        pcall(function()
+            if Shared.InfinityJump_Height ~= nil and Features.setInfinityJumpHeight then
+                Features.setInfinityJumpHeight(Shared.InfinityJump_Height)
+            end
+        end)
+        pcall(function()
+            if Shared.YinRitual_Enabled ~= nil and Features.setYinRitualEnabled then
+                Features.setYinRitualEnabled(Shared.YinRitual_Enabled)
+            end
+        end)
+        pcall(function()
+            if Shared.HatchLuck_Mode ~= nil and Features.setHatchLuckMode then
+                Features.setHatchLuckMode(Shared.HatchLuck_Mode)
+            end
+        end)
+        pcall(function()
+            if Shared.Speed_Value and Features.setSpeed then
+                Features.setSpeed(Shared.Speed_Value)
+            end
+        end)
+        pcall(function()
+            if Shared.Fly_Height and Features.setFlyHeight then
+                Features.setFlyHeight(Shared.Fly_Height)
+            end
+        end)
+        pcall(function()
+            if Shared.Fly_Speed and Features.setFlySpeed then
+                Features.setFlySpeed(Shared.Fly_Speed)
+            end
+        end)
+        pcall(function()
+            if Shared.AutoPlantEgg_Enabled ~= nil and Features.getAutoPlantState then
+                Features.getAutoPlantState().Enabled = Shared.AutoPlantEgg_Enabled
+            end
+        end)
+        pcall(function()
+            if Shared.AutoPlantEgg_Filter and Features.setAutoPlantFilter then
+                Features.setAutoPlantFilter(Shared.AutoPlantEgg_Filter)
+            end
+        end)
+        pcall(function()
+            if Shared.HatchLuck_Mode and Features.setHatchLuckMode then
+                Features.setHatchLuckMode(Shared.HatchLuck_Mode)
+            end
+        end)
+        pcall(function()
+            if Shared.Halloween_Enabled and Features.getHalloweenState then
+                Features.getHalloweenState().Enabled = Shared.Halloween_Enabled
+            end
+        end)
+
+        -- ⭐ Trigger Auto Obby kalau ON di config (karena gak loop)
+        if Shared.AutoObby_Enabled and Features.startAutoObby then
+            pcall(Features.startAutoObby)
+        end
+
+        ConfigState.Loading = false
+        if Shared.Notify and not silent then
+            Shared.Notify("📂 Config loaded!", "success")
+        end
+
+        _G.VRILZ_ConfigLoaded = true
+        if _G.VRILZ_RefreshAllUI then
+            pcall(_G.VRILZ_RefreshAllUI)
+        end
+    end)
+
+    return true
+end
+
+-- ═══ DELETE ═══
+local function config_delete()
+    if not (delfile and isfile) then
+        if Shared and Shared.Notify then Shared.Notify("❌ Executor no delete support", "error") end
+        return false
+    end
+    local okFile, exists = pcall(isfile, CONFIG_FILE)
+    if not okFile or not exists then
+        if Shared and Shared.Notify then Shared.Notify("📂 No config to delete", "warning") end
+        return false
+    end
+    local ok = pcall(delfile, CONFIG_FILE)
+    if ok and Shared and Shared.Notify then
+        Shared.Notify("🗑 Config deleted — restart to reset", "info")
+    end
+    return ok
+end
+
+-- ═══ AUTO-SAVE (debounced 1.5s) ═══
+local function config_scheduleAutoSave()
+    if ConfigState.Loading then return end
+    if not ConfigState._ready then return end
+
+    if ConfigState._saveDebounce then
+        task.cancel(ConfigState._saveDebounce)
+    end
+    ConfigState._saveDebounce = task.delay(1.5, function()
+        ConfigState._saveDebounce = nil
+        config_save(true)
+    end)
+end
+
+-- ═══ WATCHER ═══
+local function config_startWatcher()
+    if ConfigState._ready then return end
+    if not Shared then return end
+    ConfigState._ready = true
+
+    task.spawn(function()
+        local lastSnapshot = {}
+        while true do
+            task.wait(0.8)
+            if ConfigState.Loading then continue end
+            if not Shared then continue end
+
+            local changed = false
+            for _, key in ipairs(CONFIG_KEYS) do
+                local v = Shared[key]
+                local serialized
+                if type(v) == "table" then
+                    serialized = HttpService:JSONEncode(config_serializeValue(v))
+                else
+                    serialized = tostring(v)
+                end
+
+                if lastSnapshot[key] ~= serialized then
+                    lastSnapshot[key] = serialized
+                    changed = true
+                end
+            end
+
+            if changed then
+                config_scheduleAutoSave()
+            end
+        end
+    end)
+end
+
+-- ═══ Expose ═══
+_G.VRILZ_Config = {
+    save = config_save,
+    load = config_load,
+    delete = config_delete,
+    isReady = function() return ConfigState._ready end,
+    isLoading = function() return ConfigState.Loading end,
+}
+
+_G.VRILZ_WidgetRegistry = _G.VRILZ_WidgetRegistry or {}
+function _G.VRILZ_RegisterWidget(refreshFn)
+    if type(refreshFn) == "function" then
+        table.insert(_G.VRILZ_WidgetRegistry, refreshFn)
+    end
+end
+
+function _G.VRILZ_RefreshAllUI()
+    for _, fn in ipairs(_G.VRILZ_WidgetRegistry) do
+        pcall(fn)
+    end
+    print("[CONFIG] UI refreshed:", #_G.VRILZ_WidgetRegistry, "widget")
+end
+
+-- ============================================================
+-- 📤 SHARE CONFIG — Export/Import string (base64)
+-- ============================================================
+local SHARE_PREFIX = "VH1:"
+local SHARE_VERSION = 1
+
+-- Simple base64 (gak pake HttpService, biar portable di executor)
+local B64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+
+local function b64_encode(s)
+    local out = {}
+    for i = 1, #s, 3 do
+        local a = string.byte(s, i) or 0
+        local b = string.byte(s, i + 1) or 0
+        local c = string.byte(s, i + 2) or 0
+        local n = a * 65536 + b * 256 + c
+        local c1 = math.floor(n / 262144) % 64
+        local c2 = math.floor(n / 4096) % 64
+        local c3 = math.floor(n / 64) % 64
+        local c4 = n % 64
+        table.insert(out, B64_CHARS:sub(c1 + 1, c1 + 1))
+        table.insert(out, B64_CHARS:sub(c2 + 1, c2 + 1))
+        if i + 1 <= #s then
+            table.insert(out, B64_CHARS:sub(c3 + 1, c3 + 1))
+        else
+            table.insert(out, "=")
+        end
+        if i + 2 <= #s then
+            table.insert(out, B64_CHARS:sub(c4 + 1, c4 + 1))
+        else
+            table.insert(out, "=")
+        end
+    end
+    return table.concat(out)
+end
+
+local function b64_decode(s)
+    s = s:gsub("[^" .. B64_CHARS:gsub("([%+%/%^%-])", "%%%1") .. "=]", "")
+    local out = {}
+    local lookup = {}
+    for i = 1, #B64_CHARS do
+        lookup[B64_CHARS:sub(i, i)] = i - 1
+    end
+    for i = 1, #s, 4 do
+        local c1 = lookup[s:sub(i, i)] or 0
+        local c2 = lookup[s:sub(i + 1, i + 1)] or 0
+        local c3 = lookup[s:sub(i + 2, i + 2)] or 0
+        local c4 = lookup[s:sub(i + 3, i + 3)] or 0
+        local n = c1 * 262144 + c2 * 4096 + c3 * 64 + c4
+        local a = math.floor(n / 65536) % 256
+        local b = math.floor(n / 256) % 256
+        local c = n % 256
+        table.insert(out, string.char(a))
+        if s:sub(i + 2, i + 2) ~= "=" then
+            table.insert(out, string.char(b))
+        end
+        if s:sub(i + 3, i + 3) ~= "=" then
+            table.insert(out, string.char(c))
+        end
+    end
+    return table.concat(out)
+end
+
+-- ═══ EXPORT ═══
+local function config_export()
+    if not Shared then return nil, "Shared not ready" end
+
+    local data = {
+        _version = SHARE_VERSION,
+        _saved_at = os.time(),
+        _theme = _G.VRILZ_CurrentTheme or "Brutal",
+        _by = LocalPlayer.Name,
+    }
+
+    for _, key in ipairs(CONFIG_KEYS) do
+        local v = Shared[key]
+        if v ~= nil then
+            data[key] = config_serializeValue(v)
+        end
+    end
+
+    local ok, json = pcall(function()
+        return HttpService:JSONEncode(data)
+    end)
+    if not ok or not json then
+        return nil, "JSON encode failed"
+    end
+
+    local code = SHARE_PREFIX .. b64_encode(json)
+    return code, nil
+end
+
+-- ═══ IMPORT ═══
+local function config_import(code, silent)
+    if type(code) ~= "string" then
+        return false, "Invalid code (not string)"
+    end
+
+    code = code:gsub("%s+", "")  -- buang spasi/newline
+    if code:sub(1, #SHARE_PREFIX) ~= SHARE_PREFIX then
+        return false, "Invalid code (wrong prefix)"
+    end
+
+    local encoded = code:sub(#SHARE_PREFIX + 1)
+    if encoded == "" then
+        return false, "Invalid code (empty)"
+    end
+
+    local okDec, json = pcall(b64_decode, encoded)
+    if not okDec or not json or json == "" then
+        return false, "Invalid code (decode failed)"
+    end
+
+    local okJson, data = pcall(function()
+        return HttpService:JSONDecode(json)
+    end)
+    if not okJson or type(data) ~= "table" then
+        return false, "Invalid code (JSON corrupted)"
+    end
+
+    if not Shared then
+        return false, "Shared not ready"
+    end
+
+    -- Set loading biar watcher gak save pas import
+    ConfigState.Loading = true
+
+    local applied = 0
+    for _, key in ipairs(CONFIG_KEYS) do
+        if data[key] ~= nil then
+            Shared[key] = data[key]
+            applied = applied + 1
+        end
+    end
+
+    -- Theme
+    if data._theme and data._theme ~= "" then
+        _G.VRILZ_ApplyThemeFromConfig = data._theme
+    end
+
+    -- ⭐ Trigger setter khusus (sama kayak config_load)
+    task.defer(function()
+        pcall(function()
+            if Shared.AutoRidePet_Enabled ~= nil and Features.setAutoRideEnabled then
+                Features.setAutoRideEnabled(Shared.AutoRidePet_Enabled)
+            end
+        end)
+        pcall(function()
+            if Shared.InfinityJump_Enabled ~= nil and Features.setInfinityJumpEnabled then
+                Features.setInfinityJumpEnabled(Shared.InfinityJump_Enabled)
+            end
+        end)
+        pcall(function()
+            if Shared.InfinityJump_Height ~= nil and Features.setInfinityJumpHeight then
+                Features.setInfinityJumpHeight(Shared.InfinityJump_Height)
+            end
+        end)
+        pcall(function()
+            if Shared.YinRitual_Enabled ~= nil and Features.setYinRitualEnabled then
+                Features.setYinRitualEnabled(Shared.YinRitual_Enabled)
+            end
+        end)
+        pcall(function()
+            if Shared.HatchLuck_Mode ~= nil and Features.setHatchLuckMode then
+                Features.setHatchLuckMode(Shared.HatchLuck_Mode)
+            end
+        end)
+        pcall(function()
+            if Shared.AutoPlantEgg_Filter and Features.setAutoPlantFilter then
+                Features.setAutoPlantFilter(Shared.AutoPlantEgg_Filter)
+            end
+        end)
+        pcall(function()
+            if Shared.Halloween_Enabled and Features.getHalloweenState then
+                Features.getHalloweenState().Enabled = Shared.Halloween_Enabled
+            end
+        end)
+
+        ConfigState.Loading = false
+
+        if Shared.Notify and not silent then
+            Shared.Notify("📥 Config imported! (" .. applied .. " keys)", "success")
+        end
+
+        _G.VRILZ_ConfigLoaded = true
+        if _G.VRILZ_RefreshAllUI then
+            pcall(_G.VRILZ_RefreshAllUI)
+        end
+    end)
+
+    return true, "Imported " .. applied .. " keys"
+end
+
+-- Expose
+_G.VRILZ_Config.export = config_export
+_G.VRILZ_Config.import = config_import
+
+-- ============================================================
 -- FEATURES.INIT
 -- ============================================================
 function Features.Init(sharedState)
     Shared = sharedState
+
+    -- ⭐⭐⭐ CONFIG: AUTO-LOAD SEBELUM FITUR LAIN ⭐⭐⭐
+    task.spawn(function()
+        -- Tunggu Shared siap
+        task.wait(0.2)
+        local ok, loaded = pcall(config_load, true)  -- silent
+        if loaded then
+            print("[CONFIG] ✅ Auto-loaded on startup")
+        else
+            print("[CONFIG] No config / fresh start")
+        end
+        -- Baru nyalain watcher setelah load selesai
+        task.wait(0.5)
+        config_startWatcher()
+    end)
+    -- ⭐⭐⭐ END CONFIG ⭐⭐⭐
 
     -- ⭐ SET DEFAULT BIAR AMAN
     if Shared.AntiAFK_Enabled == nil then Shared.AntiAFK_Enabled = true end
