@@ -349,20 +349,23 @@ _G.VRILZ_GetEggInfo = getEggInfoForWebhook
 _G.VRILZ_GetRealtimeLuck = getRealtimeEggLuck
 
 -- ============================================================
--- ANTI-AFK (FINAL v4) — Aman buat semua fitur
+-- ANTI-AFK (FINAL v5) — SAFE, ANTI-KICK, ANTI-DOUBLE-FIRE
 -- ============================================================
 function Features.startAntiAFK()
     if Features._antiAFKStarted then return end
     Features._antiAFKStarted = true
 
     local VirtualUser = game:GetService("VirtualUser")
-
     if not Shared then Shared = {} end
     if Shared.AntiAFK_Enabled == nil then Shared.AntiAFK_Enabled = true end
 
     local hasMouseMove = (type(mousemoverel) == "function")
 
-    -- ⭐ Cek apakah ada fitur lain yang lagi jalan
+    -- ⭐ GUARD: cegah anti-AFK action dobel (race condition)
+    local _actionBusy = false
+    local _lastActionTime = 0
+
+    -- ⭐ Cek fitur lain yang lagi aktif
     local function isAnyFeatureBusy()
         if Shared.AutoFarm_Enabled then return true end
         if Shared.AutoSteal_Enabled then return true end
@@ -374,105 +377,91 @@ function Features.startAntiAFK()
             local ys = Features.getYinRitualState and Features.getYinRitualState()
             if ys and ys.Active then return true end
         end
+        if Shared.Fly_Enabled and Features.getFlyState then
+            local fs = Features.getFlyState()
+            if fs and fs.Flying then return true end
+        end
         return false
     end
 
+    -- ⭐ ACTION (TANPA task.wait block di dalam event handler)
     local function doAntiAFKAction()
         if Shared.AntiAFK_Enabled == false then return end
+        if _actionBusy then return end          -- ⭐ anti-double-fire
+        _actionBusy = true
 
-        -- 1) Capture controller
-        local captured = pcall(function()
+        -- throttle: minimal 30s antar action (biar gak spam server)
+        if os.clock() - _lastActionTime < 30 then
+            _actionBusy = false
+            return
+        end
+        _lastActionTime = os.clock()
+
+        -- 1) Capture + Button2 (jalan synchronously, tanpa wait)
+        pcall(function()
             VirtualUser:CaptureController()
+            VirtualUser:Button2Down(Vector2.new(0, 0))
+            VirtualUser:Button2Up(Vector2.new(0, 0))
         end)
 
-        -- 2) Button2 down/up
-        if captured then
-            pcall(function()
-                VirtualUser:Button2Down(Vector2.new(0, 0))
-            end)
-            task.wait(0.05)
-            pcall(function()
-                VirtualUser:Button2Up(Vector2.new(0, 0))
-            end)
-        end
-
-        -- 3) Gerak karakter — CUMA kalo gak ada fitur aktif & gak naik pet
+        -- 2) Gerak karakter (HANYA kalau aman)
         if not isAnyFeatureBusy() then
             local char = LocalPlayer.Character
             local hum = char and char:FindFirstChildOfClass("Humanoid")
-            if hum and hum.Health > 0 and not hum.SeatPart then
+            if hum and hum.Health > 0 and not hum.SeatPart and not hum.PlatformStand then
                 pcall(function()
                     hum:Move(Vector3.new(0, 0, -1), false)
-                    task.wait(0.1)
-                    hum:Move(Vector3.new(0, 0, 0), false)
+                end)
+                -- Reset gerak setelah 0.1s (task.spawn biar gak block)
+                task.delay(0.1, function()
+                    local h = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                    if h and not h.SeatPart then
+                        pcall(function() h:Move(Vector3.new(0, 0, 0), false) end)
+                    end
                 end)
             end
         end
 
-        -- 4) Mousemoverel
+        -- 3) Mouse move (cuma kalau ada + gak busuk)
         if hasMouseMove then
-            pcall(function() mousemoverel(5, 5) end)
-            task.wait(0.05)
-            pcall(function() mousemoverel(-5, -5) end)
+            task.spawn(function()
+                pcall(function() mousemoverel(5, 5) end)
+                task.wait(0.05)
+                pcall(function() mousemoverel(-5, -5) end)
+            end)
         end
 
-        -- ⭐ 5) Kamera — DIHAPUS (bisa bikin glitch, gak perlu)
+        task.delay(0.2, function() _actionBusy = false end)
     end
 
-    -- ⭐ 1) IDLED LISTENER
+    -- ═══ 1. IDLED LISTENER (yang paling penting) ═══
+    -- ⭐ JANGAN pakai while true + task.wait DI DALAM handler
+    -- Langsung connect sekali, biar Roblox yang manage
     task.spawn(function()
-        while true do
-            if not LocalPlayer or not LocalPlayer.Parent then
-                task.wait(1)
-                continue
-            end
-
-            local conn
-            local ok = pcall(function()
-                conn = LocalPlayer.Idled:Connect(function()
-                    if Shared.AntiAFK_Enabled == false then return end
-                    doAntiAFKAction()
-                end)
+        if not LocalPlayer then return end
+        LocalPlayer.Idled:Connect(function()
+            -- ⭐ Semua action di-defer biar gak block event handler
+            task.spawn(function()
+                if Shared.AntiAFK_Enabled == false then return end
+                doAntiAFKAction()
             end)
+        end)
+    end)
 
-            if ok and conn then
-                while conn.Connected do
-                    task.wait(1)
-                end
-                pcall(function() conn:Disconnect() end)
-            end
-
-            task.wait(1)
+    -- ═══ 2. PERIODIC 90s (bukan 60s) — kasih napas ═══
+    task.spawn(function()
+        task.wait(15) -- delay awal biar gak langsung action pas join
+        while true do
+            task.wait(90)
+            if Shared.AntiAFK_Enabled == false then continue end
+            task.spawn(doAntiAFKAction)
         end
     end)
 
-    -- ⭐ 2) PERIODIC 60s
-    task.spawn(function()
-        while true do
-            task.wait(60)
-            if Shared.AntiAFK_Enabled == false then continue end
-            doAntiAFKAction()
-        end
-    end)
-
-    -- ⭐ 3) EXTRA SAFETY 5 MENIT — skip kalo ada fitur aktif
-    task.spawn(function()
-        while true do
-            task.wait(300)
-            if Shared.AntiAFK_Enabled == false then continue end
-            if isAnyFeatureBusy() then continue end
-
-            local char = LocalPlayer.Character
-            local hum = char and char:FindFirstChildOfClass("Humanoid")
-            if hum and hum.Health > 0 and not hum.SeatPart then
-                pcall(function()
-                    hum:Move(Vector3.new(0, 0, -1), true)
-                    task.wait(0.5)
-                    hum:Move(Vector3.new(0, 0, 0), false)
-                    hum.Jump = true
-                end)
-            end
-        end
+    -- ═══ 3. RESPAWN SAFETY — reset state pas mati/respawn ═══
+    LocalPlayer.CharacterAdded:Connect(function()
+        _actionBusy = false
+        _lastActionTime = 0
     end)
 end
 
