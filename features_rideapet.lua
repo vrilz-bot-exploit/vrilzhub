@@ -4122,23 +4122,45 @@ if Shared.AutoMutation_Enabled then
     end
 end
 
--- ⭐ PRIORITY 2: Auto Yin Ritual — tunggu SAMPE SELESAI FULL
+-- ⭐ PRIORITY 2: Auto Yin Ritual — cuma nunggu kalau cave GAK cooldown
 if Shared.YinRitual_Enabled then
     local yinState = Features.getYinRitualState and Features.getYinRitualState()
 
-    -- Cek apakah Yin lagi aktif (scanning / collect / place / reward)
-    if yinState and yinState.Active then
+    -- Cek cave cooldown — kalau cooldown, jangan nunggu Yin
+    local caveOnCd = false
+    do
+        local hr = Workspace:FindFirstChild("HeadlessRitual")
+        if hr then
+            local phase = hr:GetAttribute("Phase")
+            local cdUntil = hr:GetAttribute("CooldownUntil")
+            if phase == "Cooldown" then
+                caveOnCd = true
+            elseif cdUntil and typeof(cdUntil) == "number" and os.time() < cdUntil then
+                caveOnCd = true
+            end
+        end
+    end
+
+    -- Cuma nunggu kalau Yin AKTIF dan cave GAK cooldown
+    if yinState and yinState.Active and not caveOnCd then
         HalloweenState.Status = "⏸️ Waiting Yin Ritual selesai..."
         task.wait(1)
         continue
     end
 
-    -- Double-check: masih ada Yin/Yang di runtime = belum selesai
-    local hr = Workspace:FindFirstChild("HeadlessRitual")
-    local rt = hr and hr:FindFirstChild("Runtime")
-    if rt then
-        for _, obj in ipairs(rt:GetChildren()) do
-            if obj:IsA("Model") and (obj.Name == "Yin" or obj.Name == "Yang") then
+    -- Cek masih ada Yin/Yang di runtime DAN cave gak cooldown
+    if not caveOnCd then
+        local hr = Workspace:FindFirstChild("HeadlessRitual")
+        local rt = hr and hr:FindFirstChild("Runtime")
+        if rt then
+            local hasItem = false
+            for _, obj in ipairs(rt:GetChildren()) do
+                if obj:IsA("Model") and (obj.Name == "Yin" or obj.Name == "Yang") then
+                    hasItem = true
+                    break
+                end
+            end
+            if hasItem then
                 HalloweenState.Status = "⏸️ Waiting Yin Ritual (masih ada item)..."
                 task.wait(1)
                 continue
@@ -4354,6 +4376,25 @@ local YinRitualCfg = {
     REWARD_WAIT = 2,
     TP_STEP = 80,
 }
+
+-- ⭐ CEK CAVE COOLDOWN
+local function isCaveOnCooldown()
+    local hr = Workspace:FindFirstChild("HeadlessRitual")
+    if not hr then return false, 0 end
+    local phase = hr:GetAttribute("Phase")
+    local cdUntil = hr:GetAttribute("CooldownUntil")
+    if phase == "Cooldown" then
+        local sisa = 0
+        if cdUntil and typeof(cdUntil) == "number" then
+            sisa = math.max(0, math.floor(cdUntil - os.time()))
+        end
+        return true, sisa
+    end
+    if cdUntil and typeof(cdUntil) == "number" and os.time() < cdUntil then
+        return true, math.max(0, math.floor(cdUntil - os.time()))
+    end
+    return false, 0
+end
 
 -- ⭐ CARI ITEM (Yin/Yang) DI RUNTIME
 local function findRitualItem(itemName)
@@ -4647,7 +4688,7 @@ local function yinCollect(itemName)
     return isHoldingRitualItem(itemName)
 end
 
--- 7) PLACE YIN/YANG — SMART COOLDOWN DETECTOR (FINAL & BERSIH)
+-- 7) PLACE YIN/YANG — ABORT CEPAT KALAU COOLDOWN
 local function yinPlace(itemName)
     local hr = Workspace:FindFirstChild("HeadlessRitual")
     if not hr then return false end
@@ -4655,17 +4696,16 @@ local function yinPlace(itemName)
     if itemName == "Yin" and isYinPlaced() then return true end
     if itemName == "Yang" and isYangPlaced() then return true end
 
+    -- ⭐ CEK COOLDOWN DI AWAL — ABORT LANGSUNG
+    local onCd, sisaCd = isCaveOnCooldown()
+    if onCd then
+        print("[YIN PLACE] ⏳ Cave cooldown " .. sisaCd .. "s — ABORT")
+        return false
+    end
+
     print("[YIN PLACE] 🎯 Mencari prompt 'Place " .. itemName .. "'...")
     local startTime = os.clock()
     local lastFireTime = 0
-
-    local function isOnCooldown()
-        local phase = hr:GetAttribute("Phase")
-        local cdUntil = hr:GetAttribute("CooldownUntil")
-        if phase == "Cooldown" then return true end
-        if cdUntil and typeof(cdUntil) == "number" and os.time() < cdUntil then return true end
-        return false
-    end
 
     local function findPlacementPrompt()
         local targetAction = "place " .. itemName:lower()
@@ -4693,23 +4733,22 @@ local function yinPlace(itemName)
     while os.clock() - startTime < 20 do
         if not YinRitualState.Enabled then return false end
 
-if itemName == "Yin" and isYinPlaced() then
-    YinRitualState._forcedHolding["Yin"] = nil
-    print("[YIN PLACE] ✅ Yin BERHASIL DI-PLACE!")
-    return true
-end
-if itemName == "Yang" and isYangPlaced() then
-    YinRitualState._forcedHolding["Yang"] = nil
-    print("[YIN PLACE] ✅ Yang BERHASIL DI-PLACE!")
-    return true
-end
+        if itemName == "Yin" and isYinPlaced() then
+            YinRitualState._forcedHolding["Yin"] = nil
+            print("[YIN PLACE] ✅ Yin BERHASIL DI-PLACE!")
+            return true
+        end
+        if itemName == "Yang" and isYangPlaced() then
+            YinRitualState._forcedHolding["Yang"] = nil
+            print("[YIN PLACE] ✅ Yang BERHASIL DI-PLACE!")
+            return true
+        end
 
-        if isOnCooldown() then
-            local sisa = math.max(0, math.floor((hr:GetAttribute("CooldownUntil") or 0) - os.time()))
-            print("[YIN PLACE] ⏳ Cave Cooldown! Nunggu " .. sisa .. " detik...")
-            task.wait(3)
-            startTime = os.clock() 
-            continue
+        -- ⭐ CEK COOLDOWN TIAP LOOP
+        local cdNow, sisaNow = isCaveOnCooldown()
+        if cdNow then
+            print("[YIN PLACE] ⏳ Cave cooldown muncul " .. sisaNow .. "s — ABORT")
+            return false
         end
 
         local prompt = findPlacementPrompt()
@@ -4719,12 +4758,10 @@ end
         if pos then
             local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
             if curRoot then
-                -- ⭐ 1. TP SEKALI AJA LANGSUNG KE ALTAR (Gak pake step-step)
-                -- Kalo masih patah-patah, berarti game-nya emang nge-lag / anti-cheat-nya ketat.
                 curRoot.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
                 curRoot.Velocity = Vector3.zero
                 curRoot.AssemblyLinearVelocity = Vector3.zero
-                task.wait(0.5) -- Jeda 0.5 detik biar server baca posisi lo
+                task.wait(0.5)
             end
         end
 
@@ -4735,12 +4772,10 @@ end
             prompt.RequiresLineOfSight = false
         end)
 
-                -- ⭐ 2. KLIK PROMPT (VIM dihapus)
         if os.clock() - lastFireTime > 1.5 then
             if typeof(fireproximityprompt) == "function" then
                 pcall(fireproximityprompt, prompt)
             end
-
             lastFireTime = os.clock()
         end
 
@@ -5005,6 +5040,15 @@ function Features.startAutoYinRitual()
             if not YinRitualState.Enabled then
                 YinRitualState.Status = "⏸️ Idle"
                 YinRitualState.Active = false
+                continue
+            end
+
+            -- ⭐ CEK CAVE COOLDOWN — PALING PENTING
+            local onCd, sisaCd = isCaveOnCooldown()
+            if onCd then
+                YinRitualState.Status = "⏳ Cave cooldown... (" .. sisaCd .. "s)"
+                YinRitualState.Active = false
+                task.wait(1)
                 continue
             end
 
