@@ -5683,32 +5683,46 @@ end
 local CONFIG_FILE = "vrilz_config.json"
 local CONFIG_VERSION = 2
 
--- Keys Shared yang di-save
+-- ═══ SHORT CODE MAP — kode 2-3 huruf, hemat karakter ═══
 local CONFIG_KEYS = {
     -- Toggles
-    "AutoSteal_Enabled", "AutoReturn_Enabled", "AutoHatch_Enabled",
-    "AutoPlantEgg_Enabled", "AutoRidePet_Enabled", "AutoEquipBest_Enabled",
-    "AutoFarm_Enabled", "AntiAFK_Enabled", "InstantPickup_Enabled",
-    "AutoMutation_Enabled", "MutationReturn_Enabled", "MutationSteal_Enabled",
-    "VolcanicHunt_Enabled", "VolcanicReturn_Enabled", "VolcanicMutation_Enabled",
-    "AutoHatchLuck_Enabled", "Speed_Enabled",
-    "FPSBoost_Enabled", "HD4K_Enabled", "LightsEffect_Enabled", "LightningEffect_Enabled",
-    "ShowTitle", "WebhookEnabled", "WebhookMentionEveryone",
-    "YinRitual_Enabled", "InfinityJump_Enabled",
-    "Halloween_Enabled", "AutoObby_Enabled",
-    "Fly_Enabled",
-    "ESP_Eggs_Enabled", "ESP_EggName_Enabled", "ESP_EggLuck_Enabled",
-    "ESP_Pets_Enabled", "ESP_PetName_Enabled", "ESP_PetCash_Enabled", "ESP_PetSpeed_Enabled",
-    -- Dropdown / string
-    "StealMode", "ReturnMode", "HatchLuck_Mode", "TP_Method",
-    "MutationStealMode", "AutoPlantEgg_Filter", "AutoRideSelectedPet",
-    "SelectedEgg", "RarityNotifThreshold",
-    "Halloween_TPMethod",
-    -- Number
-    "Speed_Value", "Fly_Height", "Fly_Speed", "InfinityJump_Height",
-    -- Table (multi-select)
-    "SelectedRarities", "MutationSelectedEggs",
+    AH = "AutoHatch_Enabled",       AL = "AutoHatchLuck_Enabled",
+    AP = "AutoPlantEgg_Enabled",    AR = "AutoRidePet_Enabled",
+    AE = "AutoEquipBest_Enabled",   AM = "AutoMutation_Enabled",
+    AS = "AutoSteal_Enabled",       AR2 = "AutoReturn_Enabled",
+    MS = "MutationSteal_Enabled",   MR = "MutationReturn_Enabled",
+    VH = "VolcanicHunt_Enabled",    VR = "VolcanicReturn_Enabled",
+    VM = "VolcanicMutation_Enabled",AM2 = "AutoFarm_Enabled",
+    AF = "AntiAFK_Enabled",         IP = "InstantPickup_Enabled",
+    SP = "Speed_Enabled",           FL = "Fly_Enabled",
+    IJ = "InfinityJump_Enabled",    YR = "YinRitual_Enabled",
+    HE = "Halloween_Enabled",       AO = "AutoObby_Enabled",
+    FP = "FPSBoost_Enabled",        HD = "HD4K_Enabled",
+    LI = "LightsEffect_Enabled",    LG = "LightningEffect_Enabled",
+    TL = "ShowTitle",               WH = "WebhookEnabled",
+    WM = "WebhookMentionEveryone",
+    EE = "ESP_Eggs_Enabled",        EN = "ESP_EggName_Enabled",
+    EL = "ESP_EggLuck_Enabled",     EP = "ESP_Pets_Enabled",
+    PN = "ESP_PetName_Enabled",     PC = "ESP_PetCash_Enabled",
+    PS = "ESP_PetSpeed_Enabled",
+    -- Strings / dropdown
+    ST = "StealMode",               RT = "ReturnMode",
+    HM = "HatchLuck_Mode",          TP = "TP_Method",
+    MMS = "MutationStealMode",      PF = "AutoPlantEgg_Filter",
+    ARP = "AutoRideSelectedPet",    SE = "SelectedEgg",
+    RNT = "RarityNotifThreshold",   HTP = "Halloween_TPMethod",
+    -- Numbers
+    SV = "Speed_Value",             FH = "Fly_Height",
+    FS = "Fly_Speed",               IH = "InfinityJump_Height",
+    -- Tables (multi-select)
+    SR = "SelectedRarities",        MSE = "MutationSelectedEggs",
 }
+
+-- Reverse map buat lookup cepat (key → code)
+local CONFIG_KEY_TO_CODE = {}
+for code, key in pairs(CONFIG_KEYS) do
+    CONFIG_KEY_TO_CODE[key] = code
+end
 
 local ConfigState = {
     Loading = false,
@@ -5743,7 +5757,7 @@ local function config_save(silent)
         _theme = _G.VRILZ_CurrentTheme or "Brutal",
     }
 
-    for _, key in ipairs(CONFIG_KEYS) do
+    for code, key in pairs(CONFIG_KEYS) do
         local v = Shared[key]
         if v ~= nil then
             data[key] = config_serializeValue(v)
@@ -5797,7 +5811,7 @@ local function config_load(silent)
 
     ConfigState.Loading = true
 
-    for _, key in ipairs(CONFIG_KEYS) do
+    for code, key in pairs(CONFIG_KEYS) do
         if data[key] ~= nil then
             Shared[key] = data[key]
         end
@@ -5936,8 +5950,8 @@ local function config_startWatcher()
             if ConfigState.Loading then continue end
             if not Shared then continue end
 
-            local changed = false
-            for _, key in ipairs(CONFIG_KEYS) do
+                        local changed = false
+            for code, key in pairs(CONFIG_KEYS) do
                 local v = Shared[key]
                 local serialized
                 if type(v) == "table" then
@@ -5951,7 +5965,6 @@ local function config_startWatcher()
                     changed = true
                 end
             end
-
             if changed then
                 config_scheduleAutoSave()
             end
@@ -5985,219 +5998,138 @@ end
 -- ============================================================
 -- 📤 SHARE CONFIG — Export/Import string (base64)
 -- ============================================================
-local SHARE_PREFIX = "VH1:"
-local SHARE_VERSION = 1
-
--- Simple base64 (gak pake HttpService, biar portable di executor)
-local B64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-
-local function b64_encode(s)
-    local out = {}
-    for i = 1, #s, 3 do
-        local a = string.byte(s, i) or 0
-        local b = string.byte(s, i + 1) or 0
-        local c = string.byte(s, i + 2) or 0
-        local n = a * 65536 + b * 256 + c
-        local c1 = math.floor(n / 262144) % 64
-        local c2 = math.floor(n / 4096) % 64
-        local c3 = math.floor(n / 64) % 64
-        local c4 = n % 64
-        table.insert(out, B64_CHARS:sub(c1 + 1, c1 + 1))
-        table.insert(out, B64_CHARS:sub(c2 + 1, c2 + 1))
-        if i + 1 <= #s then
-            table.insert(out, B64_CHARS:sub(c3 + 1, c3 + 1))
-        else
-            table.insert(out, "=")
-        end
-        if i + 2 <= #s then
-            table.insert(out, B64_CHARS:sub(c4 + 1, c4 + 1))
-        else
-            table.insert(out, "=")
-        end
-    end
-    return table.concat(out)
-end
-
-local function b64_decode(s)
-    s = s:gsub("[^" .. B64_CHARS:gsub("([%+%/%^%-])", "%%%1") .. "=]", "")
-    local out = {}
-    local lookup = {}
-    for i = 1, #B64_CHARS do
-        lookup[B64_CHARS:sub(i, i)] = i - 1
-    end
-    for i = 1, #s, 4 do
-        local c1 = lookup[s:sub(i, i)] or 0
-        local c2 = lookup[s:sub(i + 1, i + 1)] or 0
-        local c3 = lookup[s:sub(i + 2, i + 2)] or 0
-        local c4 = lookup[s:sub(i + 3, i + 3)] or 0
-        local n = c1 * 262144 + c2 * 4096 + c3 * 64 + c4
-        local a = math.floor(n / 65536) % 256
-        local b = math.floor(n / 256) % 256
-        local c = n % 256
-        table.insert(out, string.char(a))
-        if s:sub(i + 2, i + 2) ~= "=" then
-            table.insert(out, string.char(b))
-        end
-        if s:sub(i + 3, i + 3) ~= "=" then
-            table.insert(out, string.char(c))
-        end
-    end
-    return table.concat(out)
-end
-
 -- ═══ EXPORT ═══
+local function shortStr(s)
+    s = tostring(s or "")
+    if s == "Auto (Best KG)" then return "AUTO" end
+    if s == "TP GLIDE" then return "TPG" end
+    if s == "A little" then return "ALIT" end
+    s = s:gsub("%s+", ""):upper()
+    return s:sub(1, 6)
+end
+
+local function unshortStr(code, v)
+    if code == "ST" then
+        if v == "TPG" then return "TP GLIDE" end
+        return v == "FLY" and "Fly" or "TP"
+    elseif code == "RT" then
+        return v == "INSTANT" and "Instant" or "Step"
+    elseif code == "HM" then
+        return v == "ALIT" and "A little" or "Max"
+    elseif code == "ARP" then
+        return v == "AUTO" and "Auto (Best KG)" or v
+    end
+    return v
+end
+
+-- ═══ EXPORT — format pendek: VH2:AH=1:HM=MAX ═══
 local function config_export()
     if not Shared then return nil, "Shared not ready" end
 
-    local data = {
-        _version = SHARE_VERSION,
-        _saved_at = os.time(),
-        _theme = _G.VRILZ_CurrentTheme or "Brutal",
-        _by = LocalPlayer.Name,
-    }
-
-    for _, key in ipairs(CONFIG_KEYS) do
+    local parts = {}
+    for code, key in pairs(CONFIG_KEYS) do
         local v = Shared[key]
         if v ~= nil then
-            data[key] = config_serializeValue(v)
+            if type(v) == "boolean" then
+                table.insert(parts, code .. "=" .. (v and "1" or "0"))
+            elseif type(v) == "number" then
+                table.insert(parts, code .. "=" .. tostring(math.floor(v)))
+            elseif type(v) == "string" and v ~= "" then
+                table.insert(parts, code .. "=" .. shortStr(v))
+            elseif type(v) == "table" then
+                -- multi-select: cuma simpan yang TRUE aja
+                local on = {}
+                for k, vv in pairs(v) do
+                    if vv == true then table.insert(on, k:sub(1, 4)) end
+                end
+                if #on > 0 then
+                    table.insert(parts, code .. "=" .. table.concat(on, ","))
+                end
+            end
         end
     end
+    table.sort(parts)
 
-    local ok, json = pcall(function()
-        return HttpService:JSONEncode(data)
-    end)
-    if not ok or not json then
-        return nil, "JSON encode failed"
-    end
+    local themeCode = _G.VRILZ_CurrentTheme and _G.VRILZ_CurrentTheme:sub(1, 3):upper() or "BRU"
+    table.insert(parts, 1, "TH=" .. themeCode)
 
-    local code = SHARE_PREFIX .. b64_encode(json)
-    return code, nil
+    return "VH2:" .. table.concat(parts, ":"), nil
 end
 
--- ═══ IMPORT ═══
+-- ═══ IMPORT — terima format pendek VH2:... ═══
 local function config_import(code, silent)
-    if type(code) ~= "string" then
-        return false, "Invalid code (not string)"
-    end
+    if type(code) ~= "string" then return false, "invalid" end
+    code = code:gsub("%s+", "")
+    if code:sub(1, 4) ~= "VH2:" then return false, "not VH2 format" end
 
-    code = code:gsub("%s+", "")  -- buang spasi/newline
-    if code:sub(1, #SHARE_PREFIX) ~= SHARE_PREFIX then
-        return false, "Invalid code (wrong prefix)"
-    end
-
-    local encoded = code:sub(#SHARE_PREFIX + 1)
-    if encoded == "" then
-        return false, "Invalid code (empty)"
-    end
-
-    local okDec, json = pcall(b64_decode, encoded)
-    if not okDec or not json or json == "" then
-        return false, "Invalid code (decode failed)"
-    end
-
-    local okJson, data = pcall(function()
-        return HttpService:JSONDecode(json)
-    end)
-    if not okJson or type(data) ~= "table" then
-        return false, "Invalid code (JSON corrupted)"
-    end
-
-    if not Shared then
-        return false, "Shared not ready"
-    end
-
-    -- Set loading biar watcher gak save pas import
+    local body = code:sub(5)
+    local applied = 0
     ConfigState.Loading = true
 
-    local applied = 0
-    for _, key in ipairs(CONFIG_KEYS) do
-        if data[key] ~= nil then
-            Shared[key] = data[key]
-            applied = applied + 1
+    for pair in body:gmatch("[^:]+") do
+        local c, v = pair:match("^([^=]+)=(.+)$")
+        if c and v then
+            if c == "TH" then
+                local map = { BRU = "Brutal", ICE = "Ice", FIR = "Fire", PIN = "Pink",
+                              GRE = "Green", BLU = "Blue", MUS = "Mustard", OLI = "Olive" }
+                _G.VRILZ_ApplyThemeFromConfig = map[v] or "Brutal"
+            else
+                local key = CONFIG_KEYS[c]
+                if key then
+                    local cur = Shared[key]
+                    if type(cur) == "boolean" then
+                        Shared[key] = (v == "1")
+                    elseif type(cur) == "number" then
+                        Shared[key] = tonumber(v) or cur
+                    elseif type(cur) == "string" then
+                        Shared[key] = unshortStr(c, v)
+                                        elseif type(cur) == "table" then
+                        -- reset semua dulu
+                        for k in pairs(cur) do cur[k] = false end
+                        -- set yang on (prefix 4 huruf, fallback ke full name)
+                        for name in v:gmatch("[^,]+") do
+                            for k in pairs(cur) do
+                                if k:upper():sub(1, 4) == name or k:upper() == name then
+                                    cur[k] = true
+                                end
+                            end
+                        end
+                    end
+                    applied = applied + 1
+                end
+            end
         end
     end
 
-    -- Theme
-    if data._theme and data._theme ~= "" then
-        _G.VRILZ_ApplyThemeFromConfig = data._theme
-    end
-
-    -- ⭐ FIX: Bungkus SEMUA setter dalam pcall + ensure Loading = false
+    -- trigger setter
     task.spawn(function()
-        local ok, err = pcall(function()
-            -- Auto Ride Pet
+        pcall(function()
             if Shared.AutoRidePet_Enabled ~= nil and Features.setAutoRideEnabled then
-                Features.setAutoRideEnabled(Shared.AutoRidePet_Enabled)
-            end
-            -- Infinity Jump
+                Features.setAutoRideEnabled(Shared.AutoRidePet_Enabled) end
             if Shared.InfinityJump_Enabled ~= nil and Features.setInfinityJumpEnabled then
-                Features.setInfinityJumpEnabled(Shared.InfinityJump_Enabled)
-            end
+                Features.setInfinityJumpEnabled(Shared.InfinityJump_Enabled) end
             if Shared.InfinityJump_Height ~= nil and Features.setInfinityJumpHeight then
-                Features.setInfinityJumpHeight(Shared.InfinityJump_Height)
-            end
-            -- Yin Ritual
+                Features.setInfinityJumpHeight(Shared.InfinityJump_Height) end
             if Shared.YinRitual_Enabled ~= nil and Features.setYinRitualEnabled then
-                Features.setYinRitualEnabled(Shared.YinRitual_Enabled)
-            end
-            -- Hatch Luck
-            if Shared.HatchLuck_Mode ~= nil and Features.setHatchLuckMode then
-                Features.setHatchLuckMode(Shared.HatchLuck_Mode)
-            end
-            -- Auto Plant
-            if Shared.AutoPlantEgg_Filter and Features.setAutoPlantFilter then
-                Features.setAutoPlantFilter(Shared.AutoPlantEgg_Filter)
-            end
-            if Shared.AutoPlantEgg_Enabled ~= nil and Features.getAutoPlantState then
-                Features.getAutoPlantState().Enabled = Shared.AutoPlantEgg_Enabled
-            end
-            -- Halloween
-            if Shared.Halloween_Enabled ~= nil and Features.getHalloweenState then
-                Features.getHalloweenState().Enabled = Shared.Halloween_Enabled
-            end
-            -- ⭐ FIX: Halloween TP Method
-            if Shared.Halloween_TPMethod and Features.getHalloweenState then
-                local hs = Features.getHalloweenState()
+                Features.setYinRitualEnabled(Shared.YinRitual_Enabled) end
+            if Shared.HatchLuck_Mode then Features.setHatchLuckMode(Shared.HatchLuck_Mode) end
+            if Shared.Fly_Enabled ~= nil and Features.setFlyEnabled then
+                Features.setFlyEnabled(Shared.Fly_Enabled) end
+            if Shared.Speed_Value then Features.setSpeed(Shared.Speed_Value) end
+            if Shared.AutoPlantEgg_Filter then Features.setAutoPlantFilter(Shared.AutoPlantEgg_Filter) end
+            if Shared.Halloween_TPMethod then
+                local hs = Features.getHalloweenState and Features.getHalloweenState()
                 if hs then hs.TPMethod = Shared.Halloween_TPMethod end
             end
-            -- ⭐ FIX: Fly
-            if Shared.Fly_Enabled ~= nil and Features.setFlyEnabled then
-                Features.setFlyEnabled(Shared.Fly_Enabled)
-            end
-            if Shared.Fly_Height and Features.setFlyHeight then
-                Features.setFlyHeight(Shared.Fly_Height)
-            end
-            if Shared.Fly_Speed and Features.setFlySpeed then
-                Features.setFlySpeed(Shared.Fly_Speed)
-            end
-            -- Speed
-            if Shared.Speed_Value and Features.setSpeed then
-                Features.setSpeed(Shared.Speed_Value)
-            end
-            -- ⭐ FIX: Auto Obby
-            if Shared.AutoObby_Enabled and Features.startAutoObby then
-                pcall(Features.startAutoObby)
-            end
         end)
-
-        -- ⭐ FIX: SELALU reset Loading, apapun hasilnya
         ConfigState.Loading = false
-
-        if not ok then
-            warn("[CONFIG] Import setter error:", err)
-        end
-
         if Shared.Notify and not silent then
-            Shared.Notify("📥 Config imported! (" .. applied .. " keys)", "success")
+            Shared.Notify("📥 Imported " .. applied .. " keys", "success")
         end
-
-        _G.VRILZ_ConfigLoaded = true
-        if _G.VRILZ_RefreshAllUI then
-            pcall(_G.VRILZ_RefreshAllUI)
-        end
+        if _G.VRILZ_RefreshAllUI then pcall(_G.VRILZ_RefreshAllUI) end
     end)
 
-    return true, "Imported " .. applied .. " keys"
+    return true, "Imported " .. applied
 end
 
 -- Expose
