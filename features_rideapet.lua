@@ -5650,6 +5650,72 @@ function Features.startStealExecutor()
 end
 
 -- ============================================================
+-- 👻 HALLOWEEN RETURN WATCHER — TP paksa kalau udah deket base
+-- TIDAK mengubah halloweenReturnToBase() — cuma mantau posisi
+-- ============================================================
+task.spawn(function()
+    while task.wait(0.1) do
+        -- Cuma aktif kalau Auto Halloween lagi jalan
+        local hs = Features.getHalloweenState and Features.getHalloweenState()
+        if not hs or not hs.Enabled then
+            continue
+        end
+
+        -- Cuma aktif kalau status lagi "Returning to Halloween base..."
+        local status = tostring(hs.Status or "")
+        if not status:find("Returning to Halloween base", 1, true) then
+            continue
+        end
+
+        -- Ambil base
+        local base = getHalloweenBase()
+        if not base then continue end
+
+        -- Ambil posisi karakter
+        local char = LocalPlayer.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        if not root then continue end
+
+        -- Hitung jarak ke base
+        local dist = (base.Position - root.Position).Magnitude
+
+        -- ⭐ Kalau udah ≤100 studs → TP paksa langsung
+        if dist <= 100 then
+            local finalCF = base.CFrame + Vector3.new(0, HalloweenCfg.TP_HEIGHT, 0)
+
+            -- Kalau naik pet → pet ikut TP
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum and hum.SeatPart then
+                local pet = hum.SeatPart:FindFirstAncestorOfClass("Model")
+                if pet then
+                    local seat = hum.SeatPart
+                    local offset = root.CFrame:ToObjectSpace(seat.CFrame)
+
+                    root.CFrame = finalCF
+                    root.Velocity = Vector3.zero
+                    root.AssemblyLinearVelocity = Vector3.zero
+
+                    local newSeatCF = finalCF * offset
+                    local pivotToSeat = pet:GetPivot():ToObjectSpace(seat.CFrame)
+                    local targetPivot = newSeatCF * pivotToSeat:Inverse()
+                    pcall(function() pet:PivotTo(targetPivot) end)
+                else
+                    root.CFrame = finalCF
+                    root.Velocity = Vector3.zero
+                    root.AssemblyLinearVelocity = Vector3.zero
+                end
+            else
+                root.CFrame = finalCF
+                root.Velocity = Vector3.zero
+                root.AssemblyLinearVelocity = Vector3.zero
+            end
+
+            print("[Halloween Watcher] ⚡ TP paksa — jarak", math.floor(dist), "studs")
+        end
+    end
+end)
+
+-- ============================================================
 -- FEATURES.INIT
 -- ============================================================
 function Features.Init(sharedState)
