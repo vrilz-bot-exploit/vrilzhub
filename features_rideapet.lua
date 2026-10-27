@@ -5069,7 +5069,31 @@ function Features.startAutoYinRitual()
                 continue
             end
 
-            -- ⭐ CEK CAVE COOLDOWN — PALING PENTING
+                        -- ⭐⭐⭐ PRIORITAS MUTLAK: CEK REWARD DULU — WALAU CAVE COOLDOWN ⭐⭐⭐
+            -- Server set cooldown SETELAH place Yin+Yang, DAN reward muncul SELAMA cooldown
+            -- Jadi reward WAJIB diambil dulu, baru skip fitur lain
+            if findRewardPrompt() then
+                YinRitualState.Active = true
+                YinRitualState.Status = "🎁 Collecting reward..."
+
+                local got = yinCollectReward()
+
+                if got then
+                    YinRitualState._lastRewardTime = os.clock()
+                    YinRitualState.RewardCount = YinRitualState.RewardCount + 1
+                    YinRitualState.RitualCount = YinRitualState.RitualCount + 1
+                    YinRitualState.Status = "✅ Reward #" .. YinRitualState.RewardCount .. " ke-tangan!"
+                    YinRitualState.Status = "🏠 Returning to base..."
+                    yinReturnToBase()
+                    YinRitualState._lastRewardTime = os.clock()
+                    YinRitualState.Status = "⏳ Cooldown 20s..."
+                else
+                    YinRitualState.Status = "⚠️ Reward retry..."
+                end
+                continue
+            end
+
+            -- ⭐ BARU CEK CAVE COOLDOWN — kalau gak ada reward baru skip
             local onCd, sisaCd = isCaveOnCooldown()
             if onCd then
                 YinRitualState.Status = "⏳ Cave cooldown... (" .. sisaCd .. "s)"
