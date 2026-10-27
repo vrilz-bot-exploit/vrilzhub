@@ -8415,7 +8415,7 @@ heroSubLabel.TextColor3 = Color3.fromRGB(120, 140, 165)
 heroSubLabel.Font = Enum.Font.GothamSemibold
 heroSubLabel.TextSize = CFG.FONT_MUTED
 heroSubLabel.TextXAlignment = Enum.TextXAlignment.Left
-heroSubLabel.TextTruncate = Enum.TextTruncate.End
+heroSubLabel.TextTruncate = Enum.TextTruncate.AtEnd
 heroSubLabel.ZIndex = 5
 heroSubLabel.Parent = heroPanel
 
