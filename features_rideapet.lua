@@ -4382,6 +4382,7 @@ local YinRitualState = {
     RewardCount = 0,
     Active = false,
     _lastRewardTime = 0,
+    _rewardTaken = false,
     _collectingReward = false,
     _forcedHolding = {}, -- ⭐ Paksa inget state
 }
@@ -5172,40 +5173,41 @@ function Features.startAutoYinRitual()
                 continue
             end
 
--- ⭐ GUARD: skip reward kalau baru aja sukses collect (< 15 detik)
--- biar gak double-collect prompt yang sama (prompt belum ke-clear server)
-if YinRitualState._lastRewardTime and (tick() - YinRitualState._lastRewardTime) < 15 then
-    task.wait(0.5)
+-- ⭐ GUARD: skip reward kalau udah pernah diambil
+if YinRitualState._rewardTaken then
+    -- fallthrough ke bawah — jangan cek reward lagi
+    -- langsung ke cave cooldown
+else
+    if findRewardPrompt() then
+        YinRitualState.Active = true
+        YinRitualState.Status = "🎁 Collecting reward..."
+        local got = yinCollectReward()
+        if got then
+            YinRitualState._lastRewardTime = tick()
+            YinRitualState._rewardTaken = true      -- ⭐ SET FLAG
+            YinRitualState.RewardCount = YinRitualState.RewardCount + 1
+            YinRitualState.RitualCount = YinRitualState.RitualCount + 1
+            YinRitualState.Status = "✅ Reward #" .. YinRitualState.RewardCount .. " ke-tangan!"
+            YinRitualState.Status = "🏠 Returning to base..."
+            yinReturnToBase()
+            YinRitualState.Status = "⏳ Cooldown 20s..."
+        else
+            YinRitualState.Status = "⚠️ Reward retry..."
+        end
+        continue
+    end
+end
+            -- ⭐ BARU CEK CAVE COOLDOWN — kalau gak ada reward baru skip
+local onCd, sisaCd = isCaveOnCooldown()
+if onCd then
+    YinRitualState.Status = "⏳ Cave cooldown... (" .. sisaCd .. "s)"
+    YinRitualState.Active = false
+    task.wait(1)
     continue
 end
 
-if findRewardPrompt() then
-    YinRitualState.Active = true
-    YinRitualState.Status = "🎁 Collecting reward..."
-    local got = yinCollectReward()
-    if got then
-                YinRitualState._lastRewardTime = tick()
-                    YinRitualState.RewardCount = YinRitualState.RewardCount + 1
-                    YinRitualState.RitualCount = YinRitualState.RitualCount + 1
-                    YinRitualState.Status = "✅ Reward #" .. YinRitualState.RewardCount .. " ke-tangan!"
-                    YinRitualState.Status = "🏠 Returning to base..."
-                    yinReturnToBase()
-                    YinRitualState.Status = "⏳ Cooldown 20s..."
-                else
-                    YinRitualState.Status = "⚠️ Reward retry..."
-                end
-                continue
-            end
-
-            -- ⭐ BARU CEK CAVE COOLDOWN — kalau gak ada reward baru skip
-            local onCd, sisaCd = isCaveOnCooldown()
-            if onCd then
-                YinRitualState.Status = "⏳ Cave cooldown... (" .. sisaCd .. "s)"
-                YinRitualState.Active = false
-                task.wait(1)
-                continue
-            end
-
+-- ⭐ Cave READY — reset flag reward (run baru, boleh collect lagi)
+YinRitualState._rewardTaken = false
             -- Global cooldown reward
             local _now = tick()
             if YinRitualState._lastRewardTime and (_now - YinRitualState._lastRewardTime) < 20 then
@@ -5247,29 +5249,29 @@ if findRewardPrompt() then
                 continue
             end
 
-                        -- ═══ STEP 1: REWARD ═══
-if YinRitualState._lastRewardTime and (tick() - YinRitualState._lastRewardTime) < 15 then
-    task.wait(0.5)
-    continue
+                       -- ═══ STEP 1: REWARD ═══
+if YinRitualState._rewardTaken then
+    -- skip, langsung ke logic bawah
+else
+    if findRewardPrompt() then
+        YinRitualState.Active = true
+        YinRitualState.Status = "🎁 Collecting reward..."
+        local got = yinCollectReward()
+        if got then
+            YinRitualState._lastRewardTime = tick()
+            YinRitualState._rewardTaken = true      -- ⭐ SET FLAG
+            YinRitualState.RewardCount = YinRitualState.RewardCount + 1
+            YinRitualState.RitualCount = YinRitualState.RitualCount + 1
+            YinRitualState.Status = "✅ Reward #" .. YinRitualState.RewardCount .. " ke-tangan!"
+            YinRitualState.Status = "🏠 Returning to base..."
+            yinReturnToBase()
+            YinRitualState.Status = "⏳ Cooldown 20s..."
+        else
+            YinRitualState.Status = "⚠️ Reward retry..."
+        end
+        continue
+    end
 end
-
-if findRewardPrompt() then
-    YinRitualState.Active = true
-    YinRitualState.Status = "🎁 Collecting reward..."
-    local got = yinCollectReward()
-    if got then
-                YinRitualState._lastRewardTime = tick()
-                    YinRitualState.RewardCount = YinRitualState.RewardCount + 1
-                    YinRitualState.RitualCount = YinRitualState.RitualCount + 1
-                    YinRitualState.Status = "✅ Reward #" .. YinRitualState.RewardCount .. " ke-tangan!"
-                    YinRitualState.Status = "🏠 Returning to base..."
-                    yinReturnToBase()
-                    YinRitualState.Status = "⏳ Cooldown 20s..."
-                else
-                    YinRitualState.Status = "⚠️ Reward retry..."
-                end
-                continue
-            end
 
             -- ═══ STEP 2: LOGIKA URUTAN FIX ═══
             -- Aturan server Ride a Pet:
