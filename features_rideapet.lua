@@ -5695,17 +5695,17 @@ local CONFIG_KEYS = {
     "FPSBoost_Enabled", "HD4K_Enabled", "LightsEffect_Enabled", "LightningEffect_Enabled",
     "ShowTitle", "WebhookEnabled", "WebhookMentionEveryone",
     "YinRitual_Enabled", "InfinityJump_Enabled",
-    "Halloween_Enabled",                                          -- ⭐ TAMBAH INI
+    "Halloween_Enabled", "AutoObby_Enabled",
+    "Fly_Enabled",
     "ESP_Eggs_Enabled", "ESP_EggName_Enabled", "ESP_EggLuck_Enabled",
     "ESP_Pets_Enabled", "ESP_PetName_Enabled", "ESP_PetCash_Enabled", "ESP_PetSpeed_Enabled",
     -- Dropdown / string
     "StealMode", "ReturnMode", "HatchLuck_Mode", "TP_Method",
     "MutationStealMode", "AutoPlantEgg_Filter", "AutoRideSelectedPet",
     "SelectedEgg", "RarityNotifThreshold",
-
+    "Halloween_TPMethod",
     -- Number
     "Speed_Value", "Fly_Height", "Fly_Speed", "InfinityJump_Height",
-
     -- Table (multi-select)
     "SelectedRarities", "MutationSelectedEggs",
 }
@@ -5735,6 +5735,7 @@ local function config_save(silent)
     if not writefile then return false end
     if ConfigState.Loading then return false end
     if not Shared then return false end
+    if not ConfigState._ready then return false end
 
     local data = {
         _version = CONFIG_VERSION,
@@ -5806,75 +5807,64 @@ local function config_load(silent)
         _G.VRILZ_ApplyThemeFromConfig = data._theme
     end
 
-    -- ⭐ Sync fitur yang butuh setter khusus
-    task.defer(function()
-        pcall(function()
+        -- ⭐ Sync fitur yang butuh setter khusus
+    task.spawn(function()
+        local ok, err = pcall(function()
             if Shared.AutoRidePet_Enabled ~= nil and Features.setAutoRideEnabled then
                 Features.setAutoRideEnabled(Shared.AutoRidePet_Enabled)
             end
-        end)
-        pcall(function()
             if Shared.InfinityJump_Enabled ~= nil and Features.setInfinityJumpEnabled then
                 Features.setInfinityJumpEnabled(Shared.InfinityJump_Enabled)
             end
-        end)
-        pcall(function()
             if Shared.InfinityJump_Height ~= nil and Features.setInfinityJumpHeight then
                 Features.setInfinityJumpHeight(Shared.InfinityJump_Height)
             end
-        end)
-        pcall(function()
             if Shared.YinRitual_Enabled ~= nil and Features.setYinRitualEnabled then
                 Features.setYinRitualEnabled(Shared.YinRitual_Enabled)
             end
-        end)
-        pcall(function()
             if Shared.HatchLuck_Mode ~= nil and Features.setHatchLuckMode then
                 Features.setHatchLuckMode(Shared.HatchLuck_Mode)
             end
-        end)
-        pcall(function()
             if Shared.Speed_Value and Features.setSpeed then
                 Features.setSpeed(Shared.Speed_Value)
             end
-        end)
-        pcall(function()
             if Shared.Fly_Height and Features.setFlyHeight then
                 Features.setFlyHeight(Shared.Fly_Height)
             end
-        end)
-        pcall(function()
             if Shared.Fly_Speed and Features.setFlySpeed then
                 Features.setFlySpeed(Shared.Fly_Speed)
             end
-        end)
-        pcall(function()
+            -- ⭐ FIX: Fly_Enabled
+            if Shared.Fly_Enabled ~= nil and Features.setFlyEnabled then
+                Features.setFlyEnabled(Shared.Fly_Enabled)
+            end
             if Shared.AutoPlantEgg_Enabled ~= nil and Features.getAutoPlantState then
                 Features.getAutoPlantState().Enabled = Shared.AutoPlantEgg_Enabled
             end
-        end)
-        pcall(function()
             if Shared.AutoPlantEgg_Filter and Features.setAutoPlantFilter then
                 Features.setAutoPlantFilter(Shared.AutoPlantEgg_Filter)
             end
-        end)
-        pcall(function()
-            if Shared.HatchLuck_Mode and Features.setHatchLuckMode then
-                Features.setHatchLuckMode(Shared.HatchLuck_Mode)
-            end
-        end)
-        pcall(function()
-            if Shared.Halloween_Enabled and Features.getHalloweenState then
+            if Shared.Halloween_Enabled ~= nil and Features.getHalloweenState then
                 Features.getHalloweenState().Enabled = Shared.Halloween_Enabled
             end
+            -- ⭐ FIX: Halloween TP Method
+            if Shared.Halloween_TPMethod and Features.getHalloweenState then
+                local hs = Features.getHalloweenState()
+                if hs then hs.TPMethod = Shared.Halloween_TPMethod end
+            end
+            -- ⭐ FIX: Auto Obby
+            if Shared.AutoObby_Enabled and Features.startAutoObby then
+                pcall(Features.startAutoObby)
+            end
         end)
 
-        -- ⭐ Trigger Auto Obby kalau ON di config (karena gak loop)
-        if Shared.AutoObby_Enabled and Features.startAutoObby then
-            pcall(Features.startAutoObby)
+        -- ⭐ FIX: SELALU reset Loading
+        ConfigState.Loading = false
+
+        if not ok then
+            warn("[CONFIG] Load setter error:", err)
         end
 
-        ConfigState.Loading = false
         if Shared.Notify and not silent then
             Shared.Notify("📂 Config loaded!", "success")
         end
@@ -5923,7 +5913,20 @@ end
 -- ═══ WATCHER ═══
 local function config_startWatcher()
     if ConfigState._ready then return end
-    if not Shared then return end
+    if not Shared then
+        -- ⭐ FIX: retry kalau Shared belum siap
+        task.spawn(function()
+            local timeout = 0
+            while not Shared and timeout < 10 do
+                task.wait(0.5)
+                timeout = timeout + 0.5
+            end
+            if Shared and not ConfigState._ready then
+                config_startWatcher()
+            end
+        end)
+        return
+    end
     ConfigState._ready = true
 
     task.spawn(function()
@@ -6119,45 +6122,70 @@ local function config_import(code, silent)
         _G.VRILZ_ApplyThemeFromConfig = data._theme
     end
 
-    -- ⭐ Trigger setter khusus (sama kayak config_load)
-    task.defer(function()
-        pcall(function()
+    -- ⭐ FIX: Bungkus SEMUA setter dalam pcall + ensure Loading = false
+    task.spawn(function()
+        local ok, err = pcall(function()
+            -- Auto Ride Pet
             if Shared.AutoRidePet_Enabled ~= nil and Features.setAutoRideEnabled then
                 Features.setAutoRideEnabled(Shared.AutoRidePet_Enabled)
             end
-        end)
-        pcall(function()
+            -- Infinity Jump
             if Shared.InfinityJump_Enabled ~= nil and Features.setInfinityJumpEnabled then
                 Features.setInfinityJumpEnabled(Shared.InfinityJump_Enabled)
             end
-        end)
-        pcall(function()
             if Shared.InfinityJump_Height ~= nil and Features.setInfinityJumpHeight then
                 Features.setInfinityJumpHeight(Shared.InfinityJump_Height)
             end
-        end)
-        pcall(function()
+            -- Yin Ritual
             if Shared.YinRitual_Enabled ~= nil and Features.setYinRitualEnabled then
                 Features.setYinRitualEnabled(Shared.YinRitual_Enabled)
             end
-        end)
-        pcall(function()
+            -- Hatch Luck
             if Shared.HatchLuck_Mode ~= nil and Features.setHatchLuckMode then
                 Features.setHatchLuckMode(Shared.HatchLuck_Mode)
             end
-        end)
-        pcall(function()
+            -- Auto Plant
             if Shared.AutoPlantEgg_Filter and Features.setAutoPlantFilter then
                 Features.setAutoPlantFilter(Shared.AutoPlantEgg_Filter)
             end
-        end)
-        pcall(function()
-            if Shared.Halloween_Enabled and Features.getHalloweenState then
+            if Shared.AutoPlantEgg_Enabled ~= nil and Features.getAutoPlantState then
+                Features.getAutoPlantState().Enabled = Shared.AutoPlantEgg_Enabled
+            end
+            -- Halloween
+            if Shared.Halloween_Enabled ~= nil and Features.getHalloweenState then
                 Features.getHalloweenState().Enabled = Shared.Halloween_Enabled
+            end
+            -- ⭐ FIX: Halloween TP Method
+            if Shared.Halloween_TPMethod and Features.getHalloweenState then
+                local hs = Features.getHalloweenState()
+                if hs then hs.TPMethod = Shared.Halloween_TPMethod end
+            end
+            -- ⭐ FIX: Fly
+            if Shared.Fly_Enabled ~= nil and Features.setFlyEnabled then
+                Features.setFlyEnabled(Shared.Fly_Enabled)
+            end
+            if Shared.Fly_Height and Features.setFlyHeight then
+                Features.setFlyHeight(Shared.Fly_Height)
+            end
+            if Shared.Fly_Speed and Features.setFlySpeed then
+                Features.setFlySpeed(Shared.Fly_Speed)
+            end
+            -- Speed
+            if Shared.Speed_Value and Features.setSpeed then
+                Features.setSpeed(Shared.Speed_Value)
+            end
+            -- ⭐ FIX: Auto Obby
+            if Shared.AutoObby_Enabled and Features.startAutoObby then
+                pcall(Features.startAutoObby)
             end
         end)
 
+        -- ⭐ FIX: SELALU reset Loading, apapun hasilnya
         ConfigState.Loading = false
+
+        if not ok then
+            warn("[CONFIG] Import setter error:", err)
+        end
 
         if Shared.Notify and not silent then
             Shared.Notify("📥 Config imported! (" .. applied .. " keys)", "success")
@@ -6175,6 +6203,13 @@ end
 -- Expose
 _G.VRILZ_Config.export = config_export
 _G.VRILZ_Config.import = config_import
+
+-- Stub sebelum Init, biar config_load bisa pcall tanpa error
+if not Features.startAutoObby then
+    Features.startAutoObby = function() 
+        warn("[AUTO OBBY] Belum siap — dipanggil sebelum Init")
+    end
+end
 
 -- ============================================================
 -- FEATURES.INIT
@@ -6293,6 +6328,14 @@ local ObbyState = {
 function Features.startAutoObby()
     if ObbyState.Running then return end
     ObbyState.Running = true
+
+    -- ⭐ SAFETY: force reset kalo stuck >10 menit
+    task.delay(600, function()
+        if ObbyState.Running then
+            ObbyState.Running = false
+            warn("[AUTO OBBY] ⏱ Timeout 10 menit — force reset")
+        end
+    end)
 
     task.spawn(function()
         local player = game.Players.LocalPlayer
