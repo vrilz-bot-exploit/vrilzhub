@@ -3569,13 +3569,7 @@ local HalloweenState = {
     Claimed = 0,
     RareClaimed = 0,
     CandyTypes = {},
-    TPMethod = "TP100",
-    -- ⭐ FAKE CLONE STATE
-    _fakeChar = nil,
-    _fakePet = nil,
-    _realTransparency = {},
-    _realHidden = false,
-    _cameraLocked = false,
+    TPMethod = "TP100",   -- "TP100" (free), "TP180" (premium), "VOID" (premium instant)
 }
 
 -- ⭐ RARITY MAPPING
@@ -3613,92 +3607,27 @@ local HalloweenCfg = {
   RETURN_WAIT = 0.1,
 }
 
-local function isInHalloweenZone()
-    return LocalPlayer:GetAttribute("InHalloweenZone") == true
-end
-
 local function getHalloweenBase()
-    -- ═══════════════════════════════════════════════════════════
-    -- ⭐ PRIORITY 0 (MUTLAK): Player di zone → PAKE POSISI PLAYER
-    -- Fake clone spawn di tempat player berdiri = kamera nempel ke sini
-    -- ═══════════════════════════════════════════════════════════
-    if isInHalloweenZone() then
-        local char = LocalPlayer.Character
-        local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            return hrp
-        end
-    end
-
-    -- ═══ PRIORITY 1: Portal (posisi masuk zone) ═══
-    -- Cuma dipake kalo player BELUM di zone (InHalloweenZone = false)
-    local halloweenArea = Workspace:FindFirstChild("HalloweenArea")
-    if halloweenArea then
-        local portal = halloweenArea:FindFirstChild("Portal")
-        if portal then
-            local part = portal:FindFirstChildWhichIsA("BasePart", true)
-            if part then
-                return part
-            end
-        end
-    end
-
-    -- ═══ PRIORITY 2: SpawnLocation di HalloweenArea ═══
-    if halloweenArea then
-        local spawn = halloweenArea:FindFirstChildWhichIsA("SpawnLocation", true)
-        if spawn then
-            return spawn
-        end
-    end
-
-    -- ═══ PRIORITY 3: Folder "Halloween" ═══
-    local halloweenFolder = Workspace:FindFirstChild("Halloween")
-    if halloweenFolder then
-        local spawn = halloweenFolder:FindFirstChildWhichIsA("SpawnLocation", true)
-        if spawn then
-            return spawn
-        end
-        local bp = halloweenFolder:FindFirstChildWhichIsA("BasePart", true)
-        if bp then
-            return bp
-        end
-    end
-
-    -- ═══ PRIORITY 4: Nama spesifik ═══
     local candidates = {
         "HalloweenHomeAnchor", "HalloweenBase", "HalloweenSpawn",
         "HalloweenBaseplate", "HalloweenStart",
     }
     for _, name in ipairs(candidates) do
         local part = Workspace:FindFirstChild(name, true)
-        if part and part:IsA("BasePart") then
-            return part
-        end
+        if part and part:IsA("BasePart") then return part end
     end
-
-    -- ═══ PRIORITY 5: Scan SpawnLocation "halloween" ═══
-    for _, d in ipairs(Workspace:GetDescendants()) do
-        if d:IsA("SpawnLocation") and d.Name:lower():find("halloween", 1, true) then
-            return d
-        end
+    local halloweenFolder = Workspace:FindFirstChild("Halloween")
+    if halloweenFolder then
+        local spawn = halloweenFolder:FindFirstChildWhichIsA("SpawnLocation", true)
+        if spawn then return spawn end
+        local bp = halloweenFolder:FindFirstChildWhichIsA("BasePart", true)
+        if bp then return bp end
     end
-
-    -- ═══ PRIORITY 6: Fallback ke plot sendiri ═══
-    local myPlot = getMyPlotSpawn()
-    if myPlot then
-        warn("[HALLOWEEN] Base halloween gak ketemu — fake clone spawn di plot sendiri")
-        return myPlot
-    end
-
-    -- ═══ PRIORITY 7: Last resort — posisi player ═══
-    local char = LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        warn("[HALLOWEEN] Base halloween gak ketemu — fake clone spawn di posisi player")
-        return hrp
-    end
-
     return nil
+end
+
+local function isInHalloweenZone()
+    return LocalPlayer:GetAttribute("InHalloweenZone") == true
 end
 
 local function isCarryingCandy()
@@ -4174,229 +4103,15 @@ local function halloweenLeaveZone()
     return not isInHalloweenZone()
 end
 
--- ═══════════════════════════════════════════════════════════
--- 👻 FAKE CLONE HELPER — Spawn & Cleanup (camera lock included)
--- ═══════════════════════════════════════════════════════════
-local function halloweenSpawnFakeClone()
-    local char = LocalPlayer.Character
-    if not char then return false end
-
-    local halloweenBase = getHalloweenBase()
-    if not halloweenBase then
-        warn("[HALLOWEEN] Base Halloween gak ketemu — fake clone gak spawn")
-        return false
-    end
-
-    -- Clone karakter
-    local oldArch = char.Archivable
-    char.Archivable = true
-    local okC, cloneChar = pcall(char.Clone, char)
-    char.Archivable = oldArch
-
-    if not okC or not cloneChar then
-        warn("[HALLOWEEN] Clone char gagal")
-        return false
-    end
-
-    cloneChar.Name = "VRILZ_HalloweenFake_" .. LocalPlayer.Name
-    cloneChar.Parent = Workspace
-    pcall(function()
-        cloneChar:PivotTo(halloweenBase.CFrame + Vector3.new(0, 3, 0))
-    end)
-
-    for _, d in ipairs(cloneChar:GetDescendants()) do
-        if d:IsA("BasePart") then
-            d.Anchored = true
-            d.CanCollide = false
-            d.CanQuery = false
-            d.CanTouch = false
-        elseif d:IsA("Script") or d:IsA("LocalScript") or d:IsA("ModuleScript") then
-            d:Destroy()
-        end
-    end
-
-    HalloweenState._fakeChar = cloneChar
-    print("[HALLOWEEN] 👻 Fake char spawned di base")
-
-    -- Clone pet kalo lagi naik
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if hum and hum.SeatPart then
-        local pet = hum.SeatPart:FindFirstAncestorOfClass("Model")
-        if pet then
-            local oldArchP = pet.Archivable
-            pet.Archivable = true
-            local okP, clonePet = pcall(pet.Clone, pet)
-            pet.Archivable = oldArchP
-
-            if okP and clonePet then
-                clonePet.Name = "VRILZ_HalloweenFakePet_" .. pet.Name
-                clonePet.Parent = Workspace
-                pcall(function()
-                    clonePet:PivotTo(halloweenBase.CFrame + Vector3.new(5, 3, 0))
-                end)
-
-                for _, d in ipairs(clonePet:GetDescendants()) do
-                    if d:IsA("BasePart") then
-                        d.Anchored = true
-                        d.CanCollide = false
-                        d.CanQuery = false
-                        d.CanTouch = false
-                    elseif d:IsA("Script") or d:IsA("LocalScript") or d:IsA("ModuleScript") then
-                        d:Destroy()
-                    end
-                end
-
-                HalloweenState._fakePet = clonePet
-                print("[HALLOWEEN] 👻 Fake pet spawned di base")
-            end
-        end
-    end
-
-    -- HIDE REAL CHAR + PET
-    HalloweenState._realTransparency = {}
-    for _, d in ipairs(char:GetDescendants()) do
-        if d:IsA("BasePart") then
-            HalloweenState._realTransparency[d] = d.LocalTransparencyModifier
-            d.LocalTransparencyModifier = 1
-        elseif d:IsA("Decal") or d:IsA("Texture") then
-            HalloweenState._realTransparency[d] = d.Transparency
-            d.Transparency = 1
-        end
-    end
-
-    local hum2 = char:FindFirstChildOfClass("Humanoid")
-    if hum2 and hum2.SeatPart then
-        local pet2 = hum2.SeatPart:FindFirstAncestorOfClass("Model")
-        if pet2 then
-            for _, d in ipairs(pet2:GetDescendants()) do
-                if d:IsA("BasePart") then
-                    HalloweenState._realTransparency[d] = d.LocalTransparencyModifier
-                    d.LocalTransparencyModifier = 1
-                elseif d:IsA("Decal") or d:IsA("Texture") then
-                    HalloweenState._realTransparency[d] = d.Transparency
-                    d.Transparency = 1
-                end
-            end
-        end
-    end
-
-    HalloweenState._realHidden = true
-    print("[HALLOWEEN] 👻 Real char & pet INVISIBLE")
-
-    -- KAMERA KE FAKE CLONE
-    local cam = Workspace.CurrentCamera
-    if cam then
-        local cloneHum = cloneChar:FindFirstChildOfClass("Humanoid")
-            or cloneChar:FindFirstChild("HumanoidRootPart")
-        if cloneHum then
-            cam.CameraSubject = cloneHum
-            HalloweenState._cameraLocked = true
-            print("[HALLOWEEN] 📷 Camera locked to fake clone")
-        end
-    end
-
-    return true
-end
-
-local function halloweenCleanupFakeClone()
-    -- BALIKIN KAMERA KE REAL CHAR
-    if HalloweenState._cameraLocked then
-        local cam = Workspace.CurrentCamera
-        local realChar = LocalPlayer.Character
-        local realHum = realChar and realChar:FindFirstChildOfClass("Humanoid")
-        if cam and realHum then
-            cam.CameraSubject = realHum
-            print("[HALLOWEEN] 📷 Camera restored to real char")
-        end
-        HalloweenState._cameraLocked = false
-    end
-
-    if HalloweenState._fakeChar and HalloweenState._fakeChar.Parent then
-        HalloweenState._fakeChar:Destroy()
-    end
-    HalloweenState._fakeChar = nil
-
-    if HalloweenState._fakePet and HalloweenState._fakePet.Parent then
-        HalloweenState._fakePet:Destroy()
-    end
-    HalloweenState._fakePet = nil
-
-    if HalloweenState._realHidden then
-        for d, v in pairs(HalloweenState._realTransparency or {}) do
-            if d and d.Parent then
-                if d:IsA("BasePart") then d.LocalTransparencyModifier = v
-                elseif d:IsA("Decal") or d:IsA("Texture") then d.Transparency = v end
-            end
-        end
-        HalloweenState._realTransparency = {}
-        HalloweenState._realHidden = false
-        print("[HALLOWEEN] ✅ Real char & pet VISIBLE lagi")
-    end
-end
-
 function Features.startAutoHalloween()
     task.spawn(function()
         while task.wait(HalloweenCfg.LOOP_WAIT) do
-            -- ═══ OFF → cleanup ═══
-            if not HalloweenState.Enabled then
-                HalloweenState.Status = "⏸️ Idle"
-                _G.VRILZ_HalloweenBusy = false
-                HalloweenState._yinWaitStart = nil
-                halloweenCleanupFakeClone()
-                continue
-            end
-
-                        -- ═══ ON → SPAWN FAKE CLONE DI POSISI PLAYER ═══
-            -- Cek: fake clone ada & di zone = ok
-            -- Cek: fake clone ada & di luar zone (Portal) = cleanup + spawn ulang di zone
-            local fakeChar = HalloweenState._fakeChar
-            local fakeValid = fakeChar and fakeChar.Parent
-
-            -- Kalo fake clone ada, cek jarak ke player
-            local needRespawn = false
-            if fakeValid then
-                local fakeRoot = fakeChar:FindFirstChild("HumanoidRootPart")
-                local playerRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if fakeRoot and playerRoot then
-                    local dist = (fakeRoot.Position - playerRoot.Position).Magnitude
-                    -- Fake clone jauh dari player (> 100 studs) = posisi salah, respawn
-                    if dist > 100 then
-                        needRespawn = true
-                    end
-                else
-                    needRespawn = true
-                end
-            else
-                needRespawn = true
-            end
-
-            if needRespawn then
-                halloweenCleanupFakeClone()
-                local ok = halloweenSpawnFakeClone()
-                if not ok then
-                    task.wait(1)
-                    continue
-                end
-            end
-            -- Handle real char mati/respawn
-            local charNow = LocalPlayer.Character
-            if not charNow then
-                halloweenCleanupFakeClone()
-                task.wait(1)
-                continue
-            end
-
-            -- Re-lock kamera kalo game reset CameraSubject
-            if HalloweenState._cameraLocked and HalloweenState._fakeChar and HalloweenState._fakeChar.Parent then
-                local cam = Workspace.CurrentCamera
-                if cam then
-                    local fakeHum = HalloweenState._fakeChar:FindFirstChildOfClass("Humanoid")
-                        or HalloweenState._fakeChar:FindFirstChild("HumanoidRootPart")
-                    if fakeHum and cam.CameraSubject ~= fakeHum then
-                        cam.CameraSubject = fakeHum
-                    end
-                end
-            end
+           if not HalloweenState.Enabled then
+    HalloweenState.Status = "⏸️ Idle"
+    _G.VRILZ_HalloweenBusy = false
+    HalloweenState._yinWaitStart = nil   -- ⭐ reset timer
+    continue
+end
 
                         -- ⭐ PRIORITY 1: Auto Mutation — paling utama
 if Shared.AutoMutation_Enabled then
