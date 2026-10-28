@@ -3613,6 +3613,10 @@ local HalloweenCfg = {
   RETURN_WAIT = 0.1,
 }
 
+local function isInHalloweenZone()
+    return LocalPlayer:GetAttribute("InHalloweenZone") == true
+end
+
 local function getHalloweenBase()
     -- ═══ PRIORITY 0: Kalo player lagi DI Halloween zone → pake posisi player ═══
     -- Ini PALING GAMPANG. Fake clone spawn di tempat player berdiri di zone halloween
@@ -3686,21 +3690,6 @@ local function getHalloweenBase()
     end
 
     return nil
-end
-
-    -- ═══ PRIORITY 6: LAST RESORT — posisi player sekarang ═══
-    local char = LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        warn("[HALLOWEEN] Base halloween gak ketemu — fake clone spawn di posisi player")
-        return hrp
-    end
-
-    return nil
-end
-
-local function isInHalloweenZone()
-    return LocalPlayer:GetAttribute("InHalloweenZone") == true
 end
 
 local function isCarryingCandy()
