@@ -3618,8 +3618,10 @@ local function isInHalloweenZone()
 end
 
 local function getHalloweenBase()
-    -- ═══ PRIORITY 0: Kalo player lagi DI Halloween zone → pake posisi player ═══
-    -- Ini PALING GAMPANG. Fake clone spawn di tempat player berdiri di zone halloween
+    -- ═══════════════════════════════════════════════════════════
+    -- ⭐ PRIORITY 0 (MUTLAK): Player di zone → PAKE POSISI PLAYER
+    -- Fake clone spawn di tempat player berdiri = kamera nempel ke sini
+    -- ═══════════════════════════════════════════════════════════
     if isInHalloweenZone() then
         local char = LocalPlayer.Character
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
@@ -3628,60 +3630,67 @@ local function getHalloweenBase()
         end
     end
 
-    -- ═══ PRIORITY 1: Folder "HalloweenArea" → ambil Portal / Anchor ═══
+    -- ═══ PRIORITY 1: Portal (posisi masuk zone) ═══
+    -- Cuma dipake kalo player BELUM di zone (InHalloweenZone = false)
     local halloweenArea = Workspace:FindFirstChild("HalloweenArea")
     if halloweenArea then
-        -- Cari Anchor/Spawn di dalam HalloweenArea (posisi player spawn)
-        local spawn = halloweenArea:FindFirstChildWhichIsA("SpawnLocation", true)
-        if spawn then return spawn end
-        -- Cari part yang namanya ada "spawn", "anchor", "base"
-        for _, d in ipairs(halloweenArea:GetDescendants()) do
-            if d:IsA("BasePart") then
-                local n = d.Name:lower()
-                if n:find("spawn") or n:find("anchor") or n:find("base") or n:find("home") then
-                    return d
-                end
+        local portal = halloweenArea:FindFirstChild("Portal")
+        if portal then
+            local part = portal:FindFirstChildWhichIsA("BasePart", true)
+            if part then
+                return part
             end
         end
-        -- Fallback: ambil BasePart pertama
-        local bp = halloweenArea:FindFirstChildWhichIsA("BasePart", true)
-        if bp then return bp end
     end
 
-    -- ═══ PRIORITY 2: Folder "Halloween" ═══
+    -- ═══ PRIORITY 2: SpawnLocation di HalloweenArea ═══
+    if halloweenArea then
+        local spawn = halloweenArea:FindFirstChildWhichIsA("SpawnLocation", true)
+        if spawn then
+            return spawn
+        end
+    end
+
+    -- ═══ PRIORITY 3: Folder "Halloween" ═══
     local halloweenFolder = Workspace:FindFirstChild("Halloween")
     if halloweenFolder then
         local spawn = halloweenFolder:FindFirstChildWhichIsA("SpawnLocation", true)
-        if spawn then return spawn end
+        if spawn then
+            return spawn
+        end
         local bp = halloweenFolder:FindFirstChildWhichIsA("BasePart", true)
-        if bp then return bp end
+        if bp then
+            return bp
+        end
     end
 
-    -- ═══ PRIORITY 3: Nama spesifik ═══
+    -- ═══ PRIORITY 4: Nama spesifik ═══
     local candidates = {
         "HalloweenHomeAnchor", "HalloweenBase", "HalloweenSpawn",
         "HalloweenBaseplate", "HalloweenStart",
     }
     for _, name in ipairs(candidates) do
         local part = Workspace:FindFirstChild(name, true)
-        if part and part:IsA("BasePart") then return part end
+        if part and part:IsA("BasePart") then
+            return part
+        end
     end
 
-    -- ═══ PRIORITY 4: Scan SpawnLocation dengan nama "halloween" ═══
+    -- ═══ PRIORITY 5: Scan SpawnLocation "halloween" ═══
     for _, d in ipairs(Workspace:GetDescendants()) do
         if d:IsA("SpawnLocation") and d.Name:lower():find("halloween", 1, true) then
             return d
         end
     end
 
-    -- ═══ PRIORITY 5: Fallback ke plot sendiri ═══
+    -- ═══ PRIORITY 6: Fallback ke plot sendiri ═══
     local myPlot = getMyPlotSpawn()
     if myPlot then
         warn("[HALLOWEEN] Base halloween gak ketemu — fake clone spawn di plot sendiri")
         return myPlot
     end
 
-    -- ═══ PRIORITY 6: Last resort — posisi player ═══
+    -- ═══ PRIORITY 7: Last resort — posisi player ═══
     local char = LocalPlayer.Character
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
     if hrp then
@@ -4337,15 +4346,38 @@ function Features.startAutoHalloween()
                 continue
             end
 
-            -- ═══ ON → SPAWN FAKE CLONE LANGSUNG ═══
-            if not HalloweenState._fakeChar or not HalloweenState._fakeChar.Parent then
+                        -- ═══ ON → SPAWN FAKE CLONE DI POSISI PLAYER ═══
+            -- Cek: fake clone ada & di zone = ok
+            -- Cek: fake clone ada & di luar zone (Portal) = cleanup + spawn ulang di zone
+            local fakeChar = HalloweenState._fakeChar
+            local fakeValid = fakeChar and fakeChar.Parent
+
+            -- Kalo fake clone ada, cek jarak ke player
+            local needRespawn = false
+            if fakeValid then
+                local fakeRoot = fakeChar:FindFirstChild("HumanoidRootPart")
+                local playerRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if fakeRoot and playerRoot then
+                    local dist = (fakeRoot.Position - playerRoot.Position).Magnitude
+                    -- Fake clone jauh dari player (> 100 studs) = posisi salah, respawn
+                    if dist > 100 then
+                        needRespawn = true
+                    end
+                else
+                    needRespawn = true
+                end
+            else
+                needRespawn = true
+            end
+
+            if needRespawn then
+                halloweenCleanupFakeClone()
                 local ok = halloweenSpawnFakeClone()
                 if not ok then
                     task.wait(1)
                     continue
                 end
             end
-
             -- Handle real char mati/respawn
             local charNow = LocalPlayer.Character
             if not charNow then
