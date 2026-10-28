@@ -5392,15 +5392,7 @@ end
                 YinRitualState._scanStart = os.clock()
             end
             if os.clock() - YinRitualState._scanStart > 10 then
-                print("[YIN DEBUG] Stuck 10s — State check:")
-                print("  Yin holding:", isHoldingRitualItem("Yin"))
-                print("  Yang holding:", isHoldingRitualItem("Yang"))
-                print("  Yin placed:", isYinPlaced())
-                print("  Yang placed:", isYangPlaced())
-                print("  Yin in runtime:", findRitualItem("Yin") ~= nil)
-                print("  Yang in runtime:", findRitualItem("Yang") ~= nil)
-                print("  Cave cooldown:", isCaveOnCooldown())
-                YinRitualState._scanStart = os.clock()  -- reset
+                YinRitualState._scanStart = os.clock()
             end
             
             task.wait(0.5)
