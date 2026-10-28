@@ -3614,6 +3614,46 @@ local HalloweenCfg = {
 }
 
 local function getHalloweenBase()
+    -- ═══ PRIORITY 0: Kalo player lagi DI Halloween zone → pake posisi player ═══
+    -- Ini PALING GAMPANG. Fake clone spawn di tempat player berdiri di zone halloween
+    if isInHalloweenZone() then
+        local char = LocalPlayer.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            return hrp
+        end
+    end
+
+    -- ═══ PRIORITY 1: Folder "HalloweenArea" → ambil Portal / Anchor ═══
+    local halloweenArea = Workspace:FindFirstChild("HalloweenArea")
+    if halloweenArea then
+        -- Cari Anchor/Spawn di dalam HalloweenArea (posisi player spawn)
+        local spawn = halloweenArea:FindFirstChildWhichIsA("SpawnLocation", true)
+        if spawn then return spawn end
+        -- Cari part yang namanya ada "spawn", "anchor", "base"
+        for _, d in ipairs(halloweenArea:GetDescendants()) do
+            if d:IsA("BasePart") then
+                local n = d.Name:lower()
+                if n:find("spawn") or n:find("anchor") or n:find("base") or n:find("home") then
+                    return d
+                end
+            end
+        end
+        -- Fallback: ambil BasePart pertama
+        local bp = halloweenArea:FindFirstChildWhichIsA("BasePart", true)
+        if bp then return bp end
+    end
+
+    -- ═══ PRIORITY 2: Folder "Halloween" ═══
+    local halloweenFolder = Workspace:FindFirstChild("Halloween")
+    if halloweenFolder then
+        local spawn = halloweenFolder:FindFirstChildWhichIsA("SpawnLocation", true)
+        if spawn then return spawn end
+        local bp = halloweenFolder:FindFirstChildWhichIsA("BasePart", true)
+        if bp then return bp end
+    end
+
+    -- ═══ PRIORITY 3: Nama spesifik ═══
     local candidates = {
         "HalloweenHomeAnchor", "HalloweenBase", "HalloweenSpawn",
         "HalloweenBaseplate", "HalloweenStart",
@@ -3622,13 +3662,40 @@ local function getHalloweenBase()
         local part = Workspace:FindFirstChild(name, true)
         if part and part:IsA("BasePart") then return part end
     end
-    local halloweenFolder = Workspace:FindFirstChild("Halloween")
-    if halloweenFolder then
-        local spawn = halloweenFolder:FindFirstChildWhichIsA("SpawnLocation", true)
-        if spawn then return spawn end
-        local bp = halloweenFolder:FindFirstChildWhichIsA("BasePart", true)
-        if bp then return bp end
+
+    -- ═══ PRIORITY 4: Scan SpawnLocation dengan nama "halloween" ═══
+    for _, d in ipairs(Workspace:GetDescendants()) do
+        if d:IsA("SpawnLocation") and d.Name:lower():find("halloween", 1, true) then
+            return d
+        end
     end
+
+    -- ═══ PRIORITY 5: Fallback ke plot sendiri ═══
+    local myPlot = getMyPlotSpawn()
+    if myPlot then
+        warn("[HALLOWEEN] Base halloween gak ketemu — fake clone spawn di plot sendiri")
+        return myPlot
+    end
+
+    -- ═══ PRIORITY 6: Last resort — posisi player ═══
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        warn("[HALLOWEEN] Base halloween gak ketemu — fake clone spawn di posisi player")
+        return hrp
+    end
+
+    return nil
+end
+
+    -- ═══ PRIORITY 6: LAST RESORT — posisi player sekarang ═══
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        warn("[HALLOWEEN] Base halloween gak ketemu — fake clone spawn di posisi player")
+        return hrp
+    end
+
     return nil
 end
 
