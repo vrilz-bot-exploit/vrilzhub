@@ -2490,6 +2490,22 @@ local function getBestEggInMap()
     local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not myRoot then return nil end
 
+    -- ⭐ FIX: cek user udah milih rarity beneran atau belum
+    local hasRaritySelection = false
+    if Shared.SelectedRarities then
+        for rarity, on in pairs(Shared.SelectedRarities) do
+            if rarity ~= "None" and on == true then
+                hasRaritySelection = true
+                break
+            end
+        end
+    end
+
+    -- Kalau user belum milih rarity apapun → return nil (biar caller fallback)
+    if not hasRaritySelection then
+        return nil
+    end
+
     local best, bestRank = nil, 0
     for _, egg in ipairs(rendered:GetChildren()) do
         if egg:IsA("Model") and isRaritySelected(egg.Name) then
@@ -3412,38 +3428,69 @@ doReturnToPlot()
             end
 
             -- ⭐ PRIORITY 2: KALO GAK ADA VOLCANIC → STEAL EGG BIASA (by Rarity/Name)
-            local stealMode = Shared.MutationStealMode or "Rarity"
-            local targetEgg = nil
+local stealMode = Shared.MutationStealMode or "Rarity"
+local targetEgg = nil
 
-            if stealMode == "Name" then
-                local rendered = Workspace:FindFirstChild("RenderedEggs")
-                if rendered then
-                    local myRoot2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    local bestDist = math.huge
-                    for _, egg in ipairs(rendered:GetChildren()) do
-                        if egg:IsA("Model") and Shared.MutationSelectedEggs[egg.Name] then
-                            local part = egg:FindFirstChildWhichIsA("BasePart", true)
-                            if part and myRoot2 then
-                                local d = (part.Position - myRoot2.Position).Magnitude
-                                if d < bestDist then
-                                    bestDist = d
-                                    targetEgg = egg
-                                end
-                            end
+if stealMode == "Name" then
+    -- ⭐ FIX: cek dulu ada egg yang di-centang atau belum
+    local anySelected = false
+    for _, v in pairs(Shared.MutationSelectedEggs or {}) do
+        if v == true then anySelected = true break end
+    end
+
+    if anySelected then
+        local rendered = Workspace:FindFirstChild("RenderedEggs")
+        if rendered then
+            local myRoot2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            local bestDist = math.huge
+            for _, egg in ipairs(rendered:GetChildren()) do
+                if egg:IsA("Model") and Shared.MutationSelectedEggs[egg.Name] then
+                    local part = egg:FindFirstChildWhichIsA("BasePart", true)
+                    if part and myRoot2 then
+                        local d = (part.Position - myRoot2.Position).Magnitude
+                        if d < bestDist then
+                            bestDist = d
+                            targetEgg = egg
                         end
                     end
                 end
-            else
-                local best = getBestEggInMap()
-                if best then targetEgg = best.egg end
             end
+        end
+    else
+        -- ⭐ FIX: Mode Name tapi user belum centang egg apapun
+        Shared.MutationSteal_Active = false
+        if Shared.Notify and not Shared._mutationStealNotified then
+            Shared._mutationStealNotified = true
+            Shared.Notify("⚠️ Pilih minimal 1 egg di 'Select Egg Name' dulu!", "warning")
+            task.delay(5, function() Shared._mutationStealNotified = nil end)
+        end
+        task.wait(1)
+        continue
+    end
+else
+    -- Mode Rarity
+    local best = getBestEggInMap()
+    if best then
+        targetEgg = best.egg
+    else
+        -- ⭐ FIX: Mode Rarity tapi user belum pilih rarity / gak ada egg match
+        Shared.MutationSteal_Active = false
+        if Shared.Notify and not Shared._mutationStealNotified then
+            Shared._mutationStealNotified = true
+            Shared.Notify("⚠️ Pilih minimal 1 rarity di 'Select Rarity' dulu!", "warning")
+            task.delay(5, function() Shared._mutationStealNotified = nil end)
+        end
+        task.wait(1)
+        continue
+    end
+end
 
-            if not targetEgg then
-                Shared.MutationSteal_Active = false
-                task.wait(0.5)
-                continue
-            end
-
+if not targetEgg then
+    Shared.MutationSteal_Active = false
+    task.wait(0.5)
+    continue
+end
+                
             Shared.MutationSteal_Active = true
 
             local egg = targetEgg
