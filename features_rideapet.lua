@@ -1882,29 +1882,12 @@ local RARITY_ORDER = {
 
 local function getEggRarity(eggName)
     local info = EggData[eggName]
-    if info and info.Rarity then return info.Rarity end
-    -- ⭐ Kalau gak ada di GameData, coba tebak dari nama
-    local n = eggName:lower()
-    if n:find("secret") then return "Secret" end
-    if n:find("ethereal") then return "Ethereal" end
-    if n:find("divine") then return "Divine" end
-    if n:find("mythic") then return "Mythic" end
-    if n:find("legendary") then return "Legendary" end
-    if n:find("epic") then return "Epic" end
-    if n:find("rare") then return "Rare" end
-    if n:find("uncommon") then return "Uncommon" end
-    return "Common"
+    return info and info.Rarity or "Common"
 end
 
 local function isRaritySelected(eggName)
-    if not Shared.SelectedRarities then return false end
-    
-    -- ⭐ "None" = user sengaja gak mau steal by rarity
-    if Shared.SelectedRarities["None"] == true then
-        return false
-    end
-    
     local rarity = getEggRarity(eggName)
+    if not Shared.SelectedRarities then return false end
     return Shared.SelectedRarities[rarity] == true
 end
 
@@ -6013,12 +5996,12 @@ local function config_save(silent)
         _theme = _G.VRILZ_CurrentTheme or "Brutal",
     }
 
-for code, key in pairs(CONFIG_KEYS) do
-    local v = Shared[key]
-    if v ~= nil then
-        data[key] = config_serializeValue(v)
+    for code, key in pairs(CONFIG_KEYS) do
+        local v = Shared[key]
+        if v ~= nil then
+            data[key] = config_serializeValue(v)
+        end
     end
-end
 
     local ok = pcall(function()
         writefile(CONFIG_FILE, HttpService:JSONEncode(data))
@@ -6039,15 +6022,6 @@ end
 local function config_load(silent)
     if not (readfile and isfile) then return false end
     if not Shared then return false end
-    
-    -- ⭐ GUARD: Pastikan Shared.SelectedRarities udah ada
-    if not Shared.SelectedRarities then
-        warn("[CONFIG] SelectedRarities not ready — defer load")
-        task.delay(1, function()
-            config_load(silent)
-        end)
-        return false
-    end
 
     local okFile, exists = pcall(isfile, CONFIG_FILE)
     if not okFile or not exists then
@@ -6077,19 +6051,10 @@ local function config_load(silent)
     ConfigState.Loading = true
 
     for code, key in pairs(CONFIG_KEYS) do
-    if data[key] ~= nil then
-        local current = Shared[key]
-        local loaded = data[key]
-        -- ⭐ MERGE untuk table, jangan replace
-        if type(current) == "table" and type(loaded) == "table" then
-            for k, v in pairs(loaded) do
-                current[k] = v
-            end
-        else
-            Shared[key] = loaded
+        if data[key] ~= nil then
+            Shared[key] = data[key]
         end
     end
-end
 
     if data._theme then
         _G.VRILZ_ApplyThemeFromConfig = data._theme
@@ -6310,17 +6275,16 @@ local function config_export()
                 table.insert(parts, code .. "=" .. tostring(math.floor(v)))
             elseif type(v) == "string" and v ~= "" then
                 table.insert(parts, code .. "=" .. shortStr(v))
-elseif type(v) == "table" then
-    local on = {}
-    for k, vv in pairs(v) do
-        if vv == true then 
-            table.insert(on, k)      -- ⭐ SIMPAN NAMA LENGKAP, bukan sub(1,4)
-        end
-    end
-    if #on > 0 then
-        table.insert(parts, code .. "=" .. table.concat(on, ","))
-    end
-end
+            elseif type(v) == "table" then
+                -- multi-select: cuma simpan yang TRUE aja
+                local on = {}
+                for k, vv in pairs(v) do
+                    if vv == true then table.insert(on, k:sub(1, 4)) end
+                end
+                if #on > 0 then
+                    table.insert(parts, code .. "=" .. table.concat(on, ","))
+                end
+            end
         end
     end
     table.sort(parts)
@@ -6358,26 +6322,16 @@ local function config_import(code, silent)
                         Shared[key] = tonumber(v) or cur
                     elseif type(cur) == "string" then
                         Shared[key] = unshortStr(c, v)
-                    elseif type(cur) == "table" then
-                        -- ⭐ RESET ke default: "None" = true, lainnya false
-                        for k in pairs(cur) do
-                            cur[k] = (k == "None")
-                        end
-
-                        -- ⭐ Apply dari config (EXACT match, nama lengkap)
-                        local hasRarity = false
+                                        elseif type(cur) == "table" then
+                        -- reset semua dulu
+                        for k in pairs(cur) do cur[k] = false end
+                        -- set yang on (prefix 4 huruf, fallback ke full name)
                         for name in v:gmatch("[^,]+") do
                             for k in pairs(cur) do
-                                if k == name then
+                                if k:upper():sub(1, 4) == name or k:upper() == name then
                                     cur[k] = true
-                                    if k ~= "None" then hasRarity = true end
                                 end
                             end
-                        end
-
-                        -- ⭐ Kalau ada rarity selain None yang on → matikan None
-                        if hasRarity and cur["None"] ~= nil then
-                            cur["None"] = false
                         end
                     end
                     applied = applied + 1
