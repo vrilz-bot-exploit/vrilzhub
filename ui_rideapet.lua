@@ -12637,17 +12637,17 @@ function UI.Init(sharedState)
     Shared.AutoFarm_Enabled = false
     Shared.AntiAFK_Enabled = true   -- ← TAMBAH INI
     Shared.SelectedRarities = {
-        ["None"] = true,
-        ["Common"] = false,
-        ["Uncommon"] = false,
-        ["Rare"] = false,
-        ["Epic"] = false,
-        ["Legendary"] = false,
-        ["Mythic"] = false,
-        ["Divine"] = false,
-        ["Ethereal"] = false,
-        ["Secret"] = false,
-    }
+    ["None"] = false,
+    ["Common"] = true,
+    ["Uncommon"] = true,
+    ["Rare"] = true,
+    ["Epic"] = true,
+    ["Legendary"] = true,
+    ["Mythic"] = true,
+    ["Divine"] = true,
+    ["Ethereal"] = true,
+    ["Secret"] = true,
+}
     Shared.AutoHatchLuck_Enabled = false
     Shared.HatchLuck_Mode = "Max"
           Shared.StealMode = "TP"
