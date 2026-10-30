@@ -1991,6 +1991,55 @@ local RARITY_ORDER = {
     Ethereal = 9,
 }
 
+-- ⭐ TAMBAH 2 FUNGSI INI — WAJIB, biar findPriorityEggOutside gak error
+local function getEggRarity(eggName)
+    if not eggName or eggName == "" then return "Common" end
+
+    local info = EggData[eggName]
+
+    if not info then
+        local base = eggName:gsub("%s*Egg%s*$", "")
+        info = EggData[base]
+            or EggData[base .. " Egg"]
+            or EggData[eggName:lower()]
+            or EggData[base:lower()]
+    end
+
+    if not info then
+        for k, v in pairs(EggData) do
+            if type(k) == "string" then
+                local kClean = k:lower():gsub("%s*egg%s*$", ""):gsub("_", " ")
+                local nClean = eggName:lower():gsub("%s*egg%s*$", ""):gsub("_", " ")
+                if kClean == nClean then
+                    info = v
+                    break
+                end
+            end
+        end
+    end
+
+    if not info then return "Common" end
+
+    local r = info.Rarity or info.rarity or "Common"
+    r = tostring(r):gsub("^%s+", ""):gsub("%s+$", "")
+    r = r:sub(1, 1):upper() .. r:sub(2):lower()
+    return r
+end
+
+local function isRaritySelected(eggName)
+    local rarity = getEggRarity(eggName)
+    if not Shared or not Shared.SelectedRarities then return false end
+    if Shared.SelectedRarities[rarity] == true then return true end
+    for rKey, rVal in pairs(Shared.SelectedRarities) do
+        if type(rKey) == "string" and rKey ~= "None" and rVal == true then
+            if rKey:lower() == rarity:lower() then
+                return true
+            end
+        end
+    end
+    return false
+end
+
 function Features.startMutationSteal()
     task.spawn(function()
         while task.wait(0.5) do
