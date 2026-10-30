@@ -1147,22 +1147,7 @@ local lastNoEggNotif = 0
 function Features.startAutoSteal()
     task.spawn(function()
         while task.wait(0.5) do
-            -- ⭐ FIX: baca Shared dengan guard, biar gak error kalo nil
-            if not Shared then task.wait(0.5) continue end
-            if Shared.AutoSteal_Enabled ~= true then continue end
-
-            -- ⭐ FIX: skip kalo Mutation Steal lagi aktif (biar gak rebutan)
-            if Shared.MutationSteal_Active and Shared.MutationSteal_Enabled then
-                task.wait(0.5)
-                continue
-            end
-
-            -- ⭐ FIX: skip kalo Auto Mutation lagi Running
-            local ms = Features.getMutationState and Features.getMutationState()
-            if ms and (ms.Running or ms.EggLocked or ms.StealPaused) then
-                task.wait(0.5)
-                continue
-            end
+            if not Shared.AutoSteal_Enabled then continue end
 
             local char = LocalPlayer.Character
             local myRoot = char and char:FindFirstChild("HumanoidRootPart")
@@ -1174,6 +1159,7 @@ function Features.startAutoSteal()
 
             local eggName = Shared.SelectedEgg or "Cherub"
             local egg = findEggByName(eggName)
+
             if not egg then
                 local now = os.clock()
                 if now - lastNoEggNotif > 5 then
@@ -1896,12 +1882,29 @@ local RARITY_ORDER = {
 
 local function getEggRarity(eggName)
     local info = EggData[eggName]
-    return info and info.Rarity or "Common"
+    if info and info.Rarity then return info.Rarity end
+    -- ⭐ Kalau gak ada di GameData, coba tebak dari nama
+    local n = eggName:lower()
+    if n:find("secret") then return "Secret" end
+    if n:find("ethereal") then return "Ethereal" end
+    if n:find("divine") then return "Divine" end
+    if n:find("mythic") then return "Mythic" end
+    if n:find("legendary") then return "Legendary" end
+    if n:find("epic") then return "Epic" end
+    if n:find("rare") then return "Rare" end
+    if n:find("uncommon") then return "Uncommon" end
+    return "Common"
 end
 
 local function isRaritySelected(eggName)
-    local rarity = getEggRarity(eggName)
     if not Shared.SelectedRarities then return false end
+    
+    -- ⭐ "None" = user sengaja gak mau steal by rarity
+    if Shared.SelectedRarities["None"] == true then
+        return false
+    end
+    
+    local rarity = getEggRarity(eggName)
     return Shared.SelectedRarities[rarity] == true
 end
 
@@ -3145,39 +3148,22 @@ end
 -- ============================================================
 function Features.startMutationSteal()
     task.spawn(function()
-        local _lastActiveTime = 0
         while task.wait(0.5) do
             if not Shared.MutationSteal_Enabled then
                 Shared.MutationSteal_Active = false
-                _lastActiveTime = 0
                 continue
-            end
-
-            -- ⭐ FIX: guard timeout — kalo Active nyangkut > 30 detik, force reset
-            if Shared.MutationSteal_Active then
-                if _lastActiveTime == 0 then
-                    _lastActiveTime = os.clock()
-                elseif os.clock() - _lastActiveTime > 30 then
-                    warn("[MUTATION STEAL] Force reset — Active nyangkut > 30s")
-                    Shared.MutationSteal_Active = false
-                    _lastActiveTime = 0
-                end
-            else
-                _lastActiveTime = 0
             end
 
             -- Kalo Auto Mutation lagi jalan, tunggu
             if Features.getMutationState and Features.getMutationState().Running then
                 Shared.MutationSteal_Active = false
-                _lastActiveTime = 0
                 task.wait(1)
                 continue
             end
 
-            -- Kalo Auto Volcanic Hunt aktif, skip
+            -- Kalo Auto Volcanic Hunt aktif, skip (biar gak bentrok)
             if Shared.VolcanicHunt_Enabled then
                 Shared.MutationSteal_Active = false
-                _lastActiveTime = 0
                 task.wait(1)
                 continue
             end
@@ -6027,12 +6013,12 @@ local function config_save(silent)
         _theme = _G.VRILZ_CurrentTheme or "Brutal",
     }
 
-    for code, key in pairs(CONFIG_KEYS) do
-        local v = Shared[key]
-        if v ~= nil then
-            data[key] = config_serializeValue(v)
-        end
+for code, key in pairs(CONFIG_KEYS) do
+    local v = Shared[key]
+    if v ~= nil then
+        data[key] = config_serializeValue(v)
     end
+end
 
     local ok = pcall(function()
         writefile(CONFIG_FILE, HttpService:JSONEncode(data))
@@ -6053,6 +6039,15 @@ end
 local function config_load(silent)
     if not (readfile and isfile) then return false end
     if not Shared then return false end
+    
+    -- ⭐ GUARD: Pastikan Shared.SelectedRarities udah ada
+    if not Shared.SelectedRarities then
+        warn("[CONFIG] SelectedRarities not ready — defer load")
+        task.delay(1, function()
+            config_load(silent)
+        end)
+        return false
+    end
 
     local okFile, exists = pcall(isfile, CONFIG_FILE)
     if not okFile or not exists then
@@ -6082,27 +6077,30 @@ local function config_load(silent)
     ConfigState.Loading = true
 
     for code, key in pairs(CONFIG_KEYS) do
-        if data[key] ~= nil then
-            Shared[key] = data[key]
+    if data[key] ~= nil then
+        local current = Shared[key]
+        local loaded = data[key]
+        -- ⭐ MERGE untuk table, jangan replace
+        if type(current) == "table" and type(loaded) == "table" then
+            for k, v in pairs(loaded) do
+                current[k] = v
+            end
+        else
+            Shared[key] = loaded
         end
     end
+end
 
     if data._theme then
         _G.VRILZ_ApplyThemeFromConfig = data._theme
     end
 
--- ⭐ Sync fitur yang butuh setter khusus
-task.spawn(function()
-    local ok, err = pcall(function()
-        -- ⭐ FIX: cuma sync kalo fitur udah ready
-        if not Features._antiAFKStarted then
-            -- Fitur belum Init, skip setter — nanti Init yang handle
-            return
-        end
-
-        if Shared.AutoRidePet_Enabled ~= nil and Features.setAutoRideEnabled then
-            Features.setAutoRideEnabled(Shared.AutoRidePet_Enabled)
-        end
+        -- ⭐ Sync fitur yang butuh setter khusus
+    task.spawn(function()
+        local ok, err = pcall(function()
+            if Shared.AutoRidePet_Enabled ~= nil and Features.setAutoRideEnabled then
+                Features.setAutoRideEnabled(Shared.AutoRidePet_Enabled)
+            end
             if Shared.InfinityJump_Enabled ~= nil and Features.setInfinityJumpEnabled then
                 Features.setInfinityJumpEnabled(Shared.InfinityJump_Enabled)
             end
@@ -6204,6 +6202,7 @@ end
 local function config_startWatcher()
     if ConfigState._ready then return end
     if not Shared then
+        -- ⭐ FIX: retry kalau Shared belum siap
         task.spawn(function()
             local timeout = 0
             while not Shared and timeout < 10 do
@@ -6220,17 +6219,12 @@ local function config_startWatcher()
 
     task.spawn(function()
         local lastSnapshot = {}
-        local lastSaveClock = 0
         while true do
-            task.wait(1.5)  -- ⭐ FIX: dari 0.8 → 1.5, kurangi frekuensi
+            task.wait(0.8)
             if ConfigState.Loading then continue end
             if not Shared then continue end
 
-            -- ⭐ FIX: rate limit save — max 1 save tiap 5 detik
-            local now = os.clock()
-            if now - lastSaveClock < 5 then continue end
-
-            local changed = false
+                        local changed = false
             for code, key in pairs(CONFIG_KEYS) do
                 local v = Shared[key]
                 local serialized
@@ -6246,7 +6240,6 @@ local function config_startWatcher()
                 end
             end
             if changed then
-                lastSaveClock = now
                 config_scheduleAutoSave()
             end
         end
@@ -6317,16 +6310,17 @@ local function config_export()
                 table.insert(parts, code .. "=" .. tostring(math.floor(v)))
             elseif type(v) == "string" and v ~= "" then
                 table.insert(parts, code .. "=" .. shortStr(v))
-            elseif type(v) == "table" then
-                -- multi-select: cuma simpan yang TRUE aja
-                local on = {}
-                for k, vv in pairs(v) do
-                    if vv == true then table.insert(on, k:sub(1, 4)) end
-                end
-                if #on > 0 then
-                    table.insert(parts, code .. "=" .. table.concat(on, ","))
-                end
-            end
+elseif type(v) == "table" then
+    local on = {}
+    for k, vv in pairs(v) do
+        if vv == true then 
+            table.insert(on, k)      -- ⭐ SIMPAN NAMA LENGKAP, bukan sub(1,4)
+        end
+    end
+    if #on > 0 then
+        table.insert(parts, code .. "=" .. table.concat(on, ","))
+    end
+end
         end
     end
     table.sort(parts)
@@ -6364,16 +6358,26 @@ local function config_import(code, silent)
                         Shared[key] = tonumber(v) or cur
                     elseif type(cur) == "string" then
                         Shared[key] = unshortStr(c, v)
-                                        elseif type(cur) == "table" then
-                        -- reset semua dulu
-                        for k in pairs(cur) do cur[k] = false end
-                        -- set yang on (prefix 4 huruf, fallback ke full name)
+                    elseif type(cur) == "table" then
+                        -- ⭐ RESET ke default: "None" = true, lainnya false
+                        for k in pairs(cur) do
+                            cur[k] = (k == "None")
+                        end
+
+                        -- ⭐ Apply dari config (EXACT match, nama lengkap)
+                        local hasRarity = false
                         for name in v:gmatch("[^,]+") do
                             for k in pairs(cur) do
-                                if k:upper():sub(1, 4) == name or k:upper() == name then
+                                if k == name then
                                     cur[k] = true
+                                    if k ~= "None" then hasRarity = true end
                                 end
                             end
+                        end
+
+                        -- ⭐ Kalau ada rarity selain None yang on → matikan None
+                        if hasRarity and cur["None"] ~= nil then
+                            cur["None"] = false
                         end
                     end
                     applied = applied + 1
@@ -6430,7 +6434,23 @@ end
 function Features.Init(sharedState)
     Shared = sharedState
 
-    -- ⭐ SET DEFAULT BIAR AMAN DULU
+    -- ⭐⭐⭐ CONFIG: AUTO-LOAD SEBELUM FITUR LAIN ⭐⭐⭐
+    task.spawn(function()
+        -- Tunggu Shared siap
+        task.wait(0.2)
+        local ok, loaded = pcall(config_load, true)  -- silent
+        if loaded then
+            print("[CONFIG] ✅ Auto-loaded on startup")
+        else
+            print("[CONFIG] No config / fresh start")
+        end
+        -- Baru nyalain watcher setelah load selesai
+        task.wait(0.5)
+        config_startWatcher()
+    end)
+    -- ⭐⭐⭐ END CONFIG ⭐⭐⭐
+
+    -- ⭐ SET DEFAULT BIAR AMAN
     if Shared.AntiAFK_Enabled == nil then Shared.AntiAFK_Enabled = true end
     if Shared.MutationSteal_Active == nil then Shared.MutationSteal_Active = false end
     if Shared.AutoRidePet_Enabled == nil then Shared.AutoRidePet_Enabled = true end
@@ -6438,21 +6458,8 @@ function Features.Init(sharedState)
     if Shared.Fly_Enabled == nil then Shared.Fly_Enabled = false end
     if Shared.Fly_Height == nil then Shared.Fly_Height = 100 end
     if Shared.Fly_Speed == nil then Shared.Fly_Speed = 300 end
-    if Shared.AutoSteal_Enabled == nil then Shared.AutoSteal_Enabled = false end
-    if Shared.MutationSteal_Enabled == nil then Shared.MutationSteal_Enabled = false end
 
-    -- ⭐⭐⭐ FIX: LOAD CONFIG SYNC DULU SEBELUM FITUR LAIN ⭐⭐⭐
-    local ok, loaded = pcall(config_load, true)
-    if loaded then
-        print("[CONFIG] ✅ Auto-loaded on startup")
-    else
-        print("[CONFIG] No config / fresh start")
-    end
-
-    -- ⭐ Baru nyalain watcher SETELAH load
-    config_startWatcher()
-
-    -- ⭐⭐⭐ BARU NYALAIN FITUR SETELAH CONFIG LOADED ⭐⭐⭐
+    -- ⭐ Guard: cegah double-start anti-AFK
     if not Features._antiAFKStarted then
         Features._antiAFKStarted = true
         Features.startAntiAFK()
@@ -6475,7 +6482,7 @@ function Features.Init(sharedState)
     Features.startAutoHalloween()
     Features.startAutoYinRitual()
     Features.startInfinityJump()
-    Features.startStealExecutor()
+    Features.startStealExecutor() 
 
            -- ⭐ AUTO-ENABLE AUTO RIDE PET — LANGSUNG ON
     Shared.AutoRidePet_Enabled = true
