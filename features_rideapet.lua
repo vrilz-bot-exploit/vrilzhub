@@ -1991,17 +1991,234 @@ local RARITY_ORDER = {
     Ethereal = 9,
 }
 
-local function getEggRarity(eggName)
-    local info = EggData[eggName]
-    return info and info.Rarity or "Common"
-end
+function Features.startMutationSteal()
+    task.spawn(function()
+        while task.wait(0.5) do
+            if not Shared.MutationSteal_Enabled then
+                Shared.MutationSteal_Active = false
+                continue
+            end
 
-local function isRaritySelected(eggName)
-    local rarity = getEggRarity(eggName)
-    if not Shared.SelectedRarities then return false end
-    return Shared.SelectedRarities[rarity] == true
-end
+            -- ═══ GUARD: Skip kalau Volcanic Hunt aktif ═══
+            if Shared.VolcanicHunt_Enabled then
+                Shared.MutationSteal_Active = false
+                task.wait(1)
+                continue
+            end
 
+            local char = LocalPlayer.Character
+            local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if not myRoot or not hum or hum.Health <= 0 then
+                Shared.MutationSteal_Active = false
+                task.wait(1)
+                continue
+            end
+
+            -- ═══ STEP 1: Kalau lagi bawa egg → drop volcano + return ═══
+            if isHoldingEggMutation() then
+                Shared.MutationSteal_Active = true
+
+                -- 1a. TP ke volcano
+                task.wait(0.3)
+                local safePos = findSafeVolcanoPos()
+                if safePos then
+                    local rootLava = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if rootLava then
+                        rootLava.CFrame = CFrame.new(safePos)
+                        rootLava.Velocity = Vector3.zero
+                        rootLava.AssemblyLinearVelocity = Vector3.zero
+                    end
+                end
+                task.wait(1.5)
+
+                -- 1b. DIP sampe egg released
+                local dropWaited = 0
+                local eggReleased = false
+                while dropWaited < 15 do
+                    if not Shared.MutationSteal_Enabled then break end
+                    fireVolcanoDip()
+                    task.wait(1.5)
+                    dropWaited = dropWaited + 1.5
+                    if not isHoldingEggMutation() then
+                        eggReleased = true
+                        break
+                    end
+                end
+
+                if not eggReleased then
+                    Shared.MutationSteal_Active = false
+                    task.wait(2)
+                    continue
+                end
+
+                -- 1c. Tunggu egg balik
+                local waitStart = os.clock()
+                local eggBack = false
+                while os.clock() - waitStart < 20 do
+                    if not Shared.MutationSteal_Enabled then break end
+                    task.wait(1)
+                    if isHoldingEggMutation() then
+                        eggBack = true
+                        break
+                    end
+                end
+
+                if not eggBack then
+                    Shared.MutationSteal_Active = false
+                    task.wait(2)
+                    continue
+                end
+
+                -- 1d. WEBHOOK
+                if _G.VRILZ_SendWebhook then
+                    local _, eggName = isHoldingEggMutation()
+                    local cleanEggName = normalizeEggName(eggName)
+                    local eggInfo = _G.VRILZ_GetEggInfo and _G.VRILZ_GetEggInfo(cleanEggName) or {}
+                    _G.VRILZ_SendWebhook("mutation", {
+                        title = "MUTATION COMPLETE",
+                        description = "Egg berhasil di-mutasi! 🔥",
+                        details = {
+                            { name = "🥚  **EGG**", value = "```yaml\n" .. tostring(cleanEggName or "?") .. "\n```", inline = true },
+                            { name = "⚖️  **WEIGHT**", value = "```yaml\n" .. (eggInfo.weight or "?") .. "\n```", inline = true },
+                            { name = "🍀  **LUCK**", value = "```yaml\n" .. (eggInfo.luck or "?") .. "\n```", inline = true },
+                            { name = "🔥  **SOURCE**", value = "```yaml\nAuto Steal → Mutation\n```", inline = false },
+                        },
+                    })
+                end
+
+                -- 1e. RETURN (Instant / Step)
+                if Shared.MutationReturn_Enabled then
+                    task.wait(0.5)
+                    doReturnToPlot()
+                end
+
+                Shared.MutationSteal_Active = false
+                task.wait(2)
+                continue
+            end
+
+            -- ═══ STEP 2: Cari target egg — WAJIB ada filter ═══
+            local stealMode = Shared.MutationStealMode or "Rarity"
+            local targetEgg = nil
+            local hasFilter = false
+
+            if stealMode == "Name" then
+                -- Cek apakah ada egg yang dicentang
+                for _, v in pairs(Shared.MutationSelectedEggs or {}) do
+                    if v == true then hasFilter = true break end
+                end
+
+                -- ⭐ Gak ada yang dicentang → DIEM, gak steal
+                if not hasFilter then
+                    Shared.MutationSteal_Active = false
+                    task.wait(1)
+                    continue
+                end
+
+                local rendered = Workspace:FindFirstChild("RenderedEggs")
+                if rendered then
+                    local bestDist = math.huge
+                    for _, egg in ipairs(rendered:GetChildren()) do
+                        if egg:IsA("Model") and Shared.MutationSelectedEggs[egg.Name] == true then
+                            local part = egg:FindFirstChildWhichIsA("BasePart", true)
+                            if part then
+                                local d = (part.Position - myRoot.Position).Magnitude
+                                if d < bestDist then
+                                    bestDist = d
+                                    targetEgg = egg
+                                end
+                            end
+                        end
+                    end
+                end
+            else
+                -- Mode Rarity
+                local best = getBestEggInMap()
+                if best then
+                    targetEgg = best.egg
+                    hasFilter = true
+                end
+
+                -- ⭐ Gak ada rarity dipilih → DIEM, gak steal
+                if not hasFilter then
+                    Shared.MutationSteal_Active = false
+                    task.wait(1)
+                    continue
+                end
+            end
+
+            if not targetEgg then
+                task.wait(0.5)
+                continue
+            end
+
+            -- ═══ STEP 3: STEAL egg ═══
+            Shared.MutationSteal_Active = true
+
+            local eggPart = targetEgg:FindFirstChildWhichIsA("BasePart", true)
+            local prompt = targetEgg:FindFirstChild("Pickup", true)
+                or targetEgg:FindFirstChildWhichIsA("ProximityPrompt", true)
+            if not eggPart or not prompt then
+                Shared.MutationSteal_Active = false
+                task.wait(0.5)
+                continue
+            end
+
+            if prompt:IsA("ProximityPrompt") then
+                prompt.HoldDuration = 0
+                prompt.MaxActivationDistance = math.huge
+                prompt.RequiresLineOfSight = false
+            end
+
+            -- TP ke egg
+            local curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if curRoot then
+                curRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
+                curRoot.Velocity = Vector3.zero
+                curRoot.AssemblyLinearVelocity = Vector3.zero
+            end
+            task.wait(0.2)
+
+            -- Fire prompt sampe egg di tangan
+            local picked = false
+            for i = 1, 20 do
+                if not Shared.MutationSteal_Enabled then break end
+                if isHoldingEggMutation() then
+                    picked = true
+                    break
+                end
+                if not targetEgg.Parent then
+                    picked = true
+                    break
+                end
+
+                if typeof(fireproximityprompt) == "function" then
+                    pcall(fireproximityprompt, prompt)
+                end
+                task.wait(0.25)
+
+                if eggPart and eggPart.Parent then
+                    curRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if curRoot then
+                        curRoot.CFrame = CFrame.lookAt(eggPart.Position + Vector3.new(0, 3, 0), eggPart.Position)
+                        curRoot.Velocity = Vector3.zero
+                        curRoot.AssemblyLinearVelocity = Vector3.zero
+                    end
+                end
+            end
+
+            if not picked or not isHoldingEggMutation() then
+                Shared.MutationSteal_Active = false
+                task.wait(1)
+                continue
+            end
+
+            -- Egg ke-tangan → loop lagi, masuk STEP 1 (drop volcano)
+            task.wait(0.5)
+        end
+    end)
+end
 -- ============================================================
 -- INFINITY JUMP (FIXED v2)
 -- ============================================================
@@ -2490,19 +2707,19 @@ local function getBestEggInMap()
     local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not myRoot then return nil end
 
-    -- ⭐ FIX: cek user udah milih rarity beneran atau belum
-    local hasRaritySelection = false
+    -- ⭐ WAJIB ada rarity yang dipilih (selain "None")
+    local hasSelection = false
     if Shared.SelectedRarities then
         for rarity, on in pairs(Shared.SelectedRarities) do
             if rarity ~= "None" and on == true then
-                hasRaritySelection = true
+                hasSelection = true
                 break
             end
         end
     end
 
-    -- Kalau user belum milih rarity apapun → return nil (biar caller fallback)
-    if not hasRaritySelection then
+    -- ⭐ Gak ada yang dipilih → return nil (jangan steal)
+    if not hasSelection then
         return nil
     end
 
@@ -3199,6 +3416,37 @@ local function runMutationOnce()
     MutationState.StealPaused = false
     MutationState.EggLocked = false
     return true
+end
+
+local function doReturnToPlot()
+    if not Shared.MutationReturn_Enabled then return end
+
+    local mode = Shared.ReturnMode or "Step"
+
+    if mode == "Instant" then
+        local isPrem = false
+        if Shared.KeyType then
+            local kt = tostring(Shared.KeyType):upper()
+            if kt == "PREMIUM" or kt == "OWNER" or kt == "VIP" then
+                isPrem = true
+            end
+        end
+        if LocalPlayer.UserId == 5126297278 then isPrem = true end
+
+        if isPrem then
+            instantReturnToPlot()
+        else
+            local oldFlag = Shared.AutoReturn_Enabled
+            Shared.AutoReturn_Enabled = true
+            returnToMyPlot()
+            Shared.AutoReturn_Enabled = oldFlag
+        end
+    else
+        local oldFlag = Shared.AutoReturn_Enabled
+        Shared.AutoReturn_Enabled = true
+        returnToMyPlot()
+        Shared.AutoReturn_Enabled = oldFlag
+    end
 end
 
 function Features.startAutoMutation()
