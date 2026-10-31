@@ -1150,15 +1150,40 @@ function Features.startAutoSteal()
         while task.wait(0.5) do
             if not Shared.AutoSteal_Enabled then continue end
 
-            -- ⭐⭐⭐ FIX: JANGAN STEAL KALO DI HALLOWEEN ⭐⭐⭐
-            if _G.VRILZ_HalloweenBusy or _G.VRILZ_HalloweenLeaving then
-                task.wait(1)
+            -- ⭐⭐⭐ FIX: JANGAN STEAL KALO LAGI PEGANG CANDY ⭐⭐⭐
+            if LocalPlayer:GetAttribute("CarriedCandyModel") ~= nil
+               or LocalPlayer:GetAttribute("CarryingCandy") == true
+               or LocalPlayer:GetAttribute("HeldCandy") ~= nil
+               or LocalPlayer:GetAttribute("CarriedCandy") ~= nil then
+                task.wait(0.2)
                 continue
             end
-            if LocalPlayer:GetAttribute("InHalloweenZone") == true then
-                task.wait(1)
-                continue
+            do
+                local c = LocalPlayer.Character
+                if c then
+                    local carrying = false
+                    for _, obj in ipairs(c:GetChildren()) do
+                        if (obj:IsA("Model") or obj:IsA("Tool")) and obj.Name:lower():find("candy") then
+                            carrying = true
+                            break
+                        end
+                    end
+                    if carrying then
+                        task.wait(0.2)
+                        continue
+                    end
+                end
             end
+
+-- ⭐⭐⭐ FIX: JANGAN STEAL KALO DI HALLOWEEN ⭐⭐⭐
+if _G.VRILZ_HalloweenBusy or _G.VRILZ_HalloweenLeaving then
+    task.wait(0.2)
+    continue
+end
+if LocalPlayer:GetAttribute("InHalloweenZone") == true then
+    task.wait(0.2)
+    continue
+end
 
             local char = LocalPlayer.Character
             local myRoot = char and char:FindFirstChild("HumanoidRootPart")
@@ -2413,15 +2438,40 @@ function Features.startAutoFarm()
         while task.wait(0.5) do
             if not Shared.AutoFarm_Enabled then continue end
 
+            -- ⭐⭐⭐ FIX: JANGAN STEAL KALO LAGI PEGANG CANDY ⭐⭐⭐
+            if LocalPlayer:GetAttribute("CarriedCandyModel") ~= nil
+               or LocalPlayer:GetAttribute("CarryingCandy") == true
+               or LocalPlayer:GetAttribute("HeldCandy") ~= nil
+               or LocalPlayer:GetAttribute("CarriedCandy") ~= nil then
+                task.wait(0.2)
+                continue
+            end
+            do
+                local c = LocalPlayer.Character
+                if c then
+                    local carrying = false
+                    for _, obj in ipairs(c:GetChildren()) do
+                        if (obj:IsA("Model") or obj:IsA("Tool")) and obj.Name:lower():find("candy") then
+                            carrying = true
+                            break
+                        end
+                    end
+                    if carrying then
+                        task.wait(0.2)
+                        continue
+                    end
+                end
+            end
+
             -- ⭐⭐⭐ FIX: JANGAN FARM KALO DI HALLOWEEN ⭐⭐⭐
             if _G.VRILZ_HalloweenBusy or _G.VRILZ_HalloweenLeaving then
-                task.wait(1)
+                task.wait(0.2)
                 continue
             end
-            if LocalPlayer:GetAttribute("InHalloweenZone") == true then
-                task.wait(1)
-                continue
-            end
+if LocalPlayer:GetAttribute("InHalloweenZone") == true then
+    task.wait(0.2)
+    continue
+end
 
             local char = LocalPlayer.Character
             local myRoot = char and char:FindFirstChild("HumanoidRootPart")
@@ -3103,17 +3153,40 @@ function Features.startAutoMutation()
                 continue
             end
 
+            -- ⭐⭐⭐ FIX: JANGAN STEAL KALO LAGI PEGANG CANDY ⭐⭐⭐
+            if LocalPlayer:GetAttribute("CarriedCandyModel") ~= nil
+               or LocalPlayer:GetAttribute("CarryingCandy") == true
+               or LocalPlayer:GetAttribute("HeldCandy") ~= nil
+               or LocalPlayer:GetAttribute("CarriedCandy") ~= nil then
+                task.wait(0.2)
+                continue
+            end
+            do
+                local c = LocalPlayer.Character
+                if c then
+                    local carrying = false
+                    for _, obj in ipairs(c:GetChildren()) do
+                        if (obj:IsA("Model") or obj:IsA("Tool")) and obj.Name:lower():find("candy") then
+                            carrying = true
+                            break
+                        end
+                    end
+                    if carrying then
+                        task.wait(0.2)
+                        continue
+                    end
+                end
+            end
+
             -- ⭐⭐⭐ FIX: JANGAN MUTASI KALO DI HALLOWEEN ⭐⭐⭐
-            if _G.VRILZ_HalloweenBusy or _G.VRILZ_HalloweenLeaving then
-                MutationState.Running = false
-                task.wait(1)
-                continue
-            end
-            if LocalPlayer:GetAttribute("InHalloweenZone") == true then
-                MutationState.Running = false
-                task.wait(1)
-                continue
-            end
+if _G.VRILZ_HalloweenBusy or _G.VRILZ_HalloweenLeaving then
+    task.wait(0.2)
+    continue
+end
+if LocalPlayer:GetAttribute("InHalloweenZone") == true then
+    task.wait(0.2)
+    continue
+end
 
             -- ⭐ FIX: SKIP kalo Mutation Steal lagi aktif
             if Shared.MutationSteal_Active and Shared.MutationSteal_Enabled then
@@ -3169,27 +3242,49 @@ function Features.startMutationSteal()
                 continue
             end
 
-            -- ⭐⭐⭐ FIX: JANGAN STEAL KALO MASIH DI HALLOWEEN ZONE ⭐⭐⭐
-            if _G.VRILZ_HalloweenBusy then
-                Shared.MutationSteal_Active = false
-                task.wait(1)
+            -- ⭐⭐⭐ FIX: JANGAN STEAL KALO LAGI PEGANG CANDY ⭐⭐⭐
+            if LocalPlayer:GetAttribute("CarriedCandyModel") ~= nil
+               or LocalPlayer:GetAttribute("CarryingCandy") == true
+               or LocalPlayer:GetAttribute("HeldCandy") ~= nil
+               or LocalPlayer:GetAttribute("CarriedCandy") ~= nil then
+                task.wait(0.2)
                 continue
+            end
+            do
+                local c = LocalPlayer.Character
+                if c then
+                    local carrying = false
+                    for _, obj in ipairs(c:GetChildren()) do
+                        if (obj:IsA("Model") or obj:IsA("Tool")) and obj.Name:lower():find("candy") then
+                            carrying = true
+                            break
+                        end
+                    end
+                    if carrying then
+                        task.wait(0.2)
+                        continue
+                    end
+                end
             end
 
-            -- ⭐⭐⭐ FIX: JANGAN STEAL KALO PLAYER MASIH DI ZONE ⭐⭐⭐
-            local inHalloween = LocalPlayer:GetAttribute("InHalloweenZone") == true
-            if inHalloween then
-                Shared.MutationSteal_Active = false
-                task.wait(1)
-                continue
-            end
+-- ⭐⭐⭐ FIX: JANGAN STEAL KALO MASIH DI HALLOWEEN ZONE ⭐⭐⭐
+if _G.VRILZ_HalloweenBusy then
+    Shared.MutationSteal_Active = false
+    task.wait(0.2)
+    continue
+end
+local inHalloween = LocalPlayer:GetAttribute("InHalloweenZone") == true
+if inHalloween then
+    Shared.MutationSteal_Active = false
+    task.wait(0.2)   -- ⬅️ 1 → 0.2
+    continue
+end
 
-            -- ⭐⭐⭐ FIX: CEK ADA PORTAL/TRANSISI LAGI PROSES ⭐⭐⭐
-            if _G.VRILZ_HalloweenLeaving then
-                Shared.MutationSteal_Active = false
-                task.wait(0.5)
-                continue
-            end
+if _G.VRILZ_HalloweenLeaving then
+    Shared.MutationSteal_Active = false
+    task.wait(0.2)   -- ⬅️ 0.5 → 0.2
+    continue
+end
 
             if Features.getMutationState and Features.getMutationState().Running then
                 Shared.MutationSteal_Active = false
@@ -4129,13 +4224,12 @@ end
 local function halloweenLeaveZone()
     if not isInHalloweenZone() then return true end
 
-    -- ⭐ SET FLAG GLOBAL — biar MutationSteal gak nyamber
     _G.VRILZ_HalloweenLeaving = true
 
     local ok = false
     local startTime = os.clock()
 
-    while os.clock() - startTime < 8 do  -- max 8 detik
+    while os.clock() - startTime < 8 do
         if not isInHalloweenZone() then
             ok = true
             break
@@ -4151,7 +4245,6 @@ local function halloweenLeaveZone()
             return false
         end
 
-        -- TP ke portal
         local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if root then
             root.CFrame = CFrame.new(part.Position + Vector3.new(0, 5, 0))
@@ -4160,7 +4253,6 @@ local function halloweenLeaveZone()
             task.wait(0.3)
         end
 
-        -- Fire prompt
         local prompt = portal:FindFirstChild("HalloweenPortalPrompt", true)
             or portal:FindFirstChildWhichIsA("ProximityPrompt", true)
         if prompt then
@@ -4173,6 +4265,12 @@ local function halloweenLeaveZone()
         end
 
         task.wait(0.5)
+    end
+
+    -- ⭐⭐⭐ FIX: Tahan flag Leaving 1.5 detik setelah keluar ⭐⭐⭐
+    -- biar fitur steal lain gak nyamber selama transisi
+    if ok then
+        task.wait(1.5)   -- kasih napas 1.5 detik
     end
 
     _G.VRILZ_HalloweenLeaving = false
@@ -4189,9 +4287,15 @@ while task.wait(HalloweenCfg.LOOP_WAIT) do
         continue
     end
 
-    -- ⭐⭐⭐ SET FLAG DI AWAL — biar MutationSteal/steal executor gak nyamber ⭐⭐⭐
-    _G.VRILZ_HalloweenBusy = true
+    -- ⭐⭐⭐ FIX BARU: SKIP SET FLAG KALAU LEAVING AKTIF ⭐⭐⭐
+    if _G.VRILZ_HalloweenLeaving then
+        HalloweenState.Status = "🚪 Leaving Halloween — transisi..."
+        task.wait(0.3)
+        continue
+    end
 
+    -- ⭐⭐⭐ SET FLAG DI AWAL ⭐⭐⭐
+    _G.VRILZ_HalloweenBusy = true
                         -- ⭐ PRIORITY 1: Auto Mutation — paling utama
 if Shared.AutoMutation_Enabled then
     local mutState = Features.getMutationState and Features.getMutationState()
@@ -4283,20 +4387,19 @@ end
     if outsideEgg and outsideEgg.Parent then
         if isInHalloweenZone() then
             HalloweenState.Status = "🥚 Egg spawn: " .. outsideEgg.Name .. " — leaving Halloween..."
-            _G.VRILZ_HalloweenBusy = true   -- ⭐ HOLD FLAG selama keluar
-            local left = halloweenLeaveZone()  -- ⭐ cek return value
+            _G.VRILZ_HalloweenBusy = true
+            local left = halloweenLeaveZone()
 
             if not left then
-                -- ⭐ GAGAL KELUAR → JANGAN biarin MutationSteal nyamber
                 HalloweenState.Status = "⚠️ Gagal keluar Halloween — retry..."
-                _G.VRILZ_HalloweenBusy = true   -- ⭐ TETAP HOLD
+                _G.VRILZ_HalloweenBusy = true
                 task.wait(1.5)
                 continue
             end
 
-            -- ⭐ Berhasil keluar → baru lepas flag
+            -- ⭐ Berhasil keluar → lepas flag
             _G.VRILZ_HalloweenBusy = false
-            task.wait(0.5)  -- ⭐ kasih jeda sebelum steal jalan
+            task.wait(1.0)   -- ⬅️ 0.5 → 1.0 (kasih napas)
         else
             HalloweenState.Status = "🥚 Egg spawn: " .. outsideEgg.Name .. " — waiting for steal..."
             task.wait(2)
@@ -4305,9 +4408,6 @@ end
     end
 end
                 
-            -- ⭐ SET FLAG GLOBAL kalo Halloween lagi aktif
-_G.VRILZ_HalloweenBusy = true
-
 local char = LocalPlayer.Character
 local root = char and char:FindFirstChild("HumanoidRootPart")
 if not root then 
