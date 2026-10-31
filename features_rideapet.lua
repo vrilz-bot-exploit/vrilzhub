@@ -373,6 +373,7 @@ function Features.startAntiAFK()
         if Shared.VolcanicHunt_Enabled then return true end
         if Shared.AutoMutation_Enabled then return true end
         if _G.VRILZ_HalloweenBusy then return true end
+        if _G.VRILZ_HalloweenLeaving then return true end
         if Shared.YinRitual_Enabled then
             local ys = Features.getYinRitualState and Features.getYinRitualState()
             if ys and ys.Active then return true end
@@ -1148,6 +1149,16 @@ function Features.startAutoSteal()
     task.spawn(function()
         while task.wait(0.5) do
             if not Shared.AutoSteal_Enabled then continue end
+
+            -- ⭐⭐⭐ FIX: JANGAN STEAL KALO DI HALLOWEEN ⭐⭐⭐
+            if _G.VRILZ_HalloweenBusy or _G.VRILZ_HalloweenLeaving then
+                task.wait(1)
+                continue
+            end
+            if LocalPlayer:GetAttribute("InHalloweenZone") == true then
+                task.wait(1)
+                continue
+            end
 
             local char = LocalPlayer.Character
             local myRoot = char and char:FindFirstChild("HumanoidRootPart")
@@ -2402,6 +2413,16 @@ function Features.startAutoFarm()
         while task.wait(0.5) do
             if not Shared.AutoFarm_Enabled then continue end
 
+            -- ⭐⭐⭐ FIX: JANGAN FARM KALO DI HALLOWEEN ⭐⭐⭐
+            if _G.VRILZ_HalloweenBusy or _G.VRILZ_HalloweenLeaving then
+                task.wait(1)
+                continue
+            end
+            if LocalPlayer:GetAttribute("InHalloweenZone") == true then
+                task.wait(1)
+                continue
+            end
+
             local char = LocalPlayer.Character
             local myRoot = char and char:FindFirstChild("HumanoidRootPart")
             local hum = char and char:FindFirstChildOfClass("Humanoid")
@@ -3082,8 +3103,19 @@ function Features.startAutoMutation()
                 continue
             end
 
+            -- ⭐⭐⭐ FIX: JANGAN MUTASI KALO DI HALLOWEEN ⭐⭐⭐
+            if _G.VRILZ_HalloweenBusy or _G.VRILZ_HalloweenLeaving then
+                MutationState.Running = false
+                task.wait(1)
+                continue
+            end
+            if LocalPlayer:GetAttribute("InHalloweenZone") == true then
+                MutationState.Running = false
+                task.wait(1)
+                continue
+            end
+
             -- ⭐ FIX: SKIP kalo Mutation Steal lagi aktif
-            -- Biar Auto Mutation gak ganggu proses pickup + keluar cave
             if Shared.MutationSteal_Active and Shared.MutationSteal_Enabled then
                 MutationState.Running = false
                 task.wait(1)
@@ -3137,7 +3169,28 @@ function Features.startMutationSteal()
                 continue
             end
 
-            -- Kalo Auto Mutation lagi jalan, tunggu
+            -- ⭐⭐⭐ FIX: JANGAN STEAL KALO MASIH DI HALLOWEEN ZONE ⭐⭐⭐
+            if _G.VRILZ_HalloweenBusy then
+                Shared.MutationSteal_Active = false
+                task.wait(1)
+                continue
+            end
+
+            -- ⭐⭐⭐ FIX: JANGAN STEAL KALO PLAYER MASIH DI ZONE ⭐⭐⭐
+            local inHalloween = LocalPlayer:GetAttribute("InHalloweenZone") == true
+            if inHalloween then
+                Shared.MutationSteal_Active = false
+                task.wait(1)
+                continue
+            end
+
+            -- ⭐⭐⭐ FIX: CEK ADA PORTAL/TRANSISI LAGI PROSES ⭐⭐⭐
+            if _G.VRILZ_HalloweenLeaving then
+                Shared.MutationSteal_Active = false
+                task.wait(0.5)
+                continue
+            end
+
             if Features.getMutationState and Features.getMutationState().Running then
                 Shared.MutationSteal_Active = false
                 task.wait(1)
@@ -4076,42 +4129,68 @@ end
 local function halloweenLeaveZone()
     if not isInHalloweenZone() then return true end
 
-    local halloweenArea = Workspace:FindFirstChild("HalloweenArea")
-    if not halloweenArea then return false end
-    local portal = halloweenArea:FindFirstChild("Portal")
-    if not portal then return false end
+    -- ⭐ SET FLAG GLOBAL — biar MutationSteal gak nyamber
+    _G.VRILZ_HalloweenLeaving = true
 
-    local part = portal:FindFirstChildWhichIsA("BasePart", true)
-    if not part then return false end
+    local ok = false
+    local startTime = os.clock()
 
-    halloweenTpTo(part.Position + Vector3.new(0, 5, 0))
-    task.wait(0.5)
+    while os.clock() - startTime < 8 do  -- max 8 detik
+        if not isInHalloweenZone() then
+            ok = true
+            break
+        end
 
-    local prompt = portal:FindFirstChild("HalloweenPortalPrompt", true)
-    if prompt and prompt:IsA("ProximityPrompt") then
-        prompt.HoldDuration = 0
-        prompt.MaxActivationDistance = math.huge
-        prompt.RequiresLineOfSight = false
-        pcall(function()
+        local halloweenArea = Workspace:FindFirstChild("HalloweenArea")
+        local portal = halloweenArea and halloweenArea:FindFirstChild("Portal")
+        local part = portal and portal:FindFirstChildWhichIsA("BasePart", true)
+
+        if not part then
+            warn("[HALLOWEEN] ❌ Portal gak ketemu — gak bisa keluar!")
+            _G.VRILZ_HalloweenLeaving = false
+            return false
+        end
+
+        -- TP ke portal
+        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if root then
+            root.CFrame = CFrame.new(part.Position + Vector3.new(0, 5, 0))
+            root.Velocity = Vector3.zero
+            root.AssemblyLinearVelocity = Vector3.zero
+            task.wait(0.3)
+        end
+
+        -- Fire prompt
+        local prompt = portal:FindFirstChild("HalloweenPortalPrompt", true)
+            or portal:FindFirstChildWhichIsA("ProximityPrompt", true)
+        if prompt then
+            prompt.HoldDuration = 0
+            prompt.MaxActivationDistance = math.huge
+            prompt.RequiresLineOfSight = false
             if typeof(fireproximityprompt) == "function" then
-                fireproximityprompt(prompt)
+                pcall(fireproximityprompt, prompt)
             end
-        end)
-        task.wait(1.5)
+        end
+
+        task.wait(0.5)
     end
 
-    return not isInHalloweenZone()
+    _G.VRILZ_HalloweenLeaving = false
+    return ok
 end
 
 function Features.startAutoHalloween()
     task.spawn(function()
-        while task.wait(HalloweenCfg.LOOP_WAIT) do
-           if not HalloweenState.Enabled then
-    HalloweenState.Status = "⏸️ Idle"
-    _G.VRILZ_HalloweenBusy = false
-    HalloweenState._yinWaitStart = nil   -- ⭐ reset timer
-    continue
-end
+while task.wait(HalloweenCfg.LOOP_WAIT) do
+    if not HalloweenState.Enabled then
+        HalloweenState.Status = "⏸️ Idle"
+        _G.VRILZ_HalloweenBusy = false
+        HalloweenState._yinWaitStart = nil
+        continue
+    end
+
+    -- ⭐⭐⭐ SET FLAG DI AWAL — biar MutationSteal/steal executor gak nyamber ⭐⭐⭐
+    _G.VRILZ_HalloweenBusy = true
 
                         -- ⭐ PRIORITY 1: Auto Mutation — paling utama
 if Shared.AutoMutation_Enabled then
@@ -4200,19 +4279,31 @@ end
                 or Shared.MutationSteal_Enabled
 
             if stealFeatureOn then
-                local outsideEgg = findPriorityEggOutside()
-                if outsideEgg and outsideEgg.Parent then
-                    if isInHalloweenZone() then
-                        HalloweenState.Status = "🥚 Egg spawn: " .. outsideEgg.Name .. " — leaving Halloween..."
-                        halloweenLeaveZone()
-                        task.wait(1)
-                    else
-                        HalloweenState.Status = "🥚 Egg spawn: " .. outsideEgg.Name .. " — waiting for steal..."
-                        task.wait(2)
-                    end
-                    continue
-                end
+    local outsideEgg = findPriorityEggOutside()
+    if outsideEgg and outsideEgg.Parent then
+        if isInHalloweenZone() then
+            HalloweenState.Status = "🥚 Egg spawn: " .. outsideEgg.Name .. " — leaving Halloween..."
+            _G.VRILZ_HalloweenBusy = true   -- ⭐ HOLD FLAG selama keluar
+            local left = halloweenLeaveZone()  -- ⭐ cek return value
+
+            if not left then
+                -- ⭐ GAGAL KELUAR → JANGAN biarin MutationSteal nyamber
+                HalloweenState.Status = "⚠️ Gagal keluar Halloween — retry..."
+                _G.VRILZ_HalloweenBusy = true   -- ⭐ TETAP HOLD
+                task.wait(1.5)
+                continue
             end
+
+            -- ⭐ Berhasil keluar → baru lepas flag
+            _G.VRILZ_HalloweenBusy = false
+            task.wait(0.5)  -- ⭐ kasih jeda sebelum steal jalan
+        else
+            HalloweenState.Status = "🥚 Egg spawn: " .. outsideEgg.Name .. " — waiting for steal..."
+            task.wait(2)
+        end
+        continue
+    end
+end
                 
             -- ⭐ SET FLAG GLOBAL kalo Halloween lagi aktif
 _G.VRILZ_HalloweenBusy = true
@@ -5836,6 +5927,18 @@ function Features.stealEgg(egg)
     if StealExecState.Busy then
         if Shared.Notify then Shared.Notify("⏳ Already stealing, wait...", "warning") end
         return false, "busy"
+    end
+
+    -- ⭐⭐⭐ FIX: TOLAK kalau di Halloween zone / busy ⭐⭐⭐
+    if LocalPlayer:GetAttribute("InHalloweenZone") == true then
+        if Shared.Notify then Shared.Notify("❌ Gak bisa steal pas di Halloween area!", "error") end
+        StealExecState.Status = "❌ Blocked: in Halloween zone"
+        return false, "in_halloween"
+    end
+    if _G.VRILZ_HalloweenBusy then
+        if Shared.Notify then Shared.Notify("❌ Auto Halloween lagi aktif!", "error") end
+        StealExecState.Status = "❌ Blocked: Halloween busy"
+        return false, "halloween_busy"
     end
 
     local anyOn, reasons = isAnyStealFeatureOn()
