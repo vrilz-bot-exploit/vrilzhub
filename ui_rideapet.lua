@@ -1,5 +1,5 @@
 -- ============================================================
--- VRILZHUB UI — RIDE A PET v2.5 (AUTO-DETECT PC & MOBILE)
+-- VRILZHUB UI — RIDE A PET v2.6 (AUTO-DETECT PC & MOBILE)
 -- PC: 800x580 | Mobile: 88% x 78% viewport
 -- ============================================================
 
@@ -5510,7 +5510,7 @@ end)
     subtitle.Size = UDim2.new(0, 300, 0, 14)
     subtitle.Position = UDim2.fromOffset(IS_MOBILE and 48 or 58, IS_MOBILE and 26 or 28)
     subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Ride a Pet · v2.5"
+    subtitle.Text = "Ride a Pet · v2.6"
     subtitle.TextColor3 = C.Muted
     subtitle.Font = Enum.Font.GothamSemibold
     subtitle.TextSize = IS_MOBILE and 9 or 10
@@ -8173,7 +8173,7 @@ end, "WebhookMentionEveryone")
                             },
                         },
                                 footer = {
-                        text = "🏆 VRILZHUB PLATINUM  •  v2.5",
+                        text = "🏆 VRILZHUB PLATINUM  •  v2.6",
                         },
                         timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
                     }}
@@ -9882,7 +9882,7 @@ local A_Links = {
 -- Changelog VRILZHUB
 local A_Changelog = {
     {
-        Version = "v2.5",
+        Version = "v2.6",
         Date = "19 Okt 2026",
         Changes = {
             "Fly Chard (Character Fly)",
