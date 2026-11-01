@@ -3294,18 +3294,16 @@ local function buildEventTab(eventLeft, eventRight, makeCard, makeToggle, makeDr
     local seraphCard, seraphContent = makeCard(eventLeft, "🌟 AUTO SERAPH", 2)
 
     makeToggle(seraphContent, "Auto Seraph", false, function(v)
-        Shared.AutoSeraph_Enabled = v
-        local F = getFeatures()
-        if F and F.getAutoSeraphState then
-            F.getAutoSeraphState().Enabled = v
-            if v and not F._seraphStarted then
-                F._seraphStarted = true
-                F.startAutoSeraph()
-            end
-        end
-        if v then notify("🌟 Auto Seraph: ON", "success")
-        else notify("🌟 Auto Seraph: OFF", "info") end
-    end, "AutoSeraph_Enabled")
+    Shared.AutoSeraph_Enabled = v
+    local F = getFeatures()
+    if F and F.setAutoSeraphEnabled then
+        F.setAutoSeraphEnabled(v)
+    else
+        notify("❌ Features AutoSeraph gak ketemu", "error")
+    end
+    if v then notify("🌟 Auto Seraph: ON", "success")
+    else notify("🌟 Auto Seraph: OFF", "info") end
+end, "AutoSeraph_Enabled")
 
     local seraphStatusLbl = Instance.new("TextLabel")
     seraphStatusLbl.Size = UDim2.new(1, 0, 0, 18)
