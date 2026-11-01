@@ -6155,6 +6155,7 @@ function Features.Init(sharedState)
     Features.startAutoYinRitual()
     Features.startInfinityJump()
     Features.startStealExecutor() 
+    Features.startAutoSeraph()
 
            -- ⭐ AUTO-ENABLE AUTO RIDE PET — LANGSUNG ON
     Shared.AutoRidePet_Enabled = true
@@ -6584,6 +6585,228 @@ end
 
         ObbyState.Running = false
     end)
+end
+
+-- ============================================================
+-- 🌟 AUTO SERAPH — LOGIC (dipanggil dari UI)
+-- Flow: place 3 cherub (timeout 5s) → sanctify → collect → return
+-- ============================================================
+local AutoSeraph = {
+    Enabled  = false,
+    Running  = false,
+    Status   = "Idle",
+    _started = false,
+    _origPos = nil,
+}
+
+local function seraph_tpTo(pos)
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if root then
+        root.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
+        root.Velocity = Vector3.zero
+        root.AssemblyLinearVelocity = Vector3.zero
+        task.wait(0.2)
+    end
+end
+
+local function seraph_firePrompt(prompt)
+    if not prompt or not prompt:IsA("ProximityPrompt") then return false end
+    pcall(function()
+        prompt.HoldDuration = 0
+        prompt.MaxActivationDistance = math.huge
+        prompt.RequiresLineOfSight = false
+    end)
+    if typeof(fireproximityprompt) == "function" then
+        pcall(fireproximityprompt, prompt)
+        task.wait(0.3)
+        return true
+    end
+    pcall(function()
+        prompt:InputHoldBegin()
+        task.wait(0.1)
+        prompt:InputHoldEnd()
+    end)
+    task.wait(0.3)
+    return true
+end
+
+local function seraph_run()
+    if AutoSeraph.Running then return end
+    AutoSeraph.Running = true
+
+    task.spawn(function()
+        local char = LocalPlayer.Character
+        local hum  = char and char:FindFirstChildOfClass("Humanoid")
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        if not root or not hum then
+            AutoSeraph.Status = "❌ Karakter gak valid"
+            AutoSeraph.Running = false
+            AutoSeraph._started = false
+            return
+        end
+        AutoSeraph._origPos = root.Position
+
+        -- 1) Cari placer
+        AutoSeraph.Status = "🔍 Mencari Placer..."
+        local placers = {}
+        for _, d in ipairs(Workspace:GetDescendants()) do
+            if d.Name == "CherubPlacer" and d:IsA("BasePart") then
+                table.insert(placers, d)
+            end
+        end
+
+        if #placers < 3 then
+            AutoSeraph.Status = "❌ Placer kurang dari 3!"
+            AutoSeraph.Running = false
+            AutoSeraph._started = false
+            return
+        end
+
+        -- 2) Place 3 cherub (timeout 5s per placer)
+        for i = 1, 3 do
+            if not AutoSeraph.Enabled then
+                AutoSeraph.Status = "⏹ Dihentikan"
+                AutoSeraph.Running = false
+                AutoSeraph._started = false
+                return
+            end
+
+            AutoSeraph.Status = "📍 Ke Placer " .. i
+            seraph_tpTo(placers[i].Position)
+
+            local backpack = LocalPlayer:FindFirstChild("Backpack")
+            local toolToEquip = nil
+            if backpack then
+                for _, t in ipairs(backpack:GetChildren()) do
+                    if t:IsA("Tool") and t.Name:lower():find("cherub") then
+                        toolToEquip = t
+                        break
+                    end
+                end
+            end
+
+            if toolToEquip then
+                pcall(function() hum:EquipTool(toolToEquip) end)
+                task.wait(0.3)
+                local prompt = placers[i]:FindFirstChild("Place")
+                if prompt then seraph_firePrompt(prompt) end
+            end
+
+            AutoSeraph.Status = "⏳ Nunggu Cherub " .. i .. " masuk (Max 5s)..."
+            local waitStart = os.clock()
+            local placed = false
+            while os.clock() - waitStart < 5 do
+                if not toolToEquip or not toolToEquip.Parent then
+                    placed = true
+                    break
+                end
+                if not AutoSeraph.Enabled then
+                    AutoSeraph.Status = "⏹ Dihentikan"
+                    AutoSeraph.Running = false
+                    AutoSeraph._started = false
+                    return
+                end
+                task.wait(0.2)
+            end
+
+            AutoSeraph.Status = placed
+                and ("✅ Cherub " .. i .. " Berhasil!")
+                or  ("⚠️ Cherub " .. i .. " Timeout (Lanjut)")
+            task.wait(0.5)
+        end
+
+        -- 3) TP ke tengah (SeraphSpawn)
+        AutoSeraph.Status = "📍 Teleport ke Tengah..."
+        local seraphSpawn = Workspace:FindFirstChild("SeraphSpawn", true)
+        if seraphSpawn and seraphSpawn:IsA("BasePart") then
+            seraph_tpTo(seraphSpawn.Position)
+        end
+        task.wait(1)
+
+        -- 4) Sanctify
+        AutoSeraph.Status = "✨ Mencari Sanctify..."
+        local bigNest = Workspace:FindFirstChild("BigNest", true)
+        local sanctifyPrompt = bigNest and bigNest:FindFirstChild("Sanctify", true)
+
+        if sanctifyPrompt and sanctifyPrompt:IsA("ProximityPrompt") then
+            AutoSeraph.Status = "✨ Hold Sanctify..."
+            seraph_firePrompt(sanctifyPrompt)
+            task.wait(3)
+            AutoSeraph.Status = "✅ Sanctify Selesai!"
+        else
+            AutoSeraph.Status = "❌ Sanctify gak ketemu!"
+            AutoSeraph.Running = false
+            AutoSeraph._started = false
+            return
+        end
+
+        -- 5) Auto Collect Seraph
+        AutoSeraph.Status = "🧺 Auto Collect Seraph..."
+        if bigNest then
+            local pickupPrompt = bigNest:FindFirstChildWhichIsA("ProximityPrompt", true)
+            if pickupPrompt and pickupPrompt.ActionText
+                and pickupPrompt.ActionText:lower():find("collect") then
+                seraph_firePrompt(pickupPrompt)
+            end
+        end
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj.Name:lower():find("seraph") and obj:IsA("Model") then
+                local prompt = obj:FindFirstChildWhichIsA("ProximityPrompt", true)
+                if prompt then
+                    seraph_firePrompt(prompt)
+                    break
+                end
+            end
+        end
+        task.wait(1)
+
+        -- 6) Auto Return
+        AutoSeraph.Status = "🏠 Auto Return..."
+        local finalChar = LocalPlayer.Character
+        local finalRoot = finalChar and finalChar:FindFirstChild("HumanoidRootPart")
+        if finalRoot and AutoSeraph._origPos then
+            finalRoot.CFrame = CFrame.new(AutoSeraph._origPos + Vector3.new(0, 3, 0))
+            finalRoot.Velocity = Vector3.zero
+            finalRoot.AssemblyLinearVelocity = Vector3.zero
+        end
+
+        AutoSeraph.Status = "✅ Selesai Semua!"
+        task.wait(2)
+
+        AutoSeraph.Enabled  = false
+        AutoSeraph.Running  = false
+        AutoSeraph._started = false
+    end)
+end
+
+-- ============================================================
+-- PUBLIC API — dipanggil dari UI
+-- ============================================================
+function Features.getAutoSeraphState()
+    return AutoSeraph
+end
+
+function Features.setAutoSeraphEnabled(v)
+    v = v and true or false
+
+    if v then
+        -- ═══ ON ═══
+        AutoSeraph.Enabled = true
+        if not AutoSeraph.Running then
+            AutoSeraph._started = true
+            seraph_run()
+        end
+    else
+        -- ═══ OFF ═══
+        AutoSeraph.Enabled = false
+        AutoSeraph.Status = "⏹ Dihentikan"
+    end
+end
+
+-- alias biar kompatibel sama UI lu yang panggil F.startAutoSeraph()
+function Features.startAutoSeraph()
+    Features.setAutoSeraphEnabled(true)
 end
 
     _G.VRILZ_Features = Features
