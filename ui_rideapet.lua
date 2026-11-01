@@ -3288,6 +3288,48 @@ local function buildEventTab(eventLeft, eventRight, makeCard, makeToggle, makeDr
     eventNote.Parent = eventContent
     registerTheme(eventNote, "Muted", "TextColor3")
 
+    -- ============================================================
+    -- ⭐ CARD BARU SENDIRI: AUTO SERAPH
+    -- ============================================================
+    local seraphCard, seraphContent = makeCard(eventLeft, "🌟 AUTO SERAPH", 2)
+
+    makeToggle(seraphContent, "Auto Seraph", false, function(v)
+        Shared.AutoSeraph_Enabled = v
+        local F = getFeatures()
+        if F and F.getAutoSeraphState then
+            F.getAutoSeraphState().Enabled = v
+            if v and not F._seraphStarted then
+                F._seraphStarted = true
+                F.startAutoSeraph()
+            end
+        end
+        if v then notify("🌟 Auto Seraph: ON", "success")
+        else notify("🌟 Auto Seraph: OFF", "info") end
+    end, "AutoSeraph_Enabled")
+
+    local seraphStatusLbl = Instance.new("TextLabel")
+    seraphStatusLbl.Size = UDim2.new(1, 0, 0, 18)
+    seraphStatusLbl.BackgroundTransparency = 1
+    seraphStatusLbl.Text = "Status: Idle"
+    seraphStatusLbl.TextColor3 = C_local.Muted
+    seraphStatusLbl.Font = Enum.Font.GothamSemibold
+    seraphStatusLbl.TextSize = CFG.FONT_MUTED
+    seraphStatusLbl.TextXAlignment = Enum.TextXAlignment.Left
+    seraphStatusLbl.LayoutOrder = 2
+    seraphStatusLbl.ZIndex = 3
+    seraphStatusLbl.Parent = seraphContent
+    registerTheme(seraphStatusLbl, "Muted", "TextColor3")
+
+    task.spawn(function()
+        while seraphStatusLbl.Parent do
+            task.wait(0.5)
+            local F = getFeatures()
+            if F and F.getAutoSeraphState then
+                seraphStatusLbl.Text = "Status: " .. (F.getAutoSeraphState().Status or "Idle")
+            end
+        end
+    end)
+
     -- ═══════════════════════════════════════════
     -- ═══ KOLOM KANAN ═══
     -- ═══════════════════════════════════════════
