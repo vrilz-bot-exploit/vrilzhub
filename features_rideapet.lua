@@ -6155,7 +6155,6 @@ function Features.Init(sharedState)
     Features.startAutoYinRitual()
     Features.startInfinityJump()
     Features.startStealExecutor() 
-    Features.startAutoSeraph()
 
            -- ⭐ AUTO-ENABLE AUTO RIDE PET — LANGSUNG ON
     Shared.AutoRidePet_Enabled = true
