@@ -17,9 +17,9 @@ local CONFIG = {
 
 local targetScript = nil
 
-if game.PlaceId == CONFIG.RideAPet.GameId then
+if game.GameId == CONFIG.RideAPet.GameId then
     targetScript = CONFIG.RideAPet
-elseif game.PlaceId == CONFIG["Throw Food"].GameId then
+elseif game.GameId == CONFIG["Throw Food"].GameId then
     targetScript = CONFIG["Throw Food"]
 end
 
