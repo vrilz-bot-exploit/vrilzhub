@@ -1,67 +1,53 @@
--- ============================================================
--- VRILZHUB UNIVERSAL LOADER — CRAZY
--- ============================================================
+if not game:IsLoaded() then game.Loaded:Wait() end
+task.wait(math.random())
 
-local CONFIG = {
-    RideAPet = {
-        GameId = 124216119978534,
-        FeaturesURL = "https://raw.githubusercontent.com/anakpungut014-sys/projectvh/refs/heads/main/features_rideapet.lua",
-        UIURL = "https://raw.githubusercontent.com/anakpungut014-sys/projectvh/refs/heads/main/ui_rideapet.lua",
+local routes = {
+    [124216119978534] = {
+        "RideAPet",
+        "https://raw.githubusercontent.com/anakpungut014-sys/projectvh/refs/heads/main/features_rideapet.lua",
+        "https://raw.githubusercontent.com/anakpungut014-sys/projectvh/refs/heads/main/ui_rideapet.lua",
     },
-    ["Throw Food"] = {
-        GameId = 10766972131,
-        FeaturesURL = "https://raw.githubusercontent.com/anakpungut014-sys/projectvh/refs/heads/main/features_bikeforegg.lua",
-        UIURL = "https://raw.githubusercontent.com/anakpungut014-sys/projectvh/refs/heads/main/ui_bikeforegg.lua",
+    [10766972131] = {
+        "Throw Food",
+        "https://raw.githubusercontent.com/anakpungut014-sys/projectvh/refs/heads/main/features_bikeforegg.lua",
+        "https://raw.githubusercontent.com/anakpungut014-sys/projectvh/refs/heads/main/ui_bikeforegg.lua",
     },
-    ["Mount Soreya"] = {
-        GameId = 118517641508250,
-        FeaturesURL = "https://raw.githubusercontent.com/anakpungut014-sys/projectvh/refs/heads/main/features_soreya.lua",
-        UIURL = "https://raw.githubusercontent.com/anakpungut014-sys/projectvh/refs/heads/main/ui_soreya.lua",
+    [118517641508250] = {
+        "Mount Soreya",
+        "https://raw.githubusercontent.com/anakpungut014-sys/projectvh/refs/heads/main/features_soreya.lua",
+        "https://raw.githubusercontent.com/anakpungut014-sys/projectvh/refs/heads/main/ui_soreya.lua",
     },
 }
 
-local targetScript = nil
+local route = routes[game.PlaceId] or routes[game.GameId]
+if not route then return end
 
-if game.PlaceId == CONFIG.RideAPet.GameId then
-    targetScript = CONFIG.RideAPet
-elseif game.PlaceId == CONFIG["Throw Food"].GameId then
-    targetScript = CONFIG["Throw Food"]
-elseif game.PlaceId == CONFIG["Mount Soreya"].GameId then
-    targetScript = CONFIG["Mount Soreya"]
-end
+local genv = (getgenv and getgenv()) or _G
+local state = genv.VRILZ_State or { loaded = {} }
+genv.VRILZ_State = state
+if state.loaded[route[1]] then return end
 
-if not targetScript then
-    warn("[VRILZHUB] Game tidak didukung! PlaceId: " .. tostring(game.PlaceId))
-    return
-end
-
-local function loadScript(url)
-    local ok, source = pcall(function() return game:HttpGet(url) end)
-    if not ok or not source then return nil end
-
-    local fn, err = loadstring(source)
+local function load(url)
+    local ok, src = pcall(game.HttpGet, game, url)
+    if not ok or not src then return nil end
+    local fn = loadstring(src)
     if not fn then return nil end
-
-    local ok2, result = pcall(fn)
-    if not ok2 then return nil end
-
-    return result
+    local ok2, res = pcall(fn)
+    return ok2 and res or nil
 end
 
 local Shared = {}
 _G.VRILZ_Shared = Shared
 _G.VRILZ_UI_Shared = Shared
 
-local Features = loadScript(targetScript.FeaturesURL)
+local Features = load(route[2])
 if not Features then return end
 
-local UI = loadScript(targetScript.UIURL)
+local UI = load(route[3])
 if not UI then return end
 
 _G.VRILZ_Features = Features
+pcall(UI.Init, Shared)
 
-pcall(function()
-    UI.Init(Shared)
-end)
-
-print("[VRILZHUB] Loaded")
+state.loaded[route[1]] = true
+print("[VRILZHUB] Loaded:", route[1])
